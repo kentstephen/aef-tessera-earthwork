@@ -294,7 +294,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const bHide = el_("button", "at-btn at-glass", `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><kbd>H</kbd>`);
   bHide.title = "hide or show the readout (H)";
   bHide.onclick = (e) => { e.stopPropagation(); setCards(!cardsHidden); };
-  tools.append(bPair, bMore, bHide);
+  // the code, always one click away
+  const bCode = el_("a", "at-btn at-glass ew-code", `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`);
+  bCode.href = "https://github.com/kentstephen/aef-earthwork-web"; bCode.target = "_blank"; bCode.rel = "noopener";
+  bCode.title = "the code on GitHub"; bCode.setAttribute("aria-label", "the code on GitHub");
+  tools.append(bCode, bPair, bMore, bHide);
   let cardsHidden = keep("readout");
   function setCards(hidden) { cardsHidden = hidden; keep("readout", hidden); root.classList.toggle("ew-read-hidden", hidden); bHide.classList.toggle("on", hidden); }
   pane.appendChild(tools);
@@ -357,6 +361,26 @@ export function render({model, el, earthwork, s2Items, credits}) {
   about.querySelector("button").onclick = () => { about.style.display = "none"; };
   about.onclick = (e) => { if (e.target === about) about.style.display = "none"; };
   bAbout.onclick = () => { more.style.display = "none"; about.style.display = "flex"; };
+  // the first visit only: what this is and what to do, in a few lines (? has the rest)
+  const welcome = el_("div", "at-about ew-welcome");
+  welcome.innerHTML = `<div class="box at-glass">
+    <h2>Earthwork</h2>
+    <p>This map shows where the ground was dug, filled or graded between two years, for every 10 m of land. A model reads it from AlphaEarth, Google DeepMind's yearly picture of the land, taught where USGS lidar measured the same ground twice. Yellow is likely, dark is not.</p>
+    <p>This starts in Xiong'an, a new city being built south of Beijing, from 2022 to 2025.</p>
+    <ul>
+      <li><b>Click</b> a spot: where it is, its coordinates and H3 string to copy, and its score.</li>
+      <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; <kbd>[</kbd> <kbd>]</kbd> step its year.</li>
+      <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
+      <li><b>AEF Years</b> in the Earthwork card are the years compared; <kbd>M</kbd> swaps the model.</li>
+      <li>Earthwork shows from zoom ${EWZ} in. <kbd>/</kbd> searches a place.</li>
+    </ul>
+    <p><small><kbd>?</kbd> has everything else. The code: <a href="https://github.com/kentstephen/aef-earthwork-web" target="_blank" rel="noopener">aef-earthwork-web</a> on GitHub, from the notebook in <a href="https://github.com/kentstephen/aef-earthwork" target="_blank" rel="noopener">aef-earthwork</a>.</small></p>
+    <div><button class="at-chip">Start</button></div></div>`;
+  pane.appendChild(welcome);
+  const closeWelcome = () => { welcome.style.display = "none"; keep("welcome", true); };
+  welcome.querySelector("button").onclick = closeWelcome;
+  welcome.onclick = (e) => { if (e.target === welcome) closeWelcome(); };
+  if (!keep("welcome")) welcome.style.display = "flex";
 
   // the controls' effects (the kernel's, in the notebook): the years and the model are the earthwork
   // layer's own props, the brightness the imagery shader's
@@ -1396,6 +1420,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const tgt = path[0] || e.target;
     if (tgt && /^(INPUT|SELECT|TEXTAREA)$/.test(tgt.tagName)) return;
     const k = e.key, lo = st.y0, hi = st.y1;
+    // the first visit's card: Esc or Enter closes it, the other keys wait for it
+    if (welcome.style.display === "flex") { if (k === "Escape" || k === "Enter") { e.preventDefault(); closeWelcome(); } return; }
     if (k === " ") { if (!e.repeat) spaceDown(); }
     // Shift + arrows: turn the map (left, right: 15 degrees) and tilt it (up, down: 10), as MapLibre's own
     // keys do; held, it keeps going

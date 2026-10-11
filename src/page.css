@@ -429,3 +429,37 @@ body {
   line-height: 1.5;
   white-space: nowrap;
 }
+
+/* the first visit's card: short, over a dimmed map */
+.at .ew-welcome .box {
+  width: min(440px, calc(100% - 32px));
+  padding: 20px 22px 18px;
+  font-size: 13.5px;
+}
+
+.ew-welcome ul {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+
+.ew-welcome li {
+  margin: 0 0 5px;
+}
+
+.ew-welcome kbd {
+  font: 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.ew-welcome a {
+  color: var(--text);
+  text-underline-offset: 2px;
+}
+
+/* the GitHub link in the button row: a button that is a link */
+.at .ew-code {
+  color: inherit;
+  text-decoration: none;
+}
