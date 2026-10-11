@@ -1,4 +1,4 @@
-/* This page's additions to the notebook's styles */
+/* This page's additions to the notebook's styles: two columns of small cards, the same paired or not */
 
 html,
 body {
@@ -8,13 +8,299 @@ body {
   background: #0e0e0e;
 }
 
+.at {
+  --col: 264px;
+}
+
 /* the maps fill the pane (MapLibre's own stylesheet, loaded after, makes a map position: relative) */
 .at .at-map,
 .at .at-map2 {
   position: absolute;
 }
 
-/* the credits: one quiet line along the bottom, across both maps of the pair */
+/* ---- the columns: the left (search, Earthwork, the imagery) and the right (buttons, the readout) ---- */
+.at .at-top {
+  width: var(--col);
+  max-width: calc(50% - 24px);
+  gap: 8px;
+}
+
+.at .at-tools {
+  gap: 6px;
+}
+
+.at .at-btn {
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  gap: 6px;
+  border-radius: 10px;
+}
+
+/* search: small until it is used, then wide enough to read a place */
+.at .at-search {
+  width: 168px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  transition: width 0.15s ease;
+}
+
+.at .at-search:focus-within {
+  width: min(340px, calc(100vw - 48px));
+}
+
+/* every card: the column's width, small type, no long words */
+.at .at-panel,
+.at .at-yc.at-s2c,
+.at .at-yc.ew-read {
+  width: var(--col);
+  max-width: calc(50vw - 24px);
+  padding: 9px 11px;
+  border-radius: 10px;
+  transform: none;
+}
+
+.at .at-panel {
+  gap: 6px;
+}
+
+.at .at-panel .at-hd {
+  margin: 0;
+}
+
+.at .at-panel .at-hd .t {
+  font-size: 13px;
+}
+
+.at .at-panel .at-mwhy,
+.at .at-panel .at-key .why {
+  display: none;
+}
+
+.at .at-panel .at-lab {
+  min-width: 46px;
+  font-size: 12px;
+}
+
+.at .at-panel .at-row {
+  gap: 8px;
+}
+
+.at .at-panel .seg-s button {
+  padding: 2px 8px;
+  font-size: 12.5px;
+}
+
+.at .at-panel .at-key {
+  flex-wrap: nowrap;
+  gap: 6px;
+  font-size: 11.5px;
+}
+
+.at .at-panel .at-ramp {
+  flex: 1;
+  width: auto;
+  height: 8px;
+}
+
+.at .at-panel .at-win {
+  width: 132px;
+}
+
+.at .at-panel .at-wtxt {
+  font-size: 12px;
+}
+
+.at-wkeys {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: -4px;
+}
+
+.at-row .at-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* the imagery's card: the year, the keys; under the Earthwork card, only while the imagery shows */
+.at .at-yc.at-s2c {
+  display: block;
+  position: relative;
+  right: auto;
+  top: auto;
+}
+
+.at .at-yc.at-s2c.ew-off {
+  display: none;
+}
+
+.ew-img {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ew-img b {
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.ew-img span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ew-keys {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* the readout: the right column, under the buttons; it scrolls inside itself, never down the map */
+.at .at-yc.ew-read {
+  right: 12px;
+  top: 54px;
+  max-height: calc(100% - 100px);
+  overflow: auto;
+}
+
+.at .at-yc.ew-read.ew-off {
+  display: none;
+}
+
+.ew-r1 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.ew-sub {
+  margin: 8px 0 2px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.at-yc.ew-read .at-lc {
+  grid-template-columns: minmax(0, 1fr) 64px 52px;
+  gap: 3px 8px;
+  font-size: 12px;
+  margin: 6px 0 0;
+}
+
+.at-yc.ew-read .at-lc span:nth-child(3n + 1) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ew-digs {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ew-digs button {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 5px;
+  margin: 0 -5px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ew-digs button:hover {
+  background: var(--sel);
+}
+
+.ew-digs button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* the clicked spot: a line and its coordinates */
+.ew-spot {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+}
+
+.ew-spot-l {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.ew-spot .ew-x {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ew-spot .ew-x:hover,
+.ew-spot .ew-ll:hover {
+  background: var(--sel);
+  color: var(--text);
+}
+
+.ew-spot .ew-ll {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: 11.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 1px 4px;
+  margin: 2px -4px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* H: every card hidden; the search and the buttons stay */
+.at.ew-cards-hidden .at-panel,
+.at.ew-cards-hidden .at-yc {
+  display: none !important;
+}
+
+/* ---- keys on buttons ---- */
+.at-btn kbd,
+.at-search kbd,
+.at-row kbd,
+.at-more kbd,
+.at-chip kbd,
+.ew-keys kbd {
+  font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.at-btn.on kbd {
+  color: var(--on);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+/* ---- the credits: one quiet line along the bottom, across both maps of the pair ---- */
 .at-credits {
   position: absolute;
   left: 0;
@@ -64,105 +350,34 @@ body {
   bottom: 40px;
 }
 
-/* a key on a button: the tool buttons, the fold arrows, the search */
-.at-btn kbd,
-.at-hd kbd,
-.at-search kbd,
-.at-row kbd,
-.at-more kbd,
-.at-chip kbd {
-  font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--muted);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 1px 4px;
-}
-
-.at-btn.on kbd {
-  color: var(--on);
-  border-color: rgba(0, 0, 0, 0.35);
-}
-
-.at-hd .keys {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-
-.at-row .at-pick {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  color: var(--muted);
-}
-
-.at-wkeys {
-  flex-basis: 100%;
-  font-size: 11.5px;
-  color: var(--muted);
-  margin-top: -6px;
-}
-
-/* one imagery color: no buttons to choose between */
-.at-yc .yr .comps:has(button:only-child) {
-  display: none;
-}
-
 @media (max-width: 760px) {
+  .at {
+    --col: 220px;
+  }
+
   .at-credits {
     font-size: 10px;
     text-align: left;
   }
 }
 
-/* the view's analytics in the year card */
-.at-yc .ew-view {
-  border-top: 1px solid var(--line);
-  margin-top: 12px;
-  padding-top: 2px;
+/* the years read, in the Earthwork card's head; the slider's own text is then not needed */
+.ew-hy {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.at-yc .ew-view .at-lc {
-  grid-template-columns: minmax(0, 1fr) 96px 62px;
+.at .at-panel .at-wtxt {
+  display: none;
 }
 
-.at-yc .ew-view .at-lc span:first-child,
-.at-yc .ew-view .at-lc span:nth-child(3n + 1) {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* search: one focus ring, on the box */
+.at .at-search input:focus-visible {
+  outline: none;
 }
 
-.at-yc .ew-digs {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 2px 0 6px;
-}
-
-.at-yc .ew-digs button {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  border: 0;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  font-size: 12.5px;
-  padding: 4px 6px;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.at-yc .ew-digs button:hover {
-  background: var(--sel);
-}
-
-.at-yc .ew-digs button span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.at .at-search:focus-within {
+  border-color: rgba(255, 255, 255, 0.3);
 }
