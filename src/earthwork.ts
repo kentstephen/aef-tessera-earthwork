@@ -156,9 +156,25 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
     return gate / (1 + Math.exp(-z));
   }
 
+  /** The chunks in hand for this window that lie under a box, with their raw bytes. */
+  function chunksIn(bbox: [number, number, number, number], first: number, last: number) {
+    const [W, S, E, N] = bbox;
+    const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
+    const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
+    const out = [];
+    for (let r = r0; r <= r1; r++)
+      for (let c = c0; c <= c1; c++) {
+        const k = keyOf(first, last, r, c), ch = chunks.get(k);
+        if (ch) out.push({ key: k, r, c, w: ch.w, h: ch.h, first: ch.first, last: ch.last });
+      }
+    return { chunks: out, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
+  }
+
   return {
     layer,
     scoreAt,
+    chunksIn,
+    models,
     tilesRead: () => tilesRead,
     whenReady: (f: () => void) => {
       onReady = f;

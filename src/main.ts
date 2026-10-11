@@ -1,6 +1,7 @@
 import "./ui.css";
 import "./page.css";
 
+import { createAnalytics } from "./analytics";
 import { createEarthwork } from "./earthwork";
 import { s2Items } from "./s2";
 // @ts-expect-error ui.js is the notebook widget's JavaScript, carried over as is
@@ -74,6 +75,12 @@ const model = {
   send: () => {},
 };
 
+// the view's analytics: Pyodide with DuckDB in a worker, started now, ready in a few seconds
+const analytics = createAnalytics(earthwork.models, (text) =>
+  window.dispatchEvent(new CustomEvent("analytics-status", { detail: text })),
+);
+analytics.whenReady(() => window.dispatchEvent(new Event("analytics-ready")));
+
 const el = document.getElementById("app")!;
 earthwork.whenReady(() => window.dispatchEvent(new Event("earthwork-ready")));
-render({ model, el, earthwork, s2Items, credits: CREDITS });
+render({ model, el, earthwork, s2Items, credits: CREDITS, analytics });

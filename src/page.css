@@ -116,3 +116,53 @@ body {
     text-align: left;
   }
 }
+
+/* the view's analytics in the year card */
+.at-yc .ew-view {
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 2px;
+}
+
+.at-yc .ew-view .at-lc {
+  grid-template-columns: minmax(0, 1fr) 96px 62px;
+}
+
+.at-yc .ew-view .at-lc span:first-child,
+.at-yc .ew-view .at-lc span:nth-child(3n + 1) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.at-yc .ew-digs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px;
+}
+
+.at-yc .ew-digs button {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.at-yc .ew-digs button:hover {
+  background: var(--sel);
+}
+
+.at-yc .ew-digs button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
