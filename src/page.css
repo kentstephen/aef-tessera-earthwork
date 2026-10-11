@@ -39,7 +39,7 @@ body {
 
 /* search: small until it is used, then wide enough to read a place */
 .at .at-search {
-  width: 168px;
+  width: 184px;
   height: 34px;
   padding: 0 10px;
   border-radius: 10px;
@@ -420,8 +420,8 @@ body {
 
 /* the Sentinel-2 card: small, the search's width; the year first, so the pair always says which year */
 .at .at-yc.at-s2c {
-  width: 168px;
-  padding: 8px 10px 8px 12px;
+  width: 184px;
+  padding: 10px 12px 10px 14px;
 }
 
 .at .ew-s2hd {
@@ -431,7 +431,7 @@ body {
 }
 
 .ew-s2hd b {
-  font-size: 30px;
+  font-size: 34px;
   line-height: 1;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -443,14 +443,14 @@ body {
 }
 
 .ew-s2hd span {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.25;
   color: var(--muted);
 }
 
 .at-s2c .ew-keys {
-  margin: 6px 0 0;
-  font-size: 11px;
+  margin: 8px 0 0;
+  font-size: 12px;
   line-height: 1.5;
   white-space: nowrap;
 }
