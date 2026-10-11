@@ -11,7 +11,7 @@ import {COGLayer, MosaicLayer} from "@developmentseed/deck.gl-geotiff";
 import {CreateTexture} from "@developmentseed/deck.gl-raster/gpu-modules";
 import {DecoderPool, GeoTIFF, PerOriginSemaphore} from "@developmentseed/geotiff";
 import GeoTiffWorker from "@developmentseed/geotiff/pool/worker?worker";
-import {latLngToCell, getResolution, cellToBoundary, cellToLatLng, isValidCell, polygonToCells} from "h3-js";
+import {latLngToCell, getResolution, cellToBoundary, cellToLatLng, isValidCell} from "h3-js";
 import {Protocol as PMProtocol} from "pmtiles";
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 maplibregl.addProtocol("pmtiles", new PMProtocol().tile);
@@ -72,7 +72,7 @@ function histText(code, k, hy, ratio) {
   return "";
 }
 
-export function render({model, el, earthwork, s2Items, credits, analytics}) {
+export function render({model, el, earthwork, s2Items, credits}) {
   let cfg = {};
   try { cfg = JSON.parse(model.get("config") || "{}"); } catch (e) { cfg = {}; }
   if (!document.getElementById("at-fonts")) {
@@ -113,8 +113,13 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     const fallback = () => { const ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0"; root.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e2) {} ta.remove(); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
   });
+  // the credits fold to a button in the corner, as MapLibre's compact attribution does: open at
+  // first, folded on the first drag of the map, the button opens and folds them
   const creditsEl = el_("div", "at-credits", credits || "");
-  pane.append(mapEl2, mapEl, bar, msg, creditsEl);
+  const crBtn = el_("button", "at-cr-b", "i");
+  crBtn.title = "credits"; crBtn.setAttribute("aria-label", "credits");
+  crBtn.onclick = (e) => { e.stopPropagation(); creditsEl.classList.toggle("folded"); };
+  pane.append(mapEl2, mapEl, bar, msg, creditsEl, crBtn);
   root.appendChild(pane);
   el.appendChild(root);
 
@@ -138,7 +143,8 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   panel.appendChild(panelHd);
   const foldPanel = (on) => { panel.classList.toggle("collapsed", on); panelCb.title = on ? "open the Earthwork card" : "fold the Earthwork card"; keep("panel", on); };
   panelHd.onclick = (e) => { e.stopPropagation(); foldPanel(!panel.classList.contains("collapsed")); };
-  foldPanel(keep("panel"));
+  // the Earthwork card always loads open
+  foldPanel(false);
   panelRamp.style.background = `linear-gradient(90deg,${virCss(8)})`;
   const rowOf = (label) => { const r = el_("div", "at-row"); if (label) r.appendChild(el_("span", "at-lab", label)); panel.appendChild(r); return r; };
   // Kinds of change is drawn only zoomed in with its land cover read (hmeta.kinds_ready), and only
@@ -214,7 +220,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   const keyEl = el_("span", "at-key");
   rKey.appendChild(keyEl);
   // the window: the years AlphaEarth is read over; drag either end, it rereads on release
-  const rWin = rowOf("Years");
+  const rWin = rowOf("AEF Years");
   const aefYears = cfg.aef_years || [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
   const win = el_("span", "at-win");
   const wTrk = el_("span", "trk"), wSpn = el_("span", "spn"), wTks = el_("span", "tks");
@@ -316,16 +322,11 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   // stretched for the view, where the true color image clips bright ground
   const COMPS = [["tci", "True color", "Earth Genome's true color image"],
                  ["urban", "Urban", "B12 B11 B4 from the raw bands, each stretched to the view: built ground and bare soil apart by hue"],
-                 ["blueyellow", "Blue-yellow", "B11 B11 B2 from the raw bands, each stretched to the view: sand yellow, concrete blue"],
-                 // the indexes are drawn in the browser only (no kernel tiles for them)
-                 ...(cfg.s2_gpu !== false ? [
-                   ["ndbi", "NDBI", "(B11 - B8A) / (B11 + B8A), stretched to the view: built-up and bare ground orange, vegetation and water blue"],
-                   ["mineral", "Mineral", "Bare ground by its minerals, stretched to the view: iron oxides (B4 / B2) yellow, clays (B11 / B12) blue, vegetation and water dark"]] : [])];
+                 ["blueyellow", "Blue-yellow", "B11 B11 B2 from the raw bands, each stretched to the view: sand yellow, concrete blue"]];
   // what the hold card calls each, always shown while the imagery is up
-  const COMP_NAME = {tci: "True color (TCI)", urban: "False color: Urban (B12 B11 B4)", blueyellow: "False color: Blue-yellow (B11 B11 B2)",
-                     ndbi: "NDBI: orange built-up or bare, blue vegetation or water", mineral: "Mineral: yellow iron oxides, blue clays, dark vegetation and water"};
-  // true color only for now: the false colors' stretch for the view was the kernel's
-  COMPS.splice(1);
+  const COMP_NAME = {tci: "True color (TCI)", urban: "False color: Urban (B12 B11 B4)", blueyellow: "False color: Blue-yellow (B11 B11 B2)"};
+  // the Sentinel-2 card's second line
+  const COMP_SHORT = {tci: "true color", urban: "urban", blueyellow: "blue-yellow"};
   const compBox = el_("div");
   const styleComp = segOf(compBox, COMPS.map(([k, l, t]) => [k, l, t, ""]), (k) => k === st.s2comp, (k) => setComp(k));
   // new colors are new tiles: the year shown loads alone first again (s2Warm)
@@ -360,7 +361,8 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   // the controls' effects (the kernel's, in the notebook): the years and the model are the earthwork
   // layer's own props, the brightness the imagery shader's
   const send = (act) => {
-    if (act === "aef" || act === "model") { if (cardData && cardData.kind === "spot") rescoreSpot(); av = null; styleKey(); renderYear(); viewSoon(); }
+    if (act === "s2comp") s2TakeStretch();
+    if (act === "aef" || act === "model") { if (cardData && cardData.kind === "spot") rescoreSpot(); styleKey(); renderYear(); }
     update();
   };
 
@@ -536,14 +538,16 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     if (c.place && c.place.length) h += `<div class="place">${c.place.map((q) => typeof q === "string" ? esc(q) : esc(q.name) + (q.tag ? ` <span>(${esc(q.tag)})</span>` : "")).join(", ")}</div>`;
     if (c.kind === "note") return h + `<h3>${esc(c.title || "")}</h3></div>`;
     if (c.kind === "spot") {
-      const lat_lon = `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`;
-      h += `<h3>This spot</h3><div class="coords"><code title="lat, long">${lat_lon}</code><button data-copy="${lat_lon}">copy</button></div>`;
-      h += `<h4>Earthwork</h4>`;
+      h += `<h3>This pixel</h3>`;
+      // the H3 res 13 cell holding its center and the center itself, each copyable
+      const lat_lon = `${c.plat.toFixed(6)}, ${c.plon.toFixed(6)}`;
+      h += `<div class="coords"><code title="H3 string, res 13">${esc(c.cell)}</code><button data-copy="${esc(c.cell)}">copy</button>`;
+      h += `<code title="lat, long of the pixel's center">${lat_lon}</code><button data-copy="${lat_lon}">copy</button></div><h4>Earthwork</h4>`;
       h += c.score == null
-        ? `<p>No score here: ${map && map.getZoom() < EWZ ? `zoom in to ${EWZ} so AlphaEarth is read here` : "AlphaEarth has no data for this pixel in one of the years, or it is still loading"}.</p>`
+        ? `<p>No score here: ${map && map.getZoom() < EWZ ? `zoom in to ${EWZ} so AlphaEarth is read here` : "AlphaEarth has no data here in one of the years, or it is still loading"}.</p>`
         : `<p><b>${Math.round(100 * c.score)}%</b>: the chance the ground itself was dug, filled or graded from ${c.y0} to ${c.y1}, at this 10 m pixel.</p>`;
       h += `<p class="sub">Pair with Sentinel-2 (<kbd>P</kbd>) or hold space to see what it is.</p>`;
-      return h.replace('<button class="x" title="close (Esc)" aria-label="close">×</button>', "") + `</div>`;
+      return h + `</div>`;
     }
     h += `<h3>This hexagon</h3>`;
     // its H3 string and center, each copyable, however it was picked
@@ -577,87 +581,23 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   // the imagery's year, its colors and keys: the card's head while held, the pair's left card
   const cbOf = (folded) => `<button class="at-cb" title="${folded ? "open the card" : "fold the card"}">${ICON.chev}</button>`;
   const imgYr = (cbH, help) => `<div class="yr img"><b>${st.imgYear}</b><span class="comp">${COMP_NAME[st.s2comp] || ""}</span>${cbH}<span class="comps">${COMPS.map(([k, l, t]) => `<button data-comp="${k}" class="${k === st.s2comp ? "on" : ""}" title="${esc(t)}">${l}</button>`).join("")}</span><span class="help">${help}</span></div>`;
-  // ---- the view's analytics: DuckDB in a worker, over the pixels on screen ----------------------------
-  let av = null, avStatus = "", avT = null, avSeq = 0;
-  const haFmt = (v) => v >= 100 ? `${Math.round(v).toLocaleString("en-US")} ha` : v >= 10 ? `${v.toFixed(1)} ha` : `${v.toFixed(2)} ha`;
   const divName = (v) => { if (!v) return null; if (typeof v !== "string") return v.primary || null; try { const o = JSON.parse(v); return o.primary || v; } catch (e) { return v; } };
-  // the view's towns and counties as H3 res 9 cells (a town wins over its county), from the divisions
-  // the map has loaded
-  function divisionCells() {
-    const byCell = new Map();
-    if (map && map.getSource("ov-div")) for (const sub of ["county", "locality"]) {
-      let fs = [];
-      try { fs = map.querySourceFeatures("ov-div", {sourceLayer: "division_area", filter: ["all", ["==", ["get", "subtype"], sub], ["==", ["get", "class"], "land"]]}); } catch (e) {}
-      for (const f of fs) {
-        const p = f.properties || {}, name = divName(p["@name"] || p.names);
-        if (!name) continue;
-        const g = f.geometry, polys = g.type === "Polygon" ? [g.coordinates] : g.type === "MultiPolygon" ? g.coordinates : [];
-        for (const poly of polys) { let cs = []; try { cs = polygonToCells(poly, 9, true); } catch (e) {} for (const c of cs) byCell.set(c, name); }
-      }
-    }
-    const cells = new BigUint64Array(byCell.size), names = [];
-    let i = 0;
-    for (const [c, n] of byCell) { cells[i++] = BigInt("0x" + c); names.push(n); }
-    return {cells, names};
-  }
-  function viewSoon() { clearTimeout(avT); avT = setTimeout(runView, 700); }
-  async function runView() {
-    if (!analytics || !map || st.holding || map.getZoom() < EWZ) return;
-    if (!analytics.isReady()) return;
-    const b = map.getBounds(), bbox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()];
-    const {chunks, wanted} = earthwork.chunksIn(bbox, st.y0, st.y1);
-    if (!chunks.length) return;
-    const s = ++avSeq, d = divisionCells();
-    try {
-      const r = await analytics.query({chunks, bbox, model: st.model, divCells: d.cells, divNames: d.names});
-      if (s !== avSeq) return;
-      av = r; avStatus = chunks.length < wanted ? "Still loading part of the view" : "";
-    } catch (e) {
-      if (s !== avSeq) return;
-      avStatus = "DuckDB: " + e.message;
-    }
-    renderYear();
-  }
-  function viewSection() {
-    if (!av && !avStatus) return `<p class="ew-r1">Reading this view…</p>`;
-    let h = "";
-    if (av && av.pixels) {
-      h += `<p class="ew-r1"><b>${haFmt(av.likely_ha)}</b> likely moved in view</p>`;
-      if (av.places && av.places.length) {
-        const max = Math.max(...av.places.map((q) => q.ha));
-        h += `<div class="at-lc">` + av.places.slice(0, 4).map((q) => `<span>${esc(q.name || "Elsewhere")}</span><i style="width:${Math.max(2, 100 * q.ha / max)}%"></i><span>${haFmt(q.ha)}</span>`).join("") + `</div>`;
-      }
-      if (av.digs && av.digs.length) {
-        h += `<p class="ew-sub">Most moved, about 10 ha each</p><div class="ew-digs">`;
-        h += av.digs.slice(0, 3).map((q) => `<button data-dig="${q.cell}"><span>${esc(q.name || "Elsewhere")}</span><b>${haFmt(q.ha)}</b></button>`).join("");
-        h += `</div>`;
-      }
-    } else if (av) h += `<p class="ew-r1">No AlphaEarth read in view yet</p>`;
-    if (avStatus) h += `<p class="ew-sub">${esc(avStatus)}</p>`;
-    return h;
-  }
   function renderYear() {
     // the imagery's card: its year, while the imagery shows (held, or the pair's left)
     const showImg = st.holding || (st.pair && st.left === "s2");
     // a small card, the search's width: the year (what the imagery shows), what it is, its keys
-    s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>true color</span></div>`
+    const stretching = st.s2comp !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === st.s2comp);
+    s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span></div>`
       + `<div class="ew-keys">${showImg
         ? `<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
-        : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}</div>`;
+        : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
     s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
-    // the readout: the view's numbers and the clicked spot
-    const pc = cardData && cardData.kind === "spot" ? cardData : null;
-    let h = map && map.getZoom() < EWZ ? `<p class="ew-r1">Zoom in to ${EWZ} for earthwork</p>` : viewSection();
-    if (pc) {
-      const where = (pc.place && pc.place[0]) || "This spot", lat_lon = `${pc.lat.toFixed(5)}, ${pc.lon.toFixed(5)}`;
-      h += `<div class="ew-spot"><div class="ew-spot-l"><span><b>${esc(where)}</b> ${pc.score == null ? "no score here" : `${Math.round(100 * pc.score)}%`}</span>`
-        + `<button class="ew-x" title="close (Esc)" aria-label="close">\u00d7</button></div>`
-        + `<button class="ew-ll" data-copy="${lat_lon}" title="copy">${lat_lon}</button></div>`;
-    }
+    // the readout: the clicked hexagon's account, nothing until a click
+    const h = cardData && cardData.kind === "spot" ? hexSection(cardData) : "";
     yc.innerHTML = h;
     fc.style.display = "none";
     yc.className = "at-yc at-glass ew-read" + (h ? "" : " ew-off");
-    const bx = yc.querySelector(".ew-x");
+    const bx = yc.querySelector(".hex .x");
     if (bx) bx.onclick = (e) => { e.stopPropagation(); closeCard(); };
   }
   // the card never scrolls: when its content is taller
@@ -689,14 +629,6 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     e.stopPropagation();
     setComp(b.getAttribute("data-comp"));
   });
-  yc.addEventListener("click", (e) => {
-    const b = e.target && e.target.closest && e.target.closest("[data-dig]");
-    if (!b || !map) return;
-    e.stopPropagation();
-    const cell = b.getAttribute("data-dig"), [lat, lon] = cellToLatLng(cell);
-    searched = cell; update();
-    map.flyTo({center: [lon, lat], zoom: Math.max(map.getZoom(), 15), duration: 1600, essential: true});
-  });
   for (const el of [yc, fc]) el.addEventListener("click", (e) => {
     const b = e.target && e.target.closest && e.target.closest("[data-copy]");
     if (!b) return;
@@ -708,7 +640,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
   });
   function renderCard() {
-    picked = cardData && cardData.cell ? cardData.cell : null;
+    picked = cardData && cardData.kind !== "spot" && cardData.cell ? cardData.cell : null;
     // a new click opens a folded card once; folding it again stays folded
     if (cardData && cardData.n != null && cardData.n !== ycOpenedFor) { ycOpenedFor = cardData.n; if (ycFolded) { ycFolded = false; keep("card", false); } }
     renderYear(); update();
@@ -716,7 +648,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   function closeCard() { cardData = null; picked = null; imgPick = null; spot = null; renderYear(); update(); }
   function rescoreSpot() {
     if (!cardData || cardData.kind !== "spot") return;
-    cardData.score = earthwork.scoreAt(cardData.lon, cardData.lat, st.y0, st.y1, st.model);
+    cardData.score = earthwork.scoreAt(cardData.plon, cardData.plat, st.y0, st.y1, st.model);
     cardData.y0 = st.y0; cardData.y1 = st.y1;
   }
   // a pick: the same cell again clears it
@@ -731,9 +663,12 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     }
     if (cell && cell === picked) { closeCard(); return; }
     imgPick = null;
-    const ad = adminAt(pt), nm = (v) => { if (!v) return null; if (typeof v !== "string") return v.primary || null; try { const o = JSON.parse(v); return o.primary || v; } catch (e) { return v; } };
+    // the AlphaEarth pixel under the click (the mosaic's grid); the same pixel again clears it
+    const i = Math.floor((ll.lng + 180) / AEF_R), j = Math.floor((AEF_Y0 - ll.lat) / AEF_R);
+    const plon = -180 + (i + 0.5) * AEF_R, plat = AEF_Y0 - (j + 0.5) * AEF_R;
+    if (cardData && cardData.kind === "spot" && cardData.plon === plon && cardData.plat === plat) { closeCard(); return; }
     spot = {lon: ll.lng, lat: ll.lat};
-    cardData = {kind: "spot", n: ++seq, lon: ll.lng, lat: ll.lat, place: [nm(ad.locality), nm(ad.county), nm(ad.region)].filter(Boolean)};
+    cardData = {kind: "spot", n: ++seq, lon: ll.lng, lat: ll.lat, plon, plat, cell: latLngToCell(plat, plon, 13), place: placeAt(pt)};
     rescoreSpot();
     renderCard();
   }
@@ -1032,9 +967,76 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     uniformTypes: {lo: "vec3<f32>", hi: "vec3<f32>", kind: "f32"},
     getUniforms: (q) => ({lo: q.lo, hi: q.hi, kind: q.kind}),
   };
+  const s2PoolGet = () => s2Pool || (s2Pool = new DecoderPool({size: Math.min(6, navigator.hardwareConcurrency || 4),
+    createWorker: () => new GeoTiffWorker()}));
+  // ---- the false colors' stretch (the kernel's _comp_scale, taken here): each band's 98th
+  // percentile over the view, from the latest year with yearly footprints there (up to six of them),
+  // read from the overview nearest 512 pixels across the view. The mosaics are EPSG:3857, so the
+  // view's web mercator meters index them directly. One stretch for every year so the years compare;
+  // taken again when the colors change or a hold starts outside the box it was taken for
+  let s2StretchGen = 0;
+  async function s2TakeStretch() {
+    const comp = st.s2comp, spec = S2_FALSE[comp];
+    if (!spec || !spec.rgb || !map) return;
+    const b = map.getBounds(), box = [b.getWest(), Math.max(-85, b.getSouth()), b.getEast(), Math.min(85, b.getNorth())];
+    const sx = cfg.s2_stretch;
+    if (sx && sx.comp === comp && sx.box[0] <= box[0] && sx.box[1] <= box[1] && sx.box[2] >= box[2] && sx.box[3] >= box[3]) return;
+    const gen = ++s2StretchGen;
+    const mx = (lon) => 6378137 * lon * Math.PI / 180, my = (lat) => 6378137 * Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
+    const x0 = mx(box[0]), x1 = mx(box[2]), y0 = my(box[1]), y1 = my(box[3]), tpx = Math.max(x1 - x0, y1 - y0) / 512;
+    const bands = [...new Set(spec.rgb)];
+    // the footprints under the view, asked per web mercator tile as s2Discover does
+    const z = Math.max(cfg.s2_min_z || 7, Math.min(9, Math.floor(map.getZoom()))), n = 2 ** z;
+    const tx = (lon) => Math.min(n - 1, Math.max(0, Math.floor((lon + 180) / 360 * n)));
+    const ty = (lat) => { const v = Math.sin(lat * Math.PI / 180); return Math.min(n - 1, Math.max(0, Math.floor((0.5 - Math.log((1 + v) / (1 - v)) / (4 * Math.PI)) * n))); };
+    const tiles = [];
+    for (let x = tx(box[0]); x <= tx(box[2]); x++) for (let y = ty(box[3]); y <= ty(box[1]); y++) tiles.push({z, x, y});
+    let got = null;
+    for (const year of [...S2Y].reverse()) {
+      if (gen !== s2StretchGen) return;
+      const lists = await Promise.all(tiles.slice(0, 16).map((t) => s2Items(year, t).catch(() => [])));
+      const seen = new Set(), items = [];
+      for (const it of lists.flat())
+        if (!it.fill && it.bbox && !seen.has(it.id) && it.bbox[0] < box[2] && it.bbox[2] > box[0] && it.bbox[1] < box[3] && it.bbox[3] > box[1]) { seen.add(it.id); items.push(it); }
+      if (!items.length) continue;
+      const hist = Object.fromEntries(bands.map((bd) => [bd, new Uint32Array(65536)]));
+      await Promise.all(items.slice(0, 6).flatMap((it) => bands.map(async (bd) => {
+        const url = it.bands[bd];
+        if (!url) return;
+        let g = null;
+        try { g = await s2Tiff(url, null, year, false); } catch (e) { return; }
+        // the coarsest level whose pixel is no coarser than tpx
+        let im = g;
+        for (const o of g.overviews) if (o.transform[0] <= tpx * 1.01 && o.transform[0] > im.transform[0]) im = o;
+        const q = im.transform, px = q[0], tw = im.tileWidth, th = im.tileHeight;
+        const c0 = Math.max(0, Math.floor((x0 - q[2]) / px)), c1 = Math.min(im.width, Math.ceil((x1 - q[2]) / px));
+        const r0 = Math.max(0, Math.floor((q[5] - y1) / px)), r1 = Math.min(im.height, Math.ceil((q[5] - y0) / px));
+        if (c1 <= c0 || r1 <= r0) return;
+        const bx0 = Math.floor(c0 / tw), bx1 = Math.floor((c1 - 1) / tw), by0 = Math.floor(r0 / th), by1 = Math.floor((r1 - 1) / th);
+        if ((bx1 - bx0 + 1) * (by1 - by0 + 1) > 36) return;
+        const jobs = [];
+        for (let by = by0; by <= by1; by++) for (let bx = bx0; bx <= bx1; bx++)
+          jobs.push(s2Block(url, im, bx, by, s2PoolGet()).then((t) => {
+            if (!t) return;
+            const hs = hist[bd], ox = bx * tw, oy = by * th;
+            for (let r = Math.max(0, r0 - oy); r < Math.min(t.h, r1 - oy); r++)
+              for (let c = Math.max(0, c0 - ox); c < Math.min(t.w, c1 - ox); c++) { const v = t.d[r * t.w + c]; if (v) hs[v]++; }
+          }));
+        await Promise.all(jobs);
+      })));
+      const pct = (hs) => { let tot = 0; for (let v = 0; v < 65536; v++) tot += hs[v]; if (tot <= 100) return null; let acc = 0; const want = 0.98 * tot; for (let v = 0; v < 65536; v++) { acc += hs[v]; if (acc >= want) return v; } return null; };
+      const vals = Object.fromEntries(bands.map((bd) => [bd, pct(hist[bd])]));
+      // a year whose bands are not in the bucket (the STAC's lag, a guessed path) reads as nothing: the year before
+      if (bands.every((bd) => vals[bd] == null)) continue;
+      got = Object.fromEntries(bands.map((bd) => [bd, vals[bd] || 3000]));
+      break;
+    }
+    if (gen !== s2StretchGen || st.s2comp !== comp) return;
+    cfg.s2_stretch = {comp, box, ...(got || Object.fromEntries(bands.map((bd) => [bd, 3000])))};
+    renderYear(); update();
+  }
   const s2CogLayers = (year, left = false) => {
-    if (!s2Pool) s2Pool = new DecoderPool({size: Math.min(6, navigator.hardwareConcurrency || 4),
-      createWorker: () => new GeoTiffWorker()});
+    s2PoolGet();
     const e = s2Src.get(year);
     if (!e || !map) return [];
     // shown or hidden by visible, not opacity: the tile layers inside MosaicLayer and COGLayer
@@ -1113,7 +1115,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   }
   // a chunk read: the year card's line and the tooltip under a still pointer
   let tileT = null;
-  function tileIn() { viewSoon(); clearTimeout(tileT); tileT = setTimeout(() => { if (cardData && cardData.kind === "spot" && cardData.score == null) { rescoreSpot(); } renderYear(); if (lastPt && !st.holding) showHexTip(lastPt); }, 200); }
+  function tileIn() { clearTimeout(tileT); tileT = setTimeout(() => { if (cardData && cardData.kind === "spot" && cardData.score == null) { rescoreSpot(); } renderYear(); if (lastPt && !st.holding) showHexTip(lastPt); }, 200); }
   function layers() {
     const out = [];
     const z = map ? map.getZoom() : 0;
@@ -1236,8 +1238,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     // the wheel is the year while holding (the capture listener on root
     // keeps it from the map, so scrollZoom stays on: disabling it
     // mid-zoom left maplibre's zoom marked active, and scroll froze
-    // after the hold); a space hold leaves the map free to drag ("i'd
-    // like to be able to move the map when space is pressed"), a mouse
+    // after the hold); a space hold leaves the map free to drag, a mouse
     // hold cannot (the press is the hold)
     if (by === "mouse") map.dragPan.disable();
     tip.style.display = "none";
@@ -1440,8 +1441,6 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   window.addEventListener("keydown", onKey);
   // the earthwork model on the GPU is ready: draw with it
   window.addEventListener("earthwork-ready", () => update());
-  window.addEventListener("analytics-status", (e) => { avStatus = e.detail; renderYear(); });
-  window.addEventListener("analytics-ready", () => viewSoon());
 
   // ---- camera and click ----------------------------------------------------------------
   let seq = 0, lastView = "";
@@ -1454,11 +1453,21 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     lastView = key; v.n = ++seq;
     model.set("view", JSON.stringify(v)); model.save_changes();
   }
-  const adminAt = (pt) => {
-    const out = {};
-    const one = (k) => { const id = "ov-div-" + k; if (!map.getLayer(id)) return null; const fs = map.queryRenderedFeatures(pt, {layers: [id]}); return fs && fs.length ? fs[0].properties : null; };
-    try { const r = one("region"); if (r) out.region = r["@name"] || r.names || null; const c = one("county"); if (c) out.county = c["@name"] || c.names || null; const l = one("locality"); if (l) out.locality = l["@name"] || l.names || null; } catch (e) {}
-    return out;
+  // every division Overture draws under the point, smallest first, each tagged with its level
+  // (locality, county, region, country, and the levels finer than a locality ahead of them)
+  const DIV_ORDER = {locality: 0, localadmin: 1, county: 2, region: 3, country: 4};
+  const placeAt = (pt) => {
+    if (!map || !map.getLayer("ov-div-all")) return [];
+    let fs = [];
+    try { fs = map.queryRenderedFeatures(pt, {layers: ["ov-div-all"]}); } catch (e) {}
+    const seen = new Set(), out = [];
+    for (const f of fs) {
+      const p = f.properties || {}, sub = p.subtype, name = divName(p["@name"] || p.names);
+      if (!sub || !name || seen.has(sub)) continue;
+      seen.add(sub);
+      out.push({name, tag: sub, o: DIV_ORDER[sub] ?? -1});
+    }
+    return out.sort((x, y) => x.o - y.o).map(({name, tag}) => ({name, tag}));
   };
   function boot() {
     const home = cfg.home || {longitude: 3.6, latitude: 6.46, zoom: 11};
@@ -1474,17 +1483,17 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
       if (cfg.div_pm && !map.getSource("ov-div")) {
         try {
           map.addSource("ov-div", {type: "vector", url: "pmtiles://" + cfg.div_pm});
-          for (const k of ["region", "county", "locality"]) map.addLayer({id: "ov-div-" + k, type: "fill", source: "ov-div", "source-layer": "division_area", filter: ["all", ["==", ["get", "subtype"], k], ["==", ["get", "class"], "land"]], paint: {"fill-opacity": 0}}, slot());
+          map.addLayer({id: "ov-div-all", type: "fill", source: "ov-div", "source-layer": "division_area", filter: ["==", ["get", "class"], "land"], paint: {"fill-opacity": 0}}, slot());
         } catch (e) { console.error("divisions", e); }
       }
       update(); sendView(); renderYear();
     });
     map.on("moveend", sendView);
+    map.once("dragstart", () => creditsEl.classList.add("folded"));
     // a new view: the footprints under it asked for
     // (and the batches near it mounted, the far ones let go)
     map.on("moveend", () => { if (S2GPU) { s2Discover(); update(); } });
     map.on("zoomend", () => { update(); renderYear(); styleKey(); });
-    map.on("moveend", viewSoon);
     // a zoom in crossing 8.3 (the kernel's _AHEAD_ZOOM) tells the kernel
     // at once, so it starts reading before the hexagons' zoom
     let aheadSent = false;

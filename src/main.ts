@@ -1,7 +1,6 @@
 import "./ui.css";
 import "./page.css";
 
-import { createAnalytics } from "./analytics";
 import { createEarthwork } from "./earthwork";
 import { s2Items } from "./s2";
 // @ts-expect-error ui.js is the notebook widget's JavaScript, carried over as is
@@ -37,11 +36,13 @@ async function divisionsUrl(): Promise<string | null> {
 // viridis, 9 stops, for the key's ramp (the map's own comes from deck.gl-raster's colormap sprite)
 const VIRIDIS = "440154472d7b3b528b2c728e21918c28ae805ec9626dbb2ab5de2bfde725";
 
+// one line; the About page (?) has them in full
 const CREDITS = [
-  'AlphaEarth Foundations by Google and Google DeepMind and Sentinel-2 mosaics by Earth Genome (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), via <a href="https://source.coop" target="_blank" rel="noopener">Source Cooperative</a>',
-  "Place names from Overture Maps (ODbL)",
-  "Search by Photon",
-  'Basemap &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+  "AlphaEarth &copy; Google, Google DeepMind",
+  'Sentinel-2 &copy; Earth Genome (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), via <a href="https://source.coop" target="_blank" rel="noopener">Source Cooperative</a>',
+  "Places: Overture Maps (ODbL)",
+  "Search: Photon",
+  '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
 ].join('<span class="sep"></span>');
 
 const base = import.meta.env.BASE_URL;
@@ -51,13 +52,14 @@ const [earthwork, divPm] = await Promise.all([
 ]);
 
 const cfg = {
-  // Huntsville AL, one of the US sites the model learned from
-  home: { longitude: -86.8, latitude: 34.69, zoom: 13.5 },
+  // Xiong'an New Area, Hebei: the starting area, a new city graded out of farmland
+  home: { longitude: 115.954, latitude: 39.018, zoom: 12 },
   fit: true,
   ew_zoom: 12,
   ew_models: ["current", "abroad"],
-  model: "current",
-  aef_from: 2023,
+  // US + abroad: the model with truth from outside the US, for a start outside it
+  model: "abroad",
+  aef_from: 2022,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
   s2_years: [2022, 2023, 2024, 2025],
@@ -75,12 +77,6 @@ const model = {
   send: () => {},
 };
 
-// the view's analytics: Pyodide with DuckDB in a worker, started now, ready in a few seconds
-const analytics = createAnalytics(earthwork.models, (text) =>
-  window.dispatchEvent(new CustomEvent("analytics-status", { detail: text })),
-);
-analytics.whenReady(() => window.dispatchEvent(new Event("analytics-ready")));
-
 const el = document.getElementById("app")!;
 earthwork.whenReady(() => window.dispatchEvent(new Event("earthwork-ready")));
-render({ model, el, earthwork, s2Items, credits: CREDITS, analytics });
+render({ model, el, earthwork, s2Items, credits: CREDITS });
