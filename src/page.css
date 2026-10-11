@@ -46,8 +46,9 @@ body {
   transition: width 0.15s ease;
 }
 
+/* as wide as the card under it, no wider */
 .at .at-search:focus-within {
-  width: min(340px, calc(100vw - 48px));
+  width: var(--col);
 }
 
 /* every card: the column's width, small type, no long words */
@@ -125,55 +126,6 @@ body {
   gap: 8px;
   font-size: 12px;
   color: var(--muted);
-}
-
-/* the imagery's card: the year, the keys; under the Earthwork card, only while the imagery shows */
-.at .at-yc.at-s2c {
-  display: block;
-  position: relative;
-  right: auto;
-  top: auto;
-}
-
-.at .at-yc.at-s2c.ew-off {
-  display: none;
-}
-
-.ew-img {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.ew-img b {
-  font-size: 26px;
-  line-height: 1;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-.ew-img span {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.ew-keys {
-  margin-top: 6px;
-  font-size: 11.5px;
-  color: var(--muted);
-}
-
-/* the readout: the right column, under the buttons; it scrolls inside itself, never down the map */
-.at .at-yc.ew-read {
-  right: 12px;
-  top: 54px;
-  max-height: calc(100% - 100px);
-  overflow: auto;
-}
-
-.at .at-yc.ew-read.ew-off {
-  display: none;
 }
 
 .ew-r1 {
@@ -275,10 +227,111 @@ body {
   cursor: pointer;
 }
 
-/* H: every card hidden; the search and the buttons stay */
-.at.ew-cards-hidden .at-panel,
-.at.ew-cards-hidden .at-yc {
-  display: none !important;
+/* ---- the right column: Earthwork, then the readout under it; it never runs off the map ---- */
+.ew-col-r {
+  position: absolute;
+  right: 12px;
+  top: 54px;
+  z-index: 6;
+  width: var(--col);
+  max-width: calc(50vw - 24px);
+  max-height: calc(100% - 96px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ew-col-r .at-panel {
+  flex: none;
+}
+
+.at .ew-col-r .at-yc.ew-read {
+  position: relative;
+  right: auto;
+  top: auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.at .at-yc.ew-read.ew-off,
+.at.ew-read-hidden .at-yc.ew-read {
+  display: none;
+}
+
+/* a card's head folds it: its arrow turns, and the head keeps what it says */
+.at .at-panel .at-hd,
+.ew-s2hd {
+  cursor: pointer;
+  user-select: none;
+}
+
+.at .at-panel .at-hd {
+  gap: 8px;
+}
+
+.ew-hramp {
+  flex: 1;
+  height: 7px;
+  min-width: 40px;
+  border-radius: 3px;
+}
+
+.ew-hy {
+  margin-left: 0;
+}
+
+.at .at-panel.collapsed {
+  padding: 7px 8px 7px 11px;
+}
+
+.at .at-panel.collapsed .at-row {
+  display: none;
+}
+
+/* the Sentinel-2 card: always on the left, under the search */
+.at .at-yc.at-s2c {
+  display: block;
+  position: relative;
+  right: auto;
+  top: auto;
+  padding: 7px 8px 7px 11px;
+}
+
+.ew-s2hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.ew-s2hd .t {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ew-s2y {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.at-s2c:not(.ew-showing) .ew-s2y {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.at-s2c .ew-keys {
+  margin: 4px 0 2px;
+}
+
+.at-s2c.ew-folded .ew-keys {
+  display: none;
+}
+
+.ew-folded .at-cb svg {
+  transform: rotate(-90deg);
 }
 
 /* ---- keys on buttons ---- */

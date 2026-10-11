@@ -131,13 +131,15 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   const keep = (k, v) => { try { if (v === undefined) return localStorage.getItem("aef-lc-" + k) === "1"; localStorage.setItem("aef-lc-" + k, v ? "1" : "0"); } catch (e) {} return false; };
   const panelHd = el_("div", "at-hd", `<span class="t">Earthwork</span>`);
   const panelCb = el_("button", "at-cb", ICON.chev);
-  panelCb.style.display = "none";
+  const panelRamp = el_("i", "at-ramp ew-hramp");
+  panelRamp.title = "the chance the ground was dug, filled or graded: unlikely to likely";
   const panelYears = el_("span", "ew-hy");
-  panelHd.append(panelYears);
+  panelHd.append(panelRamp, panelYears, panelCb);
   panel.appendChild(panelHd);
-  const foldPanel = (on) => { panel.classList.toggle("collapsed", on); panelCb.title = on ? "show the controls" : "fold the controls"; keep("panel", on); };
-  panelCb.onclick = (e) => { e.stopPropagation(); foldPanel(!panel.classList.contains("collapsed")); };
-  foldPanel(false);
+  const foldPanel = (on) => { panel.classList.toggle("collapsed", on); panelCb.title = on ? "open the Earthwork card" : "fold the Earthwork card"; keep("panel", on); };
+  panelHd.onclick = (e) => { e.stopPropagation(); foldPanel(!panel.classList.contains("collapsed")); };
+  foldPanel(keep("panel"));
+  panelRamp.style.background = `linear-gradient(90deg,${virCss(8)})`;
   const rowOf = (label) => { const r = el_("div", "at-row"); if (label) r.appendChild(el_("span", "at-lab", label)); panel.appendChild(r); return r; };
   // Kinds of change is drawn only zoomed in with its land cover read (hmeta.kinds_ready), and only
   // once asked for: the map never switches to it by itself, its button flashes when it is ready
@@ -221,7 +223,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   const rFrom = mkR(), rTo = mkR();
   const wTxt = el_("span", "at-wtxt");
   win.append(wTrk, wSpn, wTks, rFrom, rTo);
-  rWin.append(win, wTxt, el_("span", "at-wkeys", "<kbd>-</kbd><kbd>=</kbd> first <kbd>_</kbd><kbd>+</kbd> last"));
+  rWin.append(win, wTxt);
   function styleWin() {
     const i0 = Math.max(0, aefYears.indexOf(st.y0)), i1 = Math.max(0, aefYears.indexOf(st.y1)), n = Math.max(1, aefYears.length - 1);
     rFrom.value = i0; rTo.value = i1;
@@ -272,7 +274,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   function styleRows() { styleFill(); styleWin(); styleKey(); }
   // the pair's imagery card (renderYear) waits in the top left column, shown only in the pair
   const s2c = el_("div", "at-yc at-s2c holding at-glass");
-  top.append(search, panel, s2c);
+  top.append(search, s2c);
   pane.appendChild(top);
   // the pair's right column: the Earthwork panel and the hexagon card move in (setPair)
   const rcol = el_("div", "at-rcol");
@@ -284,11 +286,11 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   const bPair = el_("button", "at-btn at-glass", ICON.pair + "<kbd>P</kbd>"); bPair.title = "pair the map with Sentinel-2 (P)";
   bPair.onclick = () => setPair(!st.pair);
   const bHide = el_("button", "at-btn at-glass", `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><kbd>H</kbd>`);
-  bHide.title = "hide or show the cards (H)";
+  bHide.title = "hide or show the readout (H)";
   bHide.onclick = (e) => { e.stopPropagation(); setCards(!cardsHidden); };
   tools.append(bPair, bMore, bHide);
-  let cardsHidden = keep("cards");
-  function setCards(hidden) { cardsHidden = hidden; keep("cards", hidden); root.classList.toggle("ew-cards-hidden", hidden); bHide.classList.toggle("on", hidden); }
+  let cardsHidden = keep("readout");
+  function setCards(hidden) { cardsHidden = hidden; keep("readout", hidden); root.classList.toggle("ew-read-hidden", hidden); bHide.classList.toggle("on", hidden); }
   pane.appendChild(tools);
   const yc = el_("div", "at-yc at-glass");
   // the old floating hexagon card: kept hidden (the hexagon drops down in the top right card)
@@ -296,6 +298,9 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   pane.appendChild(yc);
   pane.appendChild(fc);
   pane.appendChild(rcol);
+  const ewCol = el_("div", "ew-col-r");
+  ewCol.append(panel, yc);
+  pane.appendChild(ewCol);
   const tip = el_("div", "at-tip");
   pane.appendChild(tip);
   const more = el_("div", "at-more at-glass");
@@ -344,7 +349,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth taught where 3DEP lidar flew the same ground twice. Pair (P) with Sentinel-2 to see what it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the earthwork; scroll while holding to step through the years.</p>
-    <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; P pairs the map with Sentinel-2; M swaps the model (Current, Global); Q the tooltip and picking off and on; H hides and shows the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; - = and _ + the years read; L place names; / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; P pairs the map with Sentinel-2; M swaps the model (Current, Global); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -568,9 +573,9 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     if (c.km2) h += `<p class="sub">${c.km2 < 0.1 ? `${Math.round(c.km2 * 1e6).toLocaleString("en-US")} m²` : `${c.km2.toFixed(2)} km²`} hexagon.</p>`;
     return h + `</div>`;
   }
-  let ycFolded = false, s2Folded = false, ycOpenedFor = null;
+  let ycFolded = false, s2Folded = keep("s2card"), ycOpenedFor = null;
   // the imagery's year, its colors and keys: the card's head while held, the pair's left card
-  const cbOf = (folded) => `<button class="at-cb" title="${folded ? "show the card (H)" : "fold the card (H)"}">${ICON.chev}</button>`;
+  const cbOf = (folded) => `<button class="at-cb" title="${folded ? "open the card" : "fold the card"}">${ICON.chev}</button>`;
   const imgYr = (cbH, help) => `<div class="yr img"><b>${st.imgYear}</b><span class="comp">${COMP_NAME[st.s2comp] || ""}</span>${cbH}<span class="comps">${COMPS.map(([k, l, t]) => `<button data-comp="${k}" class="${k === st.s2comp ? "on" : ""}" title="${esc(t)}">${l}</button>`).join("")}</span><span class="help">${help}</span></div>`;
   // ---- the view's analytics: DuckDB in a worker, over the pixels on screen ----------------------------
   let av = null, avStatus = "", avT = null, avSeq = 0;
@@ -634,11 +639,12 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   function renderYear() {
     // the imagery's card: its year, while the imagery shows (held, or the pair's left)
     const showImg = st.holding || (st.pair && st.left === "s2");
-    s2c.innerHTML = showImg
-      ? `<div class="ew-img"><b>${st.imgYear}</b><span>Sentinel-2${COMPS.length > 1 ? `, ${esc(COMP_NAME[st.s2comp] || "")}` : ""}</span></div>`
-        + `<div class="ew-keys"><kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${S2Y[0]} or ${S2Y[S2Y.length - 1]}${st.holding ? ", or scroll" : ""}</div>`
-      : "";
-    s2c.classList.toggle("ew-off", !showImg);
+    s2c.innerHTML = `<div class="at-hd ew-s2hd"><span class="t">Sentinel-2</span><b class="ew-s2y">${st.imgYear}</b>${cbOf(s2Folded)}</div>`
+      + `<div class="ew-keys">${showImg
+        ? `<kbd>[</kbd><kbd>]</kbd> year, <kbd>B</kbd> ${S2Y[0]} or ${S2Y[S2Y.length - 1]}${st.holding ? ", or scroll" : ""}`
+        : `Hold <kbd>Space</kbd> to see it, or <kbd>P</kbd> beside the map`}</div>`;
+    s2c.className = "at-yc at-s2c at-glass" + (s2Folded ? " ew-folded" : "") + (showImg ? " ew-showing" : "");
+    s2c.querySelector(".ew-s2hd").onclick = (e) => { e.stopPropagation(); s2Folded = !s2Folded; keep("s2card", s2Folded); renderYear(); };
     // the readout: the view's numbers and the clicked spot
     const pc = cardData && cardData.kind === "spot" ? cardData : null;
     let h = map && map.getZoom() < EWZ ? `<p class="ew-r1">Zoom in to ${EWZ} for earthwork</p>` : viewSection();
@@ -1413,8 +1419,6 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
       st.imgYear = st.imgYear === b ? a : b; renderYear(); update();
     }
     else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }
-    else if (k === "-" || k === "=") { const v = Math.max(aefYears[0], Math.min(hi - 1, lo + (k === "=" ? 1 : -1))); if (v !== lo) { st.y0 = v; winSent = [st.y0, st.y1]; styleWin(); send("aef"); } }
-    else if (k === "_" || k === "+") { const v = Math.max(lo + 1, Math.min(aefYears[aefYears.length - 1], hi + (k === "+" ? 1 : -1))); if (v !== hi) { st.y1 = v; winSent = [st.y0, st.y1]; styleWin(); send("aef"); } }
     else if (k === "l" || k === "L") { st.labels = !st.labels; labels(st.labels); swLab.sty(); }
     else if (k === "x" || k === "X") { st.fit = !st.fit; sizes(); }
     else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === st.s2comp); setComp(COMPS[(i + 1) % COMPS.length][0]); }
