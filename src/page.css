@@ -1,0 +1,118 @@
+/* This page's additions to the notebook's styles */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0e0e0e;
+}
+
+/* the maps fill the pane (MapLibre's own stylesheet, loaded after, makes a map position: relative) */
+.at .at-map,
+.at .at-map2 {
+  position: absolute;
+}
+
+/* the credits: one quiet line along the bottom, across both maps of the pair */
+.at-credits {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  padding: 4px 12px 5px;
+  background: rgba(14, 15, 17, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.at-credits a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: rgba(155, 165, 175, 0.35);
+  text-underline-offset: 2px;
+}
+
+.at-credits a:hover {
+  color: var(--text);
+}
+
+.at-credits .sep::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 9px 2px;
+  border-radius: 50%;
+  background: var(--faint);
+  vertical-align: middle;
+}
+
+/* the map's controls and messages sit above the credits */
+.at .maplibregl-ctrl-bottom-left,
+.at .maplibregl-ctrl-bottom-right {
+  bottom: 26px;
+}
+
+.at-msg {
+  bottom: 40px;
+}
+
+/* a key on a button: the tool buttons, the fold arrows, the search */
+.at-btn kbd,
+.at-hd kbd,
+.at-search kbd,
+.at-row kbd,
+.at-more kbd,
+.at-chip kbd {
+  font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.at-btn.on kbd {
+  color: var(--on);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.at-hd .keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.at-row .at-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.at-wkeys {
+  flex-basis: 100%;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: -6px;
+}
+
+/* one imagery color: no buttons to choose between */
+.at-yc .yr .comps:has(button:only-child) {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .at-credits {
+    font-size: 10px;
+    text-align: left;
+  }
+}

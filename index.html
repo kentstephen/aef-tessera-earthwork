@@ -7,39 +7,7 @@
     <link rel="icon" href="data:," />
   </head>
   <body>
-    <div id="map2"></div>
-    <div id="map"></div>
-    <aside class="ew-panel">
-      <h1>Earthwork</h1>
-      <p class="ew-lede">
-        The chance the ground was dug, filled or graded between two years, from AlphaEarth, scored on
-        your GPU for every 10 m pixel.
-      </p>
-      <div class="ew-row">
-        <label>From <select id="first"></select></label>
-        <label>to <select id="last"></select></label>
-      </div>
-      <div class="ew-row ew-models">
-        <button data-model="current">Current</button>
-        <button data-model="abroad">Ex-US</button>
-        <span class="ew-key">M</span>
-      </div>
-      <p id="model-note" class="ew-note"></p>
-      <div class="ew-ramp"><span>0</span><i></i><span>1</span></div>
-      <div class="ew-row ew-imagery">
-        <button id="pair">Pair with Sentinel-2</button>
-        <span class="ew-key">P</span>
-      </div>
-      <p class="ew-note">Hold <span class="ew-key">Space</span> to see Sentinel-2 in place.</p>
-      <p id="status" class="ew-status"></p>
-    </aside>
-    <aside id="s2card" class="ew-s2card" hidden>
-      <div class="ew-s2-head"><span>Sentinel-2</span><b id="s2year"></b></div>
-      <p class="ew-note">
-        Scroll while holding, or <span class="ew-key">[</span> <span class="ew-key">]</span>, for
-        another year. <span class="ew-key">B</span> jumps between the first and the latest.
-      </p>
-    </aside>
+    <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -51,6 +51,9 @@ uniform highp isampler2DArray firstTex;
 uniform highp isampler2DArray lastTex;
 uniform highp sampler2D weightTex;
 
+// the score, kept for the alpha step after the colormap (EarthworkAlpha)
+float earthworkScore_v;
+
 float earthworkScore_dequant(int v) {
   float f = float(v) / 127.5;
   return f * abs(f);
@@ -93,6 +96,7 @@ float earthworkScore_w(int i) {
       float gate = clamp(((1.0 - cosine) - ${MODULE_NAME}.gateLo)
                          / (${MODULE_NAME}.gateHi - ${MODULE_NAME}.gateLo), 0.0, 1.0);
       float score = gate / (1.0 + exp(-z));
+      earthworkScore_v = score;
       color = vec4(score, score, score, 1.0);
     `,
   },
@@ -110,3 +114,16 @@ float earthworkScore_w(int i) {
     gateHi: props.gateHi ?? 0.15,
   }),
 } as const satisfies ShaderModule<EarthworkScoreProps>;
+
+/**
+ * After the colormap: quiet ground faint, likely earthwork nearly opaque, as
+ * earthwork.py's hexagons were (alpha 70 to 235 of 255 along the score).
+ */
+export const EarthworkAlpha = {
+  name: "earthworkAlpha",
+  inject: {
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      color.a = mix(70.0 / 255.0, 235.0 / 255.0, clamp(earthworkScore_v, 0.0, 1.0));
+    `,
+  },
+} as const satisfies ShaderModule;

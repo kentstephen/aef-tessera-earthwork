@@ -25,7 +25,9 @@
     "@luma.gl/core": "^9.4.2",
     "@luma.gl/engine": "^9.4.2",
     "@luma.gl/shadertools": "^9.4.2",
+    "h3-js": "^4.5.0",
     "maplibre-gl": "^6.14.0",
+    "pmtiles": "^4.5.0",
     "zarrita": "^0.7.5"
   }
 }
