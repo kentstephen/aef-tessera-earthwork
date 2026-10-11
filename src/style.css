@@ -2,6 +2,7 @@
   --ew-bg: rgba(18, 20, 24, 0.88);
   --ew-ink: #e8e8e4;
   --ew-dim: #9a9c9e;
+  --ew-faint: #6f7275;
   --ew-line: rgba(255, 255, 255, 0.12);
   --ew-on: #fde725;
 }
@@ -10,16 +11,49 @@ html,
 body {
   margin: 0;
   height: 100%;
+  overflow: hidden;
   background: #111;
   font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
   color: var(--ew-ink);
 }
 
-#map {
+/* ---- the maps: one, or a pair with the imagery on the left ---- */
+#map,
+#map2 {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
 }
 
+#map {
+  left: 0;
+  right: 0;
+}
+
+#map2 {
+  left: 0;
+  width: 50%;
+  visibility: hidden;
+}
+
+body.pair #map {
+  left: 50%;
+}
+
+body.pair #map2 {
+  visibility: visible;
+}
+
+body.pair #map::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 1px;
+  background: var(--ew-line);
+  z-index: 2;
+}
+
+/* ---- the panel ---- */
 .ew-panel {
   position: absolute;
   top: 12px;
@@ -30,6 +64,11 @@ body {
   background: var(--ew-bg);
   border: 1px solid var(--ew-line);
   border-radius: 8px;
+}
+
+/* paired, the panel goes over the map it speaks for */
+body.pair .ew-panel {
+  left: calc(50% + 12px);
 }
 
 .ew-panel h1 {
@@ -61,6 +100,7 @@ body {
   border: 1px solid var(--ew-line);
   border-radius: 4px;
   padding: 3px 8px;
+  cursor: pointer;
 }
 
 .ew-panel button.on {
@@ -69,8 +109,10 @@ body {
 }
 
 .ew-key {
+  display: inline-block;
   color: var(--ew-dim);
   font-size: 12px;
+  line-height: 1.3;
   border: 1px solid var(--ew-line);
   border-radius: 3px;
   padding: 0 5px;
@@ -90,4 +132,125 @@ body {
   height: 8px;
   border-radius: 2px;
   background: linear-gradient(90deg, #440154, #3b528b, #21918c, #5ec962, #fde725);
+}
+
+body.holding .ew-ramp {
+  opacity: 0.35;
+}
+
+/* ---- the imagery card: top right while holding, over the left map when paired ---- */
+.ew-s2card {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 240px;
+  padding: 12px 14px;
+  background: var(--ew-bg);
+  border: 1px solid var(--ew-line);
+  border-radius: 8px;
+}
+
+.ew-s2card.left {
+  right: auto;
+  left: 12px;
+}
+
+.ew-s2card[hidden] {
+  display: none;
+}
+
+.ew-s2-head {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  color: var(--ew-dim);
+}
+
+.ew-s2-head b {
+  color: var(--ew-ink);
+  font-size: 26px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- the credits: quiet, on the dark ground ---- */
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+  margin: 0 8px 8px 0;
+  padding: 3px 10px;
+  max-width: min(720px, calc(100vw - 32px));
+  background: rgba(18, 20, 24, 0.72);
+  border: 1px solid var(--ew-line);
+  border-radius: 6px;
+  color: var(--ew-faint);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--ew-dim);
+  text-decoration: none;
+}
+
+.maplibregl-ctrl-attrib a:hover {
+  color: var(--ew-ink);
+  text-decoration: underline;
+}
+
+/* the compact form (narrow screens): the info button, drawn for the dark ground */
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  border-radius: 12px;
+  min-height: 24px;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-button {
+  filter: invert(0.75);
+  background-color: transparent;
+}
+
+/* ---- narrow screens: the pair stacks, imagery on top ---- */
+@media (max-width: 760px) {
+  #map2 {
+    width: auto;
+    right: 0;
+    bottom: 50%;
+  }
+
+  body.pair #map {
+    left: 0;
+    top: 50%;
+  }
+
+  body.pair #map::before {
+    inset: 0 0 auto 0;
+    width: auto;
+    height: 1px;
+  }
+
+  .ew-panel {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+  }
+
+  body.pair .ew-panel {
+    left: 12px;
+    top: calc(50% + 12px);
+  }
+
+  body.pair .ew-lede,
+  body.pair .ew-note {
+    display: none;
+  }
+
+  .ew-s2card {
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+
+  .ew-s2card .ew-note {
+    display: none;
+  }
 }

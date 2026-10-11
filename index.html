@@ -4,8 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Earthwork</title>
+    <link rel="icon" href="data:," />
   </head>
   <body>
+    <div id="map2"></div>
     <div id="map"></div>
     <aside class="ew-panel">
       <h1>Earthwork</h1>
@@ -24,7 +26,19 @@
       </div>
       <p id="model-note" class="ew-note"></p>
       <div class="ew-ramp"><span>0</span><i></i><span>1</span></div>
+      <div class="ew-row ew-imagery">
+        <button id="pair">Pair with Sentinel-2</button>
+        <span class="ew-key">P</span>
+      </div>
+      <p class="ew-note">Hold <span class="ew-key">Space</span> to see Sentinel-2 in place.</p>
       <p id="status" class="ew-status"></p>
+    </aside>
+    <aside id="s2card" class="ew-s2card" hidden>
+      <div class="ew-s2-head"><span>Sentinel-2</span><b id="s2year"></b></div>
+      <p class="ew-note">
+        Scroll while holding, or <span class="ew-key">[</span> <span class="ew-key">]</span>, for
+        another year. <span class="ew-key">B</span> jumps between the first and the latest.
+      </p>
     </aside>
     <script type="module" src="/src/main.ts"></script>
   </body>
