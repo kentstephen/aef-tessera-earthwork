@@ -418,41 +418,39 @@ body {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* the Sentinel-2 card, as the notebook's: the year big beside its arrow, open or folded */
+/* the Sentinel-2 card: small, the search's width; the year first, so the pair always says which year */
 .at .at-yc.at-s2c {
-  padding: 11px 9px 11px 14px;
+  width: 168px;
+  padding: 8px 10px 8px 12px;
 }
 
 .at .ew-s2hd {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: center;
+  gap: 9px;
 }
 
-.ew-s2l b {
-  display: block;
-  font-size: 42px;
-  line-height: 0.88;
+.ew-s2hd b {
+  font-size: 30px;
+  line-height: 1;
   font-weight: 600;
-  letter-spacing: -0.035em;
-  font-stretch: 88%;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 
-.at-s2c:not(.ew-showing) .ew-s2l b {
+.at-s2c:not(.ew-showing) .ew-s2hd b {
   color: var(--muted);
 }
 
-.ew-s2l span {
-  display: block;
-  margin-top: 6px;
-  font-size: 12px;
+.ew-s2hd span {
+  font-size: 11px;
+  line-height: 1.25;
   color: var(--muted);
 }
 
 .at-s2c .ew-keys {
-  margin: 9px 0 0;
-  font-size: 12px;
-  line-height: 1.6;
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: nowrap;
 }

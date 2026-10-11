@@ -639,13 +639,12 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   function renderYear() {
     // the imagery's card: its year, while the imagery shows (held, or the pair's left)
     const showImg = st.holding || (st.pair && st.left === "s2");
-    // as the notebook's: the year big beside the arrow, what it is under it; folding hides only the keys
-    s2c.innerHTML = `<div class="ew-s2hd"><div class="ew-s2l"><b>${st.imgYear}</b><span>Sentinel-2, true color</span></div>${cbOf(s2Folded)}</div>`
+    // a small card, the search's width: the year (what the imagery shows), what it is, its keys
+    s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>true color</span></div>`
       + `<div class="ew-keys">${showImg
-        ? `<kbd>[</kbd><kbd>]</kbd> year, <kbd>B</kbd> ${S2Y[0]} or ${S2Y[S2Y.length - 1]}${st.holding ? ", or scroll" : ""}`
-        : `Hold <kbd>Space</kbd> to see it, or <kbd>P</kbd> beside the map`}</div>`;
-    s2c.className = "at-yc at-s2c at-glass" + (s2Folded ? " ew-folded" : "") + (showImg ? " ew-showing" : "");
-    s2c.querySelector(".ew-s2hd").onclick = (e) => { e.stopPropagation(); s2Folded = !s2Folded; keep("s2card", s2Folded); renderYear(); };
+        ? `<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
+        : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}</div>`;
+    s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
     // the readout: the view's numbers and the clicked spot
     const pc = cardData && cardData.kind === "spot" ? cardData : null;
     let h = map && map.getZoom() < EWZ ? `<p class="ew-r1">Zoom in to ${EWZ} for earthwork</p>` : viewSection();
