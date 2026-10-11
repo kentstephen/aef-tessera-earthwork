@@ -165,8 +165,8 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   // words under them; M switches them
   const MODELS = cfg.ew_models || ["current"];
   const MODEL_INFO = {
-    current: ["Current", "Taught on US lidar only. Stronger in the US."],
-    abroad: ["Global", "Taught on the US lidar and on truth from outside the US. Stronger outside it."],
+    current: ["US only", "Taught on US lidar only. Stronger in the US."],
+    abroad: ["US + abroad", "Taught with truth from outside the US too. Stronger outside it."],
   };
   st.model = cfg.model || "current";
   const rModel = rowOf("Model");
@@ -349,7 +349,7 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
     <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth taught where 3DEP lidar flew the same ground twice. Pair (P) with Sentinel-2 to see what it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the earthwork; scroll while holding to step through the years.</p>
-    <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; P pairs the map with Sentinel-2; M swaps the model (Current, Global); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; P pairs the map with Sentinel-2; M swaps the model (US only, US + abroad); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
