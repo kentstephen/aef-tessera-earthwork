@@ -639,8 +639,8 @@ export function render({model, el, earthwork, s2Items, credits, analytics}) {
   function renderYear() {
     // the imagery's card: its year, while the imagery shows (held, or the pair's left)
     const showImg = st.holding || (st.pair && st.left === "s2");
-    s2c.innerHTML = `<div class="at-hd ew-s2hd"><span class="t">Sentinel-2</span><b class="ew-s2y">${st.imgYear}</b>${cbOf(s2Folded)}</div>`
-      + `<div class="ew-s2big"><b>${st.imgYear}</b><span>True color</span></div>`
+    // as the notebook's: the year big beside the arrow, what it is under it; folding hides only the keys
+    s2c.innerHTML = `<div class="ew-s2hd"><div class="ew-s2l"><b>${st.imgYear}</b><span>Sentinel-2, true color</span></div>${cbOf(s2Folded)}</div>`
       + `<div class="ew-keys">${showImg
         ? `<kbd>[</kbd><kbd>]</kbd> year, <kbd>B</kbd> ${S2Y[0]} or ${S2Y[S2Y.length - 1]}${st.holding ? ", or scroll" : ""}`
         : `Hold <kbd>Space</kbd> to see it, or <kbd>P</kbd> beside the map`}</div>`;

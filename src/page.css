@@ -305,23 +305,6 @@ body {
   margin: 0;
 }
 
-.ew-s2hd .t {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.ew-s2y {
-  margin-left: auto;
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.at-s2c:not(.ew-showing) .ew-s2y {
-  color: var(--muted);
-  font-weight: 500;
-}
-
 .at-s2c .ew-keys {
   margin: 4px 0 2px;
 }
@@ -435,44 +418,41 @@ body {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* the Sentinel-2 card open: squarish, the year big; folded: its head, the year in it */
+/* the Sentinel-2 card, as the notebook's: the year big beside its arrow, open or folded */
 .at .at-yc.at-s2c {
-  padding: 9px 9px 11px 12px;
+  padding: 11px 9px 11px 14px;
 }
 
-.at-s2c:not(.ew-folded) .ew-s2y {
-  display: none;
-}
-
-.ew-s2big {
+.at .ew-s2hd {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 6px 0 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.ew-s2big b {
-  font-size: 44px;
-  line-height: 0.9;
+.ew-s2l b {
+  display: block;
+  font-size: 42px;
+  line-height: 0.88;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
+  font-stretch: 88%;
   font-variant-numeric: tabular-nums;
 }
 
-.at-s2c:not(.ew-showing) .ew-s2big b {
+.at-s2c:not(.ew-showing) .ew-s2l b {
   color: var(--muted);
 }
 
-.ew-s2big span {
+.ew-s2l span {
+  display: block;
+  margin-top: 6px;
   font-size: 12px;
   color: var(--muted);
 }
 
-.at-s2c.ew-folded .ew-s2big {
-  display: none;
-}
-
 .at-s2c .ew-keys {
+  margin: 9px 0 0;
   font-size: 12px;
   line-height: 1.6;
 }
