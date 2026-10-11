@@ -434,3 +434,45 @@ body {
 .at .at-search:focus-within {
   border-color: rgba(255, 255, 255, 0.3);
 }
+
+/* the Sentinel-2 card open: squarish, the year big; folded: its head, the year in it */
+.at .at-yc.at-s2c {
+  padding: 9px 9px 11px 12px;
+}
+
+.at-s2c:not(.ew-folded) .ew-s2y {
+  display: none;
+}
+
+.ew-s2big {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 6px 0 8px;
+}
+
+.ew-s2big b {
+  font-size: 44px;
+  line-height: 0.9;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.at-s2c:not(.ew-showing) .ew-s2big b {
+  color: var(--muted);
+}
+
+.ew-s2big span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.at-s2c.ew-folded .ew-s2big {
+  display: none;
+}
+
+.at-s2c .ew-keys {
+  font-size: 12px;
+  line-height: 1.6;
+}
