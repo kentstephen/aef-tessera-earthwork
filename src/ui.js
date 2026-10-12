@@ -11,10 +11,34 @@ import {COGLayer, MosaicLayer} from "@developmentseed/deck.gl-geotiff";
 import {CreateTexture} from "@developmentseed/deck.gl-raster/gpu-modules";
 import {DecoderPool, GeoTIFF, PerOriginSemaphore} from "@developmentseed/geotiff";
 import GeoTiffWorker from "@developmentseed/geotiff/pool/worker?worker";
+import {SourceHttp} from "@chunkd/source-http";
 import {latLngToCell, getResolution, cellToBoundary, cellToLatLng, isValidCell} from "h3-js";
 import {Protocol as PMProtocol} from "pmtiles";
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 maplibregl.addProtocol("pmtiles", new PMProtocol().tile);
+// every COG read (the Sentinel-2 headers and blocks) tries again when the bucket is busy: under a
+// false color's burst of reads (a file per band) data.source.coop answers some with 503, often
+// without CORS headers (so fetch only says "Failed to fetch"), and a tile that fails is not asked
+// for again. A busy answer waits 0.4, 0.8, 1.6 s (and a little more at random) inside its slot
+const S2_BUSY = new Set([429, 500, 502, 503, 504]);
+const s2Wait = (ms, signal) => new Promise((ok, no) => {
+  if (signal && signal.aborted) return no(signal.reason);
+  const t = setTimeout(ok, ms);
+  if (signal) signal.addEventListener("abort", () => { clearTimeout(t); no(signal.reason); }, {once: true});
+});
+SourceHttp.fetch = async (url, init) => {
+  const signal = init && init.signal;
+  for (let i = 0; ; i++) {
+    const last = i === 3, pause = () => s2Wait(400 * 2 ** i + Math.random() * 300, signal);
+    try {
+      const res = await fetch(url, init);
+      if (last || !S2_BUSY.has(res.status)) return res;
+    } catch (e) {
+      if (last || (signal && signal.aborted) || (e && e.name === "AbortError")) throw e;
+    }
+    await pause();
+  }
+};
 
 // dark basemap, trying it; light was
 // https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
@@ -119,7 +143,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const crBtn = el_("button", "at-cr-b", "i");
   crBtn.title = "credits"; crBtn.setAttribute("aria-label", "credits");
   crBtn.onclick = (e) => { e.stopPropagation(); creditsEl.classList.toggle("folded"); };
-  pane.append(mapEl2, mapEl, bar, msg, creditsEl, crBtn);
+  // under zoom 12 there is no earthwork: a standing note at the bottom says so, in the status line's style
+  const zmsg = el_("div", "at-msg at-glass ew-zmsg", `Zoom in past z${EWZ} to see earthwork`);
+  pane.append(mapEl2, mapEl, bar, msg, zmsg, creditsEl, crBtn);
   root.appendChild(pane);
   el.appendChild(root);
 
@@ -137,7 +163,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const panelHd = el_("div", "at-hd", `<span class="t">Earthwork</span>`);
   const panelCb = el_("button", "at-cb", ICON.chev);
   const panelRamp = el_("i", "at-ramp ew-hramp");
-  panelRamp.title = "the chance the ground was dug, filled or graded: unlikely to likely";
+  panelRamp.title = "the chance the ground itself was dug, filled or graded: unlikely (dark) to likely (yellow)";
   const panelYears = el_("span", "ew-hy");
   panelHd.append(panelRamp, panelYears, panelCb);
   panel.appendChild(panelHd);
@@ -256,6 +282,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the title is what is drawn, open or folded
     panelHd.querySelector(".t").textContent = {earth: "Earthwork", kinds: "Kinds of change", much: "AEF Change"}[st.gmode] || "AEF Change";
     styleSoon();
+    // earthwork's ramp is in the head, open or folded: not again in a row of its own
+    rKey.style.display = st.gmode === "earth" ? "none" : "";
     if (out_) {
       keyEl.innerHTML = `<span class="why">Zoom in to ${EWZ} for earthwork. AlphaEarth is read at 10 m with no coarser levels, so a wider view would read too much.</span>`;
       return;
@@ -366,7 +394,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   welcome.innerHTML = `<div class="box at-glass">
     <h2>Earthwork</h2>
     <p>This map shows where the ground was dug, filled or graded between two years, for every 10 m of land. A model reads it from AlphaEarth, Google DeepMind's yearly picture of the land, taught where USGS lidar measured the same ground twice. Yellow is likely, dark is not.</p>
-    <p>This starts in Xiong'an, a new city being built south of Beijing, from 2022 to 2025.</p>
+    <p>This starts in Wildwood, Florida, where The Villages is grading new neighborhoods out of farmland, from 2022 to 2025.</p>
     <ul>
       <li><b>Click</b> a spot: where it is, its coordinates and H3 string to copy, and its score.</li>
       <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; <kbd>[</kbd> <kbd>]</kbd> step its year.</li>
@@ -606,12 +634,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const cbOf = (folded) => `<button class="at-cb" title="${folded ? "open the card" : "fold the card"}">${ICON.chev}</button>`;
   const imgYr = (cbH, help) => `<div class="yr img"><b>${st.imgYear}</b><span class="comp">${COMP_NAME[st.s2comp] || ""}</span>${cbH}<span class="comps">${COMPS.map(([k, l, t]) => `<button data-comp="${k}" class="${k === st.s2comp ? "on" : ""}" title="${esc(t)}">${l}</button>`).join("")}</span><span class="help">${help}</span></div>`;
   const divName = (v) => { if (!v) return null; if (typeof v !== "string") return v.primary || null; try { const o = JSON.parse(v); return o.primary || v; } catch (e) { return v; } };
+  // the map's zoom, in the Sentinel-2 card's head; kept current on every zoom without redrawing the card
+  const zoomTxt = () => map ? map.getZoom().toFixed(1) : "";
   function renderYear() {
     // the imagery's card: its year, while the imagery shows (held, or the pair's left)
     const showImg = st.holding || (st.pair && st.left === "s2");
     // a small card, the search's width: the year (what the imagery shows), what it is, its keys
     const stretching = st.s2comp !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === st.s2comp);
-    s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span></div>`
+    s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
       + `<div class="ew-keys">${showImg
         ? `<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
         : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
@@ -767,6 +797,15 @@ export function render({model, el, earthwork, s2Items, credits}) {
         }, () => { s2Asked.delete(k); });
       }
   }
+  // the other years mount once a tile of the year shown, in the colors shown, has settled with
+  // nothing pending (a new color's first reads wait on its headers and stretch: the last tile of
+  // the colors before settling with nothing pending came too soon, and the other years then took
+  // the reads from the year shown)
+  function s2WarmUp(key) {
+    const want = (st.s2comp === "tci" ? "" : st.s2comp + " ") + st.imgYear;
+    if (s2Warm || s2Stat.pending !== 0 || !(key === want || key === want + " fill")) return;
+    s2Warm = true; setTimeout(update, 250);
+  }
   async function s2TileData(image, {device, x, y, signal, pool}, key) {
     const sy = s2Stat.years[key] || (s2Stat.years[key] = {tiles: 0, pending: 0, last: 0});
     s2Stat.pending++; sy.pending++;
@@ -793,7 +832,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
       s2Stat.pending--; sy.pending--;
       s2Stat.last = sy.last = Date.now();
       // the year shown is in: mount the others
-      if (!s2Warm && s2Stat.pending === 0) { s2Warm = true; setTimeout(update, 250); }
+      s2WarmUp(key);
     }
   }
   // nodata (alpha 0) is dropped; at a footprint edge the filtered color is the edge pixel's
@@ -854,7 +893,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const k = `${url}|${im.width}|${bx}|${by}`;
     let p = s2Blocks.get(k);
     if (!p) {
-      p = im.fetchTile(bx, by, {boundless: false, pool}).then(({array}) => ({d: array.data || array.bands[0], w: array.width, h: array.height}), () => null);
+      p = im.fetchTile(bx, by, {boundless: false, pool}).then(({array}) => ({d: array.data || array.bands[0], w: array.width, h: array.height}), () => { if (s2Blocks.get(k) === p) s2Blocks.delete(k); return null; });
       s2Blocks.set(k, p);
       if (s2Blocks.size > 256) s2Blocks.delete(s2Blocks.keys().next().value);
     }
@@ -942,7 +981,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     } finally {
       s2Stat.pending--; sy.pending--;
       s2Stat.last = sy.last = Date.now();
-      if (!s2Warm && s2Stat.pending === 0) { s2Warm = true; setTimeout(update, 250); }
+      s2WarmUp(key);
     }
   }
   // as S2Look, then back from sqrt to reflectance and each band over its stretch (the
@@ -1185,6 +1224,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     return out;
   }
   function update() {
+    const zout = !!map && map.getZoom() < EWZ && !st.holding;
+    zmsg.style.display = zout ? "block" : "none";
+    root.classList.toggle("ew-zout", zout);
     if (ov) ov.setProps({layers: layers()});
     if (ov2) ov2.setProps({layers: layers2()});
   }
@@ -1523,7 +1565,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // a zoom in crossing 8.3 (the kernel's _AHEAD_ZOOM) tells the kernel
     // at once, so it starts reading before the hexagons' zoom
     let aheadSent = false;
-    map.on("zoom", () => { styleSoon(); const z = map.getZoom(); if (z < 8.3) aheadSent = false; else if (!aheadSent && z < HEXZ) { aheadSent = true; sendView(); } });
+    map.on("zoom", () => { if ((map.getZoom() < EWZ && !st.holding) !== root.classList.contains("ew-zout")) update(); const ze = s2c.querySelector(".ew-z"); if (ze) ze.textContent = zoomTxt(); styleSoon(); const z = map.getZoom(); if (z < 8.3) aheadSent = false; else if (!aheadSent && z < HEXZ) { aheadSent = true; sendView(); } });
     map.on("mousemove", (e) => {
       if (holdT) return;
       // over the imagery: the white outline follows the pointer, no tooltip
@@ -1537,10 +1579,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
       const i = hexAt(e.lngLat);
       pickCell(i >= 0 ? hexes[i] : null, e.lngLat, e.point, st.holding);
     });
-    map.on("error", (ev) => { if (ev && ev.error && ev.error.message && !/tile|404/i.test(ev.error.message)) say("map: " + ev.error.message); });
+    // a tile's error is passing: a zoom cancels the reads it no longer needs (PMTiles names a cancel
+    // "Failed to fetch"), and a tile that failed is asked for again when it is next in view
+    map.on("error", (ev) => { if (ev && ev.error && ev.error.message && !ev.tile && !/tile|404/i.test(ev.error.message)) say("map: " + ev.error.message); else if (ev && ev.error) console.warn("map", ev.sourceId || "", ev.error.message); });
     new ResizeObserver(() => { try { map.resize(); } catch (e) {} fitCard(); }).observe(mapEl);
     window.__cmMaps = () => [map];
-    window.__cmState = () => ({st: Object.assign({}, st), hex: N, res, hmeta, tiles: tstat, card: cardData, status: model.get("status"),
+    window.__cmState = () => ({st: Object.assign({}, st), hex: N, res, hmeta, tiles: tstat, s2: s2Stat, s2stretch: cfg.s2_stretch, card: cardData, status: model.get("status"),
       lc: hattrs ? Array.from({length: N}, (_, i) => hattrs[HB * i + 7]).reduce((c, v) => (c[v]++, c), [0, 0, 0, 0]) : null});
     window.__cmTiles = () => ({log: tlog, frames: flog});
     // for tests: the center of the first hexagon whose biggest step is year y and that moved a fair amount

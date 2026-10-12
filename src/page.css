@@ -463,3 +463,23 @@ body {
   color: inherit;
   text-decoration: none;
 }
+
+/* the map's zoom, in the gap at the right of the Sentinel-2 card's head, two lines as the words beside it */
+.ew-s2hd span {
+  white-space: nowrap;
+}
+
+.ew-s2hd .ew-zw {
+  margin-left: auto;
+  text-align: right;
+}
+
+.ew-s2hd .ew-z {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the zoom note stands at the bottom; a status shown with it sits above it */
+.at.ew-zout .at-msg:not(.ew-zmsg) {
+  bottom: 78px;
+}

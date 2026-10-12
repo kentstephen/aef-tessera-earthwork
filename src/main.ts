@@ -52,13 +52,13 @@ const [earthwork, divPm] = await Promise.all([
 ]);
 
 const cfg = {
-  // Xiong'an New Area, Hebei: the starting area, a new city graded out of farmland
-  home: { longitude: 115.954, latitude: 39.018, zoom: 12 },
+  // Wildwood, Florida: the starting area, where The Villages grades new neighborhoods out of farmland
+  home: { longitude: -81.989804, latitude: 28.751057, zoom: 12.7 },
   fit: true,
   ew_zoom: 12,
   ew_models: ["current", "abroad"],
-  // US + abroad: the model with truth from outside the US, for a start outside it
-  model: "abroad",
+  // US only: the model taught on US lidar alone, for a start inside the US
+  model: "current",
   aef_from: 2022,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
