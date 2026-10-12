@@ -414,7 +414,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // layer's own props, the brightness the imagery shader's
   const send = (act) => {
     if (act === "s2comp") s2TakeStretch();
-    if (act === "aef" || act === "model") { if (cardData && cardData.kind === "spot") rescoreSpot(); styleKey(); renderYear(); }
+    if (act === "aef" || act === "model") { if (cardData && cardData.kind === "spot") { rescoreSpot(); if (cardData.score == null) readSpot(); } styleKey(); renderYear(); }
     update();
   };
 
@@ -595,8 +595,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
       const lat_lon = `${c.plat.toFixed(6)}, ${c.plon.toFixed(6)}`;
       h += `<div class="coords"><code title="H3 string, res 13">${esc(c.cell)}</code><button data-copy="${esc(c.cell)}">copy</button>`;
       h += `<code title="lat, long of the pixel's center">${lat_lon}</code><button data-copy="${lat_lon}">copy</button></div><h4>Earthwork</h4>`;
-      h += c.score == null
-        ? `<p>No score here: ${map && map.getZoom() < EWZ ? `zoom in to ${EWZ} so AlphaEarth is read here` : "AlphaEarth has no data here in one of the years, or it is still loading"}.</p>`
+      h += c.score == null && c.reading
+        ? `<p>Reading AlphaEarth here\u2026</p>`
+        : c.score == null
+        ? `<p>No score here: ${map && map.getZoom() < EWZ ? `zoom in to ${EWZ} so AlphaEarth is read here` : "AlphaEarth has no data here in one of the years"}.</p>`
         : `<p><b>${Math.round(100 * c.score)}%</b>: the chance the ground itself was dug, filled or graded from ${c.y0} to ${c.y1}, at this 10 m pixel.</p>`;
       h += `<p class="sub">Pair with Sentinel-2 (<kbd>P</kbd>) or hold space to see what it is.</p>`;
       return h + `</div>`;
@@ -725,6 +727,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
     cardData = {kind: "spot", n: ++seq, lon: ll.lng, lat: ll.lat, plon, plat, cell: latLngToCell(plat, plon, 13), place: placeAt(pt)};
     rescoreSpot();
     renderCard();
+    if (cardData.score == null) readSpot();
+  }
+  // the clicked pixel's chunk, read again when it was let go: the card says so meanwhile
+  function readSpot() {
+    const c = cardData;
+    if (!c || c.kind !== "spot" || !map || map.getZoom() < EWZ) return;
+    c.reading = true; renderYear();
+    earthwork.readAt(c.plon, c.plat, st.y0, st.y1).then(() => {
+      if (cardData !== c) return;
+      c.reading = false; rescoreSpot(); renderYear();
+    });
   }
 
   // ---- the layers --------------------------------------------------------------
@@ -1361,7 +1374,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!under || !mapEl.contains(under)) { tip.style.display = "none"; return; }
     const ll = map.unproject([pt.x - r.left, pt.y - r.top]);
     const v = earthwork.scoreAt(ll.lng, ll.lat, st.y0, st.y1, st.model);
-    if (v == null) { tip.style.display = "none"; return; }
+    if (v == null) {
+      tip.style.display = "none";
+      earthwork.readAt(ll.lng, ll.lat, st.y0, st.y1).then(() => { if (lastPt && lastPt.x === pt.x && lastPt.y === pt.y && earthwork.scoreAt(ll.lng, ll.lat, st.y0, st.y1, st.model) != null) showHexTip(pt); });
+      return;
+    }
     const p = pane.getBoundingClientRect();
     tip.innerHTML = `<b>${Math.round(100 * v)}%</b> earthwork, ${st.y0} to ${st.y1}`;
     tip.style.display = "block";
@@ -1587,6 +1604,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     window.__cmState = () => ({st: Object.assign({}, st), hex: N, res, hmeta, tiles: tstat, s2: s2Stat, s2stretch: cfg.s2_stretch, card: cardData, status: model.get("status"),
       lc: hattrs ? Array.from({length: N}, (_, i) => hattrs[HB * i + 7]).reduce((c, v) => (c[v]++, c), [0, 0, 0, 0]) : null});
     window.__cmTiles = () => ({log: tlog, frames: flog});
+    window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1); return {inHand: r.chunks.length, wanted: r.wanted, read: earthwork.tilesRead()}; };
     // for tests: the center of the first hexagon whose biggest step is year y and that moved a fair amount
     window.__cmHexAt = (y) => { const b = map.getBounds(); for (let i = 0; i < N; i++) if (hattrs && hattrs[HB * i] === y - 2000 && hattrs[HB * i + 1] >= FAIR) { const r = cellToBoundary(hexes[i], true); const c = r.slice(0, -1).reduce((a, p) => [a[0] + p[0] / (r.length - 1), a[1] + p[1] / (r.length - 1)], [0, 0]); if (b.contains(c) && map.project(c).x < mapEl.clientWidth - 420 && map.project(c).y > 200) return c; } return null; };
   }

@@ -7,7 +7,7 @@ import {
 import colormapsUrl from "@developmentseed/deck.gl-raster/gpu-modules/colormaps.png?url";
 import { ZarrLayer } from "@developmentseed/deck.gl-zarr";
 import type { Device, Texture } from "@luma.gl/core";
-import type * as zarr from "zarrita";
+import * as zarr from "zarrita";
 
 import { type AefArray, makeGetTileData, openMosaic, type PairTileData, YEAR_ORIGIN } from "./aef";
 import { EarthworkAlpha, EarthworkScore } from "./earthwork-score";
@@ -59,10 +59,19 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
       });
   }
 
-  // the raw chunks by "first-last:row-col", newest last
-  const chunks = new Map<string, { first: Int8Array; last: Int8Array; w: number; h: number }>();
+  // the raw chunks by "first-last:row-col", the last used last. A view holds more chunks than are
+  // kept (about 70 at zoom 12.7 in a laptop window, hundreds full screen or paired; each is 8 MB),
+  // so a point whose chunk was let go reads it again (readAt)
+  type Chunk = { first: Int8Array; last: Int8Array; w: number; h: number };
+  const chunks = new Map<string, Chunk>();
   const KEEP = 48;
   const keyOf = (first: number, last: number, r: number, c: number) => `${first}-${last}:${r}-${c}`;
+  const keepChunk = (k: string, ch: Chunk) => {
+    chunks.delete(k);
+    chunks.set(k, ch);
+    while (chunks.size > KEEP) chunks.delete(chunks.keys().next().value as string);
+  };
+  const reading = new Map<string, Promise<void>>();
 
   let tilesRead = 0;
 
@@ -82,10 +91,7 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
         const d = await read(a, o);
         const ys = o.sliceSpec[2] as zarr.Slice, xs = o.sliceSpec[3] as zarr.Slice;
         const r = Math.floor((ys.start ?? 0) / CHUNK), c = Math.floor((xs.start ?? 0) / CHUNK);
-        const k = keyOf(first, last, r, c);
-        chunks.delete(k);
-        chunks.set(k, { first: d.first, last: d.last, w: d.width, h: d.height });
-        while (chunks.size > KEEP) chunks.delete(chunks.keys().next().value as string);
+        keepChunk(keyOf(first, last, r, c), { first: d.first, last: d.last, w: d.width, h: d.height });
         tilesRead++;
         return d;
       },
@@ -128,9 +134,10 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
   function scoreAt(lon: number, lat: number, first: number, last: number, model: string): number | null {
     const px = Math.floor((lon - X0) / RES), py = Math.floor((Y0 - lat) / RES);
     const r = Math.floor(py / CHUNK), c = Math.floor(px / CHUNK);
-    const ch = chunks.get(keyOf(first, last, r, c));
+    const k = keyOf(first, last, r, c), ch = chunks.get(k);
     const m = models[model];
     if (!ch || !m) return null;
+    keepChunk(k, ch);
     const ix = px - c * CHUNK, iy = py - r * CHUNK;
     if (ix < 0 || iy < 0 || ix >= ch.w || iy >= ch.h) return null;
     const plane = ch.w * ch.h, at = iy * ch.w + ix;
@@ -156,6 +163,28 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
     return gate / (1 + Math.exp(-z));
   }
 
+  /**
+   * Read the chunk under a point for this window if it is not in hand (a view holds more chunks
+   * than are kept); resolves once scoreAt can answer there, or with nothing where it cannot.
+   */
+  function readAt(lon: number, lat: number, first: number, last: number): Promise<void> {
+    const px = Math.floor((lon - X0) / RES), py = Math.floor((Y0 - lat) / RES);
+    const r = Math.floor(py / CHUNK), c = Math.floor(px / CHUNK), k = keyOf(first, last, r, c);
+    if (chunks.has(k)) return Promise.resolve();
+    let p = reading.get(k);
+    if (!p) {
+      const [, , H, W] = arr.shape;
+      if (px < 0 || py < 0 || px >= W || py >= H) return Promise.resolve();
+      const ys = zarr.slice(r * CHUNK, Math.min((r + 1) * CHUNK, H)), xs = zarr.slice(c * CHUNK, Math.min((c + 1) * CHUNK, W));
+      p = Promise.all([first, last].map((y) => zarr.get(arr as AefArray, [y - YEAR_ORIGIN, null, ys, xs])))
+        .then(([f, l]) => keepChunk(k, { first: f.data as Int8Array, last: l.data as Int8Array, w: f.shape[2], h: f.shape[1] }))
+        .catch(() => {})
+        .finally(() => reading.delete(k));
+      reading.set(k, p);
+    }
+    return p;
+  }
+
   /** The chunks in hand for this window that lie under a box, with their raw bytes. */
   function chunksIn(bbox: [number, number, number, number], first: number, last: number) {
     const [W, S, E, N] = bbox;
@@ -173,6 +202,7 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
   return {
     layer,
     scoreAt,
+    readAt,
     chunksIn,
     models,
     tilesRead: () => tilesRead,
