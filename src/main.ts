@@ -59,7 +59,7 @@ const cfg = {
   ew_models: ["current", "abroad"],
   // US only: the model taught on US lidar alone, for a start inside the US
   model: "current",
-  aef_from: 2022,
+  aef_from: 2023,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
   s2_years: [2022, 2023, 2024, 2025],

@@ -394,7 +394,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   welcome.innerHTML = `<div class="box at-glass">
     <h2>Earthwork</h2>
     <p>This map shows where the ground was dug, filled or graded between two years, for every 10 m of land. A model reads it from AlphaEarth, Google DeepMind's yearly picture of the land, taught where USGS lidar measured the same ground twice. Yellow is likely, dark is not.</p>
-    <p>This starts in Wildwood, Florida, where The Villages is grading new neighborhoods out of farmland, from 2022 to 2025.</p>
+    <p>This starts in Wildwood, Florida, where The Villages is grading new neighborhoods out of farmland, from 2023 to 2025.</p>
     <ul>
       <li><b>Click</b> a spot: where it is, its coordinates and H3 string to copy, and its score.</li>
       <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; <kbd>[</kbd> <kbd>]</kbd> step its year.</li>
