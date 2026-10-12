@@ -397,7 +397,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p>This starts in Wildwood, Florida, where The Villages is grading new neighborhoods out of farmland, from 2023 to 2025.</p>
     <ul>
       <li><b>Click</b> a spot: where it is, its coordinates and H3 string to copy, and its score.</li>
-      <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; <kbd>[</kbd> <kbd>]</kbd> step its year.</li>
+      <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; while holding, <b>scroll</b> (or <kbd>[</kbd> <kbd>]</kbd>) to step its year, ${S2Y[0]} to ${S2Y[S2Y.length - 1]}.</li>
       <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
       <li><b>AEF Years</b> in the Earthwork card are the years compared; <kbd>M</kbd> swaps the model.</li>
       <li>Earthwork shows from zoom ${EWZ} in. <kbd>/</kbd> searches a place.</li>
@@ -645,7 +645,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const stretching = st.s2comp !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === st.s2comp);
     s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
       + `<div class="ew-keys">${showImg
-        ? `<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
+        ? `${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
         : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
     s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
     // the readout: the clicked hexagon's account, nothing until a click
