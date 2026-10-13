@@ -5,7 +5,7 @@ digging sites, then unchanged ground lit up by kind) for rules that need no mode
 line in RULES and a run takes about a minute. Each digging and quiet site's scores came from models taught
 without it, the test-only places' from models taught on every teaching site.
 
-Run: uv run python quick.py [catch ...]   (default 0.6)
+Run: uv run python quick.py [catch ...]   (default 0.6; SCORES_DIR=data/scores-abroad for abroad_teach.py's)
 """
 
 import os
@@ -15,6 +15,8 @@ import numpy as np
 from sklearn.metrics import average_precision_score
 
 from aggregate import SCORES, cutoff
+
+SCORES = os.environ.get("SCORES_DIR", SCORES)
 
 DESERT = ("place-sahara-dz", "place-riyadh-edge-sa", "place-cairo-desert-eg")
 

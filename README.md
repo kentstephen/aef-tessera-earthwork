@@ -25,8 +25,11 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   same share of moved ground at the held-out digging sites, then unchanged ground lit up is counted on
   ground never taught: crop switches, farm and marsh lidar, a storm coast, the islands and places abroad.
   `quick.py` tries rules that need no model taught, from the scores `aggregate.py` saves.
+- `abroad_teach.py` teaches the three models with the islands' lidar and the satellite-laser labels too
+  (fields stay test only) and saves held-out scores for `quick.py` (`SCORES_DIR=data/scores-abroad`).
 - `desert.py` asks what TESSERA's change on unchanged ground follows (clear looks, radar, years, AEF).
-- `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, and both.
+- `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
+  aggregate (the joint model muted where neither embedding changed).
 
 It reads the Earthwork site cache (`aef-earthwork/data/earthwork`, set `EARTHWORK_DATA` if it lives
 elsewhere).

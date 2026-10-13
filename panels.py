@@ -1,14 +1,15 @@
 """Site panels: the lidar's truth, the Earthwork model in AlphaEarth, in TESSERA, and where they agree.
 
-For each site, five maps on AlphaEarth's 10 m grid over a dark ground:
+For each site, six maps on AlphaEarth's 10 m grid over a dark ground:
   lidar      moved more than 0.5 m (light) and unchanged (gray), from the two 3DEP flights
   AlphaEarth the Earthwork model's score with the map's change gate, the full cividis ramp
   TESSERA    the same model taught on TESSERA, the full viridis ramp
   agreement  who calls it moved: AlphaEarth only (blue), both (yellow), TESSERA only (green), set by the
              difference of the two scores; opacity is the stronger of the two, so ground neither calls
              moved fades out instead of reading as agreement. Agreement is the lightest stop on purpose.
-  agree      the agreement score itself, the lower of the two (what the false alarm numbers measure),
-             dark to the agreement panel's "both" yellow
+  agree      the agreement score itself, the lower of the two, dark to the agreement panel's "both" yellow
+  aggregate  the model taught on both embeddings at once, times a gate that opens where either embedding
+             changed (aggregate.py's both_either), on the same ramp
 A digging site is scored by models taught on the other sites; test-only ground (farms, marshes, the storm
 coast, the islands and the other places abroad) by models taught on every digging and quiet site. A place with
 no truth drops the lidar map.
@@ -35,16 +36,21 @@ GROUND = "#0E0E10"
 INK, MUTED = "#E8E8EA", "#9A9AA2"
 AGREE = LinearSegmentedColormap.from_list("agree", ["#5B8BD6", "#FDE725", "#35B779"])
 BOTH = LinearSegmentedColormap.from_list("both", ["#1C1C22", "#FDE725"])
+TES_GATE = (0.115, 0.267)  # TESSERA's gate, calibrated in aggregate.py on every teaching site
 SHOW = ["katy-tx", "huntsville-al", "las-vegas-se-nv", "mountain-pass-ca", "hamilton-farm-in", "fresno-farm-ca", "brazoria-tx"]
 
 
 def score_all(models, d, chunk=150000):
     ok = np.flatnonzero(d["ok"])
-    out = {w: np.full(len(d["ok"]), np.nan, np.float32) for w in ("aef", "tes")}
+    out = {w: np.full(len(d["ok"]), np.nan, np.float32) for w in ("aef", "tes", "agg")}
+    lo, hi = TES_GATE
     for i in range(0, len(ok), chunk):
         sl = ok[i:i + chunk]
         out["aef"][sl] = gate(models["aef"].predict_proba(feats(d, sl, "aef"))[:, 1], d["aplain"][sl])
         out["tes"][sl] = models["tes"].predict_proba(feats(d, sl, "tes"))[:, 1]
+        # the aggregate: the joint model, muted where neither embedding changed
+        either = np.maximum(np.clip((d["aplain"][sl] - 0.05) / 0.10, 0, 1), np.clip((d["tplain"][sl] - lo) / (hi - lo), 0, 1))
+        out["agg"][sl] = models["both"].predict_proba(feats(d, sl, "both"))[:, 1] * either
     return out
 
 
@@ -58,13 +64,13 @@ def panel(name, D, models):
     d = D[name]
     shape = json.loads(str(np.load(f"{OUT}/{name}.npz", allow_pickle=True)["meta"]))["shape"]
     s = score_all(models, d)
-    A, T = (s[w].reshape(shape) for w in ("aef", "tes"))
+    A, T, G = (s[w].reshape(shape) for w in ("aef", "tes", "agg"))
     y = d["y"].reshape(shape)
     strength = np.fmax(A, T)
     diff = (T - A + 1) / 2  # 0 AlphaEarth only, .5 both, 1 TESSERA only
 
     truthless = d["kind"] == "notruth"
-    fig, ax = plt.subplots(1, 4 if truthless else 5, figsize=(20 if truthless else 25, 5.6), facecolor=GROUND)
+    fig, ax = plt.subplots(1, 5 if truthless else 6, figsize=(25 if truthless else 30, 5.6), facecolor=GROUND)
     truth = np.zeros((*shape, 4))
     truth[y == 0] = (0.32, 0.32, 0.35, 1)
     truth[y == 1] = (0.95, 0.95, 0.92, 1)
@@ -74,6 +80,7 @@ def panel(name, D, models):
         ("TESSERA model, viridis", rgba(plt.get_cmap("viridis"), T, 1.0)),
         ("AlphaEarth only · both · TESSERA only", rgba(AGREE, diff, np.clip((strength - 0.2) / 0.5, 0, 1))),
         ("agree: the lower of the two scores", rgba(BOTH, np.fmin(A, T), 1.0)),
+        ("aggregate: joint model, muted where neither changed", rgba(BOTH, G, 1.0)),
     ][truthless:]
     for a, (title, img) in zip(ax, layers):
         a.set_facecolor(GROUND)
@@ -93,7 +100,7 @@ def panel(name, D, models):
         note += f" · unchanged ground scored > .5: AlphaEarth {fa['aef_gated']:.1%}, TESSERA {fa['tes']:.1%}, agree {fa['agree']:.1%}"
     fig.text(0.01, 0.02, note, color=MUTED, fontsize=10)
     # the agreement key: the ramp, and what fades
-    k = fig.add_axes([0.52, 0.075, 0.2, 0.025] if truthless else [0.61, 0.075, 0.17, 0.025])
+    k = fig.add_axes([0.42, 0.075, 0.16, 0.025] if truthless else [0.51, 0.075, 0.14, 0.025])
     k.imshow(np.linspace(0, 1, 256)[None], cmap=AGREE, aspect="auto")
     k.set_xticks([0, 127.5, 255], ["AlphaEarth only", "both", "TESSERA only"], color=MUTED, fontsize=9)
     k.set_yticks([])
@@ -111,7 +118,7 @@ def main():
     names = sys.argv[1:] or SHOW
     D = {n: load(n) for n in set(names) | set(teaching_names())}
     for n in names:
-        print(panel(n, D, fit_models(D, held_out=n)))
+        print(panel(n, D, fit_models(D, held_out=n, which=("aef", "tes", "both"))))
 
 
 if __name__ == "__main__":
