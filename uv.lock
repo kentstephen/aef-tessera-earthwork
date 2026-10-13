@@ -475,7 +475,7 @@ wheels = [
 ]
 
 [[package]]
-name = "earthwork-continued"
+name = "aef-tessera-groundwork"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

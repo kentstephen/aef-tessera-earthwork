@@ -1,4 +1,4 @@
-# earthwork-continued
+# aef-tessera-groundwork
 
 [Earthwork](https://github.com/kentstephen/aef-earthwork) maps where the ground itself was dug, filled or
 graded between two years, from AlphaEarth Foundations (AEF) annual embeddings, with a model taught where
