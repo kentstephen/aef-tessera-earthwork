@@ -1,0 +1,8 @@
+.claude/memory/
+.env
+.venv/
+__pycache__/
+data/
+*.pyc
+.DS_Store
+*.log
