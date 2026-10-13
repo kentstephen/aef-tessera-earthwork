@@ -15,7 +15,8 @@ sites in FOLDS folds. Test-only ground is scored by models taught on everything.
 data/scores-abroad/ in aggregate.py's layout; compare the recipes with
   SCORES_DIR=data/scores-abroad uv run python quick.py
 
-Run: uv run python abroad_teach.py   (about half an hour)
+Run: uv run python abroad_teach.py   (about half an hour; ABROAD_SET=islands or space teaches one group,
+     W_SPACE weights the satellite labels, SCORES_DIR moves the scores)
 """
 
 import os
@@ -29,7 +30,7 @@ from compare import QUIET_KINDS, TEACH_KINDS, feats, labeled, load, sample
 from tessera_sites import OUT, SITES, abroad_sites, cdl_sets, place_names, space_names
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SCORES = os.path.join(HERE, "data", "scores-abroad")
+SCORES = os.environ.get("SCORES_DIR", os.path.join(HERE, "data", "scores-abroad"))
 W_SPACE = float(os.environ.get("W_SPACE", "5"))
 FOLDS = 4
 
@@ -52,8 +53,9 @@ def main():
     for n in us:
         if n not in teach + quiet:
             D.pop(n)
-    islands = [n for n in abroad_sites() if n.startswith(("pr-", "vi-")) and have(n)]
-    space = [n for n in space_names() if have(n)]
+    use = os.environ.get("ABROAD_SET", "islands,space").split(",")
+    islands = [n for n in abroad_sites() if n.startswith(("pr-", "vi-")) and have(n)] if "islands" in use else []
+    space = [n for n in space_names() if have(n)] if "space" in use else []
 
     # the taught rows of every site, with each row's weight
     T, W = {}, {}
