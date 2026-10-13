@@ -1,14 +1,17 @@
 """Site panels: the lidar's truth, the Earthwork model in AlphaEarth, in TESSERA, and where they agree.
 
-For each site, four maps on AlphaEarth's 10 m grid over a dark ground:
+For each site, five maps on AlphaEarth's 10 m grid over a dark ground:
   lidar      moved more than 0.5 m (light) and unchanged (gray), from the two 3DEP flights
   AlphaEarth the Earthwork model's score with the map's change gate, the full cividis ramp
   TESSERA    the same model taught on TESSERA, the full viridis ramp
   agreement  who calls it moved: AlphaEarth only (blue), both (yellow), TESSERA only (green), set by the
              difference of the two scores; opacity is the stronger of the two, so ground neither calls
              moved fades out instead of reading as agreement. Agreement is the lightest stop on purpose.
+  agree      the agreement score itself, the lower of the two (what the false alarm numbers measure),
+             dark to the agreement panel's "both" yellow
 A digging site is scored by models taught on the other sites; test-only ground (farms, marshes, the storm
-coast) by models taught on every digging and quiet site.
+coast, the islands and the other places abroad) by models taught on every digging and quiet site. A place with
+no truth drops the lidar map.
 
 Run: uv run python panels.py [site ...]   (writes results/panels/<site>.png)
 """
@@ -31,6 +34,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 GROUND = "#0E0E10"
 INK, MUTED = "#E8E8EA", "#9A9AA2"
 AGREE = LinearSegmentedColormap.from_list("agree", ["#5B8BD6", "#FDE725", "#35B779"])
+BOTH = LinearSegmentedColormap.from_list("both", ["#1C1C22", "#FDE725"])
 SHOW = ["katy-tx", "huntsville-al", "las-vegas-se-nv", "mountain-pass-ca", "hamilton-farm-in", "fresno-farm-ca", "brazoria-tx"]
 
 
@@ -59,7 +63,8 @@ def panel(name, D, models):
     strength = np.fmax(A, T)
     diff = (T - A + 1) / 2  # 0 AlphaEarth only, .5 both, 1 TESSERA only
 
-    fig, ax = plt.subplots(1, 4, figsize=(20, 5.6), facecolor=GROUND)
+    truthless = d["kind"] == "notruth"
+    fig, ax = plt.subplots(1, 4 if truthless else 5, figsize=(20 if truthless else 25, 5.6), facecolor=GROUND)
     truth = np.zeros((*shape, 4))
     truth[y == 0] = (0.32, 0.32, 0.35, 1)
     truth[y == 1] = (0.95, 0.95, 0.92, 1)
@@ -68,7 +73,8 @@ def panel(name, D, models):
         ("AlphaEarth model (gated), cividis", rgba(plt.get_cmap("cividis"), A, 1.0)),
         ("TESSERA model, viridis", rgba(plt.get_cmap("viridis"), T, 1.0)),
         ("AlphaEarth only · both · TESSERA only", rgba(AGREE, diff, np.clip((strength - 0.2) / 0.5, 0, 1))),
-    ]
+        ("agree: the lower of the two scores", rgba(BOTH, np.fmin(A, T), 1.0)),
+    ][truthless:]
     for a, (title, img) in zip(ax, layers):
         a.set_facecolor(GROUND)
         a.imshow(img, interpolation="nearest")
@@ -87,7 +93,7 @@ def panel(name, D, models):
         note += f" · unchanged ground scored > .5: AlphaEarth {fa['aef_gated']:.1%}, TESSERA {fa['tes']:.1%}, agree {fa['agree']:.1%}"
     fig.text(0.01, 0.02, note, color=MUTED, fontsize=10)
     # the agreement key: the ramp, and what fades
-    k = fig.add_axes([0.765, 0.075, 0.2, 0.025])
+    k = fig.add_axes([0.52, 0.075, 0.2, 0.025] if truthless else [0.61, 0.075, 0.17, 0.025])
     k.imshow(np.linspace(0, 1, 256)[None], cmap=AGREE, aspect="auto")
     k.set_xticks([0, 127.5, 255], ["AlphaEarth only", "both", "TESSERA only"], color=MUTED, fontsize=9)
     k.set_yticks([])

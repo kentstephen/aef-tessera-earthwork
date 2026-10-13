@@ -27,13 +27,13 @@ from scipy.stats import spearmanr
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import average_precision_score, roc_auc_score
 
-from tessera_sites import EARTHWORK, OUT, SITES, cdl_sets
+from tessera_sites import ISLAND_DEEP_M, OUT, SITES, cdl_sets, site_path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEACH_KINDS = ("building", "mining")
 QUIET_KINDS = ("burn", "dunes")  # taught only as not digging, as in Earthwork
 MODELS = ("aef", "tes", "both")
-RNG = np.random.default_rng(0)
+RNG = np.random.default_rng(int(os.environ.get("SEED", "0")))
 
 
 def f32(v):
@@ -44,28 +44,47 @@ def unit(v):
     return v / np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-9)
 
 
+def kind_of(name, meta):
+    """The group a site reports under; abroad groups get their own names so Hong Kong's farm is not a US farm."""
+    for pre, k in (("pr-", "island"), ("vi-", "island"), ("reunion-", "tropic"), ("guadeloupe-", "tropic"),
+                   ("hk-", "hongkong"), ("shizuoka-", "shizuoka"), ("place-", "notruth")):
+        if name.startswith(pre):
+            return k
+    if name.startswith("space-"):  # ICESat-2 and GEDI pairs: digging sites both ways, the rest unchanged only
+        return "space_dig" if meta["kind"] in TEACH_KINDS else "space_quiet"
+    return meta["kind"]
+
+
 def load(name):
-    z = np.load(f"{EARTHWORK}/{name}.npz", allow_pickle=True)
+    z = np.load(site_path(name), allow_pickle=True)
     t = np.load(f"{OUT}/{name}.npz", allow_pickle=True)
     meta = json.loads(str(t["meta"]))
     X = z["X"]
     ab, aa = X[:, :64].astype(np.float32), X[:, 64:128].astype(np.float32)
     tb = t["b_q"].astype(np.float32) * t["b_scales"][:, None]
     ta = t["a_q"].astype(np.float32) * t["a_scales"][:, None]
-    ok = (np.linalg.norm(ab, axis=1) > 0.5) & (np.linalg.norm(aa, axis=1) > 0.5)
-    ok &= np.isfinite(t["b_scales"]) & np.isfinite(t["a_scales"]) & (t["b_scales"] > 0) & (t["a_scales"] > 0)
+    aok = (np.linalg.norm(ab, axis=1) > 0.5) & (np.linalg.norm(aa, axis=1) > 0.5)
+    ok = aok & np.isfinite(t["b_scales"]) & np.isfinite(t["a_scales"]) & (t["b_scales"] > 0) & (t["a_scales"] > 0)
     s1b = t["b_s1_asc_obs_count"].astype(int) + t["b_s1_desc_obs_count"]
     s1a = t["a_s1_asc_obs_count"].astype(int) + t["a_s1_desc_obs_count"]
     tb, ta = unit(np.nan_to_num(tb)), unit(np.nan_to_num(ta))
     # a crop switch is ground nobody dug: every pixel unchanged
     y = z["y"] if "y" in z.files else np.zeros(len(X), np.int8)
+    kind = kind_of(name, meta)
+    if kind == "island":  # shallower moves on the islands are mostly lidar ground under forest
+        y = np.where((y == 1) & (np.abs(z["dz"]) <= ISLAND_DEEP_M), -1, y).astype(np.int8)
+    if meta.get("quiet_only"):  # the first survey predates AlphaEarth: only unchanged ground counts
+        y = np.where(y == 1, -1, y).astype(np.int8)
     aplain, tplain = 1 - (ab * aa).sum(1), 1 - (tb * ta).sum(1)
     # held at half precision (as the Earthwork cache is): 54 places at full precision outgrow memory
     return {
-        "name": name, "kind": meta["kind"], "years": meta["aef"], "y": y, "ok": ok,
+        "name": name, "kind": kind, "years": meta["aef"], "y": y, "ok": ok, "aok": aok,
+        "patch": z["patch"] if "patch" in z.files else np.zeros(len(X), np.float32),
         "ab": ab.astype(np.float16), "aa": aa.astype(np.float16), "tb": tb.astype(np.float16), "ta": ta.astype(np.float16),
         "aplain": aplain, "tplain": tplain,
         "radar_flip": (s1b > 0) != (s1a > 0), "s1": (float(np.median(s1b)), float(np.median(s1a))),
+        "s1b": s1b.astype(np.int16), "s1a": s1a.astype(np.int16),
+        "s2b": t["b_s2_obs_count"].astype(np.int16), "s2a": t["a_s2_obs_count"].astype(np.int16),
     }
 
 
