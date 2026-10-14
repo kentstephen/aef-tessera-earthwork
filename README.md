@@ -39,6 +39,16 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   would download per square kilometer of each embedding.
 - `coarse.py` scores cells of about 320 m and 640 m: the highest 10 m score in the cell against models taught
   on pooled embeddings (AEF's overviews among them).
+- `fire_teach.py` knobs: `CUT_PX`, `CUT_W` and `CUT_FAR` teach less of the clearcuts, `BASE=us` teaches burns on the
+  US recipe, `LEVEL=1` or `2` teaches the farm lidar's leveled ground as digging; `teach_runs.py` puts the saved
+  runs side by side.
+- `forest_labels.py` (in Earthwork's environment) builds ICESat-2 and GEDI truth at more mines in forest and at
+  mines where TESSERA's radar came and went, and repeat 3DEP lidar over eastern Kentucky's surface coal;
+  `forest_mines.py` reads TESSERA under it, scores it and teaches with it.
+- `lookalikes.py` reads ground that moved with no one digging (landslides, river banks, new solar arrays, flooded
+  pits and valleys, flood silt) and splits the reservoirs by a per-year Sentinel-2 water mask.
+- `spans.py` scores the digging sites at wider pairs of years than their lidar window; `calib.py` tries cutoffs
+  set from each place's own scores.
 - `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
   aggregate (the joint model muted where neither embedding changed).
 
@@ -69,5 +79,7 @@ uv run python coarse.py          # about 40 minutes
 - **USGS 3D Elevation Program (3DEP)** 1 m DEMs (public domain), the labels, through the Earthwork cache.
 - **Global Forest Change** v1.12 (Hansen, Potapov et al., University of Maryland; CC BY 4.0): tree cover loss
   year, tree cover in 2000 and the water mask, to place and group the new ground.
+- **USPVDB** (US Large-Scale Solar Photovoltaic Database, USGS and LBNL; public domain) for the solar arrays;
+  **Sentinel-2 L2A** (Copernicus, through Element84's earth-search) for the water masks.
 - Abroad labels through the Earthwork cache: IGN France RGE ALTI and LiDAR HD (Licence Ouverte / Etalab 2.0),
   Hong Kong CEDD lidar, VIRTUAL SHIZUOKA (CC BY 4.0), NASA ICESat-2 and GEDI.

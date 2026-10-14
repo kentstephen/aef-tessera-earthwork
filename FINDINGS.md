@@ -223,16 +223,362 @@ each digging site held out.
 1.42 MB (barely compresses), about 2.5 times AEF. The aggregate needs both years of both, so the start view
 that reads about 325 MB of AEF would read about 800 MB more.
 
+## 14. Clearcuts between burns only and every cut; burns on the US recipe; teaching land leveling
+
+`fire_teach.py` (new knobs CUT_PX, CUT_W, CUT_FAR, LEVEL; the defaults reproduce the runs already on disk) and
+`teach_runs.py` (the recipes side by side from their saved scores; `results/teach_runs.json`). Every number is
+held out as before. Rule of record: the joint model with the radar-safe gate (`either_radar`); it equals the
+either gate in every run here, since no taught or held-out digging pixel had radar in one year only. AP is the
+mean over the 14 US digging sites; "vs burns only" pairs each site's AP with the burns-only run's (bootstrap 95%
+over sites). Kolwezi has 392 moved labels.
+
+### Clearcuts, abroad recipe with burns taught
+
+| at 60% caught | cut px per region | AP | vs burns only | clearcuts lit (held out) | storm | crop | satellite digging found | Kolwezi found (AP) | Hibbing found (AP) |
+|---|---|---|---|---|---|---|---|---|---|
+| no burns, no cuts (abroad) | 0 | .583 | +.001 [-.002, +.005] | .283 (test) | .110 | .041 | .414 | .52 (.840) | .20 (.545) |
+| burns only | 0 | .582 | | .150 (test) | .089 | .038 | .414 | .44 (.852) | .12 (.545) |
+| cuts, 1,000 px | 1,000 | .579 | -.002 [-.005, .000] | .070 | .052 | .039 | .398 | .35 (.857) | .12 (.549) |
+| cuts, weight .25 | 20,000 | .577 | -.005 [-.009, -.000] | .060 | .039 | .036 | .413 | .31 (.851) | .13 (.555) |
+| cuts, 5,000 px | 5,000 | .578 | -.004 [-.009, .000] | .057 | .035 | .037 | .410 | .30 (.857) | .12 (.557) |
+| cuts, farthest half | about 10,000 | .576 | -.005 [-.011, -.000] | .056 | .030 | .034 | .403 | .27 (.859) | .12 (.558) |
+| every cut | 20,000 | .575 | -.007 [-.013, -.001] | .051 | .029 | .035 | .403 | .28 (.854) | .12 (.563) |
+
+- The curve is steep at the start and flat after: 1,000 pixels per region takes clearcuts from .150 to .070, and
+  twenty times more (or a quarter weight) only reaches .051 to .060.
+- Kolwezi's found falls in step with the clearcuts at every point (.44, .35, .30, .28). No variant quiets the
+  cuts and keeps Kolwezi. Its AP does not fall (.852 to .859 throughout): the mine's scores sink against the
+  cutoff, its ranking holds, as Hibbing's did before.
+- CUT_FAR measured each cut pixel's change (AlphaEarth's a - b beside TESSERA's, 192 numbers) against the
+  nearest of 3,000 moved pixels at each taught digging site, taking the nearest over only the sites a model is
+  taught on, and taught the farthest half of each region (at most 20,000). It lands with every cut taught
+  (Kolwezi .27): the cut pixels nearest digging are not what costs Kolwezi.
+- Hibbing's found sits at .12 in every burns run, cuts or not; burns, not cuts, move it (.20 to .12).
+- AP drops a little with any cut teaching, from -.002 (1,000 px) to -.007 (every cut); 8 to 11 of 14 sites lower.
+
+### Burns only on the US recipe
+
+| at 60% caught | AP | vs US recipe | lidar burns | burned forest | clearcuts (untaught) | storm | crop | farm | satellite found | Kolwezi | Hibbing found (AP) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| US recipe | .583 | | .105 | .025 | .378 | .102 | .049 | .037 | .222 | .06 | .31 (.533) |
+| US recipe, burns taught | .585 | +.002 [-.005, +.010] | .000 | .000 | .041 | .087 | .055 | .034 | .203 | .03 | .19 (.569) |
+
+- On the US recipe teaching burns alone takes the clearcuts from .378 to .041 with no cut taught, further than
+  the abroad recipe gets with every cut taught (.051), at no measured AP cost (7 of 14 sites lower).
+- Burns go dark at both lidar burns and the 15 fires. Hibbing's found falls (.31 to .19) while its AP rises
+  (.533 to .569); satellite digging found slips (.222 to .203).
+- Gain over the map today: +.032 [+.010, +.052], 11 of 14 sites.
+
+### Teaching land leveling (abroad recipe with burns, farms held out in the folds)
+
+Five farm lidar sites taught their moved ground as digging (Fresno 5,376 px, Antelope 3,260, Arkansas delta
+3,327, Hamilton 2,269, Box Butte 195; Othello's 23 too few). LEVEL=1 teaches only the moved ground, LEVEL=2 its
+unchanged ground beside it (40,000 px per farm).
+
+| at 60% caught | AP | vs burns only | crop switches lit | farms' unchanged lit | storm | clearcuts | satellite found | Kolwezi | Hibbing | Mountain Pass |
+|---|---|---|---|---|---|---|---|---|---|---|
+| burns only (farms test only) | .582 | | .038 | .013 | .089 | .150 | .414 | .44 | .12 | .60 |
+| leveling taught | .572 | -.010 [-.017, -.003] | .209 | .069 | .071 | .137 | .462 | .52 | .12 | .45 |
+| leveling and farms' unchanged taught | .567 | -.014 [-.026, -.004] | .052 | .018 | .038 | .142 | .441 | .40 | .09 | .56 |
+
+Leveling found at each farm, held out (unchanged lit at that farm):
+
+| farm | burns only, gated | leveling taught, gated | both taught, gated | burns only, joint alone | leveling taught, joint alone | both taught, joint alone |
+|---|---|---|---|---|---|---|
+| Fresno | .04 (.026) | .07 (.073) | .07 (.044) | .05 (.018) | .12 (.052) | .13 (.034) |
+| Arkansas delta | .13 (.017) | .14 (.154) | .15 (.013) | .61 (.030) | .66 (.141) | .85 (.039) |
+| Antelope | .53 (.004) | .61 (.023) | .52 (.002) | .53 (.003) | .60 (.014) | .51 (.001) |
+| Hamilton | .63 (.014) | .65 (.023) | .66 (.020) | .56 (.009) | .57 (.014) | .57 (.013) |
+
+- Under the either gate leveling found barely moves (Fresno .04 to .07, Arkansas .13 to .15): leveled fields
+  change little in either embedding and the gate holds them shut, taught or not.
+- Teaching only the moved ground lights crop switches 5 times as often (.038 to .209) and farms' unchanged
+  ground (.013 to .069). Teaching the farms' unchanged ground beside it takes most of that back (.052, .018).
+- The joint model alone (no gate) finds Arkansas leveling (.61 to .85 with both taught), not Fresno (.13).
+- Digging AP falls with either variant (-.010, -.014; 11 to 12 of 14 sites lower). Mountain Pass found falls
+  (.60 to .45 with moved ground only); satellite digging found rises (.414 to .44 and .46).
+- Farms are held out in the same four folds as the abroad sites and fires, so the folds differ from the burns
+  only run's; part of Kolwezi's move (.44 to .52 and .40) may be the change of fold, not the farms.
+
+## 15. More mines in forest, and digging where radar came and went
+
+`forest_labels.py` (Earthwork's environment) builds the truth, `forest_mines.py` reads TESSERA under it, scores it
+and teaches with it. Satellite labels are Earthwork's ICESat-2 and GEDI pairs (same passes, pairing and thresholds);
+the Kentucky sites are repeat 3DEP lidar, labeled as the US digging sites are. Everything new lives in
+`data/space-forest` (apart from `data/space`, so no other recipe picks it up). Abroad recipe, either_radar rule, 60%
+cutoff set on the 14 US digging sites, unless a line says otherwise.
+
+### The new truth
+
+| site | where, what | truth | moved | unchanged | role |
+|---|---|---|---|---|---|
+| ky-clay | Kentucky surface coal, forest | lidar 2017 vs 2023 | 22,914 | 845,068 | taught |
+| ky-perry | Kentucky surface coal, forest | lidar 2017 vs 2023 | 4,333 | 177,729 | taught |
+| ky-pike | Kentucky surface coal, forest | lidar 2019 vs 2023 | 2,988 | 1,195,040 | taught |
+| fort-hills-ab | oil sands cut from boreal forest | ATL03, ATL08 | 10,141 | 2,929 | taught (weight capped at 2,000 labels) |
+| boke-gn | bauxite in woodland, Guinea | satellite | 35 | 28 | taught |
+| adaro-id | coal, Kalimantan | satellite | 28 | 40 | taught |
+| madre-de-dios-pe | gold, Peruvian Amazon | satellite | 21 | 173 | taught |
+| sangatta-id | coal, Kalimantan | satellite | 13 | 15 | taught |
+| detour-lake-on | gold, Ontario boreal forest | satellite | 154 | 2,689 | test only (arrived after the runs started) |
+| pomalaa-id, sorowako-id, tarkwa-gh | nickel, nickel, gold | satellite | 5, 2, 0 | 1, 14, 38 | too few moved: test only |
+| orapa-bw, jwaneng-bw | diamonds, Botswana (radar gap) | satellite | 1,609, 2,909 | 8,423, 13,306 | test only |
+| ekibastuz-kz, sokolov-kz | coal, iron, Kazakhstan (radar gap) | ATL03, ATL08 | 297, 36 | 3,446, 851 | test only |
+
+- Two 1 m 3DEP flights over working mines cut from forest exist in eastern Kentucky (KY_Eastern_2019 or
+  KY_WestCentral_2017, then KY_CentralEast_A23). West Virginia's and Virginia's coal country has one flight since
+  AlphaEarth began. Magoffin County was tried and left out: its moved pixels are scattered singles (none in a patch
+  over 1 ha), the lidar's ground under forest rather than mining.
+- The satellite lasers give tens of moved labels at a tropical forest mine, not hundreds: canopy and cloud thin the
+  pairs. Open pits (Fort Hills, Botswana, Kazakhstan) give thousands.
+- At Madre de Dios the "unchanged" labels (ground within 0.75 m, mostly cleared forest and ponds) are lit 41% by
+  the map's rules: the clearing-without-digging case, inside a mining district.
+- Earthwork's granule reader can stall with no connection open (an hour, every worker idle). `forest_labels.py`
+  gives each granule 420 s, then skips it and restarts the workers; GEDI is skipped north of 51.5 degrees, where a
+  search still returns hundreds of granules with no footprint in the box.
+
+### Digging where TESSERA's radar came or went
+
+Final models of each recipe, never taught on these sites; the earlier satellite sites from their held-out scores.
+"Flip" is a label whose pair has Sentinel-1 in one year and none in the other. The earlier sites held 7 moved flip
+labels (Shurugwi 6, Unki 1); the four new mines add 1,891.
+
+| at 60% caught: moved found / unchanged lit | labels (moved / unchanged) | map today | joint x either | joint x radar-safe |
+|---|---|---|---|---|
+| abroad recipe, radar both years | 2,953 / 14,595 | .69 / .053 | .47 / .044 | .47 / .044 |
+| abroad recipe, radar one year only | 1,898 / 11,431 | .52 / .134 | .31 / .092 | .31 / .082 |
+| US recipe, radar both years | 2,953 / 14,595 | .07 / .006 | .11 / .015 | .11 / .015 |
+| US recipe, radar one year only | 1,898 / 11,431 | .08 / .032 | .09 / .057 | .09 / .028 |
+
+- The radar-safe gate costs no digging pooled and lights less where radar came or went: half as much under the US
+  recipe (.057 to .028), a tenth less under the abroad recipe (.092 to .082).
+- Site by site it is not always free: Ekibastuz under the US recipe .82 to .72 found (lit .30 to .13), Sokolov under
+  the abroad recipe .37 to .27 (36 labels). Orapa and Jwaneng are found the same.
+- These are the same problem abroad as before: the US recipe ranks the Botswana pits well (AP .60, .48) but scores
+  them dim (found under .15). The abroad recipe brightens them; AlphaEarth gated alone finds the most there (.52 to
+  .69) and lights the most.
+
+### Teaching the forest mines
+
+`forest_mines.py teach`: fire_teach.py's abroad recipe (burned forest taught as quiet, clearcuts too with CUT=1)
+plus the eight taught mines above, held out in folds with the abroad sites (the old sites keep fire_teach.py's
+folds). The two fire_teach.py baselines score the new mines with their final models (`base`), so a new mine is
+test only there and held out by fold in the teach runs.
+
+| joint x radar-safe, abroad-taught | AP (14 US) | clearcuts lit | storm | crop | Kolwezi found (AP) | Hibbing found (AP) | Detour Lake | KY found: Pike, Perry, Clay |
+|---|---|---|---|---|---|---|---|---|
+| burns taught | .582 | .150 | .089 | .038 | .44 (.85) | .12 (.54) | .03 | .30, .37, .62 |
+| burns + new mines | .583 | .121 | .067 | .042 | .38 (.84) | .26 (.57) | .14 | .31, .55, .67 |
+| burns + cuts | .575 | .051 | .029 | .035 | .28 (.85) | .12 (.56) | .03 | .33, .36, .60 |
+| burns + cuts + Kentucky only | .578 | .057 | .039 | .037 | .18 (.86) | .15 (.57) | | .33, .55, .67 |
+| burns + cuts + new mines | .577 | .058 | .030 | .040 | .23 (.82) | .26 (.58) | .11 | .33, .55, .67 |
+
+| satellite forest mines found (AP) | Madre de Dios | Sangatta | Adaro | Boke | Fort Hills |
+|---|---|---|---|---|---|
+| burns taught (test only) | .43 (.14) | .38 (.74) | .64 (.83) | .74 (1.00) | .31 (.93) |
+| burns + new mines (held out by fold) | .43 (.13) | .15 (.75) | .29 (.84) | .17 (.99) | .18 (.93) |
+| burns + cuts (test only) | .43 (.15) | .38 (.75) | .54 (.85) | .49 (1.00) | .38 (.93) |
+| burns + cuts + new mines (held out by fold) | .43 (.14) | .31 (.76) | .25 (.89) | .43 (.99) | .14 (.92) |
+
+- More forest mines do not remove the trade. Teaching clearcuts costs Kolwezi about as much with them as without
+  (.38 to .23 against .44 to .28), and AP at the 14 US sites moves by under .003.
+- They help elsewhere: Hibbing's found doubles (.12 to .26) in both recipes, Detour Lake (a boreal mine never
+  taught) goes from .03 to .14 (.11 with cuts taught), Perry from .37 to .55, and clearcuts fall from .150 to .121 with no
+  clearcut taught.
+- At every forest mine the ranking barely moves (Kolwezi's AP .82 to .86, Fort Hills .92 to .93); what moves is
+  the score's level against the US cutoff. The satellite forest mines score dimmer when the others are taught
+  (Adaro .64 to .29, Boke .74 to .17) at the same AP: their unchanged labels are mostly cleared forest on ground
+  that stayed, so they teach clearing as quiet as much as they teach digging.
+- Kentucky alone (with cuts) lifts Hibbing a little (.15) and lowers Kolwezi further (.18): US forest coal teaches
+  the US level, not the Congo's.
+- One run each, no seeds; Kolwezi's found swings with fold makeup (a first Kentucky run with refolded sites gave
+  .11), so differences under about .05 at one site are noise.
+
+## 16. Lookalikes not tried before, and the reservoirs split by a water mask
+
+`lookalikes.py`. No lidar. Each place is a 6 km square on AlphaEarth's grid with the years either side of the
+event, an event group against ground to compare in the same square, scored by both recipes' final models at each
+rule's 60% cutoff (the share of each group lit). Groups:
+- slide: tree cover lost (Hansen GFC v1.12) in the slide's year and the next (Landsat dates many September
+  slides a year late), against forest that never lost cover. Iburi (Hokkaido 2018 earthquake), Nippes (Haiti
+  2021), the Romagna Apennines (May 2023 rains), Wayanad (one debris flow, 2024).
+- river: water one year, land the other (bank cut away, new bar), against land both years. Ucayali, Brahmaputra
+  at Majuli, Jamuna, Kosi; 2018 against 2021, each square centered where Hansen's water is nearest half.
+- solar: a USPVDB array that went into service between the years, against ground 50 m or more from any array.
+  The eight largest built 2020 to 2023 across ground types (Texas prairie, pasture and Permian scrub, Nevada and
+  Arizona desert, Ohio and Central Valley farmland, Colorado grassland); years: in service minus 2, plus 1.
+- fill: land in the first year, water in the second, nothing dug between: the Cottbus-Nord lignite pit flooded
+  on purpose (2018 against 2024) and the Blue Nile valley behind GERD (2019 against 2023).
+- dredge: new water among the lower Rhine gravel pits (2018 against 2023): pits dredged wet, real digging.
+- flood: seen under water in at least a quarter of the flood weeks' clear looks and land in both years, against
+  land never seen flooded. Sindh (2022) and Conselice in Romagna (May 2023).
+
+The water groups come from Sentinel-2 L2A (Element84 earth-search COGs): per pixel, the share of a year's clear
+looks (up to 3 per month, SCL clear classes) with MNDWI above zero; water past 0.6, land under 0.4.
+
+| share lit, joint x either gate | US-taught event | compare | abroad-taught event | compare | what lidar would see |
+|---|---|---|---|---|---|
+| landslides (4) | .319 | .057 | .408 | .064 | moved: scars and deposits, meters |
+| river banks and bars (4) | .025 | .004 | .230 | .019 | moved: bank cut, bar built (water is flattened) |
+| solar arrays (8) | .267 | .055 | .192 | .026 | some moved: grading and roads; most array ground under .5 m |
+| pit or valley flooded (2) | .500 | .119 | .599 | .139 | nothing dug; a DEM difference reads the new water surface as meters of change |
+| gravel pits dredged (1) | .510 | .072 | .353 | .037 | moved: real digging under water |
+| flood silt (2) | .053 | .011 | .038 | .003 | under .5 m: unchanged |
+
+| same, other rules (US-taught event / abroad-taught event) | map today | TESSERA | mean |
+|---|---|---|---|
+| landslides | .247 / .424 | .454 / .459 | .251 / .404 |
+| river banks and bars | .025 / .463 | .468 / .306 | .033 / .430 |
+| solar arrays | .199 / .193 | .474 / .372 | .279 / .216 |
+| pit or valley flooded | .499 / .970 | .384 / .420 | .445 / .849 |
+| gravel pits dredged | .514 / .431 | .445 / .563 | .488 / .467 |
+| flood silt | .004 / .009 | .525 / .352 | .007 / .019 |
+
+- Landslides light about a third (US-taught) to two fifths (abroad-taught) of the scar ground under the either
+  gate. Iburi .66 and .61, Romagna .31 and .19, Nippes .29 and .45; Wayanad's single debris flow .02 US-taught
+  but .39 abroad-taught. These are real moved ground: as digging goes, a slide is the event the model is built
+  to find, made by no one.
+- Rivers: the US-taught aggregate is nearly dark on moved banks and bars (.025); abroad teaching lights a fifth
+  to a quarter (Jamuna .30, Ucayali .39 on only 259 pixels, Kosi .05). The map today, abroad-taught, lights
+  .46: the either gate holds the joint model under it.
+- Solar: a quarter of new array ground lights US-taught (.27), a fifth abroad-taught. It ranges widely: Arrow
+  Canyon .67 (desert, graded) and Fox Squirrel .54 (Ohio farmland) against Aktina .001 and Sonoran .04. Slate's
+  comparison ground (Central Valley fields) lights .34, more than its array (.22): the field false alarms
+  again, not the panels.
+- Ground flooded behind a dam or in a pit lights almost wherever it went under: Cottbus-Nord .998 under every
+  rule but TESSERA alone. At GERD only abroad teaching lights it (.21 joint x either, .95 map today); US-taught
+  stays dark (.003). Nothing was dug in either between the years.
+- Wet-dredged gravel pits light about half (US-taught .51), the share building sites find.
+- Flood silt stays dark for every combined rule (.04 to .05); TESSERA alone lights half of it (.53) and a fifth
+  of the land beside it.
+- Radar came and went at none of these squares (flip share 0), so the radar-safe gate equals the either gate
+  throughout.
+- Caveats: Hansen's loss in the slide years includes some harvest; Iburi's pair is 2018 against 2020 because
+  TESSERA has no Hokkaido pixels in 2017 (under 15 clear looks), so its "before" year already holds the
+  September slides weakly, and its comparison forest lights .15 (mixed pixels at slide edges, slides on
+  ground Hansen did not call forest). Sindh's flood covered almost the whole square (only 2,019 comparison
+  pixels). Romagna's flood weeks had a median of 3 clear looks.
+
+### The reservoirs, split by what each pixel was in the two years
+
+`lookalikes.py lakes`: the six reservoir squares from section 8, each pixel called water both years, land both,
+water to land (the bathtub ring exposed) or land to water (refilled), by the same Sentinel-2 mask.
+
+| share lit, mean over reservoirs | US-taught: map today | joint x either | abroad-taught: map today | joint x either |
+|---|---|---|---|---|
+| water both years (6) | .029 | .034 | .020 | .016 |
+| land both years (6) | .131 | .089 | .100 | .061 |
+| water to land, ring exposed (4) | .804 | .828 | .784 | .780 |
+| land to water, ring refilled (3) | .659 | .533 | .621 | .303 |
+
+- The lit ground is the bathtub ring. Exposed ring lights about four fifths under every rule (Mead .995, Sau
+  .996, Powell .76, Great Salt Lake .56); the lake that stayed water lights 2 to 3%.
+- Section 8's reading is explained: at Oroville and Folsom (2021 low, 2023 refilled) the ring went land to water,
+  inside Hansen's "land" group, which is why that group lit .38 there. Abroad teaching quiets refilled ring
+  (.53 to .30) but not exposed ring.
+- Land both years still lights 6 to 13%: at Mead and Powell, ground exposed before the first year and drying,
+  washing and greening since (Powell's land lights .12 under the either gate).
+- Like a flooded pit, an exposed lake bed is ground whose surface changed by meters without anyone digging: a
+  DEM difference with flattened water would call it moved.
+
+Files: `lookalikes.py`, `results/lookalikes.json`, `results/reservoir_rings.json`, logs
+`results_lookalikes.log` and `results_lookalikes_redo.log`; places in `data/places/ground-look-*`,
+`data/tessera/ground-look-*`, water masks in `data/lookalikes/water/`, scores in `data/scores-look-{us,abroad}/`.
+
+## 17. Wider year pairs on the digging sites
+
+`spans.py`. Each US digging site scored at wider pairs than its lidar window: the year before the first flight
+(b) and the year of the second (a), then one or two years earlier at b, later at a, or both, where both
+embeddings have the years (2017 to 2025). Same lidar labels, abroad recipe, each site held out alone (the native
+pair reproduces data/scores-abroad exactly), each rule at the recipe's 60% cutoff. No US site had radar in only
+one year of any pair, so the radar-safe gate equals the either gate throughout.
+
+The moved ground stays dug in a wider pair, so its share found is the measure here. The unchanged ground is only
+known to be unchanged inside the lidar window: a wider pair takes in digging before the first flight or after the
+second, so its share lit (and so the AP) is an upper bound on the false alarms, not a measure of them.
+
+| joint x either gate, mean over the sites with the pair | sites | moved found (native) | AP (native) | unchanged lit (native) |
+|---|---|---|---|---|
+| b - 1 | 7 | .60 (.56) | .541 (.599) | .057 (.041) |
+| b - 2 | 3 | .55 (.48) | .582 (.613) | .055 (.024) |
+| a + 1 | 13 | .61 (.59) | .493 (.569) | .052 (.042) |
+| a + 2 | 10 | .63 (.59) | .362 (.559) | .070 (.026) |
+| b - 1 and a + 1 | 6 | .64 (.56) | .480 (.571) | .074 (.047) |
+
+| map today (AEF gated), same pairs | moved found change | AP change | unchanged lit (native) |
+|---|---|---|---|
+| b - 1 | +.05 | -.051 | .083 (.054) |
+| b - 2 | +.06 | -.061 | .059 (.032) |
+| a + 1 | +.01 | -.045 | .066 (.058) |
+| a + 2 | +.08 | -.131 | .082 (.038) |
+| b - 1 and a + 1 | +.10 | -.056 | .102 (.061) |
+
+- The moved ground is found as well or better in every wider pair (+.01 to +.08 under the aggregate). A wider
+  window does not wash out the digging.
+- Unchanged ground lit rises with the span, most two years after the second flight (.026 to .070), and AP falls
+  with it (.559 to .362). Some of that is real digging after the lidar (Columbus NE at 2018 to 2022: lit .052 to
+  .257, the suburb still building); the labels cannot say how much.
+- Hibbing found doubles one year later (.20 to .41 at 2020 to 2023): its second flight's project ran to May
+  2023, so the 2022 embedding missed digging the lidar saw. Columbus NE (flown to April 2021) gains the same way
+  (.88 to .94). Where a flight's project runs into the next year, the native pair is too narrow.
+- The aggregate loses more AP than the map today two years out (-.197 against -.131) while finding about the
+  same moved ground; it may light more of the digging after the window, which these labels count as false.
+
+## 18. A cutoff set per place
+
+`calib.py`. Each rule's score set against its own place before one cutoff is set (60% of moved ground found,
+averaged over the held-out digging sites), then each digging site at a cutoff set on the other 13, as in
+section 7. Place-wide: rank (the score's quantile in the place), z (the logit's z-score), over q99 (the score over
+the place's 99th percentile, held at least f). Local: contrast (the score less the mean within about 1 km or 3
+km) and ratio (over that mean). Part A from the saved held-out scores (a place is its labeled pixels); part B
+rescores every valid pixel of every grid with models that did not see it (abroad recipe; labeled pixels match
+the saved scores exactly), as a map would hold them. Crop switches and satellite labels are not grids: their
+place is their own pixels, the local mean over neighbors among them (the place's mean under 20 in the window).
+
+| joint x either gate, abroad recipe, part B | AP | found min / median / max, sd | Four Corners | Hibbing | Katy | crop | farm | storm | burn | cut | Sahara-Riyadh-Cairo | island found | satellite found |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| one cutoff (today) | .583 | .17 / .64 / .92, .24 | .18 | .17 | .92 | .041 | .014 | .110 | .187 | .283 | .017 | .50 | .41 |
+| rank | .583 | .14 / .64 / .96, .25 | .14 | .35 | .35 | .070 | .056 | .061 | .071 | .525 | .070 | .71 | .40 |
+| z | .583 | .11 / .62 / .95, .26 | .11 | .69 | .37 | .070 | .025 | .011 | .029 | .622 | .061 | .65 | .37 |
+| over q99 (f .2) | .574 | .17 / .64 / .92, .23 | .17 | .17 | .92 | .057 | .020 | .109 | .192 | .336 | .031 | .56 | .43 |
+| contrast 1 km | .385 | .28 / .65 / .85, .18 | .28 | .35 | .48 | .034 | .058 | .172 | .068 | .389 | .078 | .63 | .46 |
+| contrast 3 km | .475 | .21 / .66 / .90, .22 | .26 | .30 | .43 | .039 | .041 | .124 | .040 | .370 | .043 | .59 | .40 |
+| ratio 3 km | .376 | .05 / .70 / .91, .25 | .31 | .47 | .20 | .060 | .091 | .066 | .040 | .459 | .116 | .69 | .37 |
+
+- Nothing evens out the sites. The spread (sd .24) stays .22 to .26 under every place-wide rule; it moves which
+  sites are dim (Hibbing up, Katy down) without closing the gap. Only the 1 km contrast narrows it (.18, min .17 to
+  .28), at a third of the AP (.583 to .385): it dims the middle of every large dug patch.
+- Rank and z light about the same share of every place by design, so the quiet ground pays: deserts .017 to
+  .06 or .07, clearcuts .28 to .5 or .6, islands' unchanged ground .006 to .08 or .14.
+- Over q99 changes almost nothing: at most sites the 99th percentile is already near 1.
+- The local contrasts quiet the large uniform events: burns .187 to .04 at 3 km (Grizzly Flats burned as one
+  sheet). The cost is AP .11 and deserts up from .017 to .043.
+- Why: the swing is mostly order inside the site and how much of it was dug, not a level. At Four Corners 21% of
+  the site moved and its moved ground scores a median .20 while the top 1% of its unchanged ground scores .99:
+  no setting of the cutoff by place puts the dug ground above the rest. Hibbing is dim throughout (its 99th
+  percentile .80), so place-wide rules help it, but it is the only site of that kind.
+- Part A (the labeled pixels only) agrees in every direction, with somewhat different numbers (rank: Katy .44,
+  Mountain Pass .76), and the same holds for the US recipe and for the abroad recipe taught with burns.
+
 ## Open
 
-- Clearcuts: teaching them as quiet works on clearcuts and costs forest mines (Kolwezi); teaching burns alone
-  gets half the way at no measured cost. Between the two: fewer cut pixels, a lower weight, or cuts taught only
-  far from any digging.
-- The radar-safe gate (`either_radar`) is free on everything measured but tested on digging at only 13
-  satellite labels with radar in one year.
-- Reservoir shores need a per-year water mask to say whether the lit ground is the bathtub ring.
+- Clearcuts against forest mines (sections 14, 15): on the abroad recipe any clearcut teaching costs Kolwezi in
+  step with the clearcuts it quiets (1,000 px per region already .44 to .35), and more forest mines taught do not
+  remove it. Kolwezi's ranking holds throughout (AP .82 to .86): the cost is its level against the US cutoff. The
+  US recipe with burns taught takes clearcuts to .04 with none taught, but finds less satellite digging (.20) and
+  little at Kolwezi (.03).
+- Ground that moved with no one digging (section 16): landslides light a third to two fifths, a flooded pit or
+  valley and an exposed lake bed most of their ground, river banks a quarter abroad-taught, new solar arrays a
+  fifth to a quarter. Lidar would call most of these moved. Whether each is a find or a false alarm is a scope
+  question, not settled here. Land leveling (section 14) is held shut by the gate whether taught or not.
+- Clearing without digging inside mining districts: Madre de Dios's unchanged labels light 41%.
+- Native year pairs can be too narrow where a lidar project ran into the next year (Hibbing to May 2023, Columbus
+  NE to April 2021; section 17): the after year could follow the flight's end date.
+- A cutoff set per place does not even out the sites (section 18); Four Corners is order inside the site, not level.
+- The radar-safe gate (`either_radar`) is now tested on 1,898 moved labels with radar in one year (section 15):
+  no digging lost pooled, less lit, but Ekibastuz and Sokolov lose some.
 - Panels draw the raw aggregate on a continuous ramp, so ground below the cutoff still looks lit (the Sahara
   panel looks busier than its 4%). Ways to draw it: start the ramp at the cutoff, two tones, or the cutoff
   marked on the key.
-- The notebook: the joint model with the either gate (radar-safe), US-taught or abroad-taught, with AEF alone
-  where TESSERA has no pixel; zoomed out, each cell carries its highest 10 m score.
+- The notebook: the joint model with the either gate (radar-safe), a recipe (US, abroad, either with burns
+  taught), AEF alone where TESSERA has no pixel; zoomed out, each cell carries its highest 10 m score.
