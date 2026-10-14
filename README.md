@@ -54,6 +54,14 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   clearing picked near each mine; `separate_test.py` teaches small heads to tell the two kinds of clearing apart,
   held out by place; `near_panels.py` draws the clearing near each mine against Sentinel-2.
 - `pyodide_probe/` reads TESSERA inside Pyodide (Node), through zarr-python and through a small fetch reader.
+  `both_reader.py` reads AlphaEarth's native UTM COGs and TESSERA on one grid with ranged requests (Pyodide or CPython;
+  `check_both_reader.py` checks it against rasterio and zarr-python). `sql_probe.py` and `udf_probe.py` score the
+  aggregate in Pyodide through xarray-sql and DuckDB: the two embeddings joined on the pixel, each 32 x 32 block's peak
+  as a GROUP BY, the model as a vectorized Python function in the SQL. `crawl.py` scores tile after tile with one
+  tile in memory and logs the wasm heap (`crawl_runs.sh` runs its choices); `browser_test.py` measures memory and
+  storage in real browsers. `run_sql.mjs` runs a probe under Node; `export_model.py` writes the model it uses.
+- `cog_vs_mosaic.py` scores the digging sites from AlphaEarth's native COGs against the mosaic the models were taught
+  on.
 - `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
   aggregate (the joint model muted where neither embedding changed).
 

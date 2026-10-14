@@ -688,6 +688,119 @@ interleaved, 1024 x 1024 tiles, and their pixel edges fall on TESSERA's grid: th
 pair pixel for pixel, with no resampling. The models here were taught on the mosaic, so moving to the COGs means
 reading the sites again.
 
+## 21. The aggregate in Pyodide through xarray-sql and DuckDB
+
+`pyodide_probe/both_reader.py`, `sql_probe.py`, `run_sql.mjs`: Pyodide 314.0.7 in Node, xarray-sql 0.6.0's wasm wheel
+(4.3 MB) with Pyodide's own DuckDB 1.5.1, pyarrow 22 and xarray. DataFusion has no wasm build, so xarray-sql's
+`XarrayContext` is absent there; `xql.register(duckdb_connection, name, ds)` is the path, and it worked as installed.
+One window of 1024 x 1024 pixels (10.24 km, 105 square km) at Huntsville, 2019 against 2023, both embeddings read
+from their own stores on one UTM grid: AlphaEarth's native COGs (`tge-labs/aef`) and TESSERA's Zarr. The reader
+matches rasterio and zarr-python byte for byte, and the two windows share their corner to the meter.
+
+| step (Pyodide, Node, one thread) | time | note |
+|---|---|---|
+| Pyodide, numpy, pandas, pyarrow, xarray, DuckDB, xarray-sql loaded | 5 s | about 41 MB of downloads, cached |
+| AEF, two years | 7.6 s | 85 MB, 130 requests (one 1024 px tile per band per year) |
+| TESSERA, two years, with scales and radar counts | 20.7 s | 252 MB, 76 requests |
+| each embedding's half of the joint model, numpy | 3.6 s | |
+| register both as tables | 0.04 s | lazy |
+| pixel join (1,048,576 pixels) | 0.5 s | |
+| A: join, gate, score, peak of each 32 x 32 block (GROUP BY) | 2.4 s | 2.2 s on DuckDB's own tables; numpy 0.06 s |
+| B: the joint model itself in SQL, 256 x 256 px | 3.5 s | 12.6M rows (pixel x band), 3.6M rows a second |
+| B, 512 x 512 px | 13.6 s | wasm heap 3.4 GB, near wasm32's 4 GB |
+
+- The joint model is linear on each embedding's own features, so its logit splits into an AEF half and a TESSERA half.
+  Rule A has numpy score each half per pixel; SQL joins the halves on the pixel, adds the bias, applies the
+  radar-safe gate (AEF's alone where TESSERA's radar came or went), falls back to the AEF-alone model where TESSERA has
+  no pixel (a LEFT JOIN), and carries the peak as `GROUP BY y // 32, x // 32` with `max(score)`. It matches numpy to
+  1e-7.
+- The 32 x 32 blocks are TESSERA's inner chunks on the zone grid (320 m, `coarse.py`'s cell). A window not starting on
+  a block edge spans 33.
+- Rule B (the dot product as a join of each pixel's unit vector to the weights by band, then two GROUP BYs and the
+  pixel join) matches numpy to 2e-6 but cannot hold a full window in wasm32 memory at once; it would have to run in
+  strips.
+- xarray-sql adds little over DuckDB itself: A took 2.4 s through the registered xarray tables against 2.2 s once
+  copied into DuckDB. The time is DuckDB's, single threaded in wasm.
+- In this window 4.5% of pixels pass the 60% cutoff and 36% of 320 m blocks carry a pixel over it (Huntsville is a
+  building site). A block's cutoff for the map wants setting on blocks, as `coarse.py` did, not on pixels.
+- numcodecs 0.15.1's zstd fails on GDAL's frames in wasm32 (no content size in the frame header, read as 4 GB);
+  Python 3.14's own `compression.zstd` decodes them. TESSERA's blosc decodes through numcodecs fine.
+
+
+### The model as a function inside the SQL
+
+`pyodide_probe/udf_probe.py`: the same window and rule, with the model as a vectorized Python function DuckDB calls on
+each batch (`create_function(..., type="arrow")`), the raw int8 bands registered through xarray-sql. It matches numpy
+to 2e-6 every way. What costs is how the bands reach the function, not the math:
+
+| how the bands reach the function | full window |
+|---|---|
+| one column per band (128 AEF, 256 TESSERA) | 40 s; a function that does nothing with 256 columns takes 17 s by itself |
+| the same columns gathered into one list inside DuckDB | 21 s to build the lists alone |
+| each pixel's bands packed into one bytes value (a BLOB), one argument | 7.3 s, plus 2.6 s to pack |
+| the pixel's (y, x) only, the function reading the bands from memory | 8.4 s |
+| numpy alone, no SQL | 3.8 s |
+
+- DuckDB calls the function 512 times per million pixels (2,048 rows a call) and hands over each column as its own
+  array each time. Scanning all 256 TESSERA columns through xarray-sql without a function takes 0.65 s.
+- Packing: a zero byte cuts a value short on its way into Arrow, so each value goes in as value + 128. TESSERA keeps to
+  -127 .. 127; AlphaEarth's -128 marks a masked pixel, carried in its own column.
+- AlphaEarth's dequantization as a 256-entry lookup table, as aef-loader does it.
+
+### The COGs score as the mosaic did
+
+`cog_vs_mosaic.py`, `results/cog_vs_mosaic.json`: at every mosaic pixel center of the 14 digging sites, the COG pixel
+under it, both years, scored by the abroad recipe's final models (in sample, so only the difference counts). Median
+cosine between the two AEF vectors .9995 (lowest site .9979, Mountain Pass); joint x radar-safe gate AP .654 from the
+mosaic, .655 from the COGs; found at the 60% cutoff .685 against .686; unchanged lit .026 both; rank correlation of the
+scores .99. The models taught on the mosaic carry to the COGs, so the browser can read AlphaEarth on TESSERA's grid.
+
+### gpudb
+
+The DuckDB community extension gpudb (Metal on Apple Silicon, CUDA on Linux) loads in native DuckDB 1.5.6 on an M3
+Max. It has no WebAssembly build, so it cannot run in Pyodide. Its functions are GPU sums, minimums, maximums,
+group-bys and joins on columns uploaded to the device; nothing for the per-pixel model math.
+
+## 22. A crawl in the browser: keeping under 4 GB
+
+`pyodide_probe/crawl.py` (runs through `crawl_runs.sh`), `browser_test.py`, `browser_test.json`. No kernel: Pyodide
+does the reading and the scoring. The design: one AEF COG tile (1024 x 1024 px, 105 square km) of raw embeddings in
+memory at a time, decoded straight into pixel-major byte buffers allocated once and refilled (value + 128, the form the
+SQL function reads, so there is no second packed copy), scored through xarray-sql and DuckDB, then reduced to what is
+kept: a byte per pixel for the most recent tiles (an LRU cache) and the highest score of each 32 x 32 block in a DuckDB
+table (`peaks`) for everything crawled. Byte ranges go out 16 at a time per array, to bound the compressed bytes held.
+
+**The crawl, 3 x 3 tiles around Huntsville (944 square km), 2019 against 2023, buffers reused:**
+
+| | |
+|---|---|
+| wasm heap | 708 MB loaded with buffers, 1,201 after the first tile, 1,325 after the second, then flat to the ninth |
+| per tile | 30.7 s reading (about 325 MB, 200 requests), 5.8 s scoring |
+| per square km | 0.35 s, 3.2 MB |
+| pixel scores kept | 1 MB per tile; panning back to a cached tile is instant |
+| peaks | 9,312 blocks, 40 KB as Parquet (about 4.3 KB per tile), written in 0.02 s |
+
+The first tile's share lit (.0449 at the 60% cutoff) matches section 21's window exactly. Still to read when the runs
+end: `crawl_1024_noreuse.log` (new buffers each tile: 1,204, then 1,444 MB after two tiles so far),
+`crawl_512.log` (512 px tiles over 2 x 2 COG tiles: AEF is read a whole COG tile at a time, so each 512 tile pulls its
+COG tile again), `crawl_1024_2x2_cache2.log` (a cache of 2 tiles: what panning back to an evicted tile costs).
+
+**Browsers** (Playwright, headless, a fresh profile; Pyodide 314.0.7 from the CDN):
+
+| browser | WebAssembly memory | Pyodide heap at its limit | storage quota | 1,000 tiles of peaks saved / read after a reload |
+|---|---|---|---|---|
+| Chromium 156 | 4,228 MB | 4,239 MB | 10,742 MB | 1.3 s / 0.14 s |
+| Brave 155 (Chromium) | 4,228 MB | 4,239 MB | 2,147 MB | 1.3 s / 0.14 s |
+| WebKit 27.2 (Safari's engine, on macOS) | 4,228 MB | 4,239 MB | 1,049 MB | 2.2 s / 0.19 s |
+| Firefox 157 | 4,228 MB | 4,239 MB | 10,737 MB | 2.5 s / 0.15 s |
+
+- Every engine gives a page the full 4 GB of wasm32, and Pyodide can fill it. The crawl's 1.3 GB leaves about 2.9 GB.
+- The peaks persist in the browser's own storage (IndexedDB, through Pyodide's IDBFS mount; DuckDB writes and reads
+  Parquet there). 1,000 tiles (about 10,500 square km) of random peaks take 4.6 MB; real ones took 4.3 KB per tile.
+  The lower 48 (about 77,000 tiles) would be about 330 MB as now stored; as one byte per block about 80 MB.
+- Not tested: Safari on iPhone or iPad (Playwright's WebKit is the desktop build), and Brave with "forget me when I
+  close this site" on, which would clear the peaks.
+
 ## Open
 
 - Clearcuts against forest mines, a second stage (section 19): a head taught on cleared-and-dug against
@@ -713,4 +826,6 @@ reading the sites again.
   panel looks busier than its 4%). Ways to draw it: start the ramp at the cutoff, two tones, or the cutoff
   marked on the key.
 - The notebook: the joint model with the either gate (radar-safe), a recipe (US, abroad, either with burns
-  taught), AEF alone where TESSERA has no pixel; zoomed out, each cell carries its highest 10 m score.
+  taught), AEF alone where TESSERA has no pixel; zoomed out, each cell carries its highest 10 m score. Kernel free
+  (Pyodide) is the path being tried: sections 20 to 22. A block's cutoff for the zoomed-out map wants setting on
+  blocks, not pixels (section 21: 4.5% of pixels lit, 36% of blocks).

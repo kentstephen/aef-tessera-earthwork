@@ -1,0 +1,21 @@
+// node run_sql.mjs (npm install pyodide@314.0.7; the xarray-sql wasm wheel from PyPI and model_abroad.npz from export_model.py in this folder): Pyodide 314 (marimo's WASM line) with xarray-sql's wasm wheel and DuckDB
+import { loadPyodide } from "pyodide";
+import fs from "fs";
+const t0 = Date.now();
+const lap = (k) => console.log(k, (Date.now() - t0) / 1000, "s", Math.round(process.memoryUsage().rss / 1e6), "MB rss");
+const py = await loadPyodide({ env: Object.fromEntries(Object.entries(process.env).filter(([k]) => ["N", "B_SIDES", "WIDE", "TILE", "TILES", "CACHE", "REUSE"].includes(k))) });
+lap("pyodide");
+await py.loadPackage(["numpy", "numcodecs", "micropip"]);
+lap("numpy numcodecs");
+await py.loadPackage(["pandas", "pyarrow", "xarray"]);
+lap("pandas pyarrow xarray");
+await py.loadPackage(["duckdb"]);
+lap("duckdb");
+const whl = "xarray_sql-0.6.0-cp310-abi3-pyemscripten_2026_0_wasm32.whl";
+py.FS.writeFile(`/home/pyodide/${whl}`, fs.readFileSync(whl));
+await py.runPythonAsync(`import micropip; await micropip.install("emfs:/home/pyodide/${whl}")`);
+await py.runPythonAsync("import xarray_sql, duckdb");
+lap("xarray-sql installed and imported");
+for (const f of ["both_reader.py", "model_abroad.npz"]) py.FS.writeFile(`/home/pyodide/${f}`, fs.readFileSync(f));
+await py.runPythonAsync(fs.readFileSync(process.argv[2] || "sql_probe.py", "utf8"));
+lap("done");
