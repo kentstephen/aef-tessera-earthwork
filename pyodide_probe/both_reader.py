@@ -2,6 +2,7 @@
 # AlphaEarth's native COGs (tge-labs/aef: bottom-up, band interleaved, 1024 px zstd tiles) and TESSERA's sharded
 # Zarr (32 x 32 inner chunks). Neighboring byte ranges are merged and every request of a read goes out together.
 import asyncio
+import random
 import struct
 
 import numpy as np
@@ -15,22 +16,47 @@ except ImportError:
 
 TES = "https://data.source.coop/tessera/tessera/zarr/v1.1-dclimate"
 AEF = "https://data.source.coop/tge-labs/aef/v1/annual"
-stats = dict(gets=0, bytes=0)
+stats = dict(gets=0, bytes=0, retries=0)
+
+# Source Cooperative now and then answers a range request with a 503 and an empty body while the same read succeeds
+# a moment later: retry those (and throttling, other 5xx, a failed fetch) with jittered backoff, about 15 s in all.
+RETRY = {429, 500, 502, 503, 504}
+TRIES = 6
+
+
+def backoff(k, after=None):
+    try:
+        return min(float(after), 30.0)
+    except (TypeError, ValueError):
+        return min(0.5 * 2 ** k, 8.0) * random.uniform(0.5, 1.5)
+
 
 try:
     from pyodide.http import pyfetch
 
     async def get(url, rng):
-        r = await pyfetch(url, headers={"Range": rng})
-        b = await r.bytes()
-        if r.status == 404:
-            return None
-        if r.status != 206:
-            raise OSError(f"{r.status} for {url} {rng}: {len(b)} bytes")
-        stats["gets"] += 1
-        stats["bytes"] += len(b)
-        return b
-except ImportError:  # CPython, to check the reader against rasterio and zarr
+        for k in range(TRIES):
+            last = k == TRIES - 1
+            try:
+                r = await pyfetch(url, headers={"Range": rng})
+                b = await r.bytes()
+            except Exception as e:  # the fetch itself failed: no status
+                if last:
+                    raise OSError(f"{e} for {url} {rng} after {TRIES} tries") from e
+                stats["retries"] += 1
+                await asyncio.sleep(backoff(k))
+                continue
+            if r.status == 404:
+                return None
+            if r.status == 206:
+                stats["gets"] += 1
+                stats["bytes"] += len(b)
+                return b
+            if r.status not in RETRY or last:
+                raise OSError(f"{r.status} for {url} {rng}: {len(b)} bytes, try {k + 1} of {TRIES}")
+            stats["retries"] += 1
+            await asyncio.sleep(backoff(k, r.headers.get("retry-after")))
+except ImportError:  # CPython, to check the reader against rasterio and zarr (obstore retries on its own)
     import obstore as obs
     from obstore.store import HTTPStore
 

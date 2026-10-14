@@ -780,10 +780,31 @@ table (`peaks`) for everything crawled. Byte ranges go out 16 at a time per arra
 | pixel scores kept | 1 MB per tile; panning back to a cached tile is instant |
 | peaks | 9,312 blocks, 40 KB as Parquet (about 4.3 KB per tile), written in 0.02 s |
 
-The first tile's share lit (.0449 at the 60% cutoff) matches section 21's window exactly. Still to read when the runs
-end: `crawl_1024_noreuse.log` (new buffers each tile: 1,204, then 1,444 MB after two tiles so far),
-`crawl_512.log` (512 px tiles over 2 x 2 COG tiles: AEF is read a whole COG tile at a time, so each 512 tile pulls its
-COG tile again), `crawl_1024_2x2_cache2.log` (a cache of 2 tiles: what panning back to an evicted tile costs).
+The first tile's share lit (.0449 at the 60% cutoff) matches section 21's window exactly.
+
+**The other choices** (the same ground, one run each):
+
+| run | heap | per tile | per square km |
+|---|---|---|---|
+| 1024 px, buffers reused (above) | 1,201, then 1,325 MB flat | 30.7 s read, 5.8 s score | 0.35 s, 3.2 MB |
+| 1024 px, new buffers each tile | 1,203, 1,444 after the second, 1,596 after the seventh | 31.1 s read, 6.0 s score | 0.35 s, 3.2 MB |
+| 512 px over 2 x 2 COG tiles (16 tiles, 419 square km) | 480, then 576 MB flat | 13.4 s read (about 148 MB), 1.4 s score | 0.57 s, 5.7 MB |
+| 1024 px, cache of 2 tiles (2 x 2, 419 square km) | 1,201, then 1,322 MB flat | 30.3 s read, 5.9 s score | 0.35 s, 3.2 MB |
+
+- Reusing the buffers keeps the heap flat. Without reuse it steps up (1,203, then 1,444, then 1,596 MB at the seventh
+  tile): a wasm heap never gives memory back, and fresh tile-sized arrays do not always fit the holes the last ones
+  left, so a long crawl without reuse would keep creeping toward 4 GB. Speed is the same either way.
+- 512 px tiles halve the heap (576 MB against 1,325) but cost 1.6 times the time and 1.8 times the bytes per square
+  km: AEF's COG is stored in 1024 px internal tiles, so each 512 tile pulls its whole COG tile again (four times
+  over). The share lit over the 2 x 2 is the same either way (.0517), so the scores do not depend on the tile size.
+- Panning back to a tile the cache has dropped is a full re-read: 35.1 s (29.4 read, 5.7 score, 324 MB), against
+  nothing for a cached tile. A cached tile's pixel scores are 1 MB, so a cache of 16 (16 MB) costs little.
+- The first no-reuse run stopped on the seventh tile: Source Cooperative answered one range request with a 503 and an empty
+  body. The same reads had all succeeded ten minutes earlier, and tile 4 of that run read slowly (53 s against about
+  30), so the service was struggling for a moment. `both_reader.get` now retries 429, 5xx and failed fetches up to six
+  tries with jittered backoff (about 15 s in all, or the server's Retry-After); `retry_check.py` checks it in
+  Pyodide against scripted 503s, a 429, a failed fetch, a 403 (not retried) and a 404. Each tile's line in the crawl
+  now counts its retries. The no-reuse rerun with it finished all nine tiles; it needed one retry, on the first tile.
 
 **Browsers** (Playwright, headless, a fresh profile; Pyodide 314.0.7 from the CDN):
 
@@ -800,6 +821,132 @@ COG tile again), `crawl_1024_2x2_cache2.log` (a cache of 2 tiles: what panning b
   The lower 48 (about 77,000 tiles) would be about 330 MB as now stored; as one byte per block about 80 MB.
 - Not tested: Safari on iPhone or iPad (Playwright's WebKit is the desktop build), and Brave with "forget me when I
   close this site" on, which would clear the peaks.
+
+## 23. The notebook, in a browser tab
+
+`notebook/earthwork_crawl.py`, exported with `marimo export html-wasm` and driven headless in Chromium and Brave
+(Playwright). The crawl runs as a background asyncio task beside the map: the map sends its view, Python sends each
+tile's pixel scores as one 1 MB message, and neither waits on the other.
+
+| | |
+|---|---|
+| page loaded to first tile read | 11 s (marimo, Pyodide, pandas, pyarrow, xarray, DuckDB, xarray-sql from PyPI) |
+| per tile (Huntsville, 2019 to 2023) | 20 to 23 s reading, 5.6 to 6.0 s scoring: faster than under Node (30 s) |
+| first tile's share lit | .0451, as under Node (.0449; the notebook counts at the cutoff's byte) |
+| wasm heap | 1,276 after the first tile, 1,385 MB after the second, then flat |
+| reload | the block peaks come back from IndexedDB, in Chromium and in Brave |
+
+- marimo's WebAssembly mode refuses `multiprocessing.Lock`, which numcodecs' Blosc takes on first use: the notebook
+  hands it a thread lock.
+- A failed read now cancels its sibling reads; left running, they piled up under the retry (the heap climbed 200 MB
+  a try and the browser began failing fetches).
+- MapLibre 5.24 draws an image layer's transparent pixels black under `raster-resampling: nearest`: the layers smooth,
+  and the 320 m blocks are drawn 4 times larger so each stays a square.
+- Zoomed out, the blocks look busy (section 21: a third of blocks are lit at the pixel cutoff). The cutoff slider
+  moves both; a cutoff of the blocks' own is still open.
+
+## 24. Back to a kernel: the map with three layers, and where TESSERA can be read
+
+The browser-only notebook (section 23) worked but was too slow to use: it reads every 10 m pixel of both
+embeddings, so a 105 square km tile takes about 30 s. The map went back to aef-earthwork's `earthwork.py`
+(kernel, H3 hexagons carrying their peak, Earth Genome's Sentinel-2 under a held space bar), copied as
+`earthwork_map.py`, with a TESSERA reader (obstore range reads of the shard index and the inner chunks under the
+view, decoded chunks kept) and three layers on M: Aggregate (the radar-safe either rule), AEF (gated) and TESSERA.
+`models/model_abroad.npz` holds the abroad recipe and each layer's cutoff at 60% of held-out digging found
+(aggregate .78, AEF .60, TESSERA .80). A slider hides hexagons under the cutoff, per layer, each layer's own
+cutoff on double-click; ramps cividis (aggregate), viridis (AEF), plasma (TESSERA).
+
+| Huntsville, zoom 13.5 (about 40 square km) | |
+|---|---|
+| AlphaEarth, each year (10 m mosaic) | 4.4 to 4.5 s |
+| TESSERA, both years (0.44 Mpx) | 6.4 to 8.1 s, beside AlphaEarth's reads |
+| frame (three layers scored, peaks carried) | 0.2 s |
+| the same ground again | 0.02 s (chunks kept) |
+
+**TESSERA can only be read at 10 m.** AlphaEarth publishes overviews (each coarser pixel the mean of the 10 m
+under it), which is how the map draws zoomed out; TESSERA v1.1 publishes none (only `global_rgb`, a 3-band color
+preview the models cannot read). Zoomed out, every 10 m pixel under the view would have to be read: about
+1.25 MB per square km a year, so about 400 MB at zoom 12.5, 1.5 GB at 11.5, 12 GB at 10. The map reads TESSERA
+from zoom 13.2 (where AlphaEarth's reads turn 10 m too) and opens at 13.3.
+
+**The first version was wrong about this.** Below zoom 13.2 its Aggregate layer drew AlphaEarth alone under the
+aggregate's name, and it opened at zoom 12.7, so the first view it showed was not an aggregate. An aggregate
+needs both embeddings read at the same level; where TESSERA is not read it now draws nothing. The zoomed-out AlphaEarth view has a milder version of the same issue: the 10 m model is run on
+overview means it was never taught on.
+
+**Searched for a zoomed-out TESSERA (October 2026).** None published: v1.1 on Source Cooperative and dClimate's
+copy on AWS are 10 m only. TESSERA v2's beta store (`zarr/v2-2B-L~beta2`, UTM zones 21, 22, 32, 33 only) adds
+`embeddings_d16` and `embeddings_d4`, the first 16 and 4 dimensions as their own arrays (Matryoshka; the v2 paper
+keeps 92% of the 128-d performance at 16), still 10 m but an eighth and a thirty-second of the bytes. No US yet,
+and the models would need teaching again on v2.
+
+**Teaching TESSERA to the AlphaEarth model: it does not carry over.** So the map can read one embedding at every zoom:
+`distill.py` teaches AlphaEarth-only students, the map's model unchanged in size, with TESSERA's help (the joint
+model or the aggregate as a teacher, blended with the lidar labels or alone; the aggregate's score on the
+teaching sites' unlabeled band; lidar moved pixels dropped where neither embedding changed). Held out as
+abroad_teach.py holds out; fields stay test only.
+
+| at 60% caught | AP | dig sites' unchanged lit | burn | crop | farm | marsh | storm | notruth | island found | space found | desert |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| base (today's AEF model) | .543 | .055 | .260 | .212 | .094 | .046 | .113 | .077 | .43 | .31 | .032 |
+| soft_both_50 | .537 | .058 | .262 | .211 | .100 | .048 | .143 | .080 | .42 | .33 | .031 |
+| soft_both_0 | .533 | .060 | .279 | .217 | .105 | .049 | .155 | .082 | .42 | .32 | .031 |
+| soft_agg_50 | .532 | .063 | .255 | .286 | .126 | .054 | .154 | .080 | .43 | .38 | .023 |
+| soft_agg_0 | .528 | .068 | .236 | .333 | .135 | .055 | .179 | .084 | .43 | .41 | .018 |
+| soft_agg_50_unl | .531 | .064 | .262 | .268 | .121 | .062 | .169 | .079 | .42 | .37 | .021 |
+| clean | .543 | .055 | .246 | .196 | .086 | .041 | .107 | .059 | .42 | .33 | .025 |
+| clean_soft_agg_50 | .535 | .061 | .248 | .266 | .122 | .050 | .154 | .073 | .43 | .36 | .019 |
+| aggregate (the teacher, both embeddings) | .582 | .039 | .190 | .038 | .012 | .023 | .099 | .075 | .50 | .42 | .017 |
+
+- No student comes near the teacher on fields. The aggregate lights .038 of the crop switches and .012 of the
+  farms' unchanged ground; every student stays at .19 to .33 and .09 to .14, where base is.
+- Every soft label makes it worse: AP falls .006 to .015 below base, and crop, farm and storm ground light more
+  (soft_agg_0: crop .212 to .333). Taught to copy the teacher's scores, the student copies how much change it
+  saw, not which kind: what lets the aggregate say "field, not dig" is in TESSERA, and AlphaEarth's two years,
+  read linearly, do not hold it.
+- The soft labels do help where the aggregate is better for reasons AlphaEarth can see: satellite digging found
+  .31 to .38 to .41 and desert lit .032 to .018, in step with how much of the teacher is in the label.
+- `clean` (moved pixels where neither embedding changed left out) is the only one at no cost: AP .543, every
+  quiet set a little lower (crop .212 to .196, burn .260 to .246, ground with no truth .077 to .059, desert
+  .032 to .025). Small, and the same at 50% and 70% caught.
+- The same order at 50% and 70% caught (`distill.py report 0.5`, `report 0.7`).
+
+Files: `distill.py`, `results_distill.log`, scores in `data/scores-distill/<variant>/`. The run took 43 minutes,
+the main process at most 17.2 GB with one child scoring a site beside it.
+
+**Zoomed out, the map moves to AEF.** Past zoom 13.2 (where TESSERA stops being read) the map switches to AEF on its
+own and grays the Aggregate and TESSERA out (a click or M there says to zoom in); zoomed back in, the layer it moved
+from comes back, unless another was picked meanwhile. Checked headless in Chromium across 13.2 both ways.
+
+## 25. Dense cities (running)
+
+On the map, Manhattan's Lower East Side from 2022 to 2025 lit block after block under TESSERA alone; AEF and the
+aggregate lit East River Park (torn up and raised on fill for flood protection from late 2021) and a few spots. TESSERA's
+own metadata there: about 30 ascending radar looks a year from 2017 to 2025, no descending looks until 2025 (17,
+when Sentinel-1C began). The radar-safe rule only catches radar coming or going, not a second look direction added.
+
+First look, the Lower East Side alone (share of pixels lit at the 60% cutoffs):
+
+| pair | radar looks | AEF | TESSERA | aggregate |
+|---|---|---|---|---|
+| 2019 to 2021 | same | .001 | .050 | .002 |
+| 2022 to 2024 | same | .004 | .104 | .010 |
+| 2022 to 2025 | descending added | .024 | .185 | .036 |
+| 2024 to 2025 | descending added | .018 | .093 | .015 |
+
+TESSERA is noisy over dense blocks with the same looks both years, and the added direction about doubles it.
+`cities.py` takes 22 cities (14 US, 8 abroad), every pair, grouped by looks, with corrections (the median shift over
+the square; the main directions of change where a look direction changed, learned at the other cities) and their
+cost at the digging sites. Results to follow.
+
+## 26. White roofs (queued)
+
+New York coats roofs white (CoolRoofs since 2010; Local Law 94 since 2020 asks for a cool, green or solar roof on
+replacement). Nothing moves, but dark to white is one of the largest brightness changes a 10 m pixel makes, and the
+lidar never taught a repainted roof. No dated list of coated roofs exists after 2012, so `whiteroofs.py` finds roofs
+that went dark to white (and white to dark) in Earth Genome's Sentinel-2 yearly mosaics, 2022 to 2024 (the same
+radar looks both years at New York), on footprints built before 2015, in seven New York squares, and counts what
+each layer lights. Results to follow.
 
 ## Open
 
@@ -825,7 +972,12 @@ COG tile again), `crawl_1024_2x2_cache2.log` (a cache of 2 tiles: what panning b
 - Panels draw the raw aggregate on a continuous ramp, so ground below the cutoff still looks lit (the Sahara
   panel looks busier than its 4%). Ways to draw it: start the ramp at the cutoff, two tones, or the cutoff
   marked on the key.
-- The notebook: the joint model with the either gate (radar-safe), a recipe (US, abroad, either with burns
-  taught), AEF alone where TESSERA has no pixel; zoomed out, each cell carries its highest 10 m score. Kernel free
-  (Pyodide) is the path being tried: sections 20 to 22. A block's cutoff for the zoomed-out map wants setting on
-  blocks, not pixels (section 21: 4.5% of pixels lit, 36% of blocks).
+- The map (section 24): whether to offer the US-only recipe beside the abroad one (a switch, by place, or not).
+  Zoomed-out AlphaEarth is the model run on overview means; worth labeling as a where-to-look view.
+- Teaching TESSERA to the AlphaEarth model (section 24): a linear student on AlphaEarth's two years does not take
+  on the aggregate's quiet on fields. Untried: a student with more room (a small two-layer net, or AlphaEarth's
+  surroundings as in section 19's ctx head). `clean` costs nothing and helps a little; it could replace base.
+- Ideas named, not to-dos: a disturbance layer marking clearcuts (never hiding them); ESD (Landsat-based, 30 m)
+  compared at the lidar sites; TESSERA made ourselves from its open code and weights (2025 without the descending
+  radar, optical only, the full 192-d); a study of one chosen area with every model on the same inputs and 3DEP.
+- Teaching on more ground outside the US (more abroad lidar or satellite truth): not yet on the list of runs.

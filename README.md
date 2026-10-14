@@ -62,6 +62,14 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   storage in real browsers. `run_sql.mjs` runs a probe under Node; `export_model.py` writes the model it uses.
 - `cog_vs_mosaic.py` scores the digging sites from AlphaEarth's native COGs against the mosaic the models were taught
   on.
+- `distill.py` teaches AlphaEarth-only models with TESSERA's help (the joint model or the aggregate as a teacher,
+  blended with the lidar labels), the map's model unchanged in size, held out as `abroad_teach.py` holds out.
+- `cities.py` reads 22 dense cities (3 km squares, every year 2017 to 2025) and scores every pair, pixels grouped by
+  TESSERA's radar look directions in the two years; it tries corrections to TESSERA's change (the median shift over
+  the square, and the main directions of change where a look direction was added or dropped, learned at the other
+  cities) and their cost at the digging sites.
+- `whiteroofs.py` finds New York roofs that went from dark to white (or white to dark) in Earth Genome's Sentinel-2
+  yearly mosaics, on NYC building footprints built before 2015, and counts how much of each each layer lights.
 - `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
   aggregate (the joint model muted where neither embedding changed).
 
@@ -83,14 +91,33 @@ uv run python years.py           # 20 places x 9 years, every pair
 uv run python coarse.py          # about 40 minutes
 uv run python separate.py read   # about 2 hours, 4.2 GB into data/separate
 uv run python separate.py test   # SECTIONS=ABCD, writes results/separate.json
+uv run python distill.py         # about 45 minutes; distill.py report [catch]
+uv run python cities.py          # about an hour; cities.py report
+uv run python whiteroofs.py      # about 15 minutes, after cities.py has read its New York squares
 ```
+
+## The map
+
+`earthwork_map.py` is a marimo notebook (aef-earthwork's map, copied) with three layers: Aggregate (AlphaEarth and
+TESSERA joined pixel by pixel), AEF and TESSERA, in H3 hexagons that each carry their highest finer cell, with
+Earth Genome's Sentinel-2 under a held space bar. AlphaEarth is read from its COG overviews zoomed out and its 10 m
+mosaic from zoom 13.2; TESSERA has no coarser product, so it and the aggregate come in from zoom 13.2. Zoomed out past it the
+map moves to AEF and grays the other two out; zoomed back in, the layer it moved from comes back. The model is `models/model_abroad.npz` (`pyodide_probe/export_model.py`).
+
+```sh
+uv run marimo run earthwork_map.py --sandbox --watch
+```
+
+`notebook/earthwork_crawl.py` is the browser-only (Pyodide) try at the same scores, tile by tile: it works, but
+reads every 10 m pixel and is slow (FINDINGS 23).
 
 ## Data and credits
 
 - **TESSERA** v1.1 embeddings, University of Cambridge with dClimate, read from the Zarr on Source
   Cooperative (`tessera/tessera`).
 - **AlphaEarth Foundations Satellite Embedding dataset**, Google and Google DeepMind (CC BY 4.0), through
-  the Earthwork cache (Source Cooperative `tge-labs/aef-mosaic`).
+  the Earthwork cache (Source Cooperative `tge-labs/aef-mosaic`) and, in the notebook, its native COGs
+  (`tge-labs/aef`).
 - **USGS 3D Elevation Program (3DEP)** 1 m DEMs (public domain), the labels, through the Earthwork cache.
 - **Global Forest Change** v1.12 (Hansen, Potapov et al., University of Maryland; CC BY 4.0): tree cover loss
   year, tree cover in 2000 and the water mask, to place and group the new ground.
@@ -99,3 +126,6 @@ uv run python separate.py test   # SECTIONS=ABCD, writes results/separate.json
   clearing near each mine.
 - Abroad labels through the Earthwork cache: IGN France RGE ALTI and LiDAR HD (Licence Ouverte / Etalab 2.0),
   Hong Kong CEDD lidar, VIRTUAL SHIZUOKA (CC BY 4.0), NASA ICESat-2 and GEDI.
+- **NYC building footprints** (NYC Open Data `5zhs-2jue`) and **Earth Genome's Sentinel-2 yearly mosaics** (CC BY 4.0,
+  contains modified Copernicus Sentinel data) for the white roofs.
+- The notebook's basemap: © CARTO, © OpenStreetMap contributors; place search by Photon (komoot), OpenStreetMap data.

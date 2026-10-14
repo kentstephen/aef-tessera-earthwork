@@ -222,7 +222,7 @@ async def main():
             return dict(hit=True)
         if not REUSE:
             buf = Buffers()
-        R.stats.update(gets=0, bytes=0)
+        R.stats.update(gets=0, bytes=0, retries=0)
         t = time.time()
         tr0, tc0 = await read_tile(buf, fr, fc)
         t_read = time.time() - t
@@ -232,7 +232,7 @@ async def main():
             while len(cache) > CACHE:
                 cache.popitem(last=False)
         return dict(read_s=round(t_read, 1), score_s=round(time.time() - t - t_read, 1), mb=round(R.stats["bytes"] / 1e6),
-                    gets=R.stats["gets"], lit=round(lit, 4))
+                    gets=R.stats["gets"], retries=R.stats["retries"], lit=round(lit, 4))
 
     for k, (fr, fc) in enumerate(tiles):
         rec = dict(n=k, fr=fr, fc=fc, **(await visit(fr, fc)), heap_mb=heap_mb())
