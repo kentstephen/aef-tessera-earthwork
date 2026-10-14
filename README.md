@@ -1,4 +1,4 @@
-# aef-tessera-groundwork
+# aef-tessera-earthwork
 
 [Earthwork](https://github.com/kentstephen/aef-earthwork) maps where the ground itself was dug, filled or
 graded between two years, from AlphaEarth Foundations (AEF) annual embeddings, with a model taught where
@@ -28,6 +28,17 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
 - `abroad_teach.py` teaches the three models with the islands' lidar and the satellite-laser labels too
   (fields stay test only) and saves held-out scores for `quick.py` (`SCORES_DIR=data/scores-abroad`).
 - `desert.py` asks what TESSERA's change on unchanged ground follows (clear looks, radar, years, AEF).
+- `checks.py` tests the gains across sites rather than seeds (bootstrap over the digging sites, paired by
+  site), sets each site's cutoff on the others, and counts the digging on farm and marsh lidar each rule finds.
+- `models.py` keeps both recipes' final models and each rule's cutoff (`data/models`), for scoring new ground.
+- `ground.py` reads new ground nobody dug, picked from Hansen's Global Forest Change: forest burned to bare
+  ground, clearcuts, drawn-down reservoirs; `fire_teach.py` teaches the burned and cut ground as unchanged.
+- `years.py` reads quiet natural ground for every year 2017 to 2025 and scores every pair of years: the
+  Sentinel-1 gap of 2022 to 2024 and the span between the years.
+- `coverage.py` samples where in the world TESSERA leaves pixels out; `bytes_read.py` counts what a browser
+  would download per square kilometer of each embedding.
+- `coarse.py` scores cells of about 320 m and 640 m: the highest 10 m score in the cell against models taught
+  on pooled embeddings (AEF's overviews among them).
 - `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
   aggregate (the joint model muted where neither embedding changed).
 
@@ -42,6 +53,11 @@ uv run python tessera_sites.py abroad places
 SAVE_SCORES=1 uv run python aggregate.py   # about 20 minutes, writes results/aggregate.json
 uv run python quick.py 0.5 0.6 0.7
 uv run python panels.py katy-tx brazoria-tx
+uv run python checks.py          # data/scores and data/scores-abroad
+uv run python ground.py          # reads 31 places, then scores them with models.py's final models
+CUT=1 uv run python fire_teach.py   # about half an hour, writes data/scores-fire-abroad-cut
+uv run python years.py           # 20 places x 9 years, every pair
+uv run python coarse.py          # about 40 minutes
 ```
 
 ## Data and credits
@@ -51,5 +67,7 @@ uv run python panels.py katy-tx brazoria-tx
 - **AlphaEarth Foundations Satellite Embedding dataset**, Google and Google DeepMind (CC BY 4.0), through
   the Earthwork cache (Source Cooperative `tge-labs/aef-mosaic`).
 - **USGS 3D Elevation Program (3DEP)** 1 m DEMs (public domain), the labels, through the Earthwork cache.
+- **Global Forest Change** v1.12 (Hansen, Potapov et al., University of Maryland; CC BY 4.0): tree cover loss
+  year, tree cover in 2000 and the water mask, to place and group the new ground.
 - Abroad labels through the Earthwork cache: IGN France RGE ALTI and LiDAR HD (Licence Ouverte / Etalab 2.0),
   Hong Kong CEDD lidar, VIRTUAL SHIZUOKA (CC BY 4.0), NASA ICESat-2 and GEDI.

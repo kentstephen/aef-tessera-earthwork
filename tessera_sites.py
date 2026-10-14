@@ -135,7 +135,7 @@ def place_names():
 
 def site_path(name):
     """A site's AlphaEarth side: Earthwork's cache, or the AlphaEarth this repo read for a place with no truth."""
-    return f"{PLACES_DIR}/{name}.npz" if name.startswith("place-") else f"{EARTHWORK}/{name}.npz"
+    return f"{PLACES_DIR}/{name}.npz" if name.startswith(("place-", "ground-")) else f"{EARTHWORK}/{name}.npz"
 
 
 def aef_unit(year, rc):
@@ -237,9 +237,9 @@ def site_rc(meta):
         return grid_rc(W, N, w, h, sa.crs)
 
 
-def read_rc(g, name, rc, years, idx=None):
+def read_rc(g, name, rc, years, idx=None, tags="ba"):
     """TESSERA for the two years under AlphaEarth mosaic rows and columns rc (only the pixels idx of that box,
-    flattened, when given): int8 (n, 128), scales and observation counts per year."""
+    flattened, when given): int8 (n, 128), scales and observation counts per year, keyed by each year's tag."""
     y0, y1, x0, x1 = rc
     LON, LAT = np.meshgrid(AEF_X0 + (np.arange(x0, x1) + 0.5) * AEF_RES, AEF_Y0 - (np.arange(y0, y1) + 0.5) * AEF_RES)
     if idx is not None:
@@ -253,7 +253,7 @@ def read_rc(g, name, rc, years, idx=None):
     at = (row - r0) * (c1 - c0) + (col - c0)
     times = list(z["time"][:])
     out = {"zone": z.attrs["proj:code"]}
-    for tag, year in zip("ba", years):
+    for tag, year in zip(tags, years):
         t, ti = time.time(), times.index(year)
         q = z["embeddings"][ti, :, r0:r1, c0:c1]  # (128, h, w) int8
         out[f"{tag}_q"] = q.reshape(128, -1)[:, at].T.copy()  # (n, 128) int8

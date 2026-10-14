@@ -41,9 +41,9 @@ def subset(d, idx):
     return {**{k: d[k][idx] for k in keep}, "kind": d["kind"], "ok": np.ones(len(idx), bool)}
 
 
-def main():
-    import aggregate
-    aggregate.SCORES = SCORES
+def rows(use=("islands", "space")):
+    """The taught rows of every site and each row's weight: (T, W, D, US digging, US quiet, abroad sites). D holds
+    the US teaching sites loaded."""
     compare.RNG = np.random.default_rng(0)
     have = lambda n: os.path.exists(f"{OUT}/{n}.npz")
     us = [n for n in SITES if have(n)]
@@ -53,11 +53,8 @@ def main():
     for n in us:
         if n not in teach + quiet:
             D.pop(n)
-    use = os.environ.get("ABROAD_SET", "islands,space").split(",")
     islands = [n for n in abroad_sites() if n.startswith(("pr-", "vi-")) and have(n)] if "islands" in use else []
     space = [n for n in space_names() if have(n)] if "space" in use else []
-
-    # the taught rows of every site, with each row's weight
     T, W = {}, {}
     for n in teach + quiet:
         T[n] = subset(D[n], sample(D[n], quiet=n in quiet))
@@ -75,15 +72,27 @@ def main():
         W[n] = np.full(len(idx), W_SPACE if n.startswith("space-") else 1.0)
         abroad.append(n)
         del d
+    return T, W, D, teach, quiet, abroad
+
+
+def fit_rows(T, W, train, which):
+    X = np.concatenate([feats(T[n], np.arange(len(T[n]["y"])), which) for n in train])
+    y = np.concatenate([(T[n]["y"] == 1).astype(int) for n in train])
+    w = np.concatenate([W[n] for n in train])
+    return LogisticRegression(C=0.3, max_iter=3000, class_weight="balanced").fit(X, y, sample_weight=w)
+
+
+def main():
+    import aggregate
+    aggregate.SCORES = SCORES
+    have = lambda n: os.path.exists(f"{OUT}/{n}.npz")
+    T, W, D, teach, quiet, abroad = rows(os.environ.get("ABROAD_SET", "islands,space").split(","))
     fold = {n: i % FOLDS for i, n in enumerate(sorted(abroad))}
     print(f"taught: {len(teach)} US digging, {len(quiet)} US quiet, {len(abroad)} abroad ({FOLDS} folds)", flush=True)
     every = np.arange
 
     def fit(train, which):
-        X = np.concatenate([feats(T[n], every(len(T[n]["y"])), which) for n in train])
-        y = np.concatenate([(T[n]["y"] == 1).astype(int) for n in train])
-        w = np.concatenate([W[n] for n in train])
-        return LogisticRegression(C=0.3, max_iter=3000, class_weight="balanced").fit(X, y, sample_weight=w)
+        return fit_rows(T, W, train, which)
 
     def bounds(train):
         us_train = [n for n in train if n in teach + quiet]

@@ -36,12 +36,16 @@ def either(s, b, lo=0.05, w=0.10, scale=1.0):
 
 RULES = {
     "aef_gated": lambda s, b: s["aef"] * gate_a(s),
+    "tes": lambda s, b: s["tes"],
     "mean": lambda s, b: (s["aef"] * gate_a(s) + s["tes"]) / 2,
     "both": lambda s, b: s["both"],
     "both_either": lambda s, b: s["both"] * either(s, b),
     # a gentler either gate: opens sooner, so digging with little change keeps more of its score
     "either_soft": lambda s, b: s["both"] * either(s, b, 0.03, 0.05, 0.6),
     "either_sqrt": lambda s, b: s["both"] * np.sqrt(either(s, b)),
+    # where TESSERA had radar in only one of the two years its change can be the radar's coming or going: there
+    # only AlphaEarth's change opens the gate
+    "either_radar": lambda s, b: s["both"] * np.where(s["flip"], gate_a(s), either(s, b)),
     # the joint model held under the mean: quiet where the joint model is (crops, burns), and where the mean
     # is (deserts, held down by AlphaEarth's gate)
     "min_both_mean": lambda s, b: np.minimum(s["both"], (s["aef"] * gate_a(s) + s["tes"]) / 2),

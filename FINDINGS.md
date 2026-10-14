@@ -108,12 +108,131 @@ folds.
   it as change everywhere.
 - Fewer TESSERA numbers would save no bytes: its Zarr chunks hold all 128 together.
 
+## 7. How far the gains carry
+
+`checks.py`, on the held-out scores. The seeds only changed the models' fit; here the 14 digging sites themselves
+are resampled (bootstrap over sites) and each rule's AP is paired with the map today's at the same site.
+
+| gain in AP over the map today | US-taught | wins | Wilcoxon p | abroad-taught | wins | Wilcoxon p |
+|---|---|---|---|---|---|---|
+| mean of the two | +.042 [.020, .064] | 12/14 | .004 | +.043 [.019, .066] | 10/14 | .005 |
+| joint model | +.021 [-.001, .045] | 9/14 | .14 | +.032 [-.001, .065] | 10/14 | .09 |
+| joint x either gate | +.030 [.012, .047] | 11/14 | .009 | +.041 [.018, .064] | 11/14 | .007 |
+| joint x sqrt(either gate) | +.033 [.014, .051] | 11/14 | .005 | +.043 [.019, .067] | 11/14 | .005 |
+
+- The gated and averaged rules' gains hold across sites; the joint model alone does not clear zero.
+- The three mines all gain under the either gate (Four Corners, Hibbing, Mountain Pass); the joint model alone
+  loses at Hibbing (-.04 US-taught, -.08 abroad-taught).
+- Crop switches: every combination lights fewer than the map at 23 to 27 of 27 crop sets; farms 6 of 6.
+- One cutoff for the map: with each site's cutoff set on the other 13, the share of moved ground found swings
+  from under .2 (Four Corners, Hibbing, Lancaster) to over .9 (Katy), sd about .20, under every rule. A fixed
+  cutoff finds very different shares at different places; that is the ground, not the rule.
+- Digging on farms: the joint model alone finds land leveling the others miss (Fresno .56, Arkansas delta .36,
+  against .09 and .08 for the map), but the either gate takes most of that back (.10, .13): leveled fields
+  change little in either embedding.
+
+## 8. New ground: burned forest, clearcuts, reservoirs
+
+`ground.py`. No lidar: 6 km squares picked from Hansen's Global Forest Change (v1.12) so the event's ground is
+about half the square, the years either side, and the share of that ground lit at each rule's 60% cutoff.
+Fifteen fires (ten in the US, five abroad), ten clearcut regions (US, Sweden, Finland, New Zealand, Brazil,
+Chile), six reservoirs.
+
+| share lit, US-taught | map today | TESSERA | mean | joint | joint x either |
+|---|---|---|---|---|---|
+| forest burned to bare (15 fires) | .013 | .061 | .007 | .004 | .025 |
+| clearcuts (10 regions) | .266 | .306 | .228 | .216 | .378 |
+| standing forest beside them | .001 to .002 | .006 to .009 | .001 to .002 | .002 to .010 | .002 to .003 |
+
+- Burned forest is mostly not a trap: Grizzly Flats was the exception, not the rule. TESSERA alone lights some
+  (Mosquito .50).
+- Clearcuts are: every rule lights a quarter or more of the cut ground, the either gate most (Kainuu .79,
+  Oregon Coast Range .75, Tres Lagoas .39). Abroad teaching quiets the Nordic cuts and brightens the Brazilian
+  and southeastern US ones.
+- Reservoirs are ambiguous: Hansen's water is the lake when full, so the bathtub ring between the two years'
+  levels falls in the "land" group, and both groups light (.1 to .5). A drawn-down shore is also ground whose
+  surface moved, as lidar would see it.
+
+## 9. Teaching burns and clearcuts as quiet
+
+`fire_teach.py`: the abroad recipe plus 20,000 pixels of burned or cut ground from each place, taught as
+unchanged; fires and cuts held out in folds with the abroad sites.
+
+| joint x either gate, abroad-taught | AP | lidar burns | clearcuts (held out) | storm | crop | satellite digging found |
+|---|---|---|---|---|---|---|
+| without | .583 | .187 | .283 | .110 | .041 | .41 |
+| burns and clearcuts taught | .575 | .000 | .051 | .029 | .035 | .40 |
+| burns only taught (clearcuts test only) | .582 | .000 | .150 | .089 | .038 | .41 |
+
+- Grizzly Flats goes dark, clearcuts fall from 28% to 5%, and the storm coast quiets as a side effect.
+- The cost is at mines in forest and woodland: Kolwezi's digging found falls from .52 to .28, Hibbing's from
+  .20 to .12; mean AP -.008 [-.016, -.001], 11 of 14 sites slightly lower. Clearing is the first stage of a
+  mine, and the model learns to doubt it.
+- Burns alone take Grizzly Flats to zero at almost no cost (AP -.0015 [-.005, +.002]), halve the clearcuts'
+  false alarms though no clearcut was taught (.28 to .15), and cost Kolwezi less (.52 to .44). Hibbing's found
+  falls to .12 under both, while its AP rises (.545 to .563): its scores shift against the cutoff, not its ranking.
+
+## 10. Which years: the radar gap
+
+`years.py`: 20 squares of quiet natural ground (deserts, steppe, savanna, rainforest, taiga), every pair of
+years 2017 to 2025. Seven had no radar, or almost none, in 2022 to 2024 (Sahara, Simpson, Kalahari, Kazakh
+steppe, Yakutia, northern Ontario, Mongolia).
+
+| share lit | radar both years | radar one year only | neither year |
+|---|---|---|---|
+| map today, US-taught | .004 | .011 | .000 |
+| TESSERA, US-taught | .092 | .192 | .003 |
+| joint x either, US-taught | .002 | .104 | .000 |
+| joint x either, abroad-taught | .001 | .035 | .000 |
+| joint x radar-safe gate, US-taught | .002 | .005 | .000 |
+| joint x radar-safe gate, abroad-taught | .001 | .000 | .000 |
+
+- A pair where TESSERA had radar in one year and not the other is the hazard; pairs inside the gap are fine.
+- The radar-safe gate opens on AEF's change alone where TESSERA's radar came or went (`either_radar` in
+  quick.py). On every held-out column it equals the either gate (no US site has such pixels; Shurugwi's 13
+  labels are found the same), so it costs nothing measured.
+- The span between the years barely matters for the combined rules (.000 to .009 at 1 to 8 years).
+
+## 11. Where TESSERA has no pixel
+
+`coverage.py`, 705 random land points: TESSERA leaves out 19% of land in 2017 (25% in the tropics) and under 1%
+in 2020, 2022 and 2024 (tropics 1 to 2%, with whole blocks missing in places such as Chongqing and Sulawesi).
+At Fishers (2017, 61% missing) AEF alone on the missing ground lights .016 of unchanged ground against the
+aggregate's .015 on the rest, so the fallback should not draw a seam.
+
+## 12. Zoomed out
+
+`coarse.py`: cells of about 320 m on the lidar sites, dug (0.2 ha or more moved) against quiet (none moved),
+each digging site held out.
+
+| cell score | AP | quiet farm cells lit at 60% of dug cells found |
+|---|---|---|
+| highest aggregate score in the cell | .872 | .053 |
+| highest map score in the cell | .858 | .117 |
+| AEF mean-pooled per year (as AEF's COG overviews), model on cells | .757 | .128 |
+| model on pooled AEF change (mean, std, min, max) | .746 | .156 |
+| model on pooled TESSERA change | .737 | .146 |
+| model on both pooled | .756 | .129 |
+
+- Carrying the highest 10 m score up beats every model taught on pooled embeddings, AEF's overviews included.
+  At 640 m the order holds (.95 for the highest score against .90 to .91).
+
+## 13. What the browser would read
+
+`bytes_read.py`, per year: AEF about 0.52 MB per square km (its chunks compress to .4 to .7), TESSERA 1.25 to
+1.42 MB (barely compresses), about 2.5 times AEF. The aggregate needs both years of both, so the start view
+that reads about 325 MB of AEF would read about 800 MB more.
+
 ## Open
 
-- The burn cost (Grizzly Flats): more burned forest as quiet teaching ground (only two burn sites are
-  cached), or fire perimeters (MTBS, NIFC) as context on the map.
+- Clearcuts: teaching them as quiet works on clearcuts and costs forest mines (Kolwezi); teaching burns alone
+  gets half the way at no measured cost. Between the two: fewer cut pixels, a lower weight, or cuts taught only
+  far from any digging.
+- The radar-safe gate (`either_radar`) is free on everything measured but tested on digging at only 13
+  satellite labels with radar in one year.
+- Reservoir shores need a per-year water mask to say whether the lit ground is the bathtub ring.
 - Panels draw the raw aggregate on a continuous ramp, so ground below the cutoff still looks lit (the Sahara
   panel looks busier than its 4%). Ways to draw it: start the ramp at the cutoff, two tones, or the cutoff
   marked on the key.
-- The notebook: the joint model with the either gate, US-taught or abroad-taught, with AEF alone where
-  TESSERA has no pixel.
+- The notebook: the joint model with the either gate (radar-safe), US-taught or abroad-taught, with AEF alone
+  where TESSERA has no pixel; zoomed out, each cell carries its highest 10 m score.

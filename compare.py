@@ -46,6 +46,8 @@ def unit(v):
 
 def kind_of(name, meta):
     """The group a site reports under; abroad groups get their own names so Hong Kong's farm is not a US farm."""
+    if name.startswith("ground-"):  # ground.py's places carry their own kind
+        return meta["kind"]
     for pre, k in (("pr-", "island"), ("vi-", "island"), ("reunion-", "tropic"), ("guadeloupe-", "tropic"),
                    ("hk-", "hongkong"), ("shizuoka-", "shizuoka"), ("place-", "notruth")):
         if name.startswith(pre):

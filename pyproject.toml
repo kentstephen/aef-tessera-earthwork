@@ -1,5 +1,5 @@
 [project]
-name = "aef-tessera-groundwork"
+name = "aef-tessera-earthwork"
 version = "0.1.0"
 description = "Earthwork with a second embedding: does TESSERA see the ground lidar says moved, and does it agree with AlphaEarth?"
 readme = "README.md"
