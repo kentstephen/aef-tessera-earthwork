@@ -1,0 +1,494 @@
+{
+ "lake-mead-nv": {
+  "years": [
+   2019,
+   2022
+  ],
+  "px": {
+   "water both": 163311,
+   "land both": 159439,
+   "water to land": 30338,
+   "land to water": 0
+  },
+  "hansen water that was water to land": 0.141,
+  "hansen land that was water to land": 0.009,
+  "us": {
+   "water both": {
+    "aef_gated": 0.034,
+    "tes": 0.031,
+    "mean": 0.034,
+    "both": 0.041,
+    "both_either": 0.029,
+    "either_radar": 0.029
+   },
+   "land both": {
+    "aef_gated": 0.269,
+    "tes": 0.036,
+    "mean": 0.097,
+    "both": 0.281,
+    "both_either": 0.15,
+    "either_radar": 0.15
+   },
+   "water to land": {
+    "aef_gated": 0.995,
+    "tes": 0.958,
+    "mean": 0.99,
+    "both": 0.997,
+    "both_either": 0.995,
+    "either_radar": 0.995
+   },
+   "land to water": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   }
+  },
+  "abroad": {
+   "water both": {
+    "aef_gated": 0.024,
+    "tes": 0.027,
+    "mean": 0.027,
+    "both": 0.018,
+    "both_either": 0.022,
+    "either_radar": 0.022
+   },
+   "land both": {
+    "aef_gated": 0.204,
+    "tes": 0.066,
+    "mean": 0.124,
+    "both": 0.13,
+    "both_either": 0.098,
+    "either_radar": 0.098
+   },
+   "water to land": {
+    "aef_gated": 0.992,
+    "tes": 0.964,
+    "mean": 0.992,
+    "both": 0.987,
+    "both_either": 0.992,
+    "either_radar": 0.992
+   },
+   "land to water": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   }
+  }
+ },
+ "lake-oroville-ca": {
+  "years": [
+   2021,
+   2023
+  ],
+  "px": {
+   "water both": 154227,
+   "land both": 110512,
+   "water to land": 11,
+   "land to water": 74615
+  },
+  "hansen water that was water to land": 0.0,
+  "hansen land that was water to land": 0.0,
+  "us": {
+   "water both": {
+    "aef_gated": 0.013,
+    "tes": 0.002,
+    "mean": 0.001,
+    "both": 0.001,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   },
+   "land both": {
+    "aef_gated": 0.164,
+    "tes": 0.108,
+    "mean": 0.137,
+    "both": 0.046,
+    "both_either": 0.09,
+    "either_radar": 0.09
+   },
+   "water to land": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   },
+   "land to water": {
+    "aef_gated": 0.976,
+    "tes": 0.633,
+    "mean": 0.91,
+    "both": 0.464,
+    "both_either": 0.729,
+    "either_radar": 0.729
+   }
+  },
+  "abroad": {
+   "water both": {
+    "aef_gated": 0.001,
+    "tes": 0.0,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   },
+   "land both": {
+    "aef_gated": 0.105,
+    "tes": 0.147,
+    "mean": 0.134,
+    "both": 0.032,
+    "both_either": 0.055,
+    "either_radar": 0.055
+   },
+   "water to land": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   },
+   "land to water": {
+    "aef_gated": 0.898,
+    "tes": 0.61,
+    "mean": 0.841,
+    "both": 0.252,
+    "both_either": 0.403,
+    "either_radar": 0.403
+   }
+  }
+ },
+ "folsom-ca": {
+  "years": [
+   2021,
+   2023
+  ],
+  "px": {
+   "water both": 124662,
+   "land both": 143384,
+   "water to land": 0,
+   "land to water": 58429
+  },
+  "hansen water that was water to land": 0.0,
+  "hansen land that was water to land": 0.0,
+  "us": {
+   "water both": {
+    "aef_gated": 0.015,
+    "tes": 0.0,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   },
+   "land both": {
+    "aef_gated": 0.17,
+    "tes": 0.149,
+    "mean": 0.172,
+    "both": 0.103,
+    "both_either": 0.152,
+    "either_radar": 0.152
+   },
+   "water to land": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   },
+   "land to water": {
+    "aef_gated": 0.979,
+    "tes": 0.707,
+    "mean": 0.944,
+    "both": 0.63,
+    "both_either": 0.849,
+    "either_radar": 0.849
+   }
+  },
+  "abroad": {
+   "water both": {
+    "aef_gated": 0.005,
+    "tes": 0.0,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   },
+   "land both": {
+    "aef_gated": 0.123,
+    "tes": 0.191,
+    "mean": 0.154,
+    "both": 0.059,
+    "both_either": 0.09,
+    "either_radar": 0.09
+   },
+   "water to land": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   },
+   "land to water": {
+    "aef_gated": 0.941,
+    "tes": 0.669,
+    "mean": 0.912,
+    "both": 0.355,
+    "both_either": 0.49,
+    "either_radar": 0.49
+   }
+  }
+ },
+ "lake-powell-ut": {
+  "years": [
+   2019,
+   2022
+  ],
+  "px": {
+   "water both": 33629,
+   "land both": 287675,
+   "water to land": 15944,
+   "land to water": 0
+  },
+  "hansen water that was water to land": 0.175,
+  "hansen land that was water to land": 0.024,
+  "us": {
+   "water both": {
+    "aef_gated": 0.005,
+    "tes": 0.012,
+    "mean": 0.007,
+    "both": 0.018,
+    "both_either": 0.009,
+    "either_radar": 0.009
+   },
+   "land both": {
+    "aef_gated": 0.159,
+    "tes": 0.164,
+    "mean": 0.139,
+    "both": 0.935,
+    "both_either": 0.121,
+    "either_radar": 0.119
+   },
+   "water to land": {
+    "aef_gated": 0.761,
+    "tes": 0.769,
+    "mean": 0.776,
+    "both": 0.83,
+    "both_either": 0.76,
+    "either_radar": 0.759
+   },
+   "land to water": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   }
+  },
+  "abroad": {
+   "water both": {
+    "aef_gated": 0.004,
+    "tes": 0.012,
+    "mean": 0.007,
+    "both": 0.011,
+    "both_either": 0.006,
+    "either_radar": 0.006
+   },
+   "land both": {
+    "aef_gated": 0.148,
+    "tes": 0.131,
+    "mean": 0.122,
+    "both": 0.665,
+    "both_either": 0.111,
+    "either_radar": 0.11
+   },
+   "water to land": {
+    "aef_gated": 0.747,
+    "tes": 0.767,
+    "mean": 0.773,
+    "both": 0.792,
+    "both_either": 0.752,
+    "either_radar": 0.751
+   },
+   "land to water": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   }
+  }
+ },
+ "great-salt-lake-ut": {
+  "years": [
+   2020,
+   2022
+  ],
+  "px": {
+   "water both": 220856,
+   "land both": 134882,
+   "water to land": 614,
+   "land to water": 509
+  },
+  "hansen water that was water to land": 0.002,
+  "hansen land that was water to land": 0.002,
+  "us": {
+   "water both": {
+    "aef_gated": 0.08,
+    "tes": 0.405,
+    "mean": 0.083,
+    "both": 0.06,
+    "both_either": 0.095,
+    "either_radar": 0.095
+   },
+   "land both": {
+    "aef_gated": 0.004,
+    "tes": 0.001,
+    "mean": 0.001,
+    "both": 0.006,
+    "both_either": 0.002,
+    "either_radar": 0.002
+   },
+   "water to land": {
+    "aef_gated": 0.485,
+    "tes": 0.314,
+    "mean": 0.51,
+    "both": 0.492,
+    "both_either": 0.562,
+    "either_radar": 0.562
+   },
+   "land to water": {
+    "aef_gated": 0.022,
+    "tes": 0.014,
+    "mean": 0.004,
+    "both": 0.12,
+    "both_either": 0.02,
+    "either_radar": 0.02
+   }
+  },
+  "abroad": {
+   "water both": {
+    "aef_gated": 0.074,
+    "tes": 0.038,
+    "mean": 0.064,
+    "both": 0.062,
+    "both_either": 0.057,
+    "either_radar": 0.057
+   },
+   "land both": {
+    "aef_gated": 0.012,
+    "tes": 0.002,
+    "mean": 0.001,
+    "both": 0.032,
+    "both_either": 0.005,
+    "either_radar": 0.005
+   },
+   "water to land": {
+    "aef_gated": 0.448,
+    "tes": 0.192,
+    "mean": 0.419,
+    "both": 0.456,
+    "both_either": 0.446,
+    "either_radar": 0.446
+   },
+   "land to water": {
+    "aef_gated": 0.024,
+    "tes": 0.014,
+    "mean": 0.016,
+    "both": 0.132,
+    "both_either": 0.016,
+    "either_radar": 0.016
+   }
+  }
+ },
+ "sau-es": {
+  "years": [
+   2021,
+   2023
+  ],
+  "px": {
+   "water both": 19781,
+   "land both": 325453,
+   "water to land": 9583,
+   "land to water": 10
+  },
+  "hansen water that was water to land": 0.161,
+  "hansen land that was water to land": 0.017,
+  "us": {
+   "water both": {
+    "aef_gated": 0.025,
+    "tes": 0.199,
+    "mean": 0.045,
+    "both": 0.031,
+    "both_either": 0.072,
+    "either_radar": 0.072
+   },
+   "land both": {
+    "aef_gated": 0.019,
+    "tes": 0.016,
+    "mean": 0.016,
+    "both": 0.015,
+    "both_either": 0.017,
+    "either_radar": 0.017
+   },
+   "water to land": {
+    "aef_gated": 0.977,
+    "tes": 0.999,
+    "mean": 0.987,
+    "both": 0.989,
+    "both_either": 0.996,
+    "either_radar": 0.996
+   },
+   "land to water": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   }
+  },
+  "abroad": {
+   "water both": {
+    "aef_gated": 0.014,
+    "tes": 0.057,
+    "mean": 0.024,
+    "both": 0.004,
+    "both_either": 0.009,
+    "either_radar": 0.009
+   },
+   "land both": {
+    "aef_gated": 0.011,
+    "tes": 0.033,
+    "mean": 0.01,
+    "both": 0.007,
+    "both_either": 0.009,
+    "either_radar": 0.009
+   },
+   "water to land": {
+    "aef_gated": 0.951,
+    "tes": 0.984,
+    "mean": 0.977,
+    "both": 0.827,
+    "both_either": 0.93,
+    "either_radar": 0.93
+   },
+   "land to water": {
+    "aef_gated": null,
+    "tes": null,
+    "mean": null,
+    "both": null,
+    "both_either": null,
+    "either_radar": null
+   }
+  }
+ }
+}

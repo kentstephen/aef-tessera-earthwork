@@ -1,0 +1,953 @@
+{
+ "scores-fire-abroad": {
+  "aef_gated": {
+   "ap": 0.5409875914339105,
+   "lit": {
+    "burn": 0.0007901151393769526,
+    "fire": 0.0009388197588743835,
+    "cut": 0.1587268734483785,
+    "storm": 0.11750185655862018,
+    "crop": 0.20243792411732092,
+    "farm": 0.09537996660529123
+   },
+   "found": {
+    "space-kolwezi-cd": 0.015306122448979591,
+    "hibbing-mn": 0.061342766822218876,
+    "space-madre-de-dios-pe": 0.2857142857142857,
+    "space-sangatta-id": 0.3076923076923077,
+    "space-adaro-id": 0.6785714285714286,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.34285714285714286,
+    "space-fort-hills-ab": 0.5199684449265358,
+    "space-detour-lake-on": 0.35064935064935066,
+    "space-orapa-bw": 0.711622125543816,
+    "space-jwaneng-bw": 0.6081127535235477,
+    "space-ekibastuz-kz": 0.41414141414141414,
+    "space-sokolov-kz": 0.3611111111111111,
+    "ky-pike": 0.25937081659973227,
+    "ky-perry": 0.27002077082852527,
+    "ky-clay": 0.6432748538011696
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "test",
+    "space-sangatta-id": "test",
+    "space-adaro-id": "test",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "test",
+    "space-fort-hills-ab": "test",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "test",
+    "ky-perry": "test",
+    "ky-clay": "test"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8258291588151918,
+    "hibbing-mn": 0.5006088791692309,
+    "space-madre-de-dios-pe": 0.14242780385258713,
+    "space-sangatta-id": 0.6577594351350007,
+    "space-adaro-id": 0.8943070022261135,
+    "space-boke-gn": 0.9970695970695971,
+    "space-fort-hills-ab": 0.9244571285593985,
+    "space-detour-lake-on": 0.5278793081547578,
+    "space-orapa-bw": 0.6468561590120873,
+    "space-jwaneng-bw": 0.6396314672695919,
+    "space-ekibastuz-kz": 0.3925935016192243,
+    "space-sokolov-kz": 0.2869447403673086,
+    "ky-pike": 0.19382975043546,
+    "ky-perry": 0.5519739434008797,
+    "ky-clay": 0.7018194272378426
+   }
+  },
+  "both_either": {
+   "ap": 0.5816666358072276,
+   "lit": {
+    "burn": 5.037306290386603e-06,
+    "fire": 0.00010177144613028304,
+    "cut": 0.1499833404707224,
+    "storm": 0.08930159029001164,
+    "crop": 0.03799132320507042,
+    "farm": 0.0128870006118136
+   },
+   "found": {
+    "space-kolwezi-cd": 0.4362244897959184,
+    "hibbing-mn": 0.12072858648201114,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.38461538461538464,
+    "space-adaro-id": 0.6428571428571429,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.7428571428571429,
+    "space-fort-hills-ab": 0.31456463859579925,
+    "space-detour-lake-on": 0.025974025974025976,
+    "space-orapa-bw": 0.6041019266625233,
+    "space-jwaneng-bw": 0.44860776899278104,
+    "space-ekibastuz-kz": 0.2558922558922559,
+    "space-sokolov-kz": 0.3333333333333333,
+    "ky-pike": 0.30287817938420347,
+    "ky-perry": 0.37479806138933763,
+    "ky-clay": 0.6199266823775857
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "test",
+    "space-sangatta-id": "test",
+    "space-adaro-id": "test",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "test",
+    "space-fort-hills-ab": "test",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "test",
+    "ky-perry": "test",
+    "ky-clay": "test"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8518490126822315,
+    "hibbing-mn": 0.5445350836164484,
+    "space-madre-de-dios-pe": 0.1420192924658574,
+    "space-sangatta-id": 0.7352978469494305,
+    "space-adaro-id": 0.8348563074768774,
+    "space-boke-gn": 0.9961570593149541,
+    "space-fort-hills-ab": 0.9263676892043788,
+    "space-detour-lake-on": 0.3657286813359956,
+    "space-orapa-bw": 0.611181138025621,
+    "space-jwaneng-bw": 0.5099784292817295,
+    "space-ekibastuz-kz": 0.3625237445303033,
+    "space-sokolov-kz": 0.2531549810815705,
+    "ky-pike": 0.29625473215917864,
+    "ky-perry": 0.5685842142358042,
+    "ky-clay": 0.7187740562808065
+   }
+  },
+  "either_radar": {
+   "ap": 0.5816623515438444,
+   "lit": {
+    "burn": 5.037306290386603e-06,
+    "fire": 0.00010177144613028304,
+    "cut": 0.1499833404707224,
+    "storm": 0.08930159029001164,
+    "crop": 0.03799132320507042,
+    "farm": 0.0128870006118136
+   },
+   "found": {
+    "space-kolwezi-cd": 0.4362244897959184,
+    "hibbing-mn": 0.12072858648201114,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.38461538461538464,
+    "space-adaro-id": 0.6428571428571429,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.7428571428571429,
+    "space-fort-hills-ab": 0.31456463859579925,
+    "space-detour-lake-on": 0.025974025974025976,
+    "space-orapa-bw": 0.603480422622747,
+    "space-jwaneng-bw": 0.4482640082502578,
+    "space-ekibastuz-kz": 0.24915824915824916,
+    "space-sokolov-kz": 0.25,
+    "ky-pike": 0.30287817938420347,
+    "ky-perry": 0.37479806138933763,
+    "ky-clay": 0.6199266823775857
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "test",
+    "space-sangatta-id": "test",
+    "space-adaro-id": "test",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "test",
+    "space-fort-hills-ab": "test",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "test",
+    "ky-perry": "test",
+    "ky-clay": "test"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8518490126822315,
+    "hibbing-mn": 0.5445350836164484,
+    "space-madre-de-dios-pe": 0.1420192924658574,
+    "space-sangatta-id": 0.7352978469494305,
+    "space-adaro-id": 0.8348563074768774,
+    "space-boke-gn": 0.9961570593149541,
+    "space-fort-hills-ab": 0.9263676892043788,
+    "space-detour-lake-on": 0.3657286813359956,
+    "space-orapa-bw": 0.6264738969827726,
+    "space-jwaneng-bw": 0.5078345205138959,
+    "space-ekibastuz-kz": 0.4083181580021989,
+    "space-sokolov-kz": 0.27838574975777747,
+    "ky-pike": 0.2962928847248936,
+    "ky-perry": 0.5685842142358042,
+    "ky-clay": 0.7187740562808065
+   }
+  }
+ },
+ "scores-fire-abroad-cut": {
+  "aef_gated": {
+   "ap": 0.5357222217453388,
+   "lit": {
+    "burn": 0.0013136253816310802,
+    "fire": 0.00016783805261449616,
+    "cut": 0.08060489111558208,
+    "storm": 0.057182005501689205,
+    "crop": 0.20427103128186272,
+    "farm": 0.09940370313294007
+   },
+   "found": {
+    "space-kolwezi-cd": 0.007653061224489796,
+    "hibbing-mn": 0.06555772994129158,
+    "space-madre-de-dios-pe": 0.23809523809523808,
+    "space-sangatta-id": 0.3076923076923077,
+    "space-adaro-id": 0.5714285714285714,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.3142857142857143,
+    "space-fort-hills-ab": 0.5861354895966867,
+    "space-detour-lake-on": 0.36363636363636365,
+    "space-orapa-bw": 0.6090739589807334,
+    "space-jwaneng-bw": 0.5713303540735648,
+    "space-ekibastuz-kz": 0.494949494949495,
+    "space-sokolov-kz": 0.3611111111111111,
+    "ky-pike": 0.25234270414993304,
+    "ky-perry": 0.2254788829909993,
+    "ky-clay": 0.603473858776294
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "test",
+    "space-sangatta-id": "test",
+    "space-adaro-id": "test",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "test",
+    "space-fort-hills-ab": "test",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "test",
+    "ky-perry": "test",
+    "ky-clay": "test"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8119598358606467,
+    "hibbing-mn": 0.5178913468294858,
+    "space-madre-de-dios-pe": 0.1594549669738337,
+    "space-sangatta-id": 0.673706415505058,
+    "space-adaro-id": 0.9127634567253462,
+    "space-boke-gn": 0.9970695970695971,
+    "space-fort-hills-ab": 0.9254613792726195,
+    "space-detour-lake-on": 0.4916897529837445,
+    "space-orapa-bw": 0.6779192964036639,
+    "space-jwaneng-bw": 0.7055718415799743,
+    "space-ekibastuz-kz": 0.4049929698093847,
+    "space-sokolov-kz": 0.26639407763224865,
+    "ky-pike": 0.21654162466616148,
+    "ky-perry": 0.5483615335159991,
+    "ky-clay": 0.6990627496713776
+   }
+  },
+  "both_either": {
+   "ap": 0.5748449451617823,
+   "lit": {
+    "burn": 1.2648013376538946e-06,
+    "fire": 2.2232703681558552e-05,
+    "cut": 0.05104251502187388,
+    "storm": 0.02896978553572736,
+    "crop": 0.03450073268212723,
+    "farm": 0.016197735231419146
+   },
+   "found": {
+    "space-kolwezi-cd": 0.2780612244897959,
+    "hibbing-mn": 0.11975011290079783,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.38461538461538464,
+    "space-adaro-id": 0.5357142857142857,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.4857142857142857,
+    "space-fort-hills-ab": 0.3828024849620353,
+    "space-detour-lake-on": 0.025974025974025976,
+    "space-orapa-bw": 0.5574891236793039,
+    "space-jwaneng-bw": 0.40838776211756617,
+    "space-ekibastuz-kz": 0.2962962962962963,
+    "space-sokolov-kz": 0.3611111111111111,
+    "ky-pike": 0.32597054886211513,
+    "ky-perry": 0.3625663512577891,
+    "ky-clay": 0.5960111722091298
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "test",
+    "space-sangatta-id": "test",
+    "space-adaro-id": "test",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "test",
+    "space-fort-hills-ab": "test",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "test",
+    "ky-perry": "test",
+    "ky-clay": "test"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8542552279238538,
+    "hibbing-mn": 0.5627571962290878,
+    "space-madre-de-dios-pe": 0.15293222266395945,
+    "space-sangatta-id": 0.754109779109779,
+    "space-adaro-id": 0.8534355031981494,
+    "space-boke-gn": 0.9954822954822956,
+    "space-fort-hills-ab": 0.9275317492481202,
+    "space-detour-lake-on": 0.3728745079263863,
+    "space-orapa-bw": 0.6382988575809385,
+    "space-jwaneng-bw": 0.5771336110521245,
+    "space-ekibastuz-kz": 0.37831289277266356,
+    "space-sokolov-kz": 0.24544345390780378,
+    "ky-pike": 0.29571847662645667,
+    "ky-perry": 0.552413575900827,
+    "ky-clay": 0.7121536058729248
+   }
+  },
+  "either_radar": {
+   "ap": 0.5748404430394134,
+   "lit": {
+    "burn": 1.2648013376538946e-06,
+    "fire": 2.2232703681558552e-05,
+    "cut": 0.05104251502187388,
+    "storm": 0.02896978553572736,
+    "crop": 0.03450073268212723,
+    "farm": 0.016197735231419146
+   },
+   "found": {
+    "space-kolwezi-cd": 0.2780612244897959,
+    "hibbing-mn": 0.11975011290079783,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.38461538461538464,
+    "space-adaro-id": 0.5357142857142857,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.4857142857142857,
+    "space-fort-hills-ab": 0.3828024849620353,
+    "space-detour-lake-on": 0.025974025974025976,
+    "space-orapa-bw": 0.5568676196395277,
+    "space-jwaneng-bw": 0.40770024063251975,
+    "space-ekibastuz-kz": 0.2727272727272727,
+    "space-sokolov-kz": 0.3333333333333333,
+    "ky-pike": 0.32597054886211513,
+    "ky-perry": 0.3625663512577891,
+    "ky-clay": 0.5960111722091298
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "test",
+    "space-sangatta-id": "test",
+    "space-adaro-id": "test",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "test",
+    "space-fort-hills-ab": "test",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "test",
+    "ky-perry": "test",
+    "ky-clay": "test"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8542552279238538,
+    "hibbing-mn": 0.5627571962290878,
+    "space-madre-de-dios-pe": 0.15293222266395945,
+    "space-sangatta-id": 0.754109779109779,
+    "space-adaro-id": 0.8534355031981494,
+    "space-boke-gn": 0.9954822954822956,
+    "space-fort-hills-ab": 0.9275317492481202,
+    "space-detour-lake-on": 0.3728745079263863,
+    "space-orapa-bw": 0.6522669846070049,
+    "space-jwaneng-bw": 0.5742370030470698,
+    "space-ekibastuz-kz": 0.42875117765867815,
+    "space-sokolov-kz": 0.260844456868986,
+    "ky-pike": 0.29575494923814516,
+    "ky-perry": 0.552413575900827,
+    "ky-clay": 0.7121536058729248
+   }
+  }
+ },
+ "scores-forest-abroad-cut-ky": {
+  "aef_gated": {
+   "ap": 0.535748837208108,
+   "lit": {
+    "burn": 0.0015601768227980315,
+    "fire": 0.0002910474738126251,
+    "cut": 0.07851060430579695,
+    "storm": 0.06575579492834506,
+    "crop": 0.20359340414458968,
+    "farm": 0.09862908117962232
+   },
+   "found": {
+    "space-kolwezi-cd": 0.007653061224489796,
+    "hibbing-mn": 0.10522354357970796,
+    "ky-pike": 0.3038821954484605,
+    "ky-perry": 0.475882760212324,
+    "ky-clay": 0.6790608361700271
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.824457960913735,
+    "hibbing-mn": 0.5362542046866855,
+    "ky-pike": 0.17171522558050495,
+    "ky-perry": 0.5483840121618445,
+    "ky-clay": 0.7082098493212146
+   }
+  },
+  "both_either": {
+   "ap": 0.5781372445348091,
+   "lit": {
+    "burn": 3.408393893596823e-06,
+    "fire": 2.8345248442707064e-05,
+    "cut": 0.0572060848637876,
+    "storm": 0.03917525465110893,
+    "crop": 0.03735910663940739,
+    "farm": 0.024754855745581228
+   },
+   "found": {
+    "space-kolwezi-cd": 0.1836734693877551,
+    "hibbing-mn": 0.14609363239500225,
+    "ky-pike": 0.3333333333333333,
+    "ky-perry": 0.5531963997230556,
+    "ky-clay": 0.673256524395566
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8557136021866731,
+    "hibbing-mn": 0.5731231607056018,
+    "ky-pike": 0.26311383370520464,
+    "ky-perry": 0.565162719093465,
+    "ky-clay": 0.7247957166314501
+   }
+  },
+  "either_radar": {
+   "ap": 0.5781327114707048,
+   "lit": {
+    "burn": 3.408393893596823e-06,
+    "fire": 2.8345248442707064e-05,
+    "cut": 0.0572060848637876,
+    "storm": 0.03917525465110893,
+    "crop": 0.03735910663940739,
+    "farm": 0.024754855745581228
+   },
+   "found": {
+    "space-kolwezi-cd": 0.1836734693877551,
+    "hibbing-mn": 0.14609363239500225,
+    "ky-pike": 0.3333333333333333,
+    "ky-perry": 0.5531963997230556,
+    "ky-clay": 0.673256524395566
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8557136021866731,
+    "hibbing-mn": 0.5731231607056018,
+    "ky-pike": 0.26312449373049684,
+    "ky-perry": 0.565162719093465,
+    "ky-clay": 0.7247957166314501
+   }
+  }
+ },
+ "scores-forest-abroad-cut-ky-refold": {
+  "aef_gated": {
+   "ap": 0.535748837208108,
+   "lit": {
+    "burn": 0.0015601768227980315,
+    "fire": 0.0010352094043765698,
+    "cut": 0.08739264150019307,
+    "storm": 0.06575579492834506,
+    "crop": 0.20359340414458968,
+    "farm": 0.09862908117962232
+   },
+   "found": {
+    "space-kolwezi-cd": 0.002551020408163265,
+    "hibbing-mn": 0.10522354357970796,
+    "ky-pike": 0.3002008032128514,
+    "ky-perry": 0.4774982690976229,
+    "ky-clay": 0.6762677838875797
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   }
+  },
+  "both_either": {
+   "ap": 0.5781372445348091,
+   "lit": {
+    "burn": 3.408393893596823e-06,
+    "fire": 6.000387177959857e-05,
+    "cut": 0.05166567097304342,
+    "storm": 0.03917525465110893,
+    "crop": 0.03735910663940739,
+    "farm": 0.024754855745581228
+   },
+   "found": {
+    "space-kolwezi-cd": 0.11224489795918367,
+    "hibbing-mn": 0.14609363239500225,
+    "ky-pike": 0.33701472556894246,
+    "ky-perry": 0.5495038079852297,
+    "ky-clay": 0.6701143405778127
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   }
+  },
+  "either_radar": {
+   "ap": 0.5781327114707048,
+   "lit": {
+    "burn": 3.408393893596823e-06,
+    "fire": 6.000387177959857e-05,
+    "cut": 0.05166567097304342,
+    "storm": 0.03917525465110893,
+    "crop": 0.03735910663940739,
+    "farm": 0.024754855745581228
+   },
+   "found": {
+    "space-kolwezi-cd": 0.11224489795918367,
+    "hibbing-mn": 0.14609363239500225,
+    "ky-pike": 0.33701472556894246,
+    "ky-perry": 0.5495038079852297,
+    "ky-clay": 0.6701143405778127
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   }
+  }
+ },
+ "scores-forest-abroad": {
+  "aef_gated": {
+   "ap": 0.5372863138607138,
+   "lit": {
+    "burn": 0.0006787523208821219,
+    "fire": 0.0015827578050693287,
+    "cut": 0.14431504431953143,
+    "storm": 0.10072334811109168,
+    "crop": 0.23797992250165512,
+    "farm": 0.09508792606172335
+   },
+   "found": {
+    "space-kolwezi-cd": 0.03316326530612245,
+    "hibbing-mn": 0.23694114105073008,
+    "space-madre-de-dios-pe": 0.2857142857142857,
+    "space-sangatta-id": 0.3076923076923077,
+    "space-adaro-id": 0.39285714285714285,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.05714285714285714,
+    "space-fort-hills-ab": 0.3224534069618381,
+    "space-detour-lake-on": 0.37012987012987014,
+    "space-orapa-bw": 0.6656308266003729,
+    "space-jwaneng-bw": 0.5850807837744929,
+    "space-ekibastuz-kz": 0.5420875420875421,
+    "space-sokolov-kz": 0.3888888888888889,
+    "ky-pike": 0.2838018741633199,
+    "ky-perry": 0.4747288252942534,
+    "ky-clay": 0.6753949550493148
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "abroad",
+    "space-sangatta-id": "abroad",
+    "space-adaro-id": "abroad",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "abroad",
+    "space-fort-hills-ab": "abroad",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8047372180002266,
+    "hibbing-mn": 0.507814558342117,
+    "space-madre-de-dios-pe": 0.11771745936260958,
+    "space-sangatta-id": 0.6659523809523811,
+    "space-adaro-id": 0.8829591652781299,
+    "space-boke-gn": 0.9977443609022557,
+    "space-fort-hills-ab": 0.9269858593544984,
+    "space-detour-lake-on": 0.5232881220953779,
+    "space-orapa-bw": 0.6964374809528245,
+    "space-jwaneng-bw": 0.6816180352837357,
+    "space-ekibastuz-kz": 0.41708499962885415,
+    "space-sokolov-kz": 0.2685753854297867,
+    "ky-pike": 0.16935019132683948,
+    "ky-perry": 0.5466536653105161,
+    "ky-clay": 0.7063756375262648
+   }
+  },
+  "both_either": {
+   "ap": 0.5826126876431357,
+   "lit": {
+    "burn": 2.0149225161546414e-06,
+    "fire": 0.0001489169334862229,
+    "cut": 0.12081177830455458,
+    "storm": 0.06727391449221441,
+    "crop": 0.042150090669306986,
+    "farm": 0.013486477296033958
+   },
+   "found": {
+    "space-kolwezi-cd": 0.375,
+    "hibbing-mn": 0.2620803853680566,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.15384615384615385,
+    "space-adaro-id": 0.2857142857142857,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.17142857142857143,
+    "space-fort-hills-ab": 0.1829208164875259,
+    "space-detour-lake-on": 0.14285714285714285,
+    "space-orapa-bw": 0.550652579241765,
+    "space-jwaneng-bw": 0.35510484702646955,
+    "space-ekibastuz-kz": 0.4882154882154882,
+    "space-sokolov-kz": 0.3888888888888889,
+    "ky-pike": 0.31258366800535475,
+    "ky-perry": 0.5529656127394414,
+    "ky-clay": 0.672514619883041
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "abroad",
+    "space-sangatta-id": "abroad",
+    "space-adaro-id": "abroad",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "abroad",
+    "space-fort-hills-ab": "abroad",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.841025600759548,
+    "hibbing-mn": 0.5730494350669536,
+    "space-madre-de-dios-pe": 0.12571946087990357,
+    "space-sangatta-id": 0.7473423813623861,
+    "space-adaro-id": 0.843294864687638,
+    "space-boke-gn": 0.9942315137437089,
+    "space-fort-hills-ab": 0.9272369255079367,
+    "space-detour-lake-on": 0.413702346435871,
+    "space-orapa-bw": 0.6594002618928639,
+    "space-jwaneng-bw": 0.5704154554583868,
+    "space-ekibastuz-kz": 0.41706792527476244,
+    "space-sokolov-kz": 0.2354590870640834,
+    "ky-pike": 0.2607666306608648,
+    "ky-perry": 0.5667250305405476,
+    "ky-clay": 0.7227720195538074
+   }
+  },
+  "either_radar": {
+   "ap": 0.5826082862174395,
+   "lit": {
+    "burn": 2.0149225161546414e-06,
+    "fire": 0.0001489169334862229,
+    "cut": 0.12081177830455458,
+    "storm": 0.06727391449221441,
+    "crop": 0.042150090669306986,
+    "farm": 0.013486477296033958
+   },
+   "found": {
+    "space-kolwezi-cd": 0.375,
+    "hibbing-mn": 0.2620803853680566,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.15384615384615385,
+    "space-adaro-id": 0.2857142857142857,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.17142857142857143,
+    "space-fort-hills-ab": 0.1829208164875259,
+    "space-detour-lake-on": 0.14285714285714285,
+    "space-orapa-bw": 0.5494095711622126,
+    "space-jwaneng-bw": 0.3544173255414232,
+    "space-ekibastuz-kz": 0.4444444444444444,
+    "space-sokolov-kz": 0.3055555555555556,
+    "ky-pike": 0.31258366800535475,
+    "ky-perry": 0.5529656127394414,
+    "ky-clay": 0.672514619883041
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "abroad",
+    "space-sangatta-id": "abroad",
+    "space-adaro-id": "abroad",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "abroad",
+    "space-fort-hills-ab": "abroad",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.841025600759548,
+    "hibbing-mn": 0.5730494350669536,
+    "space-madre-de-dios-pe": 0.12571946087990357,
+    "space-sangatta-id": 0.7473423813623861,
+    "space-adaro-id": 0.843294864687638,
+    "space-boke-gn": 0.9942315137437089,
+    "space-fort-hills-ab": 0.9272369255079367,
+    "space-detour-lake-on": 0.413702346435871,
+    "space-orapa-bw": 0.6712095108189501,
+    "space-jwaneng-bw": 0.5677350401303671,
+    "space-ekibastuz-kz": 0.4567339882266274,
+    "space-sokolov-kz": 0.261896929214752,
+    "ky-pike": 0.26080640725906545,
+    "ky-perry": 0.5667250305405476,
+    "ky-clay": 0.7227720195538074
+   }
+  }
+ },
+ "scores-forest-abroad-cut": {
+  "aef_gated": {
+   "ap": 0.532309017943235,
+   "lit": {
+    "burn": 0.0010284262493542825,
+    "fire": 0.0001693483665702711,
+    "cut": 0.07567500126088272,
+    "storm": 0.05656489587582499,
+    "crop": 0.23256569482778477,
+    "farm": 0.09783225316016005
+   },
+   "found": {
+    "space-kolwezi-cd": 0.03316326530612245,
+    "hibbing-mn": 0.23987656179437,
+    "space-madre-de-dios-pe": 0.3333333333333333,
+    "space-sangatta-id": 0.23076923076923078,
+    "space-adaro-id": 0.25,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.14285714285714285,
+    "space-fort-hills-ab": 0.3895079380731683,
+    "space-detour-lake-on": 0.33766233766233766,
+    "space-orapa-bw": 0.5618396519577378,
+    "space-jwaneng-bw": 0.5427982124441388,
+    "space-ekibastuz-kz": 0.5622895622895623,
+    "space-sokolov-kz": 0.3888888888888889,
+    "ky-pike": 0.2878179384203481,
+    "ky-perry": 0.46942072467112855,
+    "ky-clay": 0.6749148991882692
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "abroad",
+    "space-sangatta-id": "abroad",
+    "space-adaro-id": "abroad",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "abroad",
+    "space-fort-hills-ab": "abroad",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.7620366358888684,
+    "hibbing-mn": 0.5223762749703457,
+    "space-madre-de-dios-pe": 0.13414759532563447,
+    "space-sangatta-id": 0.654151624164412,
+    "space-adaro-id": 0.9145673157675294,
+    "space-boke-gn": 0.9954822954822955,
+    "space-fort-hills-ab": 0.9185989866253217,
+    "space-detour-lake-on": 0.49314234399881346,
+    "space-orapa-bw": 0.7039947037562989,
+    "space-jwaneng-bw": 0.7238512073642918,
+    "space-ekibastuz-kz": 0.41501136255462767,
+    "space-sokolov-kz": 0.27180290726,
+    "ky-pike": 0.17017943679567266,
+    "ky-perry": 0.5464689134757604,
+    "ky-clay": 0.7116153181422169
+   }
+  },
+  "both_either": {
+   "ap": 0.5767744972588538,
+   "lit": {
+    "burn": 1.2648013376538946e-06,
+    "fire": 2.9706241133405652e-05,
+    "cut": 0.05832308757113519,
+    "storm": 0.03047595140224341,
+    "crop": 0.03988498053601711,
+    "farm": 0.019885382522922525
+   },
+   "found": {
+    "space-kolwezi-cd": 0.22704081632653061,
+    "hibbing-mn": 0.2611019117868433,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.3076923076923077,
+    "space-adaro-id": 0.25,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.42857142857142855,
+    "space-fort-hills-ab": 0.1410117345429445,
+    "space-detour-lake-on": 0.11038961038961038,
+    "space-orapa-bw": 0.49285270354257305,
+    "space-jwaneng-bw": 0.34444826400825024,
+    "space-ekibastuz-kz": 0.49158249158249157,
+    "space-sokolov-kz": 0.3888888888888889,
+    "ky-pike": 0.3253012048192771,
+    "ky-perry": 0.5525040387722132,
+    "ky-clay": 0.6697215676005935
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "abroad",
+    "space-sangatta-id": "abroad",
+    "space-adaro-id": "abroad",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "abroad",
+    "space-fort-hills-ab": "abroad",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8175222412393717,
+    "hibbing-mn": 0.5810797976861218,
+    "space-madre-de-dios-pe": 0.14348155138051474,
+    "space-sangatta-id": 0.7637842728042774,
+    "space-adaro-id": 0.8864796920667947,
+    "space-boke-gn": 0.9935022130144081,
+    "space-fort-hills-ab": 0.9207114229212319,
+    "space-detour-lake-on": 0.39331604965910594,
+    "space-orapa-bw": 0.6527449749942189,
+    "space-jwaneng-bw": 0.6118893702705824,
+    "space-ekibastuz-kz": 0.4157730376034934,
+    "space-sokolov-kz": 0.2388553317765155,
+    "ky-pike": 0.2807550834011684,
+    "ky-perry": 0.5675084348421696,
+    "ky-clay": 0.7276417738908637
+   }
+  },
+  "either_radar": {
+   "ap": 0.5767698984375479,
+   "lit": {
+    "burn": 1.2648013376538946e-06,
+    "fire": 2.9706241133405652e-05,
+    "cut": 0.05832308757113519,
+    "storm": 0.03047595140224341,
+    "crop": 0.03988498053601711,
+    "farm": 0.019885382522922525
+   },
+   "found": {
+    "space-kolwezi-cd": 0.22704081632653061,
+    "hibbing-mn": 0.2611019117868433,
+    "space-madre-de-dios-pe": 0.42857142857142855,
+    "space-sangatta-id": 0.3076923076923077,
+    "space-adaro-id": 0.25,
+    "space-pomalaa-id": 0.2,
+    "space-boke-gn": 0.42857142857142855,
+    "space-fort-hills-ab": 0.1410117345429445,
+    "space-detour-lake-on": 0.11038961038961038,
+    "space-orapa-bw": 0.49285270354257305,
+    "space-jwaneng-bw": 0.3437607425232039,
+    "space-ekibastuz-kz": 0.4478114478114478,
+    "space-sokolov-kz": 0.3055555555555556,
+    "ky-pike": 0.3253012048192771,
+    "ky-perry": 0.5525040387722132,
+    "ky-clay": 0.6697215676005935
+   },
+   "roles": {
+    "space-kolwezi-cd": "abroad",
+    "hibbing-mn": "teach",
+    "space-madre-de-dios-pe": "abroad",
+    "space-sangatta-id": "abroad",
+    "space-adaro-id": "abroad",
+    "space-pomalaa-id": "test",
+    "space-boke-gn": "abroad",
+    "space-fort-hills-ab": "abroad",
+    "space-detour-lake-on": "test",
+    "space-orapa-bw": "test",
+    "space-jwaneng-bw": "test",
+    "space-ekibastuz-kz": "test",
+    "space-sokolov-kz": "test",
+    "ky-pike": "abroad",
+    "ky-perry": "abroad",
+    "ky-clay": "abroad"
+   },
+   "site_ap": {
+    "space-kolwezi-cd": 0.8175222412393717,
+    "hibbing-mn": 0.5810797976861218,
+    "space-madre-de-dios-pe": 0.14348155138051474,
+    "space-sangatta-id": 0.7637842728042774,
+    "space-adaro-id": 0.8864796920667947,
+    "space-boke-gn": 0.9935022130144081,
+    "space-fort-hills-ab": 0.9207114229212319,
+    "space-detour-lake-on": 0.39331604965910594,
+    "space-orapa-bw": 0.6653471358600721,
+    "space-jwaneng-bw": 0.608219473295247,
+    "space-ekibastuz-kz": 0.4592673099194362,
+    "space-sokolov-kz": 0.2623751549651026,
+    "ky-pike": 0.2807650771326382,
+    "ky-perry": 0.5675084348421696,
+    "ky-clay": 0.7276417738908637
+   }
+  }
+ }
+}

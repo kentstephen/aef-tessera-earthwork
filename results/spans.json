@@ -1,0 +1,1263 @@
+{
+ "new-albany-oh": {
+  "native": {
+   "years": [
+    2018,
+    2022
+   ],
+   "moved_px": 11199,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.437,
+    "found": 0.688,
+    "lit": 0.0195
+   },
+   "both_either": {
+    "ap": 0.488,
+    "found": 0.696,
+    "lit": 0.0137
+   },
+   "either_radar": {
+    "ap": 0.488,
+    "found": 0.696,
+    "lit": 0.0137
+   },
+   "check_max_diff": 0.0
+  },
+  "b-1": {
+   "years": [
+    2017,
+    2022
+   ],
+   "moved_px": 10967,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.381,
+    "found": 0.743,
+    "lit": 0.0407
+   },
+   "both_either": {
+    "ap": 0.451,
+    "found": 0.746,
+    "lit": 0.0256
+   },
+   "either_radar": {
+    "ap": 0.451,
+    "found": 0.746,
+    "lit": 0.0256
+   }
+  },
+  "a+1": {
+   "years": [
+    2018,
+    2023
+   ],
+   "moved_px": 11199,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.302,
+    "found": 0.72,
+    "lit": 0.0306
+   },
+   "both_either": {
+    "ap": 0.292,
+    "found": 0.654,
+    "lit": 0.018
+   },
+   "either_radar": {
+    "ap": 0.292,
+    "found": 0.654,
+    "lit": 0.018
+   }
+  },
+  "a+2": {
+   "years": [
+    2018,
+    2024
+   ],
+   "moved_px": 11199,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.258,
+    "found": 0.666,
+    "lit": 0.0296
+   },
+   "both_either": {
+    "ap": 0.233,
+    "found": 0.558,
+    "lit": 0.0186
+   },
+   "either_radar": {
+    "ap": 0.233,
+    "found": 0.558,
+    "lit": 0.0186
+   }
+  },
+  "b-1 a+1": {
+   "years": [
+    2017,
+    2023
+   ],
+   "moved_px": 10967,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.276,
+    "found": 0.743,
+    "lit": 0.0413
+   },
+   "both_either": {
+    "ap": 0.279,
+    "found": 0.701,
+    "lit": 0.027
+   },
+   "either_radar": {
+    "ap": 0.279,
+    "found": 0.701,
+    "lit": 0.027
+   }
+  }
+ },
+ "katy-tx": {
+  "native": {
+   "years": [
+    2017,
+    2024
+   ],
+   "moved_px": 70343,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.675,
+    "found": 0.915,
+    "lit": 0.1872
+   },
+   "both_either": {
+    "ap": 0.673,
+    "found": 0.915,
+    "lit": 0.138
+   },
+   "either_radar": {
+    "ap": 0.673,
+    "found": 0.915,
+    "lit": 0.138
+   },
+   "check_max_diff": 0.0
+  },
+  "a+1": {
+   "years": [
+    2017,
+    2025
+   ],
+   "moved_px": 70343,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.549,
+    "found": 0.929,
+    "lit": 0.1914
+   },
+   "both_either": {
+    "ap": 0.529,
+    "found": 0.899,
+    "lit": 0.1185
+   },
+   "either_radar": {
+    "ap": 0.529,
+    "found": 0.899,
+    "lit": 0.1185
+   }
+  }
+ },
+ "columbus-ne-oh": {
+  "native": {
+   "years": [
+    2018,
+    2020
+   ],
+   "moved_px": 9222,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.599,
+    "found": 0.777,
+    "lit": 0.084
+   },
+   "both_either": {
+    "ap": 0.733,
+    "found": 0.875,
+    "lit": 0.0522
+   },
+   "either_radar": {
+    "ap": 0.733,
+    "found": 0.875,
+    "lit": 0.0522
+   },
+   "check_max_diff": 0.0
+  },
+  "b-1": {
+   "years": [
+    2017,
+    2020
+   ],
+   "moved_px": 9057,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.446,
+    "found": 0.923,
+    "lit": 0.1839
+   },
+   "both_either": {
+    "ap": 0.454,
+    "found": 0.938,
+    "lit": 0.1078
+   },
+   "either_radar": {
+    "ap": 0.454,
+    "found": 0.938,
+    "lit": 0.1078
+   }
+  },
+  "a+1": {
+   "years": [
+    2018,
+    2021
+   ],
+   "moved_px": 9222,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.575,
+    "found": 0.901,
+    "lit": 0.1047
+   },
+   "both_either": {
+    "ap": 0.569,
+    "found": 0.943,
+    "lit": 0.0876
+   },
+   "either_radar": {
+    "ap": 0.569,
+    "found": 0.943,
+    "lit": 0.0876
+   }
+  },
+  "a+2": {
+   "years": [
+    2018,
+    2022
+   ],
+   "moved_px": 9222,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.275,
+    "found": 0.938,
+    "lit": 0.2767
+   },
+   "both_either": {
+    "ap": 0.199,
+    "found": 0.962,
+    "lit": 0.2571
+   },
+   "either_radar": {
+    "ap": 0.199,
+    "found": 0.962,
+    "lit": 0.2571
+   }
+  },
+  "b-1 a+1": {
+   "years": [
+    2017,
+    2021
+   ],
+   "moved_px": 9057,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.513,
+    "found": 0.959,
+    "lit": 0.1741
+   },
+   "both_either": {
+    "ap": 0.421,
+    "found": 0.964,
+    "lit": 0.1314
+   },
+   "either_radar": {
+    "ap": 0.421,
+    "found": 0.964,
+    "lit": 0.1314
+   }
+  }
+ },
+ "aurora-co": {
+  "native": {
+   "years": [
+    2017,
+    2020
+   ],
+   "moved_px": 10831,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.566,
+    "found": 0.723,
+    "lit": 0.037
+   },
+   "both_either": {
+    "ap": 0.52,
+    "found": 0.636,
+    "lit": 0.0256
+   },
+   "either_radar": {
+    "ap": 0.52,
+    "found": 0.636,
+    "lit": 0.0256
+   },
+   "check_max_diff": 0.0
+  },
+  "a+1": {
+   "years": [
+    2017,
+    2021
+   ],
+   "moved_px": 10831,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.552,
+    "found": 0.727,
+    "lit": 0.0354
+   },
+   "both_either": {
+    "ap": 0.422,
+    "found": 0.684,
+    "lit": 0.0647
+   },
+   "either_radar": {
+    "ap": 0.422,
+    "found": 0.684,
+    "lit": 0.0647
+   }
+  },
+  "a+2": {
+   "years": [
+    2017,
+    2022
+   ],
+   "moved_px": 10831,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.46,
+    "found": 0.766,
+    "lit": 0.0947
+   },
+   "both_either": {
+    "ap": 0.356,
+    "found": 0.708,
+    "lit": 0.0732
+   },
+   "either_radar": {
+    "ap": 0.356,
+    "found": 0.708,
+    "lit": 0.0732
+   }
+  }
+ },
+ "brighton-co": {
+  "native": {
+   "years": [
+    2017,
+    2020
+   ],
+   "moved_px": 4852,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.172,
+    "found": 0.592,
+    "lit": 0.0831
+   },
+   "both_either": {
+    "ap": 0.259,
+    "found": 0.582,
+    "lit": 0.0536
+   },
+   "either_radar": {
+    "ap": 0.259,
+    "found": 0.582,
+    "lit": 0.0536
+   },
+   "check_max_diff": 0.0
+  },
+  "a+1": {
+   "years": [
+    2017,
+    2021
+   ],
+   "moved_px": 4852,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.12,
+    "found": 0.503,
+    "lit": 0.0676
+   },
+   "both_either": {
+    "ap": 0.166,
+    "found": 0.51,
+    "lit": 0.0562
+   },
+   "either_radar": {
+    "ap": 0.166,
+    "found": 0.51,
+    "lit": 0.0562
+   }
+  },
+  "a+2": {
+   "years": [
+    2017,
+    2022
+   ],
+   "moved_px": 4852,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.132,
+    "found": 0.712,
+    "lit": 0.15
+   },
+   "both_either": {
+    "ap": 0.19,
+    "found": 0.676,
+    "lit": 0.1215
+   },
+   "either_radar": {
+    "ap": 0.19,
+    "found": 0.676,
+    "lit": 0.1215
+   }
+  }
+ },
+ "lakewood-ranch-fl": {
+  "native": {
+   "years": [
+    2018,
+    2024
+   ],
+   "moved_px": 204357,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.825,
+    "found": 0.81,
+    "lit": 0.0759
+   },
+   "both_either": {
+    "ap": 0.799,
+    "found": 0.754,
+    "lit": 0.0701
+   },
+   "either_radar": {
+    "ap": 0.799,
+    "found": 0.754,
+    "lit": 0.0701
+   },
+   "check_max_diff": 0.0
+  },
+  "b-1": {
+   "years": [
+    2017,
+    2024
+   ],
+   "moved_px": 197822,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.738,
+    "found": 0.836,
+    "lit": 0.1169
+   },
+   "both_either": {
+    "ap": 0.717,
+    "found": 0.769,
+    "lit": 0.1013
+   },
+   "either_radar": {
+    "ap": 0.717,
+    "found": 0.769,
+    "lit": 0.1013
+   }
+  },
+  "a+1": {
+   "years": [
+    2018,
+    2025
+   ],
+   "moved_px": 204357,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.838,
+    "found": 0.87,
+    "lit": 0.0908
+   },
+   "both_either": {
+    "ap": 0.825,
+    "found": 0.799,
+    "lit": 0.0701
+   },
+   "either_radar": {
+    "ap": 0.825,
+    "found": 0.799,
+    "lit": 0.0701
+   }
+  },
+  "b-1 a+1": {
+   "years": [
+    2017,
+    2025
+   ],
+   "moved_px": 197822,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.762,
+    "found": 0.895,
+    "lit": 0.1335
+   },
+   "both_either": {
+    "ap": 0.757,
+    "found": 0.796,
+    "lit": 0.0984
+   },
+   "either_radar": {
+    "ap": 0.757,
+    "found": 0.796,
+    "lit": 0.0984
+   }
+  }
+ },
+ "huntsville-al": {
+  "native": {
+   "years": [
+    2019,
+    2023
+   ],
+   "moved_px": 66956,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.464,
+    "found": 0.595,
+    "lit": 0.0801
+   },
+   "both_either": {
+    "ap": 0.522,
+    "found": 0.607,
+    "lit": 0.0613
+   },
+   "either_radar": {
+    "ap": 0.522,
+    "found": 0.607,
+    "lit": 0.0613
+   },
+   "check_max_diff": 0.0
+  },
+  "b-1": {
+   "years": [
+    2018,
+    2023
+   ],
+   "moved_px": 66867,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.367,
+    "found": 0.639,
+    "lit": 0.1053
+   },
+   "both_either": {
+    "ap": 0.494,
+    "found": 0.653,
+    "lit": 0.0788
+   },
+   "either_radar": {
+    "ap": 0.494,
+    "found": 0.653,
+    "lit": 0.0788
+   }
+  },
+  "b-2": {
+   "years": [
+    2017,
+    2023
+   ],
+   "moved_px": 59717,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.312,
+    "found": 0.715,
+    "lit": 0.1604
+   },
+   "both_either": {
+    "ap": 0.439,
+    "found": 0.743,
+    "lit": 0.1505
+   },
+   "either_radar": {
+    "ap": 0.439,
+    "found": 0.743,
+    "lit": 0.1505
+   }
+  },
+  "a+1": {
+   "years": [
+    2019,
+    2024
+   ],
+   "moved_px": 66956,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.435,
+    "found": 0.595,
+    "lit": 0.1143
+   },
+   "both_either": {
+    "ap": 0.446,
+    "found": 0.62,
+    "lit": 0.1013
+   },
+   "either_radar": {
+    "ap": 0.446,
+    "found": 0.62,
+    "lit": 0.1013
+   }
+  },
+  "a+2": {
+   "years": [
+    2019,
+    2025
+   ],
+   "moved_px": 66956,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.408,
+    "found": 0.577,
+    "lit": 0.0824
+   },
+   "both_either": {
+    "ap": 0.393,
+    "found": 0.611,
+    "lit": 0.0807
+   },
+   "either_radar": {
+    "ap": 0.393,
+    "found": 0.611,
+    "lit": 0.0807
+   }
+  },
+  "b-1 a+1": {
+   "years": [
+    2018,
+    2024
+   ],
+   "moved_px": 66867,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.381,
+    "found": 0.606,
+    "lit": 0.1187
+   },
+   "both_either": {
+    "ap": 0.42,
+    "found": 0.624,
+    "lit": 0.105
+   },
+   "either_radar": {
+    "ap": 0.42,
+    "found": 0.624,
+    "lit": 0.105
+   }
+  }
+ },
+ "fishers-in": {
+  "native": {
+   "years": [
+    2017,
+    2023
+   ],
+   "moved_px": 29232,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.749,
+    "found": 0.799,
+    "lit": 0.04
+   },
+   "both_either": {
+    "ap": 0.797,
+    "found": 0.781,
+    "lit": 0.0219
+   },
+   "either_radar": {
+    "ap": 0.797,
+    "found": 0.781,
+    "lit": 0.0219
+   },
+   "check_max_diff": 0.0
+  },
+  "a+1": {
+   "years": [
+    2017,
+    2024
+   ],
+   "moved_px": 29222,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.734,
+    "found": 0.783,
+    "lit": 0.0352
+   },
+   "both_either": {
+    "ap": 0.743,
+    "found": 0.807,
+    "lit": 0.0309
+   },
+   "either_radar": {
+    "ap": 0.743,
+    "found": 0.807,
+    "lit": 0.0309
+   }
+  },
+  "a+2": {
+   "years": [
+    2017,
+    2025
+   ],
+   "moved_px": 29232,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.588,
+    "found": 0.865,
+    "lit": 0.0985
+   },
+   "both_either": {
+    "ap": 0.52,
+    "found": 0.848,
+    "lit": 0.0662
+   },
+   "either_radar": {
+    "ap": 0.52,
+    "found": 0.848,
+    "lit": 0.0662
+   }
+  }
+ },
+ "las-vegas-se-nv": {
+  "native": {
+   "years": [
+    2017,
+    2022
+   ],
+   "moved_px": 41265,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.728,
+    "found": 0.753,
+    "lit": 0.0251
+   },
+   "both_either": {
+    "ap": 0.789,
+    "found": 0.702,
+    "lit": 0.0113
+   },
+   "either_radar": {
+    "ap": 0.789,
+    "found": 0.702,
+    "lit": 0.0113
+   },
+   "check_max_diff": 0.0
+  },
+  "a+1": {
+   "years": [
+    2017,
+    2023
+   ],
+   "moved_px": 41265,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.705,
+    "found": 0.738,
+    "lit": 0.0241
+   },
+   "both_either": {
+    "ap": 0.752,
+    "found": 0.676,
+    "lit": 0.0123
+   },
+   "either_radar": {
+    "ap": 0.752,
+    "found": 0.676,
+    "lit": 0.0123
+   }
+  },
+  "a+2": {
+   "years": [
+    2017,
+    2024
+   ],
+   "moved_px": 41265,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.712,
+    "found": 0.75,
+    "lit": 0.0254
+   },
+   "both_either": {
+    "ap": 0.697,
+    "found": 0.679,
+    "lit": 0.0163
+   },
+   "either_radar": {
+    "ap": 0.697,
+    "found": 0.679,
+    "lit": 0.0163
+   }
+  }
+ },
+ "las-vegas-nw-nv": {
+  "native": {
+   "years": [
+    2017,
+    2022
+   ],
+   "moved_px": 26208,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.769,
+    "found": 0.565,
+    "lit": 0.0059
+   },
+   "both_either": {
+    "ap": 0.808,
+    "found": 0.561,
+    "lit": 0.005
+   },
+   "either_radar": {
+    "ap": 0.808,
+    "found": 0.561,
+    "lit": 0.005
+   },
+   "check_max_diff": 0.0
+  },
+  "a+1": {
+   "years": [
+    2017,
+    2023
+   ],
+   "moved_px": 26208,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.628,
+    "found": 0.558,
+    "lit": 0.0134
+   },
+   "both_either": {
+    "ap": 0.679,
+    "found": 0.557,
+    "lit": 0.012
+   },
+   "either_radar": {
+    "ap": 0.679,
+    "found": 0.557,
+    "lit": 0.012
+   }
+  },
+  "a+2": {
+   "years": [
+    2017,
+    2024
+   ],
+   "moved_px": 26208,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.629,
+    "found": 0.571,
+    "lit": 0.0136
+   },
+   "both_either": {
+    "ap": 0.624,
+    "found": 0.578,
+    "lit": 0.0129
+   },
+   "either_radar": {
+    "ap": 0.624,
+    "found": 0.578,
+    "lit": 0.0129
+   }
+  }
+ },
+ "lancaster-ca": {
+  "native": {
+   "years": [
+    2017,
+    2023
+   ],
+   "moved_px": 8790,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.107,
+    "found": 0.13,
+    "lit": 0.0087
+   },
+   "both_either": {
+    "ap": 0.121,
+    "found": 0.255,
+    "lit": 0.0116
+   },
+   "either_radar": {
+    "ap": 0.121,
+    "found": 0.255,
+    "lit": 0.0116
+   },
+   "check_max_diff": 0.0
+  },
+  "a+1": {
+   "years": [
+    2017,
+    2024
+   ],
+   "moved_px": 8790,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.083,
+    "found": 0.056,
+    "lit": 0.006
+   },
+   "both_either": {
+    "ap": 0.111,
+    "found": 0.19,
+    "lit": 0.0095
+   },
+   "either_radar": {
+    "ap": 0.111,
+    "found": 0.19,
+    "lit": 0.0095
+   }
+  },
+  "a+2": {
+   "years": [
+    2017,
+    2025
+   ],
+   "moved_px": 8790,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.1,
+    "found": 0.383,
+    "lit": 0.0243
+   },
+   "both_either": {
+    "ap": 0.117,
+    "found": 0.328,
+    "lit": 0.0207
+   },
+   "either_radar": {
+    "ap": 0.117,
+    "found": 0.328,
+    "lit": 0.0207
+   }
+  }
+ },
+ "mountain-pass-ca": {
+  "native": {
+   "years": [
+    2019,
+    2025
+   ],
+   "moved_px": 19076,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.697,
+    "found": 0.674,
+    "lit": 0.0143
+   },
+   "both_either": {
+    "ap": 0.77,
+    "found": 0.633,
+    "lit": 0.0094
+   },
+   "either_radar": {
+    "ap": 0.77,
+    "found": 0.633,
+    "lit": 0.0094
+   },
+   "check_max_diff": 0.0
+  },
+  "b-1": {
+   "years": [
+    2018,
+    2025
+   ],
+   "moved_px": 19074,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.747,
+    "found": 0.685,
+    "lit": 0.0105
+   },
+   "both_either": {
+    "ap": 0.79,
+    "found": 0.683,
+    "lit": 0.0093
+   },
+   "either_radar": {
+    "ap": 0.79,
+    "found": 0.683,
+    "lit": 0.0093
+   }
+  },
+  "b-2": {
+   "years": [
+    2017,
+    2025
+   ],
+   "moved_px": 18777,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.724,
+    "found": 0.739,
+    "lit": 0.0147
+   },
+   "both_either": {
+    "ap": 0.799,
+    "found": 0.737,
+    "lit": 0.0113
+   },
+   "either_radar": {
+    "ap": 0.799,
+    "found": 0.737,
+    "lit": 0.0113
+   }
+  }
+ },
+ "four-corners-fl": {
+  "native": {
+   "years": [
+    2018,
+    2024
+   ],
+   "moved_px": 82416,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.303,
+    "found": 0.286,
+    "lit": 0.1044
+   },
+   "both_either": {
+    "ap": 0.339,
+    "found": 0.206,
+    "lit": 0.0811
+   },
+   "either_radar": {
+    "ap": 0.339,
+    "found": 0.206,
+    "lit": 0.0811
+   },
+   "check_max_diff": 0.0
+  },
+  "b-1": {
+   "years": [
+    2017,
+    2024
+   ],
+   "moved_px": 73637,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.328,
+    "found": 0.381,
+    "lit": 0.121
+   },
+   "both_either": {
+    "ap": 0.382,
+    "found": 0.281,
+    "lit": 0.0725
+   },
+   "either_radar": {
+    "ap": 0.382,
+    "found": 0.281,
+    "lit": 0.0725
+   }
+  },
+  "a+1": {
+   "years": [
+    2018,
+    2025
+   ],
+   "moved_px": 82416,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.281,
+    "found": 0.314,
+    "lit": 0.139
+   },
+   "both_either": {
+    "ap": 0.346,
+    "found": 0.232,
+    "lit": 0.087
+   },
+   "either_radar": {
+    "ap": 0.346,
+    "found": 0.232,
+    "lit": 0.087
+   }
+  },
+  "b-1 a+1": {
+   "years": [
+    2017,
+    2025
+   ],
+   "moved_px": 73637,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.332,
+    "found": 0.422,
+    "lit": 0.1396
+   },
+   "both_either": {
+    "ap": 0.418,
+    "found": 0.31,
+    "lit": 0.0767
+   },
+   "either_radar": {
+    "ap": 0.418,
+    "found": 0.31,
+    "lit": 0.0767
+   }
+  }
+ },
+ "hibbing-mn": {
+  "native": {
+   "years": [
+    2020,
+    2022
+   ],
+   "moved_px": 13286,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.5,
+    "found": 0.093,
+    "lit": 0.0004
+   },
+   "both_either": {
+    "ap": 0.545,
+    "found": 0.198,
+    "lit": 0.0017
+   },
+   "either_radar": {
+    "ap": 0.545,
+    "found": 0.198,
+    "lit": 0.0017
+   },
+   "check_max_diff": 0.0
+  },
+  "b-1": {
+   "years": [
+    2019,
+    2022
+   ],
+   "moved_px": 13515,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.462,
+    "found": 0.098,
+    "lit": 0.0011
+   },
+   "both_either": {
+    "ap": 0.502,
+    "found": 0.146,
+    "lit": 0.0014
+   },
+   "either_radar": {
+    "ap": 0.502,
+    "found": 0.146,
+    "lit": 0.0014
+   }
+  },
+  "b-2": {
+   "years": [
+    2018,
+    2022
+   ],
+   "moved_px": 13485,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.442,
+    "found": 0.078,
+    "lit": 0.0016
+   },
+   "both_either": {
+    "ap": 0.507,
+    "found": 0.172,
+    "lit": 0.0025
+   },
+   "either_radar": {
+    "ap": 0.507,
+    "found": 0.172,
+    "lit": 0.0025
+   }
+  },
+  "a+1": {
+   "years": [
+    2020,
+    2023
+   ],
+   "moved_px": 13203,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.504,
+    "found": 0.167,
+    "lit": 0.0027
+   },
+   "both_either": {
+    "ap": 0.53,
+    "found": 0.411,
+    "lit": 0.007
+   },
+   "either_radar": {
+    "ap": 0.53,
+    "found": 0.411,
+    "lit": 0.007
+   }
+  },
+  "a+2": {
+   "years": [
+    2020,
+    2024
+   ],
+   "moved_px": 13054,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.217,
+    "found": 0.249,
+    "lit": 0.0257
+   },
+   "both_either": {
+    "ap": 0.287,
+    "found": 0.346,
+    "lit": 0.0348
+   },
+   "either_radar": {
+    "ap": 0.287,
+    "found": 0.346,
+    "lit": 0.0348
+   }
+  },
+  "b-1 a+1": {
+   "years": [
+    2019,
+    2023
+   ],
+   "moved_px": 13397,
+   "radar_flip": 0.0,
+   "aef_gated": {
+    "ap": 0.528,
+    "found": 0.219,
+    "lit": 0.0039
+   },
+   "both_either": {
+    "ap": 0.583,
+    "found": 0.421,
+    "lit": 0.0063
+   },
+   "either_radar": {
+    "ap": 0.583,
+    "found": 0.421,
+    "lit": 0.0063
+   }
+  }
+ }
+}

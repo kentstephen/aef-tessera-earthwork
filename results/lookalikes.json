@@ -1,0 +1,1094 @@
+{
+ "iburi-jp": {
+  "kind": "slide",
+  "years": [
+   2018,
+   2020
+  ],
+  "px": [
+   34019,
+   249109
+  ],
+  "radar": [
+   92.0,
+   92.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.61,
+    "tes": 0.389,
+    "mean": 0.524,
+    "both": 0.543,
+    "both_either": 0.662,
+    "either_radar": 0.662
+   },
+   "compare": {
+    "aef_gated": 0.126,
+    "tes": 0.11,
+    "mean": 0.115,
+    "both": 0.133,
+    "both_either": 0.147,
+    "either_radar": 0.147
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.676,
+    "tes": 0.39,
+    "mean": 0.579,
+    "both": 0.533,
+    "both_either": 0.605,
+    "either_radar": 0.605
+   },
+   "compare": {
+    "aef_gated": 0.141,
+    "tes": 0.121,
+    "mean": 0.13,
+    "both": 0.127,
+    "both_either": 0.125,
+    "either_radar": 0.125
+   }
+  }
+ },
+ "haiti-nippes": {
+  "kind": "slide",
+  "years": [
+   2020,
+   2022
+  ],
+  "px": [
+   11131,
+   66256
+  ],
+  "radar": [
+   57.0,
+   48.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.219,
+    "tes": 0.425,
+    "mean": 0.25,
+    "both": 0.172,
+    "both_either": 0.289,
+    "either_radar": 0.289
+   },
+   "compare": {
+    "aef_gated": 0.04,
+    "tes": 0.106,
+    "mean": 0.045,
+    "both": 0.027,
+    "both_either": 0.055,
+    "either_radar": 0.055
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.363,
+    "tes": 0.493,
+    "mean": 0.413,
+    "both": 0.636,
+    "both_either": 0.445,
+    "either_radar": 0.445
+   },
+   "compare": {
+    "aef_gated": 0.08,
+    "tes": 0.128,
+    "mean": 0.088,
+    "both": 0.186,
+    "both_either": 0.114,
+    "either_radar": 0.114
+   }
+  }
+ },
+ "romagna-apennines-it": {
+  "kind": "slide",
+  "years": [
+   2022,
+   2024
+  ],
+  "px": [
+   11074,
+   142227
+  ],
+  "radar": [
+   59.0,
+   61.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.16,
+    "tes": 0.548,
+    "mean": 0.227,
+    "both": 0.266,
+    "both_either": 0.306,
+    "either_radar": 0.306
+   },
+   "compare": {
+    "aef_gated": 0.009,
+    "tes": 0.088,
+    "mean": 0.014,
+    "both": 0.023,
+    "both_either": 0.025,
+    "either_radar": 0.025
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.074,
+    "tes": 0.649,
+    "mean": 0.143,
+    "both": 0.159,
+    "both_either": 0.192,
+    "either_radar": 0.192
+   },
+   "compare": {
+    "aef_gated": 0.004,
+    "tes": 0.131,
+    "mean": 0.008,
+    "both": 0.01,
+    "both_either": 0.014,
+    "either_radar": 0.014
+   }
+  }
+ },
+ "wayanad-in": {
+  "kind": "slide",
+  "years": [
+   2023,
+   2025
+  ],
+  "px": [
+   5677,
+   298494
+  ],
+  "radar": [
+   51.0,
+   59.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.0,
+    "tes": 0.453,
+    "mean": 0.001,
+    "both": 0.001,
+    "both_either": 0.017,
+    "either_radar": 0.017
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.002,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.581,
+    "tes": 0.303,
+    "mean": 0.483,
+    "both": 0.315,
+    "both_either": 0.389,
+    "either_radar": 0.389
+   },
+   "compare": {
+    "aef_gated": 0.002,
+    "tes": 0.001,
+    "mean": 0.002,
+    "both": 0.002,
+    "both_either": 0.003,
+    "either_radar": 0.003
+   }
+  }
+ },
+ "ucayali-pe": {
+  "kind": "river",
+  "years": [
+   2018,
+   2021
+  ],
+  "px": [
+   259,
+   290666
+  ],
+  "radar": [
+   48.0,
+   55.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.085,
+    "tes": 0.687,
+    "mean": 0.104,
+    "both": 0.073,
+    "both_either": 0.093,
+    "either_radar": 0.093
+   },
+   "compare": {
+    "aef_gated": 0.007,
+    "tes": 0.059,
+    "mean": 0.006,
+    "both": 0.005,
+    "both_either": 0.016,
+    "either_radar": 0.016
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.386,
+    "tes": 0.664,
+    "mean": 0.432,
+    "both": 0.402,
+    "both_either": 0.394,
+    "either_radar": 0.394
+   },
+   "compare": {
+    "aef_gated": 0.028,
+    "tes": 0.036,
+    "mean": 0.021,
+    "both": 0.052,
+    "both_either": 0.058,
+    "either_radar": 0.058
+   }
+  }
+ },
+ "brahmaputra-in": {
+  "kind": "river",
+  "years": [
+   2018,
+   2021
+  ],
+  "px": [
+   73462,
+   139827
+  ],
+  "radar": [
+   56.0,
+   56.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.012,
+    "tes": 0.247,
+    "mean": 0.02,
+    "both": 0.0,
+    "both_either": 0.003,
+    "either_radar": 0.003
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.029,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.327,
+    "tes": 0.192,
+    "mean": 0.33,
+    "both": 0.116,
+    "both_either": 0.175,
+    "either_radar": 0.175
+   },
+   "compare": {
+    "aef_gated": 0.046,
+    "tes": 0.022,
+    "mean": 0.035,
+    "both": 0.0,
+    "both_either": 0.002,
+    "either_radar": 0.002
+   }
+  }
+ },
+ "jamuna-bd": {
+  "kind": "river",
+  "years": [
+   2018,
+   2021
+  ],
+  "px": [
+   79670,
+   88579
+  ],
+  "radar": [
+   59.0,
+   60.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.002,
+    "tes": 0.417,
+    "mean": 0.008,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.073,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.662,
+    "tes": 0.144,
+    "mean": 0.571,
+    "both": 0.09,
+    "both_either": 0.303,
+    "either_radar": 0.303
+   },
+   "compare": {
+    "aef_gated": 0.025,
+    "tes": 0.032,
+    "mean": 0.022,
+    "both": 0.005,
+    "both_either": 0.012,
+    "either_radar": 0.012
+   }
+  }
+ },
+ "kosi-in": {
+  "kind": "river",
+  "years": [
+   2018,
+   2021
+  ],
+  "px": [
+   47086,
+   210892
+  ],
+  "radar": [
+   91.0,
+   91.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.0,
+    "tes": 0.522,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.093,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.478,
+    "tes": 0.224,
+    "mean": 0.386,
+    "both": 0.01,
+    "both_either": 0.048,
+    "either_radar": 0.048
+   },
+   "compare": {
+    "aef_gated": 0.01,
+    "tes": 0.062,
+    "mean": 0.01,
+    "both": 0.001,
+    "both_either": 0.003,
+    "either_radar": 0.003
+   }
+  }
+ },
+ "cottbuser-ostsee-de": {
+  "kind": "fill",
+  "years": [
+   2018,
+   2024
+  ],
+  "px": [
+   209285,
+   138577
+  ],
+  "radar": [
+   237.0,
+   117.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.998,
+    "tes": 0.17,
+    "mean": 0.88,
+    "both": 0.996,
+    "both_either": 0.998,
+    "either_radar": 0.998
+   },
+   "compare": {
+    "aef_gated": 0.153,
+    "tes": 0.053,
+    "mean": 0.093,
+    "both": 0.161,
+    "both_either": 0.197,
+    "either_radar": 0.197
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.995,
+    "tes": 0.762,
+    "mean": 0.992,
+    "both": 0.984,
+    "both_either": 0.992,
+    "either_radar": 0.992
+   },
+   "compare": {
+    "aef_gated": 0.064,
+    "tes": 0.088,
+    "mean": 0.068,
+    "both": 0.06,
+    "both_either": 0.071,
+    "either_radar": 0.071
+   }
+  }
+ },
+ "gerd-et": {
+  "kind": "fill",
+  "years": [
+   2019,
+   2023
+  ],
+  "px": [
+   262795,
+   64960
+  ],
+  "radar": [
+   13.0,
+   20.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.001,
+    "tes": 0.597,
+    "mean": 0.01,
+    "both": 0.001,
+    "both_either": 0.003,
+    "either_radar": 0.003
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.301,
+    "mean": 0.001,
+    "both": 0.011,
+    "both_either": 0.041,
+    "either_radar": 0.041
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.946,
+    "tes": 0.078,
+    "mean": 0.706,
+    "both": 0.09,
+    "both_either": 0.206,
+    "either_radar": 0.206
+   },
+   "compare": {
+    "aef_gated": 0.269,
+    "tes": 0.157,
+    "mean": 0.227,
+    "both": 0.177,
+    "both_either": 0.208,
+    "either_radar": 0.208
+   }
+  }
+ },
+ "rhine-gravel-de": {
+  "kind": "dredge",
+  "years": [
+   2018,
+   2023
+  ],
+  "px": [
+   2935,
+   268276
+  ],
+  "radar": [
+   233.0,
+   122.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.514,
+    "tes": 0.445,
+    "mean": 0.488,
+    "both": 0.695,
+    "both_either": 0.51,
+    "either_radar": 0.51
+   },
+   "compare": {
+    "aef_gated": 0.048,
+    "tes": 0.063,
+    "mean": 0.046,
+    "both": 0.1,
+    "both_either": 0.072,
+    "either_radar": 0.072
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.431,
+    "tes": 0.563,
+    "mean": 0.467,
+    "both": 0.327,
+    "both_either": 0.353,
+    "either_radar": 0.353
+   },
+   "compare": {
+    "aef_gated": 0.032,
+    "tes": 0.094,
+    "mean": 0.042,
+    "both": 0.036,
+    "both_either": 0.037,
+    "either_radar": 0.037
+   }
+  }
+ },
+ "sindh-flood-pk": {
+  "kind": "flood",
+  "years": [
+   2021,
+   2023
+  ],
+  "px": [
+   351580,
+   2019
+  ],
+  "radar": [
+   60.0,
+   59.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.0,
+    "tes": 0.656,
+    "mean": 0.003,
+    "both": 0.016,
+    "both_either": 0.052,
+    "either_radar": 0.052
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.207,
+    "mean": 0.0,
+    "both": 0.001,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.003,
+    "tes": 0.22,
+    "mean": 0.013,
+    "both": 0.024,
+    "both_either": 0.047,
+    "either_radar": 0.047
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.007,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   }
+  }
+ },
+ "romagna-flood-it": {
+  "kind": "flood",
+  "years": [
+   2022,
+   2024
+  ],
+  "px": [
+   152815,
+   203193
+  ],
+  "radar": [
+   59.0,
+   61.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.008,
+    "tes": 0.394,
+    "mean": 0.012,
+    "both": 0.017,
+    "both_either": 0.055,
+    "either_radar": 0.055
+   },
+   "compare": {
+    "aef_gated": 0.001,
+    "tes": 0.206,
+    "mean": 0.004,
+    "both": 0.008,
+    "both_either": 0.021,
+    "either_radar": 0.021
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.014,
+    "tes": 0.485,
+    "mean": 0.025,
+    "both": 0.016,
+    "both_either": 0.029,
+    "either_radar": 0.029
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.299,
+    "mean": 0.002,
+    "both": 0.001,
+    "both_either": 0.005,
+    "either_radar": 0.005
+   }
+  }
+ },
+ "aktina-tx": {
+  "kind": "solar",
+  "years": [
+   2021,
+   2024
+  ],
+  "px": [
+   57362,
+   282847
+  ],
+  "radar": [
+   30.0,
+   29.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.002,
+    "tes": 0.064,
+    "mean": 0.001,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   },
+   "compare": {
+    "aef_gated": 0.0,
+    "tes": 0.039,
+    "mean": 0.001,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.003,
+    "tes": 0.031,
+    "mean": 0.002,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   },
+   "compare": {
+    "aef_gated": 0.006,
+    "tes": 0.031,
+    "mean": 0.008,
+    "both": 0.002,
+    "both_either": 0.002,
+    "either_radar": 0.002
+   }
+  }
+ },
+ "impact-tx": {
+  "kind": "solar",
+  "years": [
+   2018,
+   2021
+  ],
+  "px": [
+   67783,
+   272808
+  ],
+  "radar": [
+   27.0,
+   29.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.17,
+    "tes": 0.145,
+    "mean": 0.166,
+    "both": 0.062,
+    "both_either": 0.121,
+    "either_radar": 0.121
+   },
+   "compare": {
+    "aef_gated": 0.055,
+    "tes": 0.124,
+    "mean": 0.061,
+    "both": 0.056,
+    "both_either": 0.05,
+    "either_radar": 0.05
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.165,
+    "tes": 0.227,
+    "mean": 0.19,
+    "both": 0.117,
+    "both_either": 0.16,
+    "either_radar": 0.16
+   },
+   "compare": {
+    "aef_gated": 0.056,
+    "tes": 0.153,
+    "mean": 0.068,
+    "both": 0.084,
+    "both_either": 0.053,
+    "either_radar": 0.053
+   }
+  }
+ },
+ "arrow-canyon-nv": {
+  "kind": "solar",
+  "years": [
+   2021,
+   2024
+  ],
+  "px": [
+   88494,
+   259947
+  ],
+  "radar": [
+   121.0,
+   30.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.186,
+    "tes": 0.897,
+    "mean": 0.477,
+    "both": 0.457,
+    "both_either": 0.671,
+    "either_radar": 0.671
+   },
+   "compare": {
+    "aef_gated": 0.001,
+    "tes": 0.006,
+    "mean": 0.001,
+    "both": 0.006,
+    "both_either": 0.003,
+    "either_radar": 0.003
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.005,
+    "tes": 0.447,
+    "mean": 0.023,
+    "both": 0.029,
+    "both_either": 0.093,
+    "either_radar": 0.093
+   },
+   "compare": {
+    "aef_gated": 0.001,
+    "tes": 0.0,
+    "mean": 0.0,
+    "both": 0.0,
+    "both_either": 0.0,
+    "either_radar": 0.0
+   }
+  }
+ },
+ "fox-squirrel-oh": {
+  "kind": "solar",
+  "years": [
+   2021,
+   2024
+  ],
+  "px": [
+   78190,
+   267871
+  ],
+  "radar": [
+   26.0,
+   24.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.35,
+    "tes": 0.965,
+    "mean": 0.619,
+    "both": 0.216,
+    "both_either": 0.54,
+    "either_radar": 0.54
+   },
+   "compare": {
+    "aef_gated": 0.021,
+    "tes": 0.016,
+    "mean": 0.013,
+    "both": 0.007,
+    "both_either": 0.011,
+    "either_radar": 0.011
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.342,
+    "tes": 0.947,
+    "mean": 0.642,
+    "both": 0.167,
+    "both_either": 0.31,
+    "either_radar": 0.31
+   },
+   "compare": {
+    "aef_gated": 0.023,
+    "tes": 0.02,
+    "mean": 0.015,
+    "both": 0.011,
+    "both_either": 0.011,
+    "either_radar": 0.011
+   }
+  }
+ },
+ "prospero-tx": {
+  "kind": "solar",
+  "years": [
+   2018,
+   2021
+  ],
+  "px": [
+   103572,
+   235121
+  ],
+  "radar": [
+   53.0,
+   59.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.127,
+    "tes": 0.575,
+    "mean": 0.286,
+    "both": 0.019,
+    "both_either": 0.127,
+    "either_radar": 0.127
+   },
+   "compare": {
+    "aef_gated": 0.008,
+    "tes": 0.032,
+    "mean": 0.01,
+    "both": 0.005,
+    "both_either": 0.01,
+    "either_radar": 0.01
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.186,
+    "tes": 0.247,
+    "mean": 0.226,
+    "both": 0.124,
+    "both_either": 0.221,
+    "either_radar": 0.221
+   },
+   "compare": {
+    "aef_gated": 0.01,
+    "tes": 0.018,
+    "mean": 0.012,
+    "both": 0.011,
+    "both_either": 0.016,
+    "either_radar": 0.016
+   }
+  }
+ },
+ "sonoran-az": {
+  "kind": "solar",
+  "years": [
+   2021,
+   2024
+  ],
+  "px": [
+   98529,
+   243210
+  ],
+  "radar": [
+   147.0,
+   90.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.006,
+    "tes": 0.661,
+    "mean": 0.009,
+    "both": 0.002,
+    "both_either": 0.036,
+    "either_radar": 0.036
+   },
+   "compare": {
+    "aef_gated": 0.001,
+    "tes": 0.001,
+    "mean": 0.001,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.007,
+    "tes": 0.664,
+    "mean": 0.015,
+    "both": 0.002,
+    "both_either": 0.015,
+    "either_radar": 0.015
+   },
+   "compare": {
+    "aef_gated": 0.006,
+    "tes": 0.001,
+    "mean": 0.002,
+    "both": 0.0,
+    "both_either": 0.001,
+    "either_radar": 0.001
+   }
+  }
+ },
+ "slate-ca": {
+  "kind": "solar",
+  "years": [
+   2019,
+   2022
+  ],
+  "px": [
+   148475,
+   177554
+  ],
+  "radar": [
+   99.0,
+   60.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.158,
+    "tes": 0.207,
+    "mean": 0.17,
+    "both": 0.15,
+    "both_either": 0.222,
+    "either_radar": 0.222
+   },
+   "compare": {
+    "aef_gated": 0.435,
+    "tes": 0.34,
+    "mean": 0.419,
+    "both": 0.23,
+    "both_either": 0.341,
+    "either_radar": 0.341
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.098,
+    "tes": 0.219,
+    "mean": 0.126,
+    "both": 0.056,
+    "both_either": 0.138,
+    "either_radar": 0.138
+   },
+   "compare": {
+    "aef_gated": 0.072,
+    "tes": 0.403,
+    "mean": 0.164,
+    "both": 0.042,
+    "both_either": 0.09,
+    "either_radar": 0.09
+   }
+  }
+ },
+ "sun-mountain-co": {
+  "kind": "solar",
+  "years": [
+   2019,
+   2022
+  ],
+  "px": [
+   85924,
+   261606
+  ],
+  "radar": [
+   57.0,
+   41.0
+  ],
+  "flip": 0.0,
+  "us": {
+   "event": {
+    "aef_gated": 0.59,
+    "tes": 0.278,
+    "mean": 0.507,
+    "both": 0.193,
+    "both_either": 0.419,
+    "either_radar": 0.419
+   },
+   "compare": {
+    "aef_gated": 0.015,
+    "tes": 0.017,
+    "mean": 0.014,
+    "both": 0.028,
+    "both_either": 0.024,
+    "either_radar": 0.024
+   }
+  },
+  "abroad": {
+   "event": {
+    "aef_gated": 0.734,
+    "tes": 0.196,
+    "mean": 0.501,
+    "both": 0.451,
+    "both_either": 0.595,
+    "either_radar": 0.595
+   },
+   "compare": {
+    "aef_gated": 0.018,
+    "tes": 0.015,
+    "mean": 0.012,
+    "both": 0.109,
+    "both_either": 0.033,
+    "either_radar": 0.033
+   }
+  }
+ }
+}

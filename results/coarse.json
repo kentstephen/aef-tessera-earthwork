@@ -1,0 +1,490 @@
+{
+ "320": {
+  "cells": {
+   "new-albany-oh": [
+    88,
+    320
+   ],
+   "katy-tx": [
+    320,
+    288
+   ],
+   "columbus-ne-oh": [
+    37,
+    78
+   ],
+   "aurora-co": [
+    54,
+    223
+   ],
+   "brighton-co": [
+    35,
+    251
+   ],
+   "lakewood-ranch-fl": [
+    511,
+    211
+   ],
+   "huntsville-al": [
+    306,
+    469
+   ],
+   "fishers-in": [
+    260,
+    136
+   ],
+   "las-vegas-se-nv": [
+    177,
+    251
+   ],
+   "las-vegas-nw-nv": [
+    80,
+    208
+   ],
+   "lancaster-ca": [
+    69,
+    622
+   ],
+   "mountain-pass-ca": [
+    61,
+    189
+   ],
+   "four-corners-fl": [
+    204,
+    173
+   ],
+   "hibbing-mn": [
+    53,
+    113
+   ],
+   "cameron-peak-co": [
+    5,
+    521
+   ],
+   "grizzly-flats-ca": [
+    1,
+    677
+   ],
+   "white-sands-nm": [
+    222,
+    1
+   ],
+   "mexico-beach-fl": [
+    99,
+    410
+   ],
+   "antelope-farm-ne": [
+    39,
+    446
+   ],
+   "box-butte-farm-ne": [
+    1,
+    819
+   ],
+   "fresno-farm-ca": [
+    68,
+    281
+   ],
+   "hamilton-farm-in": [
+    73,
+    123
+   ],
+   "arkansas-delta-ar": [
+    15,
+    80
+   ],
+   "othello-pivots-wa": [
+    0,
+    157
+   ],
+   "brazoria-tx": [
+    231,
+    351
+   ],
+   "anahuac-tx": [
+    87,
+    381
+   ],
+   "myakka-fl": [
+    86,
+    208
+   ]
+  },
+  "aef_gated:max": {
+   "ap": 0.858,
+   "ap_building": 0.861,
+   "ap_mining": 0.849,
+   "quiet_lit": {
+    "burn": 0.055,
+    "storm": 0.137,
+    "farm": 0.117,
+    "marsh": 0.05
+   }
+  },
+  "aef_gated:p99": {
+   "ap": 0.859,
+   "ap_building": 0.865,
+   "ap_mining": 0.837,
+   "quiet_lit": {
+    "burn": 0.086,
+    "storm": 0.176,
+    "farm": 0.137,
+    "marsh": 0.063
+   }
+  },
+  "aef_gated:mean": {
+   "ap": 0.788,
+   "ap_building": 0.779,
+   "ap_mining": 0.819,
+   "quiet_lit": {
+    "burn": 0.339,
+    "storm": 0.537,
+    "farm": 0.315,
+    "marsh": 0.258
+   }
+  },
+  "aef_gated:lit": {
+   "ap": 0.757,
+   "ap_building": 0.755,
+   "ap_mining": 0.764,
+   "quiet_lit": {
+    "burn": 0.239,
+    "storm": 0.351,
+    "farm": 0.246,
+    "marsh": 0.149
+   }
+  },
+  "both_either:max": {
+   "ap": 0.872,
+   "ap_building": 0.874,
+   "ap_mining": 0.866,
+   "quiet_lit": {
+    "burn": 0.056,
+    "storm": 0.122,
+    "farm": 0.053,
+    "marsh": 0.062
+   }
+  },
+  "both_either:p99": {
+   "ap": 0.872,
+   "ap_building": 0.876,
+   "ap_mining": 0.856,
+   "quiet_lit": {
+    "burn": 0.098,
+    "storm": 0.154,
+    "farm": 0.06,
+    "marsh": 0.081
+   }
+  },
+  "both_either:mean": {
+   "ap": 0.807,
+   "ap_building": 0.797,
+   "ap_mining": 0.842,
+   "quiet_lit": {
+    "burn": 0.293,
+    "storm": 0.566,
+    "farm": 0.188,
+    "marsh": 0.356
+   }
+  },
+  "both_either:lit": {
+   "ap": 0.805,
+   "ap_building": 0.813,
+   "ap_mining": 0.772,
+   "quiet_lit": {
+    "burn": 0.261,
+    "storm": 0.332,
+    "farm": 0.094,
+    "marsh": 0.22
+   }
+  },
+  "overview": {
+   "ap": 0.757,
+   "ap_building": 0.736,
+   "ap_mining": 0.832,
+   "quiet_lit": {
+    "burn": 0.272,
+    "storm": 0.049,
+    "farm": 0.128,
+    "marsh": 0.417
+   }
+  },
+  "stats": {
+   "ap": 0.746,
+   "ap_building": 0.753,
+   "ap_mining": 0.719,
+   "quiet_lit": {
+    "burn": 0.134,
+    "storm": 0.18,
+    "farm": 0.156,
+    "marsh": 0.099
+   }
+  },
+  "stats_tes": {
+   "ap": 0.737,
+   "ap_building": 0.747,
+   "ap_mining": 0.699,
+   "quiet_lit": {
+    "burn": 0.322,
+    "storm": 0.305,
+    "farm": 0.146,
+    "marsh": 0.19
+   }
+  },
+  "stats_both": {
+   "ap": 0.756,
+   "ap_building": 0.763,
+   "ap_mining": 0.73,
+   "quiet_lit": {
+    "burn": 0.352,
+    "storm": 0.29,
+    "farm": 0.129,
+    "marsh": 0.101
+   }
+  }
+ },
+ "640": {
+  "cells": {
+   "new-albany-oh": [
+    71,
+    17
+   ],
+   "katy-tx": [
+    139,
+    27
+   ],
+   "columbus-ne-oh": [
+    20,
+    6
+   ],
+   "aurora-co": [
+    38,
+    28
+   ],
+   "brighton-co": [
+    28,
+    22
+   ],
+   "lakewood-ranch-fl": [
+    170,
+    9
+   ],
+   "huntsville-al": [
+    124,
+    61
+   ],
+   "fishers-in": [
+    133,
+    11
+   ],
+   "las-vegas-se-nv": [
+    87,
+    20
+   ],
+   "las-vegas-nw-nv": [
+    36,
+    29
+   ],
+   "lancaster-ca": [
+    42,
+    111
+   ],
+   "mountain-pass-ca": [
+    38,
+    27
+   ],
+   "four-corners-fl": [
+    87,
+    22
+   ],
+   "hibbing-mn": [
+    26,
+    21
+   ],
+   "cameron-peak-co": [
+    7,
+    95
+   ],
+   "grizzly-flats-ca": [
+    8,
+    100
+   ],
+   "white-sands-nm": [
+    59,
+    0
+   ],
+   "mexico-beach-fl": [
+    46,
+    43
+   ],
+   "antelope-farm-ne": [
+    25,
+    59
+   ],
+   "box-butte-farm-ne": [
+    1,
+    186
+   ],
+   "fresno-farm-ca": [
+    42,
+    46
+   ],
+   "hamilton-farm-in": [
+    55,
+    13
+   ],
+   "arkansas-delta-ar": [
+    7,
+    13
+   ],
+   "othello-pivots-wa": [
+    0,
+    38
+   ],
+   "brazoria-tx": [
+    120,
+    52
+   ],
+   "anahuac-tx": [
+    59,
+    67
+   ],
+   "myakka-fl": [
+    56,
+    11
+   ]
+  },
+  "aef_gated:max": {
+   "ap": 0.952,
+   "ap_building": 0.956,
+   "ap_mining": 0.934,
+   "quiet_lit": {
+    "burn": 0.075,
+    "storm": 0.209,
+    "farm": 0.212,
+    "marsh": 0.055
+   }
+  },
+  "aef_gated:p99": {
+   "ap": 0.944,
+   "ap_building": 0.954,
+   "ap_mining": 0.908,
+   "quiet_lit": {
+    "burn": 0.205,
+    "storm": 0.326,
+    "farm": 0.272,
+    "marsh": 0.142
+   }
+  },
+  "aef_gated:mean": {
+   "ap": 0.915,
+   "ap_building": 0.915,
+   "ap_mining": 0.916,
+   "quiet_lit": {
+    "burn": 0.571,
+    "storm": 0.698,
+    "farm": 0.494,
+    "marsh": 0.378
+   }
+  },
+  "aef_gated:lit": {
+   "ap": 0.892,
+   "ap_building": 0.901,
+   "ap_mining": 0.858,
+   "quiet_lit": {
+    "burn": 0.3,
+    "storm": 0.465,
+    "farm": 0.419,
+    "marsh": 0.198
+   }
+  },
+  "both_either:max": {
+   "ap": 0.949,
+   "ap_building": 0.956,
+   "ap_mining": 0.923,
+   "quiet_lit": {
+    "burn": 0.09,
+    "storm": 0.186,
+    "farm": 0.099,
+    "marsh": 0.08
+   }
+  },
+  "both_either:p99": {
+   "ap": 0.945,
+   "ap_building": 0.952,
+   "ap_mining": 0.917,
+   "quiet_lit": {
+    "burn": 0.285,
+    "storm": 0.372,
+    "farm": 0.148,
+    "marsh": 0.214
+   }
+  },
+  "both_either:mean": {
+   "ap": 0.927,
+   "ap_building": 0.931,
+   "ap_mining": 0.913,
+   "quiet_lit": {
+    "burn": 0.355,
+    "storm": 0.651,
+    "farm": 0.368,
+    "marsh": 0.425
+   }
+  },
+  "both_either:lit": {
+   "ap": 0.917,
+   "ap_building": 0.932,
+   "ap_mining": 0.863,
+   "quiet_lit": {
+    "burn": 0.33,
+    "storm": 0.535,
+    "farm": 0.165,
+    "marsh": 0.293
+   }
+  },
+  "overview": {
+   "ap": 0.914,
+   "ap_building": 0.915,
+   "ap_mining": 0.908,
+   "quiet_lit": {
+    "burn": 0.299,
+    "storm": 0.093,
+    "farm": 0.102,
+    "marsh": 0.314
+   }
+  },
+  "stats": {
+   "ap": 0.904,
+   "ap_building": 0.913,
+   "ap_mining": 0.87,
+   "quiet_lit": {
+    "burn": 0.058,
+    "storm": 0.279,
+    "farm": 0.125,
+    "marsh": 0.056
+   }
+  },
+  "stats_tes": {
+   "ap": 0.903,
+   "ap_building": 0.919,
+   "ap_mining": 0.843,
+   "quiet_lit": {
+    "burn": 0.404,
+    "storm": 0.465,
+    "farm": 0.224,
+    "marsh": 0.365
+   }
+  },
+  "stats_both": {
+   "ap": 0.912,
+   "ap_building": 0.925,
+   "ap_mining": 0.867,
+   "quiet_lit": {
+    "burn": 0.46,
+    "storm": 0.442,
+    "farm": 0.129,
+    "marsh": 0.186
+   }
+  }
+ }
+}

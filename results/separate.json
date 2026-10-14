@@ -1,0 +1,2774 @@
+{
+ "A": {
+  "ky-clay": {
+   "dug": 13073,
+   "not": 4813,
+   "score": 0.915,
+   "pair": 0.924,
+   "ctx": 0.858,
+   "after": 0.934,
+   "traj": 0.977,
+   "all": 0.91
+  },
+  "ky-pike": {
+   "dug": 410,
+   "not": 15000,
+   "score": 0.779,
+   "pair": 0.781,
+   "ctx": 0.795,
+   "after": 0.804,
+   "traj": 0.634,
+   "all": 0.839
+  },
+  "ky-perry": {
+   "dug": 42,
+   "not": 88,
+   "score": 0.898,
+   "pair": 0.934,
+   "ctx": 0.904,
+   "after": 0.943,
+   "traj": 0.916,
+   "all": 0.936
+  },
+  "hibbing-mn": {
+   "dug": 1539,
+   "not": 3744,
+   "score": 0.953,
+   "pair": 0.946,
+   "ctx": 0.976,
+   "after": 0.878,
+   "traj": 0.917,
+   "all": 0.944
+  },
+  "lakewood-ranch-fl": {
+   "dug": 15000,
+   "not": 14592,
+   "score": 0.737,
+   "pair": 0.608,
+   "ctx": 0.424,
+   "after": 0.575,
+   "traj": 0.73,
+   "all": 0.573
+  },
+  "four-corners-fl": {
+   "dug": 2927,
+   "not": 7861,
+   "score": 0.399,
+   "pair": 0.247,
+   "ctx": 0.188,
+   "after": 0.496,
+   "traj": 0.478,
+   "all": 0.208
+  },
+  "huntsville-al": {
+   "dug": 1046,
+   "not": 3146,
+   "score": 0.722,
+   "pair": 0.658,
+   "ctx": 0.69,
+   "after": 0.865,
+   "traj": 0.655,
+   "all": 0.773
+  },
+  "new-albany-oh": {
+   "dug": 457,
+   "not": 937,
+   "score": 0.732,
+   "pair": 0.739,
+   "ctx": 0.642,
+   "after": 0.583,
+   "traj": 0.598,
+   "all": 0.698
+  }
+ },
+ "B": {
+  "score": {
+   "cut_called_dug": 0.237,
+   "per_place": {
+    "coast-range-or": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.467,
+     "forest": 0.001
+    },
+    "willapa-wa": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.173,
+     "forest": 0.002
+    },
+    "ware-ga": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.525,
+     "forest": 0.009
+    },
+    "pine-ms": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.573,
+     "forest": 0.005
+    },
+    "north-woods-me": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.006,
+     "forest": 0.0
+    },
+    "norrland-se": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.016,
+     "forest": 0.0
+    },
+    "kainuu-fi": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.019,
+     "forest": 0.0
+    },
+    "kaingaroa-nz": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.0,
+     "forest": 0.0
+    },
+    "tres-lagoas-br": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.595,
+     "forest": 0.0
+    },
+    "biobio-cl": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.0,
+     "forest": 0.0
+    },
+    "space-amaravati-in": {
+     "moved": 0.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-eko-atlantic-ng": {
+     "moved": 0.1,
+     "unchanged": 0.011,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.459
+    },
+    "space-kolwezi-cd": {
+     "moved": 0.433,
+     "unchanged": 0.001,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.654
+    },
+    "space-mobimbi-sl": {
+     "moved": 0.438,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.576
+    },
+    "space-morowali-id": {
+     "moved": 0.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-new-capital-eg": {
+     "moved": 0.468,
+     "unchanged": 0.276,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.656
+    },
+    "space-sembehun-sl": {
+     "moved": 0.06,
+     "unchanged": 0.007,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.508
+    },
+    "space-serengeti-tz": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-shurugwi-zw": {
+     "moved": 0.25,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-unki-zw": {
+     "moved": 0.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-weda-bay-id": {
+     "moved": 0.0,
+     "unchanged": 0.005,
+     "cut": null,
+     "forest": null
+    },
+    "space-xiongan-cn": {
+     "moved": 0.286,
+     "unchanged": 0.061,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.62
+    },
+    "space-madre-de-dios-pe": {
+     "moved": 0.091,
+     "unchanged": 0.378,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.584
+    },
+    "space-tarkwa-gh": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-sangatta-id": {
+     "moved": 0.455,
+     "unchanged": 0.133,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.687
+    },
+    "space-adaro-id": {
+     "moved": 0.538,
+     "unchanged": 0.054,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.716
+    },
+    "space-sorowako-id": {
+     "moved": 0.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-boke-gn": {
+     "moved": 0.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-fort-hills-ab": {
+     "moved": 0.251,
+     "unchanged": 0.056,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.63
+    },
+    "space-detour-lake-on": {
+     "moved": 0.076,
+     "unchanged": 0.002,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.457
+    },
+    "space-orapa-bw": {
+     "moved": 0.309,
+     "unchanged": 0.033,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.661
+    },
+    "space-jwaneng-bw": {
+     "moved": 0.28,
+     "unchanged": 0.06,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.599
+    },
+    "space-ekibastuz-kz": {
+     "moved": 0.278,
+     "unchanged": 0.013,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.602
+    },
+    "space-sokolov-kz": {
+     "moved": 0.176,
+     "unchanged": 0.002,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.489
+    }
+   }
+  },
+  "pair": {
+   "cut_called_dug": 0.635,
+   "per_place": {
+    "coast-range-or": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.799,
+     "forest": 0.009
+    },
+    "willapa-wa": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.735,
+     "forest": 0.022
+    },
+    "ware-ga": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.692,
+     "forest": 0.009
+    },
+    "pine-ms": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.79,
+     "forest": 0.017
+    },
+    "north-woods-me": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.406,
+     "forest": 0.004
+    },
+    "norrland-se": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.423,
+     "forest": 0.009
+    },
+    "kainuu-fi": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.546,
+     "forest": 0.016
+    },
+    "kaingaroa-nz": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.921,
+     "forest": 0.007
+    },
+    "tres-lagoas-br": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.612,
+     "forest": 0.007
+    },
+    "biobio-cl": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.424,
+     "forest": 0.024
+    },
+    "space-amaravati-in": {
+     "moved": 0.5,
+     "unchanged": 0.312,
+     "cut": null,
+     "forest": null
+    },
+    "space-eko-atlantic-ng": {
+     "moved": 0.15,
+     "unchanged": 0.055,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.215
+    },
+    "space-kolwezi-cd": {
+     "moved": 0.672,
+     "unchanged": 0.042,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.591
+    },
+    "space-mobimbi-sl": {
+     "moved": 0.792,
+     "unchanged": 0.237,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.783
+    },
+    "space-morowali-id": {
+     "moved": 1.0,
+     "unchanged": 0.315,
+     "cut": null,
+     "forest": null
+    },
+    "space-new-capital-eg": {
+     "moved": 0.755,
+     "unchanged": 0.316,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.58
+    },
+    "space-sembehun-sl": {
+     "moved": 0.929,
+     "unchanged": 0.477,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.819
+    },
+    "space-serengeti-tz": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-shurugwi-zw": {
+     "moved": 0.25,
+     "unchanged": 0.01,
+     "cut": null,
+     "forest": null
+    },
+    "space-unki-zw": {
+     "moved": 0.0,
+     "unchanged": 0.019,
+     "cut": null,
+     "forest": null
+    },
+    "space-weda-bay-id": {
+     "moved": 1.0,
+     "unchanged": 0.011,
+     "cut": null,
+     "forest": null
+    },
+    "space-xiongan-cn": {
+     "moved": 0.812,
+     "unchanged": 0.371,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.645
+    },
+    "space-madre-de-dios-pe": {
+     "moved": 0.364,
+     "unchanged": 0.49,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.325
+    },
+    "space-tarkwa-gh": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-sangatta-id": {
+     "moved": 0.545,
+     "unchanged": 0.4,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.534
+    },
+    "space-adaro-id": {
+     "moved": 0.538,
+     "unchanged": 0.189,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.436
+    },
+    "space-sorowako-id": {
+     "moved": 1.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-boke-gn": {
+     "moved": 0.0,
+     "unchanged": 0.04,
+     "cut": null,
+     "forest": null
+    },
+    "space-fort-hills-ab": {
+     "moved": 0.523,
+     "unchanged": 0.131,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.442
+    },
+    "space-detour-lake-on": {
+     "moved": 0.222,
+     "unchanged": 0.057,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.325
+    },
+    "space-orapa-bw": {
+     "moved": 0.139,
+     "unchanged": 0.01,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.207
+    },
+    "space-jwaneng-bw": {
+     "moved": 0.276,
+     "unchanged": 0.051,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.272
+    },
+    "space-ekibastuz-kz": {
+     "moved": 0.384,
+     "unchanged": 0.199,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.402
+    },
+    "space-sokolov-kz": {
+     "moved": 0.559,
+     "unchanged": 0.106,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.48
+    }
+   }
+  },
+  "ctx": {
+   "cut_called_dug": 0.179,
+   "per_place": {
+    "coast-range-or": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.068,
+     "forest": 0.07
+    },
+    "willapa-wa": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.138,
+     "forest": 0.223
+    },
+    "ware-ga": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.305,
+     "forest": 0.154
+    },
+    "pine-ms": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.042,
+     "forest": 0.017
+    },
+    "north-woods-me": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.006,
+     "forest": 0.235
+    },
+    "norrland-se": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.013,
+     "forest": 0.486
+    },
+    "kainuu-fi": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.0,
+     "forest": 0.123
+    },
+    "kaingaroa-nz": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.004,
+     "forest": 0.035
+    },
+    "tres-lagoas-br": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.601,
+     "forest": 0.083
+    },
+    "biobio-cl": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.609,
+     "forest": 0.339
+    },
+    "space-amaravati-in": {
+     "moved": 1.0,
+     "unchanged": 0.4,
+     "cut": null,
+     "forest": null
+    },
+    "space-eko-atlantic-ng": {
+     "moved": 0.3,
+     "unchanged": 0.723,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.794
+    },
+    "space-kolwezi-cd": {
+     "moved": 0.851,
+     "unchanged": 0.791,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.922
+    },
+    "space-mobimbi-sl": {
+     "moved": 0.771,
+     "unchanged": 0.468,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.943
+    },
+    "space-morowali-id": {
+     "moved": 1.0,
+     "unchanged": 0.376,
+     "cut": null,
+     "forest": null
+    },
+    "space-new-capital-eg": {
+     "moved": 0.993,
+     "unchanged": 0.922,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.982
+    },
+    "space-sembehun-sl": {
+     "moved": 0.964,
+     "unchanged": 0.822,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.979
+    },
+    "space-serengeti-tz": {
+     "moved": null,
+     "unchanged": 0.142,
+     "cut": null,
+     "forest": null
+    },
+    "space-shurugwi-zw": {
+     "moved": 0.75,
+     "unchanged": 0.429,
+     "cut": null,
+     "forest": null
+    },
+    "space-unki-zw": {
+     "moved": 1.0,
+     "unchanged": 0.184,
+     "cut": null,
+     "forest": null
+    },
+    "space-weda-bay-id": {
+     "moved": 1.0,
+     "unchanged": 0.016,
+     "cut": null,
+     "forest": null
+    },
+    "space-xiongan-cn": {
+     "moved": 0.977,
+     "unchanged": 0.566,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.983
+    },
+    "space-madre-de-dios-pe": {
+     "moved": 1.0,
+     "unchanged": 0.797,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.972
+    },
+    "space-tarkwa-gh": {
+     "moved": null,
+     "unchanged": 1.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-sangatta-id": {
+     "moved": 0.545,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.582
+    },
+    "space-adaro-id": {
+     "moved": 0.615,
+     "unchanged": 0.054,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.814
+    },
+    "space-sorowako-id": {
+     "moved": 1.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-boke-gn": {
+     "moved": 0.0,
+     "unchanged": 0.2,
+     "cut": null,
+     "forest": null
+    },
+    "space-fort-hills-ab": {
+     "moved": 0.859,
+     "unchanged": 0.904,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.908
+    },
+    "space-detour-lake-on": {
+     "moved": 0.951,
+     "unchanged": 0.375,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.948
+    },
+    "space-orapa-bw": {
+     "moved": 0.493,
+     "unchanged": 0.128,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.78
+    },
+    "space-jwaneng-bw": {
+     "moved": 0.562,
+     "unchanged": 0.422,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.818
+    },
+    "space-ekibastuz-kz": {
+     "moved": 0.866,
+     "unchanged": 0.85,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.911
+    },
+    "space-sokolov-kz": {
+     "moved": 0.765,
+     "unchanged": 0.33,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.841
+    }
+   }
+  },
+  "after": {
+   "cut_called_dug": 0.589,
+   "per_place": {
+    "coast-range-or": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.811,
+     "forest": 0.165
+    },
+    "willapa-wa": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.84,
+     "forest": 0.139
+    },
+    "ware-ga": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.825,
+     "forest": 0.141
+    },
+    "pine-ms": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.778,
+     "forest": 0.107
+    },
+    "north-woods-me": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.066,
+     "forest": 0.038
+    },
+    "norrland-se": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.435,
+     "forest": 0.615
+    },
+    "kainuu-fi": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.063,
+     "forest": 0.187
+    },
+    "kaingaroa-nz": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.816,
+     "forest": 0.583
+    },
+    "tres-lagoas-br": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.424,
+     "forest": 0.029
+    },
+    "biobio-cl": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.834,
+     "forest": 0.578
+    },
+    "space-amaravati-in": {
+     "moved": 0.833,
+     "unchanged": 0.75,
+     "cut": null,
+     "forest": null
+    },
+    "space-eko-atlantic-ng": {
+     "moved": 0.9,
+     "unchanged": 0.874,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.604
+    },
+    "space-kolwezi-cd": {
+     "moved": 0.994,
+     "unchanged": 0.63,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.916
+    },
+    "space-mobimbi-sl": {
+     "moved": 1.0,
+     "unchanged": 0.955,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.954
+    },
+    "space-morowali-id": {
+     "moved": 1.0,
+     "unchanged": 0.651,
+     "cut": null,
+     "forest": null
+    },
+    "space-new-capital-eg": {
+     "moved": 0.966,
+     "unchanged": 0.821,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.841
+    },
+    "space-sembehun-sl": {
+     "moved": 0.976,
+     "unchanged": 0.939,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.905
+    },
+    "space-serengeti-tz": {
+     "moved": null,
+     "unchanged": 0.035,
+     "cut": null,
+     "forest": null
+    },
+    "space-shurugwi-zw": {
+     "moved": 1.0,
+     "unchanged": 0.662,
+     "cut": null,
+     "forest": null
+    },
+    "space-unki-zw": {
+     "moved": 1.0,
+     "unchanged": 0.798,
+     "cut": null,
+     "forest": null
+    },
+    "space-weda-bay-id": {
+     "moved": 1.0,
+     "unchanged": 0.973,
+     "cut": null,
+     "forest": null
+    },
+    "space-xiongan-cn": {
+     "moved": 0.962,
+     "unchanged": 0.641,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.908
+    },
+    "space-madre-de-dios-pe": {
+     "moved": 1.0,
+     "unchanged": 0.993,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.986
+    },
+    "space-tarkwa-gh": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-sangatta-id": {
+     "moved": 0.909,
+     "unchanged": 0.867,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.83
+    },
+    "space-adaro-id": {
+     "moved": 1.0,
+     "unchanged": 0.811,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.889
+    },
+    "space-sorowako-id": {
+     "moved": 1.0,
+     "unchanged": 0.333,
+     "cut": null,
+     "forest": null
+    },
+    "space-boke-gn": {
+     "moved": 1.0,
+     "unchanged": 0.96,
+     "cut": null,
+     "forest": null
+    },
+    "space-fort-hills-ab": {
+     "moved": 0.998,
+     "unchanged": 0.941,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.882
+    },
+    "space-detour-lake-on": {
+     "moved": 0.979,
+     "unchanged": 0.525,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.769
+    },
+    "space-orapa-bw": {
+     "moved": 0.996,
+     "unchanged": 0.909,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.873
+    },
+    "space-jwaneng-bw": {
+     "moved": 0.967,
+     "unchanged": 0.572,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.75
+    },
+    "space-ekibastuz-kz": {
+     "moved": 1.0,
+     "unchanged": 0.989,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.897
+    },
+    "space-sokolov-kz": {
+     "moved": 0.853,
+     "unchanged": 0.794,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.796
+    }
+   }
+  },
+  "traj": {
+   "cut_called_dug": 0.783,
+   "per_place": {
+    "coast-range-or": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.884,
+     "forest": 0.005
+    },
+    "willapa-wa": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.864,
+     "forest": 0.009
+    },
+    "ware-ga": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.909,
+     "forest": 0.011
+    },
+    "pine-ms": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.891,
+     "forest": 0.005
+    },
+    "north-woods-me": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.562,
+     "forest": 0.002
+    },
+    "norrland-se": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.616,
+     "forest": 0.001
+    },
+    "kainuu-fi": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.757,
+     "forest": 0.001
+    },
+    "kaingaroa-nz": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.965,
+     "forest": 0.005
+    },
+    "tres-lagoas-br": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.841,
+     "forest": 0.004
+    },
+    "biobio-cl": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.536,
+     "forest": 0.006
+    },
+    "space-amaravati-in": {
+     "moved": 0.0,
+     "unchanged": 0.088,
+     "cut": null,
+     "forest": null
+    },
+    "space-eko-atlantic-ng": {
+     "moved": 0.0,
+     "unchanged": 0.013,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.065
+    },
+    "space-kolwezi-cd": {
+     "moved": 0.721,
+     "unchanged": 0.028,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.368
+    },
+    "space-mobimbi-sl": {
+     "moved": 0.771,
+     "unchanged": 0.083,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.351
+    },
+    "space-morowali-id": {
+     "moved": 0.571,
+     "unchanged": 0.255,
+     "cut": null,
+     "forest": null
+    },
+    "space-new-capital-eg": {
+     "moved": 0.248,
+     "unchanged": 0.113,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.13
+    },
+    "space-sembehun-sl": {
+     "moved": 0.524,
+     "unchanged": 0.114,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.274
+    },
+    "space-serengeti-tz": {
+     "moved": null,
+     "unchanged": 0.052,
+     "cut": null,
+     "forest": null
+    },
+    "space-shurugwi-zw": {
+     "moved": 0.25,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-unki-zw": {
+     "moved": 0.0,
+     "unchanged": 0.004,
+     "cut": null,
+     "forest": null
+    },
+    "space-weda-bay-id": {
+     "moved": 1.0,
+     "unchanged": 0.011,
+     "cut": null,
+     "forest": null
+    },
+    "space-xiongan-cn": {
+     "moved": 0.826,
+     "unchanged": 0.351,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.347
+    },
+    "space-madre-de-dios-pe": {
+     "moved": 0.091,
+     "unchanged": 0.406,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.17
+    },
+    "space-tarkwa-gh": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-sangatta-id": {
+     "moved": 0.818,
+     "unchanged": 0.467,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.423
+    },
+    "space-adaro-id": {
+     "moved": 0.769,
+     "unchanged": 0.216,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.33
+    },
+    "space-sorowako-id": {
+     "moved": 1.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-boke-gn": {
+     "moved": 1.0,
+     "unchanged": 0.16,
+     "cut": null,
+     "forest": null
+    },
+    "space-fort-hills-ab": {
+     "moved": 0.146,
+     "unchanged": 0.014,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.099
+    },
+    "space-detour-lake-on": {
+     "moved": 0.132,
+     "unchanged": 0.002,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.08
+    },
+    "space-orapa-bw": {
+     "moved": 0.849,
+     "unchanged": 0.057,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.494
+    },
+    "space-jwaneng-bw": {
+     "moved": 0.675,
+     "unchanged": 0.131,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.297
+    },
+    "space-ekibastuz-kz": {
+     "moved": 0.134,
+     "unchanged": 0.001,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.108
+    },
+    "space-sokolov-kz": {
+     "moved": 0.353,
+     "unchanged": 0.004,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.147
+    }
+   }
+  },
+  "all": {
+   "cut_called_dug": 0.155,
+   "per_place": {
+    "coast-range-or": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.247,
+     "forest": 0.005
+    },
+    "willapa-wa": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.159,
+     "forest": 0.011
+    },
+    "ware-ga": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.234,
+     "forest": 0.006
+    },
+    "pine-ms": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.077,
+     "forest": 0.011
+    },
+    "north-woods-me": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.01,
+     "forest": 0.003
+    },
+    "norrland-se": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.026,
+     "forest": 0.012
+    },
+    "kainuu-fi": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.003,
+     "forest": 0.01
+    },
+    "kaingaroa-nz": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.006,
+     "forest": 0.001
+    },
+    "tres-lagoas-br": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.522,
+     "forest": 0.005
+    },
+    "biobio-cl": {
+     "moved": null,
+     "unchanged": null,
+     "cut": 0.263,
+     "forest": 0.048
+    },
+    "space-amaravati-in": {
+     "moved": 0.5,
+     "unchanged": 0.086,
+     "cut": null,
+     "forest": null
+    },
+    "space-eko-atlantic-ng": {
+     "moved": 0.0,
+     "unchanged": 0.041,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.591
+    },
+    "space-kolwezi-cd": {
+     "moved": 0.752,
+     "unchanged": 0.09,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.889
+    },
+    "space-mobimbi-sl": {
+     "moved": 0.792,
+     "unchanged": 0.167,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.896
+    },
+    "space-morowali-id": {
+     "moved": 0.857,
+     "unchanged": 0.107,
+     "cut": null,
+     "forest": null
+    },
+    "space-new-capital-eg": {
+     "moved": 0.829,
+     "unchanged": 0.369,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.92
+    },
+    "space-sembehun-sl": {
+     "moved": 0.881,
+     "unchanged": 0.553,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.935
+    },
+    "space-serengeti-tz": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-shurugwi-zw": {
+     "moved": 0.5,
+     "unchanged": 0.035,
+     "cut": null,
+     "forest": null
+    },
+    "space-unki-zw": {
+     "moved": 0.0,
+     "unchanged": 0.041,
+     "cut": null,
+     "forest": null
+    },
+    "space-weda-bay-id": {
+     "moved": 1.0,
+     "unchanged": 0.011,
+     "cut": null,
+     "forest": null
+    },
+    "space-xiongan-cn": {
+     "moved": 0.925,
+     "unchanged": 0.431,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.956
+    },
+    "space-madre-de-dios-pe": {
+     "moved": 0.818,
+     "unchanged": 0.72,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.915
+    },
+    "space-tarkwa-gh": {
+     "moved": null,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-sangatta-id": {
+     "moved": 0.364,
+     "unchanged": 0.2,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.581
+    },
+    "space-adaro-id": {
+     "moved": 0.615,
+     "unchanged": 0.162,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.785
+    },
+    "space-sorowako-id": {
+     "moved": 1.0,
+     "unchanged": 0.0,
+     "cut": null,
+     "forest": null
+    },
+    "space-boke-gn": {
+     "moved": 0.0,
+     "unchanged": 0.08,
+     "cut": null,
+     "forest": null
+    },
+    "space-fort-hills-ab": {
+     "moved": 0.519,
+     "unchanged": 0.192,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.823
+    },
+    "space-detour-lake-on": {
+     "moved": 0.229,
+     "unchanged": 0.052,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.726
+    },
+    "space-orapa-bw": {
+     "moved": 0.401,
+     "unchanged": 0.009,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.571
+    },
+    "space-jwaneng-bw": {
+     "moved": 0.215,
+     "unchanged": 0.068,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.516
+    },
+    "space-ekibastuz-kz": {
+     "moved": 0.343,
+     "unchanged": 0.269,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.783
+    },
+    "space-sokolov-kz": {
+     "moved": 0.588,
+     "unchanged": 0.121,
+     "cut": null,
+     "forest": null,
+     "auc_vs_cuts": 0.805
+    }
+   }
+  }
+ },
+ "C": {
+  "all": {
+   "ky-clay": {
+    "auc": 0.931,
+    "mean_dug": 0.699,
+    "mean_not": 0.237,
+    "auc_vs_cuts": 1.0
+   },
+   "ky-pike": {
+    "auc": 0.795,
+    "mean_dug": 0.341,
+    "mean_not": 0.133,
+    "auc_vs_cuts": 0.987
+   },
+   "ky-perry": {
+    "auc": 0.939,
+    "mean_dug": 0.645,
+    "mean_not": 0.195,
+    "auc_vs_cuts": 1.0
+   },
+   "hibbing-mn": {
+    "auc": 0.956,
+    "mean_dug": 0.832,
+    "mean_not": 0.167,
+    "auc_vs_cuts": 1.0
+   },
+   "lakewood-ranch-fl": {
+    "auc": 0.665,
+    "mean_dug": 0.513,
+    "mean_not": 0.369,
+    "auc_vs_cuts": 0.997
+   },
+   "four-corners-fl": {
+    "auc": 0.255,
+    "mean_dug": 0.632,
+    "mean_not": 0.84,
+    "auc_vs_cuts": 0.999
+   },
+   "huntsville-al": {
+    "auc": 0.816,
+    "mean_dug": 0.528,
+    "mean_not": 0.29,
+    "auc_vs_cuts": 0.999
+   },
+   "new-albany-oh": {
+    "auc": 0.708,
+    "mean_dug": 0.888,
+    "mean_not": 0.734,
+    "auc_vs_cuts": 1.0
+   },
+   "coast-range-or": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.03
+   },
+   "willapa-wa": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.015
+   },
+   "ware-ga": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.034
+   },
+   "pine-ms": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.024
+   },
+   "north-woods-me": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.038
+   },
+   "norrland-se": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.048
+   },
+   "kainuu-fi": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.038
+   },
+   "kaingaroa-nz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.013
+   },
+   "tres-lagoas-br": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.049
+   },
+   "biobio-cl": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.013
+   },
+   "space-amaravati-in": {
+    "auc": 0.768,
+    "mean_dug": 0.21,
+    "mean_not": 0.151
+   },
+   "space-eko-atlantic-ng": {
+    "auc": 0.415,
+    "mean_dug": 0.294,
+    "mean_not": 0.335,
+    "auc_vs_cuts": 0.997
+   },
+   "space-kolwezi-cd": {
+    "auc": 0.958,
+    "mean_dug": 0.614,
+    "mean_not": 0.076,
+    "auc_vs_cuts": 0.986
+   },
+   "space-mobimbi-sl": {
+    "auc": 0.843,
+    "mean_dug": 0.756,
+    "mean_not": 0.196,
+    "auc_vs_cuts": 0.96
+   },
+   "space-morowali-id": {
+    "auc": 0.863,
+    "mean_dug": 0.618,
+    "mean_not": 0.288
+   },
+   "space-new-capital-eg": {
+    "auc": 0.674,
+    "mean_dug": 0.489,
+    "mean_not": 0.359,
+    "auc_vs_cuts": 0.999
+   },
+   "space-sembehun-sl": {
+    "auc": 0.899,
+    "mean_dug": 0.755,
+    "mean_not": 0.286,
+    "auc_vs_cuts": 0.996
+   },
+   "space-serengeti-tz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.034
+   },
+   "space-shurugwi-zw": {
+    "auc": 0.958,
+    "mean_dug": 0.297,
+    "mean_not": 0.038
+   },
+   "space-unki-zw": {
+    "auc": 0.944,
+    "mean_dug": 0.451,
+    "mean_not": 0.166
+   },
+   "space-weda-bay-id": {
+    "auc": 0.989,
+    "mean_dug": 0.505,
+    "mean_not": 0.027
+   },
+   "space-xiongan-cn": {
+    "auc": 0.784,
+    "mean_dug": 0.771,
+    "mean_not": 0.414,
+    "auc_vs_cuts": 1.0
+   },
+   "space-madre-de-dios-pe": {
+    "auc": 0.38,
+    "mean_dug": 0.462,
+    "mean_not": 0.567,
+    "auc_vs_cuts": 0.999
+   },
+   "space-tarkwa-gh": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.105
+   },
+   "space-sangatta-id": {
+    "auc": 0.606,
+    "mean_dug": 0.526,
+    "mean_not": 0.341,
+    "auc_vs_cuts": 0.966
+   },
+   "space-adaro-id": {
+    "auc": 0.821,
+    "mean_dug": 0.521,
+    "mean_not": 0.323,
+    "auc_vs_cuts": 1.0
+   },
+   "space-sorowako-id": {
+    "auc": 1.0,
+    "mean_dug": 0.605,
+    "mean_not": 0.021
+   },
+   "space-boke-gn": {
+    "auc": 0.8,
+    "mean_dug": 0.059,
+    "mean_not": 0.04
+   },
+   "space-fort-hills-ab": {
+    "auc": 0.745,
+    "mean_dug": 0.42,
+    "mean_not": 0.264,
+    "auc_vs_cuts": 0.998
+   },
+   "space-detour-lake-on": {
+    "auc": 0.916,
+    "mean_dug": 0.626,
+    "mean_not": 0.173,
+    "auc_vs_cuts": 0.996
+   },
+   "space-orapa-bw": {
+    "auc": 0.975,
+    "mean_dug": 0.773,
+    "mean_not": 0.15,
+    "auc_vs_cuts": 1.0
+   },
+   "space-jwaneng-bw": {
+    "auc": 0.916,
+    "mean_dug": 0.779,
+    "mean_not": 0.225,
+    "auc_vs_cuts": 0.998
+   },
+   "space-ekibastuz-kz": {
+    "auc": 0.919,
+    "mean_dug": 0.736,
+    "mean_not": 0.399,
+    "auc_vs_cuts": 1.0
+   },
+   "space-sokolov-kz": {
+    "auc": 0.8,
+    "mean_dug": 0.542,
+    "mean_not": 0.14,
+    "auc_vs_cuts": 0.937
+   }
+  },
+  "pair": {
+   "ky-clay": {
+    "auc": 0.914,
+    "mean_dug": 0.596,
+    "mean_not": 0.236,
+    "auc_vs_cuts": 0.992
+   },
+   "ky-pike": {
+    "auc": 0.699,
+    "mean_dug": 0.341,
+    "mean_not": 0.173,
+    "auc_vs_cuts": 0.906
+   },
+   "ky-perry": {
+    "auc": 0.924,
+    "mean_dug": 0.694,
+    "mean_not": 0.285,
+    "auc_vs_cuts": 0.998
+   },
+   "hibbing-mn": {
+    "auc": 0.956,
+    "mean_dug": 0.735,
+    "mean_not": 0.2,
+    "auc_vs_cuts": 0.999
+   },
+   "lakewood-ranch-fl": {
+    "auc": 0.668,
+    "mean_dug": 0.49,
+    "mean_not": 0.356,
+    "auc_vs_cuts": 0.975
+   },
+   "four-corners-fl": {
+    "auc": 0.364,
+    "mean_dug": 0.7,
+    "mean_not": 0.746,
+    "auc_vs_cuts": 0.997
+   },
+   "huntsville-al": {
+    "auc": 0.687,
+    "mean_dug": 0.473,
+    "mean_not": 0.345,
+    "auc_vs_cuts": 0.986
+   },
+   "new-albany-oh": {
+    "auc": 0.64,
+    "mean_dug": 0.878,
+    "mean_not": 0.755,
+    "auc_vs_cuts": 1.0
+   },
+   "coast-range-or": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.063
+   },
+   "willapa-wa": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.037
+   },
+   "ware-ga": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.053
+   },
+   "pine-ms": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.106
+   },
+   "north-woods-me": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.092
+   },
+   "norrland-se": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.095
+   },
+   "kainuu-fi": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.098
+   },
+   "kaingaroa-nz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.082
+   },
+   "tres-lagoas-br": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.173
+   },
+   "biobio-cl": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.02
+   },
+   "space-amaravati-in": {
+    "auc": 0.79,
+    "mean_dug": 0.353,
+    "mean_not": 0.243
+   },
+   "space-eko-atlantic-ng": {
+    "auc": 0.625,
+    "mean_dug": 0.347,
+    "mean_not": 0.31,
+    "auc_vs_cuts": 0.967
+   },
+   "space-kolwezi-cd": {
+    "auc": 0.956,
+    "mean_dug": 0.61,
+    "mean_not": 0.102,
+    "auc_vs_cuts": 0.968
+   },
+   "space-mobimbi-sl": {
+    "auc": 0.838,
+    "mean_dug": 0.748,
+    "mean_not": 0.249,
+    "auc_vs_cuts": 0.886
+   },
+   "space-morowali-id": {
+    "auc": 0.939,
+    "mean_dug": 0.811,
+    "mean_not": 0.421
+   },
+   "space-new-capital-eg": {
+    "auc": 0.624,
+    "mean_dug": 0.492,
+    "mean_not": 0.411,
+    "auc_vs_cuts": 0.991
+   },
+   "space-sembehun-sl": {
+    "auc": 0.92,
+    "mean_dug": 0.762,
+    "mean_not": 0.342,
+    "auc_vs_cuts": 0.991
+   },
+   "space-serengeti-tz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.062
+   },
+   "space-shurugwi-zw": {
+    "auc": 0.962,
+    "mean_dug": 0.306,
+    "mean_not": 0.051
+   },
+   "space-unki-zw": {
+    "auc": 0.914,
+    "mean_dug": 0.487,
+    "mean_not": 0.238
+   },
+   "space-weda-bay-id": {
+    "auc": 0.995,
+    "mean_dug": 0.432,
+    "mean_not": 0.046
+   },
+   "space-xiongan-cn": {
+    "auc": 0.782,
+    "mean_dug": 0.697,
+    "mean_not": 0.416,
+    "auc_vs_cuts": 0.999
+   },
+   "space-madre-de-dios-pe": {
+    "auc": 0.388,
+    "mean_dug": 0.417,
+    "mean_not": 0.522,
+    "auc_vs_cuts": 0.982
+   },
+   "space-tarkwa-gh": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.155
+   },
+   "space-sangatta-id": {
+    "auc": 0.642,
+    "mean_dug": 0.569,
+    "mean_not": 0.432,
+    "auc_vs_cuts": 0.984
+   },
+   "space-adaro-id": {
+    "auc": 0.582,
+    "mean_dug": 0.45,
+    "mean_not": 0.39,
+    "auc_vs_cuts": 0.969
+   },
+   "space-sorowako-id": {
+    "auc": 1.0,
+    "mean_dug": 0.405,
+    "mean_not": 0.06
+   },
+   "space-boke-gn": {
+    "auc": 0.82,
+    "mean_dug": 0.112,
+    "mean_not": 0.055
+   },
+   "space-fort-hills-ab": {
+    "auc": 0.772,
+    "mean_dug": 0.505,
+    "mean_not": 0.36,
+    "auc_vs_cuts": 0.995
+   },
+   "space-detour-lake-on": {
+    "auc": 0.915,
+    "mean_dug": 0.635,
+    "mean_not": 0.237,
+    "auc_vs_cuts": 0.992
+   },
+   "space-orapa-bw": {
+    "auc": 0.968,
+    "mean_dug": 0.672,
+    "mean_not": 0.174,
+    "auc_vs_cuts": 1.0
+   },
+   "space-jwaneng-bw": {
+    "auc": 0.917,
+    "mean_dug": 0.799,
+    "mean_not": 0.276,
+    "auc_vs_cuts": 0.999
+   },
+   "space-ekibastuz-kz": {
+    "auc": 0.924,
+    "mean_dug": 0.653,
+    "mean_not": 0.378,
+    "auc_vs_cuts": 1.0
+   },
+   "space-sokolov-kz": {
+    "auc": 0.781,
+    "mean_dug": 0.539,
+    "mean_not": 0.196,
+    "auc_vs_cuts": 0.896
+   }
+  },
+  "after": {
+   "ky-clay": {
+    "auc": 0.872,
+    "mean_dug": 0.469,
+    "mean_not": 0.26,
+    "auc_vs_cuts": 0.982
+   },
+   "ky-pike": {
+    "auc": 0.83,
+    "mean_dug": 0.348,
+    "mean_not": 0.196,
+    "auc_vs_cuts": 0.929
+   },
+   "ky-perry": {
+    "auc": 0.933,
+    "mean_dug": 0.63,
+    "mean_not": 0.308,
+    "auc_vs_cuts": 0.999
+   },
+   "hibbing-mn": {
+    "auc": 0.909,
+    "mean_dug": 0.712,
+    "mean_not": 0.253,
+    "auc_vs_cuts": 0.999
+   },
+   "lakewood-ranch-fl": {
+    "auc": 0.714,
+    "mean_dug": 0.476,
+    "mean_not": 0.344,
+    "auc_vs_cuts": 0.982
+   },
+   "four-corners-fl": {
+    "auc": 0.501,
+    "mean_dug": 0.4,
+    "mean_not": 0.388,
+    "auc_vs_cuts": 0.954
+   },
+   "huntsville-al": {
+    "auc": 0.848,
+    "mean_dug": 0.477,
+    "mean_not": 0.23,
+    "auc_vs_cuts": 0.964
+   },
+   "new-albany-oh": {
+    "auc": 0.621,
+    "mean_dug": 0.654,
+    "mean_not": 0.553,
+    "auc_vs_cuts": 0.995
+   },
+   "coast-range-or": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.112
+   },
+   "willapa-wa": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.103
+   },
+   "ware-ga": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.159
+   },
+   "pine-ms": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.229
+   },
+   "north-woods-me": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.122
+   },
+   "norrland-se": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.121
+   },
+   "kainuu-fi": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.096
+   },
+   "kaingaroa-nz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.052
+   },
+   "tres-lagoas-br": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.027
+   },
+   "biobio-cl": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.157
+   },
+   "space-amaravati-in": {
+    "auc": 0.5,
+    "mean_dug": 0.254,
+    "mean_not": 0.218
+   },
+   "space-eko-atlantic-ng": {
+    "auc": 0.51,
+    "mean_dug": 0.445,
+    "mean_not": 0.441,
+    "auc_vs_cuts": 0.989
+   },
+   "space-kolwezi-cd": {
+    "auc": 0.919,
+    "mean_dug": 0.509,
+    "mean_not": 0.177,
+    "auc_vs_cuts": 0.983
+   },
+   "space-mobimbi-sl": {
+    "auc": 0.759,
+    "mean_dug": 0.529,
+    "mean_not": 0.387,
+    "auc_vs_cuts": 0.989
+   },
+   "space-morowali-id": {
+    "auc": 0.846,
+    "mean_dug": 0.69,
+    "mean_not": 0.391
+   },
+   "space-new-capital-eg": {
+    "auc": 0.598,
+    "mean_dug": 0.492,
+    "mean_not": 0.438,
+    "auc_vs_cuts": 0.967
+   },
+   "space-sembehun-sl": {
+    "auc": 0.589,
+    "mean_dug": 0.487,
+    "mean_not": 0.437,
+    "auc_vs_cuts": 0.984
+   },
+   "space-serengeti-tz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.071
+   },
+   "space-shurugwi-zw": {
+    "auc": 0.902,
+    "mean_dug": 0.501,
+    "mean_not": 0.116
+   },
+   "space-unki-zw": {
+    "auc": 0.981,
+    "mean_dug": 0.569,
+    "mean_not": 0.241
+   },
+   "space-weda-bay-id": {
+    "auc": 0.995,
+    "mean_dug": 0.46,
+    "mean_not": 0.356
+   },
+   "space-xiongan-cn": {
+    "auc": 0.701,
+    "mean_dug": 0.626,
+    "mean_not": 0.479,
+    "auc_vs_cuts": 0.993
+   },
+   "space-madre-de-dios-pe": {
+    "auc": 0.541,
+    "mean_dug": 0.797,
+    "mean_not": 0.707,
+    "auc_vs_cuts": 1.0
+   },
+   "space-tarkwa-gh": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.215
+   },
+   "space-sangatta-id": {
+    "auc": 0.515,
+    "mean_dug": 0.468,
+    "mean_not": 0.463,
+    "auc_vs_cuts": 0.954
+   },
+   "space-adaro-id": {
+    "auc": 0.653,
+    "mean_dug": 0.609,
+    "mean_not": 0.481,
+    "auc_vs_cuts": 0.997
+   },
+   "space-sorowako-id": {
+    "auc": 1.0,
+    "mean_dug": 0.293,
+    "mean_not": 0.116
+   },
+   "space-boke-gn": {
+    "auc": 0.52,
+    "mean_dug": 0.348,
+    "mean_not": 0.361
+   },
+   "space-fort-hills-ab": {
+    "auc": 0.479,
+    "mean_dug": 0.465,
+    "mean_not": 0.462,
+    "auc_vs_cuts": 0.989
+   },
+   "space-detour-lake-on": {
+    "auc": 0.886,
+    "mean_dug": 0.649,
+    "mean_not": 0.258,
+    "auc_vs_cuts": 0.99
+   },
+   "space-orapa-bw": {
+    "auc": 0.908,
+    "mean_dug": 0.681,
+    "mean_not": 0.284,
+    "auc_vs_cuts": 0.993
+   },
+   "space-jwaneng-bw": {
+    "auc": 0.886,
+    "mean_dug": 0.703,
+    "mean_not": 0.26,
+    "auc_vs_cuts": 0.994
+   },
+   "space-ekibastuz-kz": {
+    "auc": 0.87,
+    "mean_dug": 0.69,
+    "mean_not": 0.458,
+    "auc_vs_cuts": 0.999
+   },
+   "space-sokolov-kz": {
+    "auc": 0.803,
+    "mean_dug": 0.529,
+    "mean_not": 0.26,
+    "auc_vs_cuts": 0.949
+   }
+  },
+  "ctx": {
+   "ky-clay": {
+    "auc": 0.896,
+    "mean_dug": 0.681,
+    "mean_not": 0.334,
+    "auc_vs_cuts": 1.0
+   },
+   "ky-pike": {
+    "auc": 0.761,
+    "mean_dug": 0.4,
+    "mean_not": 0.224,
+    "auc_vs_cuts": 0.996
+   },
+   "ky-perry": {
+    "auc": 0.877,
+    "mean_dug": 0.403,
+    "mean_not": 0.207,
+    "auc_vs_cuts": 0.999
+   },
+   "hibbing-mn": {
+    "auc": 0.962,
+    "mean_dug": 0.695,
+    "mean_not": 0.157,
+    "auc_vs_cuts": 0.999
+   },
+   "lakewood-ranch-fl": {
+    "auc": 0.535,
+    "mean_dug": 0.382,
+    "mean_not": 0.386,
+    "auc_vs_cuts": 0.996
+   },
+   "four-corners-fl": {
+    "auc": 0.213,
+    "mean_dug": 0.633,
+    "mean_not": 0.873,
+    "auc_vs_cuts": 0.999
+   },
+   "huntsville-al": {
+    "auc": 0.815,
+    "mean_dug": 0.511,
+    "mean_not": 0.328,
+    "auc_vs_cuts": 1.0
+   },
+   "new-albany-oh": {
+    "auc": 0.674,
+    "mean_dug": 0.776,
+    "mean_not": 0.646,
+    "auc_vs_cuts": 1.0
+   },
+   "coast-range-or": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.035
+   },
+   "willapa-wa": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.031
+   },
+   "ware-ga": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.057
+   },
+   "pine-ms": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.02
+   },
+   "north-woods-me": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.042
+   },
+   "norrland-se": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.04
+   },
+   "kainuu-fi": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.033
+   },
+   "kaingaroa-nz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.008
+   },
+   "tres-lagoas-br": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.093
+   },
+   "biobio-cl": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.026
+   },
+   "space-amaravati-in": {
+    "auc": 0.807,
+    "mean_dug": 0.49,
+    "mean_not": 0.343
+   },
+   "space-eko-atlantic-ng": {
+    "auc": 0.308,
+    "mean_dug": 0.465,
+    "mean_not": 0.521,
+    "auc_vs_cuts": 1.0
+   },
+   "space-kolwezi-cd": {
+    "auc": 0.912,
+    "mean_dug": 0.552,
+    "mean_not": 0.19,
+    "auc_vs_cuts": 0.997
+   },
+   "space-mobimbi-sl": {
+    "auc": 0.883,
+    "mean_dug": 0.748,
+    "mean_not": 0.271,
+    "auc_vs_cuts": 0.999
+   },
+   "space-morowali-id": {
+    "auc": 0.763,
+    "mean_dug": 0.49,
+    "mean_not": 0.287
+   },
+   "space-new-capital-eg": {
+    "auc": 0.697,
+    "mean_dug": 0.605,
+    "mean_not": 0.489,
+    "auc_vs_cuts": 1.0
+   },
+   "space-sembehun-sl": {
+    "auc": 0.852,
+    "mean_dug": 0.722,
+    "mean_not": 0.373,
+    "auc_vs_cuts": 0.999
+   },
+   "space-serengeti-tz": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.104
+   },
+   "space-shurugwi-zw": {
+    "auc": 0.967,
+    "mean_dug": 0.201,
+    "mean_not": 0.077
+   },
+   "space-unki-zw": {
+    "auc": 0.888,
+    "mean_dug": 0.427,
+    "mean_not": 0.233
+   },
+   "space-weda-bay-id": {
+    "auc": 0.995,
+    "mean_dug": 0.533,
+    "mean_not": 0.095
+   },
+   "space-xiongan-cn": {
+    "auc": 0.744,
+    "mean_dug": 0.64,
+    "mean_not": 0.403,
+    "auc_vs_cuts": 0.999
+   },
+   "space-madre-de-dios-pe": {
+    "auc": 0.436,
+    "mean_dug": 0.563,
+    "mean_not": 0.565,
+    "auc_vs_cuts": 1.0
+   },
+   "space-tarkwa-gh": {
+    "auc": null,
+    "mean_dug": null,
+    "mean_not": 0.244
+   },
+   "space-sangatta-id": {
+    "auc": 0.612,
+    "mean_dug": 0.497,
+    "mean_not": 0.342,
+    "auc_vs_cuts": 0.748
+   },
+   "space-adaro-id": {
+    "auc": 0.813,
+    "mean_dug": 0.561,
+    "mean_not": 0.292,
+    "auc_vs_cuts": 1.0
+   },
+   "space-sorowako-id": {
+    "auc": 1.0,
+    "mean_dug": 0.797,
+    "mean_not": 0.106
+   },
+   "space-boke-gn": {
+    "auc": 0.2,
+    "mean_dug": 0.019,
+    "mean_not": 0.044
+   },
+   "space-fort-hills-ab": {
+    "auc": 0.724,
+    "mean_dug": 0.48,
+    "mean_not": 0.351,
+    "auc_vs_cuts": 0.999
+   },
+   "space-detour-lake-on": {
+    "auc": 0.895,
+    "mean_dug": 0.629,
+    "mean_not": 0.242,
+    "auc_vs_cuts": 0.998
+   },
+   "space-orapa-bw": {
+    "auc": 0.961,
+    "mean_dug": 0.705,
+    "mean_not": 0.205,
+    "auc_vs_cuts": 1.0
+   },
+   "space-jwaneng-bw": {
+    "auc": 0.94,
+    "mean_dug": 0.802,
+    "mean_not": 0.271,
+    "auc_vs_cuts": 0.999
+   },
+   "space-ekibastuz-kz": {
+    "auc": 0.91,
+    "mean_dug": 0.725,
+    "mean_not": 0.456,
+    "auc_vs_cuts": 1.0
+   },
+   "space-sokolov-kz": {
+    "auc": 0.786,
+    "mean_dug": 0.514,
+    "mean_not": 0.188,
+    "auc_vs_cuts": 0.972
+   }
+  }
+ },
+ "D": {
+  "near-kolwezi-cd": {
+   "km": 47.2,
+   "moved": 323,
+   "cut": 15000,
+   "score": {
+    "auc": 0.676,
+    "found": 0.474,
+    "cut_lit": 0.115
+   },
+   "all_without": {
+    "auc": 0.972,
+    "found": 0.449,
+    "cut_lit": 0.0
+   },
+   "all_with": {
+    "auc": 0.986,
+    "found": 0.446,
+    "cut_lit": 0.0
+   },
+   "pair_without": {
+    "auc": 0.931,
+    "found": 0.455,
+    "cut_lit": 0.0
+   },
+   "pair_with": {
+    "auc": 0.942,
+    "found": 0.437,
+    "cut_lit": 0.0
+   },
+   "ctx_without": {
+    "auc": 0.992,
+    "found": 0.43,
+    "cut_lit": 0.0
+   },
+   "ctx_with": {
+    "auc": 0.996,
+    "found": 0.375,
+    "cut_lit": 0.0
+   },
+   "after_without": {
+    "auc": 0.995,
+    "found": 0.294,
+    "cut_lit": 0.0
+   },
+   "after_with": {
+    "auc": 0.996,
+    "found": 0.328,
+    "cut_lit": 0.0
+   }
+  },
+  "near-fort-hills-ab": {
+   "km": 55.8,
+   "moved": 6482,
+   "cut": 14694,
+   "score": {
+    "auc": 0.95,
+    "found": 0.335,
+    "cut_lit": 0.0
+   },
+   "all_without": {
+    "auc": 0.991,
+    "found": 0.189,
+    "cut_lit": 0.0
+   },
+   "all_with": {
+    "auc": 0.999,
+    "found": 0.167,
+    "cut_lit": 0.0
+   },
+   "pair_without": {
+    "auc": 0.992,
+    "found": 0.247,
+    "cut_lit": 0.0
+   },
+   "pair_with": {
+    "auc": 0.998,
+    "found": 0.237,
+    "cut_lit": 0.0
+   },
+   "ctx_without": {
+    "auc": 0.996,
+    "found": 0.195,
+    "cut_lit": 0.0
+   },
+   "ctx_with": {
+    "auc": 0.999,
+    "found": 0.181,
+    "cut_lit": 0.0
+   },
+   "after_without": {
+    "auc": 0.998,
+    "found": 0.127,
+    "cut_lit": 0.0
+   },
+   "after_with": {
+    "auc": 0.999,
+    "found": 0.129,
+    "cut_lit": 0.0
+   }
+  },
+  "near-detour-lake-on": {
+   "km": 48.0,
+   "moved": 144,
+   "cut": 15000,
+   "score": {
+    "auc": 0.774,
+    "found": 0.132,
+    "cut_lit": 0.0
+   },
+   "all_without": {
+    "auc": 0.981,
+    "found": 0.118,
+    "cut_lit": 0.0
+   },
+   "all_with": {
+    "auc": 0.99,
+    "found": 0.111,
+    "cut_lit": 0.0
+   },
+   "pair_without": {
+    "auc": 0.985,
+    "found": 0.132,
+    "cut_lit": 0.0
+   },
+   "pair_with": {
+    "auc": 0.992,
+    "found": 0.118,
+    "cut_lit": 0.0
+   },
+   "ctx_without": {
+    "auc": 0.982,
+    "found": 0.111,
+    "cut_lit": 0.0
+   },
+   "ctx_with": {
+    "auc": 0.986,
+    "found": 0.111,
+    "cut_lit": 0.0
+   },
+   "after_without": {
+    "auc": 0.995,
+    "found": 0.132,
+    "cut_lit": 0.0
+   },
+   "after_with": {
+    "auc": 0.995,
+    "found": 0.125,
+    "cut_lit": 0.0
+   }
+  },
+  "near-adaro-id": {
+   "km": 35.2,
+   "moved": 13,
+   "cut": 14759,
+   "score": {
+    "auc": 0.557,
+    "found": 0.615,
+    "cut_lit": 0.55
+   },
+   "all_without": {
+    "auc": 0.99,
+    "found": 0.308,
+    "cut_lit": 0.011
+   },
+   "all_with": {
+    "auc": 0.996,
+    "found": 0.154,
+    "cut_lit": 0.001
+   },
+   "pair_without": {
+    "auc": 0.981,
+    "found": 0.231,
+    "cut_lit": 0.009
+   },
+   "pair_with": {
+    "auc": 0.993,
+    "found": 0.077,
+    "cut_lit": 0.001
+   },
+   "ctx_without": {
+    "auc": 0.987,
+    "found": 0.462,
+    "cut_lit": 0.013
+   },
+   "ctx_with": {
+    "auc": 0.995,
+    "found": 0.077,
+    "cut_lit": 0.001
+   },
+   "after_without": {
+    "auc": 0.994,
+    "found": 0.462,
+    "cut_lit": 0.01
+   },
+   "after_with": {
+    "auc": 0.995,
+    "found": 0.308,
+    "cut_lit": 0.006
+   }
+  },
+  "near-sangatta-id": {
+   "km": 38.5,
+   "moved": 11,
+   "cut": 248,
+   "score": {
+    "auc": 0.408,
+    "found": 0.455,
+    "cut_lit": 0.71
+   },
+   "all_without": {
+    "auc": 0.885,
+    "found": 0.455,
+    "cut_lit": 0.0
+   },
+   "all_with": {
+    "auc": 0.971,
+    "found": 0.364,
+    "cut_lit": 0.0
+   },
+   "pair_without": {
+    "auc": 0.802,
+    "found": 0.455,
+    "cut_lit": 0.056
+   },
+   "pair_with": {
+    "auc": 0.921,
+    "found": 0.455,
+    "cut_lit": 0.0
+   },
+   "ctx_without": {
+    "auc": 0.738,
+    "found": 0.455,
+    "cut_lit": 0.0
+   },
+   "ctx_with": {
+    "auc": 0.965,
+    "found": 0.364,
+    "cut_lit": 0.0
+   },
+   "after_without": {
+    "auc": 0.989,
+    "found": 0.273,
+    "cut_lit": 0.0
+   },
+   "after_with": {
+    "auc": 0.997,
+    "found": 0.273,
+    "cut_lit": 0.0
+   }
+  },
+  "near-madre-de-dios-pe": {
+   "km": 37.7,
+   "moved": 11,
+   "cut": 15000,
+   "score": {
+    "auc": 0.083,
+    "found": 0.091,
+    "cut_lit": 0.894
+   },
+   "all_without": {
+    "auc": 0.881,
+    "found": 0.091,
+    "cut_lit": 0.047
+   },
+   "all_with": {
+    "auc": 1.0,
+    "found": 0.091,
+    "cut_lit": 0.0
+   },
+   "pair_without": {
+    "auc": 0.507,
+    "found": 0.091,
+    "cut_lit": 0.332
+   },
+   "pair_with": {
+    "auc": 0.988,
+    "found": 0.091,
+    "cut_lit": 0.002
+   },
+   "ctx_without": {
+    "auc": 1.0,
+    "found": 0.091,
+    "cut_lit": 0.0
+   },
+   "ctx_with": {
+    "auc": 1.0,
+    "found": 0.091,
+    "cut_lit": 0.0
+   },
+   "after_without": {
+    "auc": 1.0,
+    "found": 0.091,
+    "cut_lit": 0.0
+   },
+   "after_with": {
+    "auc": 1.0,
+    "found": 0.091,
+    "cut_lit": 0.0
+   }
+  },
+  "near-mobimbi-sl": {
+   "km": 21.1,
+   "moved": 48,
+   "cut": 15000,
+   "score": {
+    "auc": 0.787,
+    "found": 0.479,
+    "cut_lit": 0.0
+   },
+   "all_without": {
+    "auc": 0.843,
+    "found": 0.479,
+    "cut_lit": 0.0
+   },
+   "all_with": {
+    "auc": 0.984,
+    "found": 0.479,
+    "cut_lit": 0.0
+   },
+   "pair_without": {
+    "auc": 0.802,
+    "found": 0.479,
+    "cut_lit": 0.0
+   },
+   "pair_with": {
+    "auc": 0.975,
+    "found": 0.479,
+    "cut_lit": 0.0
+   },
+   "ctx_without": {
+    "auc": 0.995,
+    "found": 0.479,
+    "cut_lit": 0.0
+   },
+   "ctx_with": {
+    "auc": 1.0,
+    "found": 0.479,
+    "cut_lit": 0.0
+   },
+   "after_without": {
+    "auc": 0.99,
+    "found": 0.396,
+    "cut_lit": 0.0
+   },
+   "after_with": {
+    "auc": 1.0,
+    "found": 0.396,
+    "cut_lit": 0.0
+   }
+  },
+  "near-sembehun-sl": {
+   "km": 34.5,
+   "moved": 84,
+   "cut": 15000,
+   "score": {
+    "auc": 0.908,
+    "found": 0.107,
+    "cut_lit": 0.0
+   },
+   "all_without": {
+    "auc": 0.993,
+    "found": 0.107,
+    "cut_lit": 0.0
+   },
+   "all_with": {
+    "auc": 0.995,
+    "found": 0.107,
+    "cut_lit": 0.0
+   },
+   "pair_without": {
+    "auc": 0.986,
+    "found": 0.107,
+    "cut_lit": 0.0
+   },
+   "pair_with": {
+    "auc": 0.992,
+    "found": 0.107,
+    "cut_lit": 0.0
+   },
+   "ctx_without": {
+    "auc": 0.993,
+    "found": 0.083,
+    "cut_lit": 0.0
+   },
+   "ctx_with": {
+    "auc": 0.994,
+    "found": 0.036,
+    "cut_lit": 0.0
+   },
+   "after_without": {
+    "auc": 0.972,
+    "found": 0.036,
+    "cut_lit": 0.0
+   },
+   "after_with": {
+    "auc": 0.993,
+    "found": 0.012,
+    "cut_lit": 0.0
+   }
+  }
+ }
+}

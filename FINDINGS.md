@@ -560,8 +560,140 @@ place is their own pixels, the local mean over neighbors among them (the place's
 - Part A (the labeled pixels only) agrees in every direction, with somewhat different numbers (rank: Katy .44,
   Mountain Pass .76), and the same holds for the US recipe and for the abroad recipe taught with burns.
 
+## 19. Clearing that was dug against clearing that was not
+
+`separate.py` reads, `separate_test.py` tests, `near_panels.py` draws the clearing picked near each mine. Every
+section before this one taught clearcuts as quiet and watched Kolwezi pay. Here the question is asked head on: given
+ground whose forest was cleared, can the embeddings say whether it was then dug? A small head (logistic regression on
+scaled features, each place weighted the same and its two groups balanced) is taught on that question alone, and
+every number is held out by place.
+
+Truth:
+- **Same place, same years:** Hansen's forest loss in a year of the lidar window, split by the lidar into cleared and
+  dug (moved) and cleared and not dug (unchanged). Kentucky's coal (Clay 13,073 dug / 4,813 not; Pike 410 / 15,000;
+  Perry 42 / 88), Hibbing's iron (1,539 / 3,744), and forest cleared for building at Lakewood Ranch (15,000 /
+  14,592), Four Corners (2,927 / 7,861), Huntsville (1,046 / 3,146) and New Albany (457 / 937).
+- **Far away:** the ten clearcut regions of section 8 (cut ground) and the 26 satellite-laser sites (moved and
+  unchanged labels).
+- **Near each mine:** a 6 km square 15 to 60 km from each of eleven abroad mines, picked from Hansen's loss in one
+  year 2018 to 2023, cut ground against forest kept. Checked by eye against Sentinel-2 (`results/near/`): Kolwezi's
+  is a grid of cleared blocks, Madre de Dios's small farm clearings, Boke, Detour Lake and Morowali clearing; Fort
+  Hills's is a boreal burn, not a cut; Mobimbi and Sembehun picked the same square; Sangatta's and Weda Bay's hold
+  active mining in the square, and Adaro's loss is mostly degraded forest still standing. Those three are suspect.
+
+Every year 2017 to 2025 of both embeddings is read under the kept pixels, with the mean embedding around each pixel
+within about 110 m and 510 m. Feature sets: **pair** (the map's own features at the two years), **ctx** (the
+surroundings at the two years: the change there and what it became), **after** (the 2025 embedding against the
+later year: what the ground became since), **traj** (nine numbers per embedding over every year: distance from the
+first year, distance kept at the end, the year it went farthest, the surroundings' change), **all** together. A label
+needs a valid year after its pair, so labels whose later year is 2025 drop out (Salonga and Pomalaa entirely). The
+baseline is the aggregate itself (joint model x radar-safe gate, abroad recipe), held out: spans.py's leave-one-out
+models at the five US digging sites, abroad_teach.py's saved held-out scores at the older satellite sites, and the
+final models where they never taught (Kentucky, the clearcut regions, forest_labels.py's mines, the squares near
+mines).
+
+### A. Same place: one lidar site held out at a time
+
+| AUC, cleared and dug vs cleared and not dug | aggregate | pair | ctx | after | traj | all |
+|---|---|---|---|---|---|---|
+| ky-clay | .915 | .924 | .858 | .934 | .977 | .910 |
+| ky-pike | .779 | .781 | .795 | .804 | .634 | .839 |
+| ky-perry (130 labels) | .898 | .934 | .904 | .943 | .916 | .936 |
+| hibbing-mn | .953 | .946 | .976 | .878 | .917 | .944 |
+| lakewood-ranch-fl | .737 | .608 | .424 | .575 | .730 | .573 |
+| four-corners-fl | .399 | .247 | .188 | .496 | .478 | .208 |
+| huntsville-al | .722 | .658 | .690 | .865 | .655 | .773 |
+| new-albany-oh | .732 | .739 | .642 | .583 | .598 | .698 |
+| mean (7 sites, Perry left out) | .748 | .700 | .653 | .734 | .713 | .706 |
+
+- At the mines in forest the aggregate already orders the two well (Clay .915, Hibbing .953), and a head taught only
+  on this question adds a little at some (the path over the years at Clay .977, the years after at Huntsville .865).
+- Taught on these eight sites alone, no head beats the aggregate on average. Four Corners is inverted under every
+  rule: its cleared-not-dug ground scores above its dug ground, the in-site order problem of section 18.
+
+### B. Taught on the US lidar alone, scored abroad
+
+| head | clearcut regions called dug | Kolwezi moved / unchanged called dug | Kolwezi moved vs all cut ground, AUC |
+|---|---|---|---|
+| aggregate (at the 80% point of held-out lidar dug) | .237 | .43 / .00 | .65 |
+| pair | .635 | .67 / .04 | .59 |
+| ctx | .179 | .85 / .79 | .92 |
+| after | .589 | .99 / .63 | .92 |
+| all | .155 | .75 / .09 | .89 |
+
+- The surroundings carry from Kentucky and Minnesota to the Congo: the ctx head sets mine digging apart from the
+  clearcut regions (Kolwezi .92, Detour Lake .95, Madre de Dios .97, Fort Hills .91) where the aggregate does not
+  (.65, .46, .58, .63). It does it by the district: it calls the mines' unchanged ground dug too (Kolwezi .79). It
+  says "mining around here", not "this pixel was dug".
+- The pair features alone, taught on the US lidar, call two thirds of the clearcut regions dug: what US forest
+  clearing looks like before digging does not carry to Nordic or southern hemisphere forestry.
+
+### C. Everything taught, each place held out
+
+With the clearcut regions and the satellite sites taught too (cut ground and unchanged as not dug, moved as dug),
+every head sets each mine's digging apart from the held-out clearcut regions almost perfectly (AUC .94 to 1.00 under
+all, Sangatta .97, Sokolov .94); the held-out clearcut regions score a mean .01 to .05 under all. That is too clean
+to read as mine against cut: the clearcut regions are temperate forestry country and the mines are not, and
+AlphaEarth carries place strongly (section 1's note). Part D is the fair test. Inside the lidar sites the all head
+lands near the aggregate (Clay .931, Hibbing .956, Pike .795, Huntsville .816, Four Corners .255).
+
+### D. Each mine against clearing near it
+
+Each mine's moved labels against the cut ground of its own nearby square, the mine and its square both held out.
+"Head" taught without any square near a mine (as C) or with the other mines' squares too. The map's view: the share
+of the mine's moved labels and of the nearby cut ground the aggregate lights at its 60% cutoff, alone and where the
+head also says dug (over one half).
+
+| mine (km to square) | moved labels | aggregate AUC | aggregate: found / nearby cut lit | all head AUC (without / with) | aggregate x all head (without) | aggregate x ctx head (without) |
+|---|---|---|---|---|---|---|
+| Kolwezi (47) | 323 | .676 | .47 / .12 | .97 / .99 | .45 / .00 | .43 / .00 |
+| Fort Hills (56, a burn) | 6,482 | .950 | .34 / .00 | .99 / 1.00 | .19 / .00 | .20 / .00 |
+| Detour Lake (48) | 144 | .774 | .13 / .00 | .98 / .99 | .12 / .00 | .11 / .00 |
+| Mobimbi (21) | 48 | .787 | .48 / .00 | .84 / .98 | .48 / .00 | .48 / .00 |
+| Sembehun (34, Mobimbi's square) | 84 | .908 | .11 / .00 | .99 / .99 | .11 / .00 | .08 / .00 |
+| Madre de Dios (38) | 11 | .083 | .09 / .89 | .88 / 1.00 | .09 / .05 | .09 / .00 |
+| Adaro (35, suspect) | 13 | .557 | .61 / .55 | .99 / 1.00 | .31 / .01 | .46 / .01 |
+| Sangatta (38, suspect) | 11 | .408 | .46 / .71 | .89 / .97 | .46 / .00 | .46 / .00 |
+
+- Held out by place, near the mine, in the same forest and years, the heads set digging apart from clearing (AUC .84
+  to 1.00 against the aggregate's .08 to .95). At Kolwezi the aggregate times the all head keeps nearly all its found
+  (.47 to .45) and its nearby clearing goes from .12 lit to none. That is the trade sections 9, 14 and 15 could not
+  make by teaching clearcuts as quiet (every variant took Kolwezi's found down in step).
+- Madre de Dios's nearby farm clearings light .89 under the aggregate, the clearing-without-digging case of section
+  15, and go dark under every head. The aggregate finds little of the mine there either (.09); the head does not
+  change that.
+- It is not free everywhere: Fort Hills's found falls .34 to .19 and Adaro's .61 to .31 where the head also has to
+  agree. Weda Bay and Morowali had too few moved labels left to score.
+- The ctx head needs no later year (only the two years of the pair and their surroundings), so it fits a map whose
+  later year is 2025; the after and traj heads need a year after the pair.
+- Caveats: one square per mine, picked by Hansen loss and checked by eye, three of them suspect and one a burn; tens
+  of moved labels at most tropical mines; the heads are not yet tested on the 14 US digging sites as a map rule
+  (they need the surroundings read at every digging pixel), so their cost to digging AP there is unmeasured.
+
+Files: `separate.py`, `separate_test.py`, `near_panels.py`, `results/separate.json`, `results/near/`, logs
+`results_separate_*.log`; data in `data/separate/` (4.2 GB).
+
+## 20. Reading TESSERA in the browser (Pyodide)
+
+`pyodide_probe/`: Pyodide 314.0.7 in Node (the same Pyodide line marimo 0.25.1 bundles, 314.0.0, and the abi
+xarray-sql 0.6.0's wasm wheel targets). TESSERA's sharded Zarr (blosc zstd with bitshuffle, crc32c index) decodes in
+Pyodide with its own packages. zarr-python reads each 32 x 32 inner chunk as its own request, one after another: a
+512 x 512 window of one year took 124 s (63 s through the async API, 549 requests). A small reader that reads the
+shard index, merges neighboring byte ranges and fetches them together took 4 to 6 s (13 requests, 31 MB, decode 0.1
+s), byte-identical to zarr's. The network is then the limit, about 1.25 MB per square km per year of TESSERA.
+
+AlphaEarth's own COGs on Source Cooperative (`tge-labs/aef`, what aef-loader reads) are in UTM at 10 m, band
+interleaved, 1024 x 1024 tiles, and their pixel edges fall on TESSERA's grid: the Huntsville tile sits 33,616 and
+548,864 whole pixels from TESSERA's zone origin. Read from the COGs instead of the lat/lon mosaic, the two embeddings
+pair pixel for pixel, with no resampling. The models here were taught on the mosaic, so moving to the COGs means
+reading the sites again.
+
 ## Open
 
+- Clearcuts against forest mines, a second stage (section 19): a head taught on cleared-and-dug against
+  cleared-not-dug, multiplied with the aggregate, keeps Kolwezi's found (.47 to .45) and darkens the clearing near
+  it (.12 to .00), held out. Not yet tried as a map rule on the 14 US digging sites (needs the surroundings at every
+  digging pixel), nor on more than one square of clearing per mine.
 - Clearcuts against forest mines (sections 14, 15): on the abroad recipe any clearcut teaching costs Kolwezi in
   step with the clearcuts it quiets (1,000 px per region already .44 to .35), and more forest mines taught do not
   remove it. Kolwezi's ranking holds throughout (AP .82 to .86): the cost is its level against the US cutoff. The

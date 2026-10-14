@@ -1,0 +1,2158 @@
+{
+ "data/scores": {
+  "ap": {
+   "sites": [
+    "aurora-co",
+    "brighton-co",
+    "columbus-ne-oh",
+    "fishers-in",
+    "four-corners-fl",
+    "hibbing-mn",
+    "huntsville-al",
+    "katy-tx",
+    "lakewood-ranch-fl",
+    "lancaster-ca",
+    "las-vegas-nw-nv",
+    "las-vegas-se-nv",
+    "mountain-pass-ca",
+    "new-albany-oh"
+   ],
+   "per_site": {
+    "aef_gated": [
+     0.607,
+     0.196,
+     0.636,
+     0.751,
+     0.294,
+     0.505,
+     0.492,
+     0.688,
+     0.771,
+     0.118,
+     0.806,
+     0.728,
+     0.708,
+     0.448
+    ],
+    "mean": [
+     0.625,
+     0.233,
+     0.716,
+     0.787,
+     0.367,
+     0.627,
+     0.535,
+     0.662,
+     0.734,
+     0.121,
+     0.862,
+     0.806,
+     0.778,
+     0.484
+    ],
+    "both": [
+     0.574,
+     0.27,
+     0.734,
+     0.786,
+     0.279,
+     0.463,
+     0.55,
+     0.693,
+     0.737,
+     0.13,
+     0.85,
+     0.718,
+     0.789,
+     0.47
+    ],
+    "both_either": [
+     0.566,
+     0.266,
+     0.726,
+     0.795,
+     0.304,
+     0.533,
+     0.533,
+     0.687,
+     0.752,
+     0.138,
+     0.834,
+     0.78,
+     0.772,
+     0.483
+    ],
+    "either_sqrt": [
+     0.569,
+     0.267,
+     0.731,
+     0.794,
+     0.295,
+     0.551,
+     0.535,
+     0.688,
+     0.75,
+     0.144,
+     0.849,
+     0.778,
+     0.777,
+     0.483
+    ]
+   },
+   "mean": {
+    "gain": [
+     0.042,
+     0.02,
+     0.064
+    ],
+    "wins": 12,
+    "sign_p": 0.013,
+    "wilcoxon_p": 0.004,
+    "building": [
+     0.03,
+     0.008,
+     0.05
+    ],
+    "mining": [
+     0.088,
+     0.07,
+     0.122
+    ],
+    "mining_sites": {
+     "four-corners-fl": 0.073,
+     "hibbing-mn": 0.122,
+     "mountain-pass-ca": 0.07
+    }
+   },
+   "both": {
+    "gain": [
+     0.021,
+     -0.001,
+     0.045
+    ],
+    "wins": 9,
+    "sign_p": 0.424,
+    "wilcoxon_p": 0.135,
+    "building": [
+     0.025,
+     0.001,
+     0.048
+    ],
+    "mining": [
+     0.008,
+     -0.042,
+     0.081
+    ],
+    "mining_sites": {
+     "four-corners-fl": -0.015,
+     "hibbing-mn": -0.042,
+     "mountain-pass-ca": 0.081
+    }
+   },
+   "both_either": {
+    "gain": [
+     0.03,
+     0.012,
+     0.047
+    ],
+    "wins": 11,
+    "sign_p": 0.057,
+    "wilcoxon_p": 0.009,
+    "building": [
+     0.029,
+     0.008,
+     0.05
+    ],
+    "mining": [
+     0.034,
+     0.009,
+     0.064
+    ],
+    "mining_sites": {
+     "four-corners-fl": 0.009,
+     "hibbing-mn": 0.027,
+     "mountain-pass-ca": 0.064
+    }
+   },
+   "either_sqrt": {
+    "gain": [
+     0.033,
+     0.014,
+     0.051
+    ],
+    "wins": 11,
+    "sign_p": 0.057,
+    "wilcoxon_p": 0.005,
+    "building": [
+     0.032,
+     0.009,
+     0.053
+    ],
+    "mining": [
+     0.038,
+     0.0,
+     0.069
+    ],
+    "mining_sites": {
+     "four-corners-fl": 0.0,
+     "hibbing-mn": 0.046,
+     "mountain-pass-ca": 0.069
+    }
+   }
+  },
+  "false_alarm": {
+   "crop": {
+    "aef_gated": {
+     "mean": [
+      0.153,
+      0.091,
+      0.221
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.064,
+      0.031,
+      0.102
+     ],
+     "vs_map": [
+      -0.089,
+      -0.139,
+      -0.047
+     ],
+     "fewer_than_map": 26
+    },
+    "both": {
+     "mean": [
+      0.021,
+      0.007,
+      0.038
+     ],
+     "vs_map": [
+      -0.132,
+      -0.194,
+      -0.076
+     ],
+     "fewer_than_map": 27
+    },
+    "both_either": {
+     "mean": [
+      0.049,
+      0.022,
+      0.083
+     ],
+     "vs_map": [
+      -0.104,
+      -0.16,
+      -0.054
+     ],
+     "fewer_than_map": 23
+    },
+    "either_sqrt": {
+     "mean": [
+      0.042,
+      0.018,
+      0.072
+     ],
+     "vs_map": [
+      -0.111,
+      -0.168,
+      -0.06
+     ],
+     "fewer_than_map": 23
+    },
+    "n": 27
+   },
+   "farm": {
+    "aef_gated": {
+     "mean": [
+      0.097,
+      0.039,
+      0.161
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.044,
+      0.009,
+      0.1
+     ],
+     "vs_map": [
+      -0.053,
+      -0.093,
+      -0.021
+     ],
+     "fewer_than_map": 6
+    },
+    "both": {
+     "mean": [
+      0.029,
+      0.004,
+      0.072
+     ],
+     "vs_map": [
+      -0.069,
+      -0.121,
+      -0.028
+     ],
+     "fewer_than_map": 6
+    },
+    "both_either": {
+     "mean": [
+      0.037,
+      0.008,
+      0.089
+     ],
+     "vs_map": [
+      -0.061,
+      -0.112,
+      -0.023
+     ],
+     "fewer_than_map": 6
+    },
+    "either_sqrt": {
+     "mean": [
+      0.034,
+      0.006,
+      0.084
+     ],
+     "vs_map": [
+      -0.063,
+      -0.114,
+      -0.026
+     ],
+     "fewer_than_map": 6
+    },
+    "n": 6
+   },
+   "marsh": {
+    "aef_gated": {
+     "mean": [
+      0.043,
+      0.008,
+      0.082
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.056,
+      0.009,
+      0.135
+     ],
+     "vs_map": [
+      0.013,
+      -0.016,
+      0.053
+     ],
+     "fewer_than_map": 1
+    },
+    "both": {
+     "mean": [
+      0.02,
+      0.009,
+      0.038
+     ],
+     "vs_map": [
+      -0.023,
+      -0.044,
+      0.007
+     ],
+     "fewer_than_map": 2
+    },
+    "both_either": {
+     "mean": [
+      0.056,
+      0.021,
+      0.12
+     ],
+     "vs_map": [
+      0.012,
+      -0.018,
+      0.038
+     ],
+     "fewer_than_map": 1
+    },
+    "either_sqrt": {
+     "mean": [
+      0.048,
+      0.019,
+      0.103
+     ],
+     "vs_map": [
+      0.005,
+      -0.021,
+      0.021
+     ],
+     "fewer_than_map": 1
+    },
+    "n": 3
+   },
+   "burn": {
+    "aef_gated": {
+     "mean": [
+      0.112,
+      0.004,
+      0.22
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.053,
+      0.0,
+      0.106
+     ],
+     "vs_map": [
+      -0.059,
+      -0.113,
+      -0.004
+     ],
+     "fewer_than_map": 2
+    },
+    "both": {
+     "mean": [
+      0.03,
+      0.0,
+      0.06
+     ],
+     "vs_map": [
+      -0.082,
+      -0.16,
+      -0.004
+     ],
+     "fewer_than_map": 2
+    },
+    "both_either": {
+     "mean": [
+      0.105,
+      0.0,
+      0.21
+     ],
+     "vs_map": [
+      -0.007,
+      -0.01,
+      -0.004
+     ],
+     "fewer_than_map": 2
+    },
+    "either_sqrt": {
+     "mean": [
+      0.089,
+      0.0,
+      0.178
+     ],
+     "vs_map": [
+      -0.023,
+      -0.041,
+      -0.004
+     ],
+     "fewer_than_map": 2
+    },
+    "n": 2
+   },
+   "storm": {
+    "aef_gated": {
+     "mean": [
+      0.144,
+      0.144,
+      0.144
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.118,
+      0.118,
+      0.118
+     ],
+     "vs_map": [
+      -0.026,
+      -0.026,
+      -0.026
+     ],
+     "fewer_than_map": 1
+    },
+    "both": {
+     "mean": [
+      0.037,
+      0.037,
+      0.037
+     ],
+     "vs_map": [
+      -0.107,
+      -0.107,
+      -0.107
+     ],
+     "fewer_than_map": 1
+    },
+    "both_either": {
+     "mean": [
+      0.102,
+      0.102,
+      0.102
+     ],
+     "vs_map": [
+      -0.043,
+      -0.043,
+      -0.043
+     ],
+     "fewer_than_map": 1
+    },
+    "either_sqrt": {
+     "mean": [
+      0.086,
+      0.086,
+      0.086
+     ],
+     "vs_map": [
+      -0.058,
+      -0.058,
+      -0.058
+     ],
+     "fewer_than_map": 1
+    },
+    "n": 1
+   },
+   "island": {
+    "aef_gated": {
+     "mean": [
+      0.012,
+      0.007,
+      0.019
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.012,
+      0.007,
+      0.018
+     ],
+     "vs_map": [
+      -0.0,
+      -0.002,
+      0.001
+     ],
+     "fewer_than_map": 5
+    },
+    "both": {
+     "mean": [
+      0.018,
+      0.006,
+      0.037
+     ],
+     "vs_map": [
+      0.006,
+      -0.008,
+      0.028
+     ],
+     "fewer_than_map": 8
+    },
+    "both_either": {
+     "mean": [
+      0.023,
+      0.011,
+      0.042
+     ],
+     "vs_map": [
+      0.011,
+      -0.001,
+      0.03
+     ],
+     "fewer_than_map": 2
+    },
+    "either_sqrt": {
+     "mean": [
+      0.021,
+      0.01,
+      0.039
+     ],
+     "vs_map": [
+      0.009,
+      -0.003,
+      0.028
+     ],
+     "fewer_than_map": 3
+    },
+    "n": 12
+   },
+   "notruth": {
+    "aef_gated": {
+     "mean": [
+      0.052,
+      0.019,
+      0.089
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.078,
+      0.025,
+      0.138
+     ],
+     "vs_map": [
+      0.026,
+      0.004,
+      0.059
+     ],
+     "fewer_than_map": 0
+    },
+    "both": {
+     "mean": [
+      0.243,
+      0.069,
+      0.444
+     ],
+     "vs_map": [
+      0.191,
+      0.046,
+      0.375
+     ],
+     "fewer_than_map": 3
+    },
+    "both_either": {
+     "mean": [
+      0.064,
+      0.019,
+      0.128
+     ],
+     "vs_map": [
+      0.012,
+      -0.012,
+      0.044
+     ],
+     "fewer_than_map": 3
+    },
+    "either_sqrt": {
+     "mean": [
+      0.069,
+      0.023,
+      0.131
+     ],
+     "vs_map": [
+      0.017,
+      -0.001,
+      0.042
+     ],
+     "fewer_than_map": 3
+    },
+    "n": 9
+   },
+   "space_quiet": {
+    "aef_gated": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "both": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "both_either": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "either_sqrt": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "n": 2
+   }
+  },
+  "loso_cutoff": {
+   "aef_gated": {
+    "cutoff_range": [
+     0.526,
+     0.673
+    ],
+    "found": {
+     "aurora-co": 0.708,
+     "brighton-co": 0.567,
+     "columbus-ne-oh": 0.788,
+     "fishers-in": 0.771,
+     "four-corners-fl": 0.215,
+     "hibbing-mn": 0.233,
+     "huntsville-al": 0.534,
+     "katy-tx": 0.916,
+     "lakewood-ranch-fl": 0.809,
+     "lancaster-ca": 0.168,
+     "las-vegas-nw-nv": 0.528,
+     "las-vegas-se-nv": 0.767,
+     "mountain-pass-ca": 0.713,
+     "new-albany-oh": 0.655
+    },
+    "lit": {
+     "aurora-co": 0.018,
+     "brighton-co": 0.067,
+     "columbus-ne-oh": 0.072,
+     "fishers-in": 0.031,
+     "four-corners-fl": 0.101,
+     "hibbing-mn": 0.004,
+     "huntsville-al": 0.043,
+     "katy-tx": 0.171,
+     "lakewood-ranch-fl": 0.089,
+     "lancaster-ca": 0.01,
+     "las-vegas-nw-nv": 0.004,
+     "las-vegas-se-nv": 0.029,
+     "mountain-pass-ca": 0.016,
+     "new-albany-oh": 0.014
+    }
+   },
+   "mean": {
+    "cutoff_range": [
+     0.64,
+     0.709
+    ],
+    "found": {
+     "aurora-co": 0.676,
+     "brighton-co": 0.529,
+     "columbus-ne-oh": 0.827,
+     "fishers-in": 0.764,
+     "four-corners-fl": 0.227,
+     "hibbing-mn": 0.277,
+     "huntsville-al": 0.551,
+     "katy-tx": 0.898,
+     "lakewood-ranch-fl": 0.73,
+     "lancaster-ca": 0.241,
+     "las-vegas-nw-nv": 0.603,
+     "las-vegas-se-nv": 0.762,
+     "mountain-pass-ca": 0.625,
+     "new-albany-oh": 0.652
+    },
+    "lit": {
+     "aurora-co": 0.014,
+     "brighton-co": 0.024,
+     "columbus-ne-oh": 0.037,
+     "fishers-in": 0.023,
+     "four-corners-fl": 0.076,
+     "hibbing-mn": 0.004,
+     "huntsville-al": 0.032,
+     "katy-tx": 0.111,
+     "lakewood-ranch-fl": 0.075,
+     "lancaster-ca": 0.011,
+     "las-vegas-nw-nv": 0.004,
+     "las-vegas-se-nv": 0.014,
+     "mountain-pass-ca": 0.009,
+     "new-albany-oh": 0.011
+    }
+   },
+   "both": {
+    "cutoff_range": [
+     0.903,
+     0.938
+    ],
+    "found": {
+     "aurora-co": 0.543,
+     "brighton-co": 0.478,
+     "columbus-ne-oh": 0.893,
+     "fishers-in": 0.637,
+     "four-corners-fl": 0.074,
+     "hibbing-mn": 0.873,
+     "huntsville-al": 0.502,
+     "katy-tx": 0.898,
+     "lakewood-ranch-fl": 0.58,
+     "lancaster-ca": 0.61,
+     "las-vegas-nw-nv": 0.569,
+     "las-vegas-se-nv": 0.678,
+     "mountain-pass-ca": 0.58,
+     "new-albany-oh": 0.497
+    },
+    "lit": {
+     "aurora-co": 0.008,
+     "brighton-co": 0.015,
+     "columbus-ne-oh": 0.05,
+     "fishers-in": 0.009,
+     "four-corners-fl": 0.036,
+     "hibbing-mn": 0.098,
+     "huntsville-al": 0.016,
+     "katy-tx": 0.098,
+     "lakewood-ranch-fl": 0.055,
+     "lancaster-ca": 0.037,
+     "las-vegas-nw-nv": 0.003,
+     "las-vegas-se-nv": 0.022,
+     "mountain-pass-ca": 0.008,
+     "new-albany-oh": 0.005
+    }
+   },
+   "both_either": {
+    "cutoff_range": [
+     0.719,
+     0.834
+    ],
+    "found": {
+     "aurora-co": 0.643,
+     "brighton-co": 0.554,
+     "columbus-ne-oh": 0.878,
+     "fishers-in": 0.721,
+     "four-corners-fl": 0.137,
+     "hibbing-mn": 0.302,
+     "huntsville-al": 0.566,
+     "katy-tx": 0.912,
+     "lakewood-ranch-fl": 0.763,
+     "lancaster-ca": 0.401,
+     "las-vegas-nw-nv": 0.552,
+     "las-vegas-se-nv": 0.741,
+     "mountain-pass-ca": 0.606,
+     "new-albany-oh": 0.62
+    },
+    "lit": {
+     "aurora-co": 0.018,
+     "brighton-co": 0.038,
+     "columbus-ne-oh": 0.052,
+     "fishers-in": 0.015,
+     "four-corners-fl": 0.074,
+     "hibbing-mn": 0.005,
+     "huntsville-al": 0.035,
+     "katy-tx": 0.129,
+     "lakewood-ranch-fl": 0.081,
+     "lancaster-ca": 0.019,
+     "las-vegas-nw-nv": 0.004,
+     "las-vegas-se-nv": 0.015,
+     "mountain-pass-ca": 0.009,
+     "new-albany-oh": 0.009
+    }
+   },
+   "either_sqrt": {
+    "cutoff_range": [
+     0.767,
+     0.855
+    ],
+    "found": {
+     "aurora-co": 0.622,
+     "brighton-co": 0.543,
+     "columbus-ne-oh": 0.886,
+     "fishers-in": 0.705,
+     "four-corners-fl": 0.127,
+     "hibbing-mn": 0.325,
+     "huntsville-al": 0.557,
+     "katy-tx": 0.912,
+     "lakewood-ranch-fl": 0.734,
+     "lancaster-ca": 0.445,
+     "las-vegas-nw-nv": 0.57,
+     "las-vegas-se-nv": 0.74,
+     "mountain-pass-ca": 0.621,
+     "new-albany-oh": 0.599
+    },
+    "lit": {
+     "aurora-co": 0.015,
+     "brighton-co": 0.033,
+     "columbus-ne-oh": 0.051,
+     "fishers-in": 0.013,
+     "four-corners-fl": 0.069,
+     "hibbing-mn": 0.006,
+     "huntsville-al": 0.031,
+     "katy-tx": 0.124,
+     "lakewood-ranch-fl": 0.076,
+     "lancaster-ca": 0.02,
+     "las-vegas-nw-nv": 0.003,
+     "las-vegas-se-nv": 0.016,
+     "mountain-pass-ca": 0.009,
+     "new-albany-oh": 0.008
+    }
+   }
+  },
+  "field_digging": {
+   "anahuac-tx": {
+    "found": {
+     "aef_gated": 0.051,
+     "mean": 0.108,
+     "both": 0.027,
+     "both_either": 0.084,
+     "either_sqrt": 0.071
+    },
+    "lit": {
+     "aef_gated": 0.082,
+     "mean": 0.135,
+     "both": 0.038,
+     "both_either": 0.12,
+     "either_sqrt": 0.103
+    },
+    "moved_px": 7129
+   },
+   "antelope-farm-ne": {
+    "found": {
+     "aef_gated": 0.575,
+     "mean": 0.571,
+     "both": 0.513,
+     "both_either": 0.588,
+     "either_sqrt": 0.589
+    },
+    "lit": {
+     "aef_gated": 0.079,
+     "mean": 0.004,
+     "both": 0.003,
+     "both_either": 0.006,
+     "either_sqrt": 0.005
+    },
+    "moved_px": 3260
+   },
+   "arkansas-delta-ar": {
+    "found": {
+     "aef_gated": 0.079,
+     "mean": 0.112,
+     "both": 0.359,
+     "both_either": 0.126,
+     "either_sqrt": 0.136
+    },
+    "lit": {
+     "aef_gated": 0.04,
+     "mean": 0.005,
+     "both": 0.008,
+     "both_either": 0.005,
+     "either_sqrt": 0.005
+    },
+    "moved_px": 3327
+   },
+   "box-butte-farm-ne": {
+    "found": {
+     "aef_gated": 0.379,
+     "mean": 0.328,
+     "both": 0.097,
+     "both_either": 0.221,
+     "either_sqrt": 0.21
+    },
+    "lit": {
+     "aef_gated": 0.187,
+     "mean": 0.043,
+     "both": 0.001,
+     "both_either": 0.009,
+     "either_sqrt": 0.007
+    },
+    "moved_px": 195
+   },
+   "brazoria-tx": {
+    "found": {
+     "aef_gated": 0.065,
+     "mean": 0.091,
+     "both": 0.263,
+     "both_either": 0.146,
+     "either_sqrt": 0.158
+    },
+    "lit": {
+     "aef_gated": 0.008,
+     "mean": 0.009,
+     "both": 0.014,
+     "both_either": 0.025,
+     "either_sqrt": 0.022
+    },
+    "moved_px": 18803
+   },
+   "fresno-farm-ca": {
+    "found": {
+     "aef_gated": 0.09,
+     "mean": 0.077,
+     "both": 0.559,
+     "both_either": 0.102,
+     "either_sqrt": 0.104
+    },
+    "lit": {
+     "aef_gated": 0.222,
+     "mean": 0.178,
+     "both": 0.135,
+     "both_either": 0.166,
+     "either_sqrt": 0.157
+    },
+    "moved_px": 5376
+   },
+   "hamilton-farm-in": {
+    "found": {
+     "aef_gated": 0.546,
+     "mean": 0.544,
+     "both": 0.448,
+     "both_either": 0.539,
+     "either_sqrt": 0.523
+    },
+    "lit": {
+     "aef_gated": 0.021,
+     "mean": 0.014,
+     "both": 0.006,
+     "both_either": 0.012,
+     "either_sqrt": 0.011
+    },
+    "moved_px": 2269
+   },
+   "myakka-fl": {
+    "found": {
+     "aef_gated": 0.397,
+     "mean": 0.341,
+     "both": 0.265,
+     "both_either": 0.349,
+     "either_sqrt": 0.336
+    },
+    "lit": {
+     "aef_gated": 0.04,
+     "mean": 0.023,
+     "both": 0.009,
+     "both_either": 0.021,
+     "either_sqrt": 0.019
+    },
+    "moved_px": 13388
+   }
+  }
+ },
+ "data/scores-abroad": {
+  "ap": {
+   "sites": [
+    "aurora-co",
+    "brighton-co",
+    "columbus-ne-oh",
+    "fishers-in",
+    "four-corners-fl",
+    "hibbing-mn",
+    "huntsville-al",
+    "katy-tx",
+    "lakewood-ranch-fl",
+    "lancaster-ca",
+    "las-vegas-nw-nv",
+    "las-vegas-se-nv",
+    "mountain-pass-ca",
+    "new-albany-oh"
+   ],
+   "per_site": {
+    "aef_gated": [
+     0.566,
+     0.172,
+     0.599,
+     0.749,
+     0.303,
+     0.5,
+     0.464,
+     0.675,
+     0.825,
+     0.107,
+     0.769,
+     0.728,
+     0.697,
+     0.437
+    ],
+    "mean": [
+     0.555,
+     0.251,
+     0.661,
+     0.785,
+     0.414,
+     0.582,
+     0.53,
+     0.639,
+     0.797,
+     0.095,
+     0.835,
+     0.791,
+     0.777,
+     0.484
+    ],
+    "both": [
+     0.502,
+     0.265,
+     0.749,
+     0.796,
+     0.326,
+     0.417,
+     0.553,
+     0.68,
+     0.792,
+     0.103,
+     0.831,
+     0.762,
+     0.792,
+     0.473
+    ],
+    "both_either": [
+     0.52,
+     0.259,
+     0.733,
+     0.797,
+     0.339,
+     0.545,
+     0.522,
+     0.673,
+     0.799,
+     0.121,
+     0.808,
+     0.789,
+     0.77,
+     0.488
+    ],
+    "either_sqrt": [
+     0.52,
+     0.261,
+     0.739,
+     0.799,
+     0.332,
+     0.546,
+     0.526,
+     0.675,
+     0.798,
+     0.121,
+     0.826,
+     0.791,
+     0.776,
+     0.487
+    ]
+   },
+   "mean": {
+    "gain": [
+     0.043,
+     0.019,
+     0.066
+    ],
+    "wins": 10,
+    "sign_p": 0.18,
+    "wilcoxon_p": 0.005,
+    "building": [
+     0.03,
+     0.005,
+     0.053
+    ],
+    "mining": [
+     0.091,
+     0.08,
+     0.111
+    ],
+    "mining_sites": {
+     "four-corners-fl": 0.111,
+     "hibbing-mn": 0.082,
+     "mountain-pass-ca": 0.08
+    }
+   },
+   "both": {
+    "gain": [
+     0.032,
+     -0.001,
+     0.065
+    ],
+    "wins": 10,
+    "sign_p": 0.18,
+    "wilcoxon_p": 0.091,
+    "building": [
+     0.038,
+     0.003,
+     0.072
+    ],
+    "mining": [
+     0.012,
+     -0.083,
+     0.095
+    ],
+    "mining_sites": {
+     "four-corners-fl": 0.023,
+     "hibbing-mn": -0.083,
+     "mountain-pass-ca": 0.095
+    }
+   },
+   "both_either": {
+    "gain": [
+     0.041,
+     0.018,
+     0.064
+    ],
+    "wins": 11,
+    "sign_p": 0.057,
+    "wilcoxon_p": 0.007,
+    "building": [
+     0.038,
+     0.009,
+     0.067
+    ],
+    "mining": [
+     0.051,
+     0.036,
+     0.074
+    ],
+    "mining_sites": {
+     "four-corners-fl": 0.036,
+     "hibbing-mn": 0.044,
+     "mountain-pass-ca": 0.074
+    }
+   },
+   "either_sqrt": {
+    "gain": [
+     0.043,
+     0.019,
+     0.067
+    ],
+    "wins": 11,
+    "sign_p": 0.057,
+    "wilcoxon_p": 0.005,
+    "building": [
+     0.041,
+     0.011,
+     0.071
+    ],
+    "mining": [
+     0.051,
+     0.029,
+     0.079
+    ],
+    "mining_sites": {
+     "four-corners-fl": 0.029,
+     "hibbing-mn": 0.046,
+     "mountain-pass-ca": 0.079
+    }
+   }
+  },
+  "false_alarm": {
+   "crop": {
+    "aef_gated": {
+     "mean": [
+      0.217,
+      0.148,
+      0.29
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.068,
+      0.033,
+      0.109
+     ],
+     "vs_map": [
+      -0.149,
+      -0.205,
+      -0.099
+     ],
+     "fewer_than_map": 27
+    },
+    "both": {
+     "mean": [
+      0.019,
+      0.007,
+      0.033
+     ],
+     "vs_map": [
+      -0.198,
+      -0.266,
+      -0.135
+     ],
+     "fewer_than_map": 27
+    },
+    "both_either": {
+     "mean": [
+      0.041,
+      0.018,
+      0.069
+     ],
+     "vs_map": [
+      -0.176,
+      -0.238,
+      -0.118
+     ],
+     "fewer_than_map": 26
+    },
+    "either_sqrt": {
+     "mean": [
+      0.035,
+      0.015,
+      0.059
+     ],
+     "vs_map": [
+      -0.181,
+      -0.245,
+      -0.124
+     ],
+     "fewer_than_map": 27
+    },
+    "n": 27
+   },
+   "farm": {
+    "aef_gated": {
+     "mean": [
+      0.095,
+      0.038,
+      0.169
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.042,
+      0.014,
+      0.071
+     ],
+     "vs_map": [
+      -0.053,
+      -0.11,
+      -0.012
+     ],
+     "fewer_than_map": 6
+    },
+    "both": {
+     "mean": [
+      0.012,
+      0.005,
+      0.02
+     ],
+     "vs_map": [
+      -0.082,
+      -0.159,
+      -0.028
+     ],
+     "fewer_than_map": 6
+    },
+    "both_either": {
+     "mean": [
+      0.014,
+      0.007,
+      0.022
+     ],
+     "vs_map": [
+      -0.081,
+      -0.157,
+      -0.024
+     ],
+     "fewer_than_map": 6
+    },
+    "either_sqrt": {
+     "mean": [
+      0.012,
+      0.006,
+      0.02
+     ],
+     "vs_map": [
+      -0.083,
+      -0.16,
+      -0.026
+     ],
+     "fewer_than_map": 6
+    },
+    "n": 6
+   },
+   "marsh": {
+    "aef_gated": {
+     "mean": [
+      0.041,
+      0.009,
+      0.057
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.045,
+      0.008,
+      0.091
+     ],
+     "vs_map": [
+      0.004,
+      -0.022,
+      0.034
+     ],
+     "fewer_than_map": 2
+    },
+    "both": {
+     "mean": [
+      0.012,
+      0.006,
+      0.017
+     ],
+     "vs_map": [
+      -0.028,
+      -0.042,
+      -0.003
+     ],
+     "fewer_than_map": 3
+    },
+    "both_either": {
+     "mean": [
+      0.024,
+      0.004,
+      0.043
+     ],
+     "vs_map": [
+      -0.017,
+      -0.033,
+      -0.005
+     ],
+     "fewer_than_map": 3
+    },
+    "either_sqrt": {
+     "mean": [
+      0.02,
+      0.004,
+      0.036
+     ],
+     "vs_map": [
+      -0.021,
+      -0.035,
+      -0.005
+     ],
+     "fewer_than_map": 3
+    },
+    "n": 3
+   },
+   "burn": {
+    "aef_gated": {
+     "mean": [
+      0.263,
+      0.125,
+      0.401
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.156,
+      0.0,
+      0.312
+     ],
+     "vs_map": [
+      -0.107,
+      -0.125,
+      -0.09
+     ],
+     "fewer_than_map": 2
+    },
+    "both": {
+     "mean": [
+      0.159,
+      0.002,
+      0.316
+     ],
+     "vs_map": [
+      -0.104,
+      -0.123,
+      -0.085
+     ],
+     "fewer_than_map": 2
+    },
+    "both_either": {
+     "mean": [
+      0.187,
+      0.0,
+      0.373
+     ],
+     "vs_map": [
+      -0.076,
+      -0.125,
+      -0.028
+     ],
+     "fewer_than_map": 2
+    },
+    "either_sqrt": {
+     "mean": [
+      0.181,
+      0.0,
+      0.363
+     ],
+     "vs_map": [
+      -0.082,
+      -0.125,
+      -0.039
+     ],
+     "fewer_than_map": 2
+    },
+    "n": 2
+   },
+   "storm": {
+    "aef_gated": {
+     "mean": [
+      0.126,
+      0.126,
+      0.126
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.078,
+      0.078,
+      0.078
+     ],
+     "vs_map": [
+      -0.047,
+      -0.047,
+      -0.047
+     ],
+     "fewer_than_map": 1
+    },
+    "both": {
+     "mean": [
+      0.063,
+      0.063,
+      0.063
+     ],
+     "vs_map": [
+      -0.063,
+      -0.063,
+      -0.063
+     ],
+     "fewer_than_map": 1
+    },
+    "both_either": {
+     "mean": [
+      0.11,
+      0.11,
+      0.11
+     ],
+     "vs_map": [
+      -0.015,
+      -0.015,
+      -0.015
+     ],
+     "fewer_than_map": 1
+    },
+    "either_sqrt": {
+     "mean": [
+      0.098,
+      0.098,
+      0.098
+     ],
+     "vs_map": [
+      -0.028,
+      -0.028,
+      -0.028
+     ],
+     "fewer_than_map": 1
+    },
+    "n": 1
+   },
+   "island": {
+    "aef_gated": {
+     "mean": [
+      0.006,
+      0.003,
+      0.009
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.006,
+      0.003,
+      0.009
+     ],
+     "vs_map": [
+      -0.0,
+      -0.001,
+      0.0
+     ],
+     "fewer_than_map": 8
+    },
+    "both": {
+     "mean": [
+      0.005,
+      0.003,
+      0.007
+     ],
+     "vs_map": [
+      -0.001,
+      -0.003,
+      0.001
+     ],
+     "fewer_than_map": 8
+    },
+    "both_either": {
+     "mean": [
+      0.006,
+      0.004,
+      0.008
+     ],
+     "vs_map": [
+      -0.0,
+      -0.002,
+      0.002
+     ],
+     "fewer_than_map": 4
+    },
+    "either_sqrt": {
+     "mean": [
+      0.005,
+      0.004,
+      0.008
+     ],
+     "vs_map": [
+      -0.0,
+      -0.003,
+      0.001
+     ],
+     "fewer_than_map": 5
+    },
+    "n": 12
+   },
+   "notruth": {
+    "aef_gated": {
+     "mean": [
+      0.077,
+      0.017,
+      0.18
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.066,
+      0.016,
+      0.15
+     ],
+     "vs_map": [
+      -0.01,
+      -0.03,
+      0.002
+     ],
+     "fewer_than_map": 5
+    },
+    "both": {
+     "mean": [
+      0.076,
+      0.012,
+      0.185
+     ],
+     "vs_map": [
+      -0.001,
+      -0.016,
+      0.018
+     ],
+     "fewer_than_map": 6
+    },
+    "both_either": {
+     "mean": [
+      0.078,
+      0.01,
+      0.196
+     ],
+     "vs_map": [
+      0.001,
+      -0.016,
+      0.021
+     ],
+     "fewer_than_map": 6
+    },
+    "either_sqrt": {
+     "mean": [
+      0.077,
+      0.01,
+      0.194
+     ],
+     "vs_map": [
+      0.0,
+      -0.017,
+      0.018
+     ],
+     "fewer_than_map": 6
+    },
+    "n": 9
+   },
+   "space_quiet": {
+    "aef_gated": {
+     "mean": [
+      0.0,
+      0.0,
+      0.001
+     ],
+     "vs_map": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "fewer_than_map": 0
+    },
+    "mean": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      -0.0,
+      -0.001,
+      0.0
+     ],
+     "fewer_than_map": 1
+    },
+    "both": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      -0.0,
+      -0.001,
+      0.0
+     ],
+     "fewer_than_map": 1
+    },
+    "both_either": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      -0.0,
+      -0.001,
+      0.0
+     ],
+     "fewer_than_map": 1
+    },
+    "either_sqrt": {
+     "mean": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "vs_map": [
+      -0.0,
+      -0.001,
+      0.0
+     ],
+     "fewer_than_map": 1
+    },
+    "n": 2
+   }
+  },
+  "loso_cutoff": {
+   "aef_gated": {
+    "cutoff_range": [
+     0.528,
+     0.707
+    ],
+    "found": {
+     "aurora-co": 0.729,
+     "brighton-co": 0.592,
+     "columbus-ne-oh": 0.786,
+     "fishers-in": 0.811,
+     "four-corners-fl": 0.265,
+     "hibbing-mn": 0.062,
+     "huntsville-al": 0.594,
+     "katy-tx": 0.921,
+     "lakewood-ranch-fl": 0.832,
+     "lancaster-ca": 0.098,
+     "las-vegas-nw-nv": 0.561,
+     "las-vegas-se-nv": 0.772,
+     "mountain-pass-ca": 0.685,
+     "new-albany-oh": 0.692
+    },
+    "lit": {
+     "aurora-co": 0.04,
+     "brighton-co": 0.083,
+     "columbus-ne-oh": 0.094,
+     "fishers-in": 0.044,
+     "four-corners-fl": 0.1,
+     "hibbing-mn": 0.0,
+     "huntsville-al": 0.08,
+     "katy-tx": 0.199,
+     "lakewood-ranch-fl": 0.082,
+     "lancaster-ca": 0.007,
+     "las-vegas-nw-nv": 0.006,
+     "las-vegas-se-nv": 0.029,
+     "mountain-pass-ca": 0.015,
+     "new-albany-oh": 0.02
+    }
+   },
+   "mean": {
+    "cutoff_range": [
+     0.608,
+     0.698
+    ],
+    "found": {
+     "aurora-co": 0.694,
+     "brighton-co": 0.561,
+     "columbus-ne-oh": 0.847,
+     "fishers-in": 0.814,
+     "four-corners-fl": 0.272,
+     "hibbing-mn": 0.099,
+     "huntsville-al": 0.573,
+     "katy-tx": 0.914,
+     "lakewood-ranch-fl": 0.789,
+     "lancaster-ca": 0.141,
+     "las-vegas-nw-nv": 0.602,
+     "las-vegas-se-nv": 0.773,
+     "mountain-pass-ca": 0.596,
+     "new-albany-oh": 0.725
+    },
+    "lit": {
+     "aurora-co": 0.027,
+     "brighton-co": 0.038,
+     "columbus-ne-oh": 0.062,
+     "fishers-in": 0.032,
+     "four-corners-fl": 0.071,
+     "hibbing-mn": 0.0,
+     "huntsville-al": 0.037,
+     "katy-tx": 0.138,
+     "lakewood-ranch-fl": 0.073,
+     "lancaster-ca": 0.008,
+     "las-vegas-nw-nv": 0.005,
+     "las-vegas-se-nv": 0.018,
+     "mountain-pass-ca": 0.008,
+     "new-albany-oh": 0.017
+    }
+   },
+   "both": {
+    "cutoff_range": [
+     0.858,
+     0.91
+    ],
+    "found": {
+     "aurora-co": 0.612,
+     "brighton-co": 0.54,
+     "columbus-ne-oh": 0.929,
+     "fishers-in": 0.767,
+     "four-corners-fl": 0.135,
+     "hibbing-mn": 0.179,
+     "huntsville-al": 0.621,
+     "katy-tx": 0.941,
+     "lakewood-ranch-fl": 0.663,
+     "lancaster-ca": 0.222,
+     "las-vegas-nw-nv": 0.661,
+     "las-vegas-se-nv": 0.685,
+     "mountain-pass-ca": 0.75,
+     "new-albany-oh": 0.668
+    },
+    "lit": {
+     "aurora-co": 0.026,
+     "brighton-co": 0.032,
+     "columbus-ne-oh": 0.07,
+     "fishers-in": 0.018,
+     "four-corners-fl": 0.051,
+     "hibbing-mn": 0.005,
+     "huntsville-al": 0.048,
+     "katy-tx": 0.153,
+     "lakewood-ranch-fl": 0.055,
+     "lancaster-ca": 0.011,
+     "las-vegas-nw-nv": 0.007,
+     "las-vegas-se-nv": 0.014,
+     "mountain-pass-ca": 0.013,
+     "new-albany-oh": 0.014
+    }
+   },
+   "both_either": {
+    "cutoff_range": [
+     0.724,
+     0.834
+    ],
+    "found": {
+     "aurora-co": 0.64,
+     "brighton-co": 0.58,
+     "columbus-ne-oh": 0.883,
+     "fishers-in": 0.792,
+     "four-corners-fl": 0.178,
+     "hibbing-mn": 0.172,
+     "huntsville-al": 0.607,
+     "katy-tx": 0.921,
+     "lakewood-ranch-fl": 0.771,
+     "lancaster-ca": 0.212,
+     "las-vegas-nw-nv": 0.558,
+     "las-vegas-se-nv": 0.713,
+     "mountain-pass-ca": 0.637,
+     "new-albany-oh": 0.702
+    },
+    "lit": {
+     "aurora-co": 0.026,
+     "brighton-co": 0.053,
+     "columbus-ne-oh": 0.058,
+     "fishers-in": 0.024,
+     "four-corners-fl": 0.069,
+     "hibbing-mn": 0.001,
+     "huntsville-al": 0.062,
+     "katy-tx": 0.15,
+     "lakewood-ranch-fl": 0.074,
+     "lancaster-ca": 0.01,
+     "las-vegas-nw-nv": 0.005,
+     "las-vegas-se-nv": 0.012,
+     "mountain-pass-ca": 0.009,
+     "new-albany-oh": 0.014
+    }
+   },
+   "either_sqrt": {
+    "cutoff_range": [
+     0.763,
+     0.85
+    ],
+    "found": {
+     "aurora-co": 0.626,
+     "brighton-co": 0.569,
+     "columbus-ne-oh": 0.895,
+     "fishers-in": 0.786,
+     "four-corners-fl": 0.169,
+     "hibbing-mn": 0.169,
+     "huntsville-al": 0.613,
+     "katy-tx": 0.925,
+     "lakewood-ranch-fl": 0.748,
+     "lancaster-ca": 0.214,
+     "las-vegas-nw-nv": 0.58,
+     "las-vegas-se-nv": 0.711,
+     "mountain-pass-ca": 0.666,
+     "new-albany-oh": 0.693
+    },
+    "lit": {
+     "aurora-co": 0.025,
+     "brighton-co": 0.047,
+     "columbus-ne-oh": 0.057,
+     "fishers-in": 0.022,
+     "four-corners-fl": 0.065,
+     "hibbing-mn": 0.001,
+     "huntsville-al": 0.058,
+     "katy-tx": 0.148,
+     "lakewood-ranch-fl": 0.069,
+     "lancaster-ca": 0.01,
+     "las-vegas-nw-nv": 0.005,
+     "las-vegas-se-nv": 0.012,
+     "mountain-pass-ca": 0.01,
+     "new-albany-oh": 0.013
+    }
+   }
+  },
+  "field_digging": {
+   "anahuac-tx": {
+    "found": {
+     "aef_gated": 0.033,
+     "mean": 0.055,
+     "both": 0.013,
+     "both_either": 0.032,
+     "either_sqrt": 0.028
+    },
+    "lit": {
+     "aef_gated": 0.057,
+     "mean": 0.091,
+     "both": 0.017,
+     "both_either": 0.043,
+     "either_sqrt": 0.036
+    },
+    "moved_px": 7129
+   },
+   "antelope-farm-ne": {
+    "found": {
+     "aef_gated": 0.508,
+     "mean": 0.568,
+     "both": 0.492,
+     "both_either": 0.506,
+     "either_sqrt": 0.515
+    },
+    "lit": {
+     "aef_gated": 0.067,
+     "mean": 0.006,
+     "both": 0.003,
+     "both_either": 0.004,
+     "either_sqrt": 0.003
+    },
+    "moved_px": 3260
+   },
+   "arkansas-delta-ar": {
+    "found": {
+     "aef_gated": 0.085,
+     "mean": 0.138,
+     "both": 0.574,
+     "both_either": 0.132,
+     "either_sqrt": 0.151
+    },
+    "lit": {
+     "aef_gated": 0.11,
+     "mean": 0.035,
+     "both": 0.027,
+     "both_either": 0.013,
+     "either_sqrt": 0.012
+    },
+    "moved_px": 3327
+   },
+   "box-butte-farm-ne": {
+    "found": {
+     "aef_gated": 0.272,
+     "mean": 0.297,
+     "both": 0.123,
+     "both_either": 0.154,
+     "either_sqrt": 0.144
+    },
+    "lit": {
+     "aef_gated": 0.268,
+     "mean": 0.093,
+     "both": 0.003,
+     "both_either": 0.008,
+     "either_sqrt": 0.007
+    },
+    "moved_px": 195
+   },
+   "brazoria-tx": {
+    "found": {
+     "aef_gated": 0.076,
+     "mean": 0.092,
+     "both": 0.238,
+     "both_either": 0.125,
+     "either_sqrt": 0.134
+    },
+    "lit": {
+     "aef_gated": 0.009,
+     "mean": 0.008,
+     "both": 0.006,
+     "both_either": 0.004,
+     "either_sqrt": 0.004
+    },
+    "moved_px": 18803
+   },
+   "fresno-farm-ca": {
+    "found": {
+     "aef_gated": 0.024,
+     "mean": 0.047,
+     "both": 0.047,
+     "both_either": 0.044,
+     "either_sqrt": 0.043
+    },
+    "lit": {
+     "aef_gated": 0.088,
+     "mean": 0.088,
+     "both": 0.026,
+     "both_either": 0.034,
+     "either_sqrt": 0.031
+    },
+    "moved_px": 5376
+   },
+   "hamilton-farm-in": {
+    "found": {
+     "aef_gated": 0.631,
+     "mean": 0.662,
+     "both": 0.546,
+     "both_either": 0.62,
+     "either_sqrt": 0.608
+    },
+    "lit": {
+     "aef_gated": 0.025,
+     "mean": 0.02,
+     "both": 0.009,
+     "both_either": 0.014,
+     "either_sqrt": 0.013
+    },
+    "moved_px": 2269
+   },
+   "myakka-fl": {
+    "found": {
+     "aef_gated": 0.446,
+     "mean": 0.364,
+     "both": 0.331,
+     "both_either": 0.377,
+     "either_sqrt": 0.365
+    },
+    "lit": {
+     "aef_gated": 0.057,
+     "mean": 0.034,
+     "both": 0.014,
+     "both_either": 0.024,
+     "either_sqrt": 0.021
+    },
+    "moved_px": 13388
+   }
+  }
+ }
+}

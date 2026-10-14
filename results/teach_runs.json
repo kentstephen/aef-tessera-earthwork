@@ -1,0 +1,3464 @@
+{
+ "scores": {
+  "aef_gated": {
+   "ap": 0.553,
+   "gain": null,
+   "burn": 0.112,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.013,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.266,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.144,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.153,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.097,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.144,
+   "island_found": 0.452,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.0,
+     "ap": 0.742,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.259,
+     "ap": 0.505,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.249,
+     "ap": 0.294,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.701,
+     "ap": 0.708,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.09,
+     "lit": 0.222,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.079,
+     "lit": 0.04,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.575,
+     "lit": 0.079,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.546,
+     "lit": 0.021,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.22
+  },
+  "both": {
+   "ap": 0.575,
+   "gain": [
+    0.021,
+    -0.002,
+    0.044
+   ],
+   "burn": 0.03,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.004,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.216,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.037,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.021,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.029,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.223,
+   "island_found": 0.538,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.013,
+     "ap": 0.802,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.847,
+     "ap": 0.463,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.089,
+     "ap": 0.279,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.582,
+     "ap": 0.789,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.559,
+     "lit": 0.135,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.359,
+     "lit": 0.008,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.513,
+     "lit": 0.003,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.448,
+     "lit": 0.006,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.06
+  },
+  "both_either": {
+   "ap": 0.583,
+   "gain": [
+    0.03,
+    0.012,
+    0.047
+   ],
+   "burn": 0.105,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.025,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.378,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.102,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.049,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.037,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.222,
+   "island_found": 0.533,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.061,
+     "ap": 0.806,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.312,
+     "ap": 0.533,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.164,
+     "ap": 0.304,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.606,
+     "ap": 0.772,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.102,
+     "lit": 0.166,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.126,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.588,
+     "lit": 0.006,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.539,
+     "lit": 0.012,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.21
+  },
+  "either_radar": {
+   "ap": 0.583,
+   "gain": [
+    0.03,
+    0.012,
+    0.047
+   ],
+   "burn": 0.105,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.025,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.378,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.102,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.049,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.037,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.222,
+   "island_found": 0.533,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.061,
+     "ap": 0.806,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.312,
+     "ap": 0.533,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.164,
+     "ap": 0.304,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.606,
+     "ap": 0.772,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.102,
+     "lit": 0.166,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.126,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.588,
+     "lit": 0.006,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.539,
+     "lit": 0.012,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.21
+  }
+ },
+ "scores-abroad": {
+  "aef_gated": {
+   "ap": 0.542,
+   "gain": null,
+   "burn": 0.263,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.01,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.237,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.126,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.217,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.095,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.311,
+   "island_found": 0.425,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.013,
+     "ap": 0.824,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.093,
+     "ap": 0.5,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.286,
+     "ap": 0.303,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.674,
+     "ap": 0.697,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.024,
+     "lit": 0.088,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.085,
+     "lit": 0.11,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.508,
+     "lit": 0.067,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.631,
+     "lit": 0.025,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.401
+  },
+  "both": {
+   "ap": 0.574,
+   "gain": [
+    0.032,
+    -0.002,
+    0.065
+   ],
+   "burn": 0.159,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.007,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.213,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.063,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.019,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.012,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.388,
+   "island_found": 0.513,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.446,
+     "ap": 0.843,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.208,
+     "ap": 0.417,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.155,
+     "ap": 0.326,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.734,
+     "ap": 0.792,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.047,
+     "lit": 0.026,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.574,
+     "lit": 0.027,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.492,
+     "lit": 0.003,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.546,
+     "lit": 0.009,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.316
+  },
+  "both_either": {
+   "ap": 0.583,
+   "gain": [
+    0.041,
+    0.018,
+    0.063
+   ],
+   "burn": 0.187,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.019,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.283,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.11,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.041,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.014,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.414,
+   "island_found": 0.497,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.523,
+     "ap": 0.84,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.198,
+     "ap": 0.545,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.206,
+     "ap": 0.339,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.633,
+     "ap": 0.77,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.044,
+     "lit": 0.034,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.132,
+     "lit": 0.013,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.506,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.62,
+     "lit": 0.014,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.373
+  },
+  "either_radar": {
+   "ap": 0.583,
+   "gain": [
+    0.041,
+    0.018,
+    0.064
+   ],
+   "burn": 0.187,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.019,
+   "fire_roles": [
+    "test"
+   ],
+   "cut": 0.283,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.11,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.041,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.014,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.414,
+   "island_found": 0.497,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.523,
+     "ap": 0.84,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.198,
+     "ap": 0.545,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.206,
+     "ap": 0.339,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.633,
+     "ap": 0.77,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.044,
+     "lit": 0.034,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.132,
+     "lit": 0.013,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.506,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.62,
+     "lit": 0.014,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.373
+  }
+ },
+ "scores-fire-abroad": {
+  "aef_gated": {
+   "ap": 0.541,
+   "gain": null,
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.001,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.159,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.118,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.202,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.095,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.335,
+   "island_found": 0.425,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.015,
+     "ap": 0.826,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.061,
+     "ap": 0.501,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.296,
+     "ap": 0.311,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.652,
+     "ap": 0.696,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.02,
+     "lit": 0.071,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.078,
+     "lit": 0.098,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.557,
+     "lit": 0.077,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.639,
+     "lit": 0.024,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.001
+  },
+  "both": {
+   "ap": 0.571,
+   "gain": [
+    0.03,
+    -0.007,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.114,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.049,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.017,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.011,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.37,
+   "island_found": 0.511,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.342,
+     "ap": 0.856,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.104,
+     "ap": 0.392,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.162,
+     "ap": 0.338,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.675,
+     "ap": 0.783,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.046,
+     "lit": 0.018,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.614,
+     "lit": 0.03,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.526,
+     "lit": 0.003,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.558,
+     "lit": 0.009,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.582,
+   "gain": [
+    0.041,
+    0.015,
+    0.066
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.15,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.089,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.038,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.013,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.414,
+   "island_found": 0.499,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.436,
+     "ap": 0.852,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.121,
+     "ap": 0.545,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.217,
+     "ap": 0.351,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.598,
+     "ap": 0.767,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.043,
+     "lit": 0.026,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.133,
+     "lit": 0.017,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.533,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.631,
+     "lit": 0.014,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.582,
+   "gain": [
+    0.041,
+    0.016,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.15,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.089,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.038,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.013,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.414,
+   "island_found": 0.499,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.436,
+     "ap": 0.852,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.121,
+     "ap": 0.545,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.217,
+     "ap": 0.351,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.598,
+     "ap": 0.767,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.043,
+     "lit": 0.026,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.133,
+     "lit": 0.017,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.533,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.631,
+     "lit": 0.014,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-abroad-cut": {
+  "aef_gated": {
+   "ap": 0.536,
+   "gain": null,
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.081,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.057,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.204,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.099,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.337,
+   "island_found": 0.428,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.008,
+     "ap": 0.812,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.066,
+     "ap": 0.518,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.282,
+     "ap": 0.307,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.656,
+     "ap": 0.7,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.019,
+     "lit": 0.071,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.084,
+     "lit": 0.115,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.556,
+     "lit": 0.082,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.655,
+     "lit": 0.026,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.002
+  },
+  "both": {
+   "ap": 0.564,
+   "gain": [
+    0.028,
+    -0.008,
+    0.063
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.033,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.015,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.013,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.013,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.343,
+   "island_found": 0.516,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.153,
+     "ap": 0.854,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.107,
+     "ap": 0.427,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.158,
+     "ap": 0.341,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.687,
+     "ap": 0.779,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.038,
+     "lit": 0.017,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.668,
+     "lit": 0.035,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.554,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.571,
+     "lit": 0.011,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.575,
+   "gain": [
+    0.039,
+    0.014,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.051,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.029,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.035,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.016,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.403,
+   "island_found": 0.503,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.278,
+     "ap": 0.854,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.12,
+     "ap": 0.563,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.209,
+     "ap": 0.354,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.601,
+     "ap": 0.767,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.042,
+     "lit": 0.026,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.137,
+     "lit": 0.023,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.567,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.638,
+     "lit": 0.016,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.575,
+   "gain": [
+    0.039,
+    0.014,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.051,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.029,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.035,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.016,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.403,
+   "island_found": 0.503,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.278,
+     "ap": 0.854,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.12,
+     "ap": 0.563,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.209,
+     "ap": 0.354,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.601,
+     "ap": 0.767,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.042,
+     "lit": 0.026,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.137,
+     "lit": 0.023,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.567,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.638,
+     "lit": 0.016,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-abroad-cut-px5000": {
+  "aef_gated": {
+   "ap": 0.539,
+   "gain": null,
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.088,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.065,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.208,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.098,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.349,
+   "island_found": 0.43,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.013,
+     "ap": 0.82,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.075,
+     "ap": 0.515,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.286,
+     "ap": 0.305,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.659,
+     "ap": 0.701,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.021,
+     "lit": 0.077,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.085,
+     "lit": 0.104,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.548,
+     "lit": 0.083,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.658,
+     "lit": 0.026,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.002
+  },
+  "both": {
+   "ap": 0.566,
+   "gain": [
+    0.028,
+    -0.008,
+    0.064
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.041,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.019,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.015,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.013,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.35,
+   "island_found": 0.517,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.196,
+     "ap": 0.859,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.107,
+     "ap": 0.415,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.164,
+     "ap": 0.34,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.666,
+     "ap": 0.779,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.036,
+     "lit": 0.015,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.685,
+     "lit": 0.036,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.546,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.589,
+     "lit": 0.011,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.578,
+   "gain": [
+    0.039,
+    0.014,
+    0.064
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.057,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.035,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.037,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.015,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.41,
+   "island_found": 0.503,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.296,
+     "ap": 0.857,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.122,
+     "ap": 0.557,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.215,
+     "ap": 0.353,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.594,
+     "ap": 0.766,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.041,
+     "lit": 0.023,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.141,
+     "lit": 0.022,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.561,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.642,
+     "lit": 0.016,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.578,
+   "gain": [
+    0.039,
+    0.014,
+    0.064
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.057,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.035,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.037,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.015,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.41,
+   "island_found": 0.503,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.296,
+     "ap": 0.857,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.122,
+     "ap": 0.557,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.215,
+     "ap": 0.353,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.594,
+     "ap": 0.766,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.041,
+     "lit": 0.023,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.141,
+     "lit": 0.022,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.561,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.642,
+     "lit": 0.016,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-abroad-cut-w0.25": {
+  "aef_gated": {
+   "ap": 0.539,
+   "gain": null,
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.091,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.063,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.205,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.099,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.336,
+   "island_found": 0.428,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.015,
+     "ap": 0.826,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.059,
+     "ap": 0.512,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.284,
+     "ap": 0.308,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.658,
+     "ap": 0.701,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.021,
+     "lit": 0.075,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.085,
+     "lit": 0.112,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.548,
+     "lit": 0.082,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.653,
+     "lit": 0.025,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.002
+  },
+  "both": {
+   "ap": 0.566,
+   "gain": [
+    0.027,
+    -0.01,
+    0.063
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.045,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.022,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.015,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.013,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.352,
+   "island_found": 0.519,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.219,
+     "ap": 0.852,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.116,
+     "ap": 0.409,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.16,
+     "ap": 0.34,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.661,
+     "ap": 0.782,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.036,
+     "lit": 0.018,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.644,
+     "lit": 0.031,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.553,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.581,
+     "lit": 0.011,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.577,
+   "gain": [
+    0.038,
+    0.013,
+    0.063
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.06,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.039,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.036,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.016,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.413,
+   "island_found": 0.504,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.314,
+     "ap": 0.851,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.125,
+     "ap": 0.555,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.211,
+     "ap": 0.352,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.59,
+     "ap": 0.77,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.041,
+     "lit": 0.026,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.137,
+     "lit": 0.018,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.565,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.639,
+     "lit": 0.017,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.577,
+   "gain": [
+    0.038,
+    0.013,
+    0.063
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.06,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.039,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.036,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.016,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.413,
+   "island_found": 0.504,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.314,
+     "ap": 0.851,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.125,
+     "ap": 0.555,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.211,
+     "ap": 0.352,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.59,
+     "ap": 0.77,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.041,
+     "lit": 0.026,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.137,
+     "lit": 0.018,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.565,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.639,
+     "lit": 0.017,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-us": {
+  "aef_gated": {
+   "ap": 0.55,
+   "gain": null,
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.002,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.033,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.139,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.15,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.104,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.144,
+   "island_found": 0.436,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.0,
+     "ap": 0.772,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.139,
+     "ap": 0.517,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.276,
+     "ap": 0.299,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.694,
+     "ap": 0.717,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.073,
+     "lit": 0.186,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.077,
+     "lit": 0.05,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.602,
+     "lit": 0.108,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.58,
+     "lit": 0.022,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both": {
+   "ap": 0.572,
+   "gain": [
+    0.022,
+    -0.008,
+    0.051
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.017,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.046,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.027,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.028,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.204,
+   "island_found": 0.463,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.005,
+     "ap": 0.824,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.216,
+     "ap": 0.437,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.123,
+     "ap": 0.3,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.603,
+     "ap": 0.787,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.536,
+     "lit": 0.121,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.502,
+     "lit": 0.013,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.632,
+     "lit": 0.005,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.491,
+     "lit": 0.008,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.585,
+   "gain": [
+    0.035,
+    0.013,
+    0.057
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.041,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.087,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.055,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.034,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.203,
+   "island_found": 0.474,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.026,
+     "ap": 0.828,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.186,
+     "ap": 0.569,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.18,
+     "ap": 0.321,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.58,
+     "ap": 0.777,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.086,
+     "lit": 0.135,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.13,
+     "lit": 0.009,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.635,
+     "lit": 0.01,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.549,
+     "lit": 0.014,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.585,
+   "gain": [
+    0.035,
+    0.013,
+    0.057
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.041,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.087,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.055,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.034,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.203,
+   "island_found": 0.474,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.026,
+     "ap": 0.828,
+     "role": "test"
+    },
+    "hibbing-mn": {
+     "found": 0.186,
+     "ap": 0.569,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.18,
+     "ap": 0.321,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.58,
+     "ap": 0.777,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.086,
+     "lit": 0.135,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.13,
+     "lit": 0.009,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.635,
+     "lit": 0.01,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.549,
+     "lit": 0.014,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-abroad-cut-far": {
+  "aef_gated": {
+   "ap": 0.537,
+   "gain": null,
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.077,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.063,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.216,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.111,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.332,
+   "island_found": 0.429,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.003,
+     "ap": 0.831,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.063,
+     "ap": 0.515,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.282,
+     "ap": 0.303,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.659,
+     "ap": 0.699,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.024,
+     "lit": 0.086,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.085,
+     "lit": 0.114,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.573,
+     "lit": 0.105,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.666,
+     "lit": 0.029,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.002
+  },
+  "both": {
+   "ap": 0.563,
+   "gain": [
+    0.026,
+    -0.01,
+    0.063
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.039,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.016,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.012,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.011,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.338,
+   "island_found": 0.517,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.151,
+     "ap": 0.859,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.114,
+     "ap": 0.405,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.159,
+     "ap": 0.336,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.694,
+     "ap": 0.777,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.033,
+     "lit": 0.013,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.672,
+     "lit": 0.033,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.541,
+     "lit": 0.003,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.564,
+     "lit": 0.01,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.576,
+   "gain": [
+    0.039,
+    0.015,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.056,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.03,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.034,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.014,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.403,
+   "island_found": 0.503,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.27,
+     "ap": 0.859,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.121,
+     "ap": 0.558,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.209,
+     "ap": 0.351,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.603,
+     "ap": 0.765,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.04,
+     "lit": 0.023,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.138,
+     "lit": 0.019,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.552,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.636,
+     "lit": 0.015,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.576,
+   "gain": [
+    0.039,
+    0.015,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.056,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.03,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.034,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.014,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.403,
+   "island_found": 0.503,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.27,
+     "ap": 0.859,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.121,
+     "ap": 0.558,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.209,
+     "ap": 0.351,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.603,
+     "ap": 0.765,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.04,
+     "lit": 0.023,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.138,
+     "lit": 0.019,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.552,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.636,
+     "lit": 0.015,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-abroad-level1": {
+  "aef_gated": {
+   "ap": 0.534,
+   "gain": null,
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.001,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.15,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.089,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.337,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.155,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.341,
+   "island_found": 0.415,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.038,
+     "ap": 0.777,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.132,
+     "ap": 0.516,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.27,
+     "ap": 0.308,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.497,
+     "ap": 0.691,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.059,
+     "lit": 0.132,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.079,
+     "lit": 0.169,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.578,
+     "lit": 0.136,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.649,
+     "lit": 0.025,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.002
+  },
+  "both": {
+   "ap": 0.561,
+   "gain": [
+    0.027,
+    -0.014,
+    0.066
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.106,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.04,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.149,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.052,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.39,
+   "island_found": 0.485,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.416,
+     "ap": 0.801,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.099,
+     "ap": 0.379,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.139,
+     "ap": 0.312,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.409,
+     "ap": 0.778,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.122,
+     "lit": 0.052,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.658,
+     "lit": 0.141,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.598,
+     "lit": 0.014,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.567,
+     "lit": 0.014,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.572,
+   "gain": [
+    0.038,
+    0.01,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.137,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.071,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.209,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.069,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.462,
+   "island_found": 0.488,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.515,
+     "ap": 0.803,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.117,
+     "ap": 0.535,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.194,
+     "ap": 0.327,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.447,
+     "ap": 0.774,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.075,
+     "lit": 0.073,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.137,
+     "lit": 0.154,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.609,
+     "lit": 0.023,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.651,
+     "lit": 0.023,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.572,
+   "gain": [
+    0.038,
+    0.009,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.137,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.071,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.209,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.069,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.462,
+   "island_found": 0.488,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.515,
+     "ap": 0.803,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.117,
+     "ap": 0.535,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.194,
+     "ap": 0.327,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.447,
+     "ap": 0.774,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.075,
+     "lit": 0.073,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.137,
+     "lit": 0.154,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.609,
+     "lit": 0.023,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.651,
+     "lit": 0.023,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-abroad-level2": {
+  "aef_gated": {
+   "ap": 0.541,
+   "gain": null,
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.002,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.164,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.046,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.127,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.06,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.375,
+   "island_found": 0.435,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.0,
+     "ap": 0.812,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.039,
+     "ap": 0.511,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.238,
+     "ap": 0.29,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.558,
+     "ap": 0.686,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.036,
+     "lit": 0.066,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.093,
+     "lit": 0.058,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.47,
+     "lit": 0.019,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.608,
+     "lit": 0.013,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.001
+  },
+  "both": {
+   "ap": 0.551,
+   "gain": [
+    0.01,
+    -0.029,
+    0.046
+   ],
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.111,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.02,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.031,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.017,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.41,
+   "island_found": 0.526,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.296,
+     "ap": 0.834,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.068,
+     "ap": 0.418,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.121,
+     "ap": 0.32,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.556,
+     "ap": 0.752,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.129,
+     "lit": 0.034,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.855,
+     "lit": 0.039,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.506,
+     "lit": 0.001,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.574,
+     "lit": 0.013,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.567,
+   "gain": [
+    0.027,
+    -0.004,
+    0.052
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.142,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.038,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.052,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.018,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.441,
+   "island_found": 0.511,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.395,
+     "ap": 0.832,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.091,
+     "ap": 0.554,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.183,
+     "ap": 0.328,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.556,
+     "ap": 0.756,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.07,
+     "lit": 0.044,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.152,
+     "lit": 0.013,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.515,
+     "lit": 0.002,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.656,
+     "lit": 0.02,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.567,
+   "gain": [
+    0.027,
+    -0.004,
+    0.052
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.142,
+   "cut_roles": [
+    "test"
+   ],
+   "storm": 0.038,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.052,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.018,
+   "farm_roles": [
+    "abroad",
+    "test"
+   ],
+   "space_dig_found": 0.441,
+   "island_found": 0.511,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.395,
+     "ap": 0.832,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.091,
+     "ap": 0.554,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.183,
+     "ap": 0.328,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.556,
+     "ap": 0.756,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.07,
+     "lit": 0.044,
+     "role": "abroad"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.152,
+     "lit": 0.013,
+     "role": "abroad"
+    },
+    "antelope-farm-ne": {
+     "found": 0.515,
+     "lit": 0.002,
+     "role": "abroad"
+    },
+    "hamilton-farm-in": {
+     "found": 0.656,
+     "lit": 0.02,
+     "role": "abroad"
+    }
+   },
+   "grizzly": 0.0
+  }
+ },
+ "scores-fire-abroad-cut-px1000": {
+  "aef_gated": {
+   "ap": 0.539,
+   "gain": null,
+   "burn": 0.001,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.131,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.074,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.203,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.095,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.341,
+   "island_found": 0.428,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.013,
+     "ap": 0.823,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.061,
+     "ap": 0.5,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.29,
+     "ap": 0.312,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.662,
+     "ap": 0.697,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.021,
+     "lit": 0.072,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.083,
+     "lit": 0.101,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.546,
+     "lit": 0.078,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.647,
+     "lit": 0.024,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.001
+  },
+  "both": {
+   "ap": 0.568,
+   "gain": [
+    0.029,
+    -0.007,
+    0.064
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.051,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.029,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.016,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.013,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.339,
+   "island_found": 0.514,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.27,
+     "ap": 0.86,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.11,
+     "ap": 0.395,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.159,
+     "ap": 0.342,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.672,
+     "ap": 0.781,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.039,
+     "lit": 0.021,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.629,
+     "lit": 0.032,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.536,
+     "lit": 0.003,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.566,
+     "lit": 0.01,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "both_either": {
+   "ap": 0.579,
+   "gain": [
+    0.04,
+    0.015,
+    0.065
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.07,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.052,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.039,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.016,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.398,
+   "island_found": 0.499,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.347,
+     "ap": 0.857,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.124,
+     "ap": 0.549,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.212,
+     "ap": 0.354,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.596,
+     "ap": 0.768,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.043,
+     "lit": 0.028,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.135,
+     "lit": 0.02,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.545,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.635,
+     "lit": 0.016,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  },
+  "either_radar": {
+   "ap": 0.579,
+   "gain": [
+    0.04,
+    0.015,
+    0.066
+   ],
+   "burn": 0.0,
+   "burn_roles": [
+    "quiet"
+   ],
+   "fire": 0.0,
+   "fire_roles": [
+    "abroad"
+   ],
+   "cut": 0.07,
+   "cut_roles": [
+    "abroad"
+   ],
+   "storm": 0.052,
+   "storm_roles": [
+    "test"
+   ],
+   "crop": 0.039,
+   "crop_roles": [
+    "test"
+   ],
+   "farm": 0.016,
+   "farm_roles": [
+    "test"
+   ],
+   "space_dig_found": 0.398,
+   "island_found": 0.499,
+   "watch": {
+    "space-kolwezi-cd": {
+     "found": 0.347,
+     "ap": 0.857,
+     "role": "abroad"
+    },
+    "hibbing-mn": {
+     "found": 0.124,
+     "ap": 0.549,
+     "role": "teach"
+    },
+    "four-corners-fl": {
+     "found": 0.212,
+     "ap": 0.354,
+     "role": "teach"
+    },
+    "mountain-pass-ca": {
+     "found": 0.596,
+     "ap": 0.768,
+     "role": "teach"
+    }
+   },
+   "farms": {
+    "fresno-farm-ca": {
+     "found": 0.043,
+     "lit": 0.028,
+     "role": "test"
+    },
+    "arkansas-delta-ar": {
+     "found": 0.135,
+     "lit": 0.02,
+     "role": "test"
+    },
+    "antelope-farm-ne": {
+     "found": 0.545,
+     "lit": 0.004,
+     "role": "test"
+    },
+    "hamilton-farm-in": {
+     "found": 0.635,
+     "lit": 0.016,
+     "role": "test"
+    }
+   },
+   "grizzly": 0.0
+  }
+ }
+}

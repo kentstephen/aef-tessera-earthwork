@@ -1,0 +1,2193 @@
+{
+ "sites": {
+  "new-albany-oh": {
+   "kind": "building",
+   "years": [
+    2018,
+    2022
+   ],
+   "valid": 0.992,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    52.0,
+    51.0
+   ],
+   "rho_plain": 0.607,
+   "tes_still_plain": [
+    0.09,
+    null
+   ],
+   "aef_still_plain": 0.038,
+   "aef_plain": {
+    "auc": 0.927,
+    "ap": 0.176
+   },
+   "tes_plain": {
+    "auc": 0.924,
+    "ap": 0.342
+   },
+   "rho_models": 0.45,
+   "ap": {
+    "aef": 0.433,
+    "tes": 0.449,
+    "both": 0.469,
+    "aef_gated": 0.452,
+    "agree": 0.471
+   },
+   "found": {
+    "aef": 0.753,
+    "tes": 0.79,
+    "both": 0.753,
+    "aef_gated": 0.681,
+    "agree": 0.642
+   },
+   "false_alarm": {
+    "aef": 0.044,
+    "tes": 0.04,
+    "both": 0.028,
+    "aef_gated": 0.017,
+    "agree": 0.012
+   },
+   "moved_split": {
+    "both": 0.642,
+    "aef_only": 0.038,
+    "tes_only": 0.147,
+    "neither": 0.172
+   },
+   "r2_change": -0.153,
+   "r2_year": 0.167
+  },
+  "katy-tx": {
+   "kind": "building",
+   "years": [
+    2017,
+    2024
+   ],
+   "valid": 0.978,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    85.0,
+    59.0
+   ],
+   "rho_plain": 0.798,
+   "tes_still_plain": [
+    0.148,
+    null
+   ],
+   "aef_still_plain": 0.055,
+   "aef_plain": {
+    "auc": 0.927,
+    "ap": 0.6
+   },
+   "tes_plain": {
+    "auc": 0.92,
+    "ap": 0.508
+   },
+   "rho_models": 0.64,
+   "ap": {
+    "aef": 0.696,
+    "tes": 0.605,
+    "both": 0.691,
+    "aef_gated": 0.686,
+    "agree": 0.645
+   },
+   "found": {
+    "aef": 0.977,
+    "tes": 0.92,
+    "both": 0.961,
+    "aef_gated": 0.918,
+    "agree": 0.875
+   },
+   "false_alarm": {
+    "aef": 0.335,
+    "tes": 0.174,
+    "both": 0.213,
+    "aef_gated": 0.175,
+    "agree": 0.101
+   },
+   "moved_split": {
+    "both": 0.875,
+    "aef_only": 0.043,
+    "tes_only": 0.046,
+    "neither": 0.037
+   },
+   "r2_change": 0.082,
+   "r2_year": -0.442
+  },
+  "columbus-ne-oh": {
+   "kind": "building",
+   "years": [
+    2018,
+    2020
+   ],
+   "valid": 0.994,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    52.0,
+    57.0
+   ],
+   "rho_plain": 0.694,
+   "tes_still_plain": [
+    0.135,
+    null
+   ],
+   "aef_still_plain": 0.039,
+   "aef_plain": {
+    "auc": 0.832,
+    "ap": 0.119
+   },
+   "tes_plain": {
+    "auc": 0.917,
+    "ap": 0.542
+   },
+   "rho_models": 0.677,
+   "ap": {
+    "aef": 0.668,
+    "tes": 0.714,
+    "both": 0.741,
+    "aef_gated": 0.637,
+    "agree": 0.681
+   },
+   "found": {
+    "aef": 0.96,
+    "tes": 0.958,
+    "both": 0.961,
+    "aef_gated": 0.8,
+    "agree": 0.797
+   },
+   "false_alarm": {
+    "aef": 0.237,
+    "tes": 0.192,
+    "both": 0.162,
+    "aef_gated": 0.083,
+    "agree": 0.033
+   },
+   "moved_split": {
+    "both": 0.797,
+    "aef_only": 0.003,
+    "tes_only": 0.162,
+    "neither": 0.039
+   },
+   "r2_change": 0.357,
+   "r2_year": 0.317
+  },
+  "aurora-co": {
+   "kind": "building",
+   "years": [
+    2017,
+    2020
+   ],
+   "valid": 0.996,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    45.0,
+    60.0
+   ],
+   "rho_plain": 0.762,
+   "tes_still_plain": [
+    0.211,
+    null
+   ],
+   "aef_still_plain": 0.051,
+   "aef_plain": {
+    "auc": 0.804,
+    "ap": 0.095
+   },
+   "tes_plain": {
+    "auc": 0.856,
+    "ap": 0.328
+   },
+   "rho_models": 0.439,
+   "ap": {
+    "aef": 0.65,
+    "tes": 0.448,
+    "both": 0.567,
+    "aef_gated": 0.607,
+    "agree": 0.605
+   },
+   "found": {
+    "aef": 0.843,
+    "tes": 0.862,
+    "both": 0.835,
+    "aef_gated": 0.727,
+    "agree": 0.671
+   },
+   "false_alarm": {
+    "aef": 0.038,
+    "tes": 0.238,
+    "both": 0.084,
+    "aef_gated": 0.02,
+    "agree": 0.015
+   },
+   "moved_split": {
+    "both": 0.671,
+    "aef_only": 0.057,
+    "tes_only": 0.191,
+    "neither": 0.081
+   },
+   "r2_change": 0.308,
+   "r2_year": 0.014
+  },
+  "brighton-co": {
+   "kind": "building",
+   "years": [
+    2017,
+    2020
+   ],
+   "valid": 0.999,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    72.0,
+    90.0
+   ],
+   "rho_plain": 0.625,
+   "tes_still_plain": [
+    0.266,
+    null
+   ],
+   "aef_still_plain": 0.064,
+   "aef_plain": {
+    "auc": 0.83,
+    "ap": 0.041
+   },
+   "tes_plain": {
+    "auc": 0.776,
+    "ap": 0.171
+   },
+   "rho_models": 0.64,
+   "ap": {
+    "aef": 0.197,
+    "tes": 0.232,
+    "both": 0.273,
+    "aef_gated": 0.196,
+    "agree": 0.225
+   },
+   "found": {
+    "aef": 0.808,
+    "tes": 0.716,
+    "both": 0.699,
+    "aef_gated": 0.61,
+    "agree": 0.541
+   },
+   "false_alarm": {
+    "aef": 0.208,
+    "tes": 0.119,
+    "both": 0.124,
+    "aef_gated": 0.084,
+    "agree": 0.034
+   },
+   "moved_split": {
+    "both": 0.541,
+    "aef_only": 0.07,
+    "tes_only": 0.175,
+    "neither": 0.214
+   },
+   "r2_change": 0.143,
+   "r2_year": 0.095
+  },
+  "lakewood-ranch-fl": {
+   "kind": "building",
+   "years": [
+    2018,
+    2024
+   ],
+   "valid": 0.995,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    58.0,
+    58.0
+   ],
+   "rho_plain": 0.869,
+   "tes_still_plain": [
+    0.114,
+    null
+   ],
+   "aef_still_plain": 0.042,
+   "aef_plain": {
+    "auc": 0.944,
+    "ap": 0.818
+   },
+   "tes_plain": {
+    "auc": 0.918,
+    "ap": 0.708
+   },
+   "rho_models": 0.767,
+   "ap": {
+    "aef": 0.724,
+    "tes": 0.651,
+    "both": 0.729,
+    "aef_gated": 0.765,
+    "agree": 0.727
+   },
+   "found": {
+    "aef": 0.836,
+    "tes": 0.779,
+    "both": 0.865,
+    "aef_gated": 0.825,
+    "agree": 0.725
+   },
+   "false_alarm": {
+    "aef": 0.177,
+    "tes": 0.119,
+    "both": 0.149,
+    "aef_gated": 0.096,
+    "agree": 0.076
+   },
+   "moved_split": {
+    "both": 0.725,
+    "aef_only": 0.101,
+    "tes_only": 0.054,
+    "neither": 0.12
+   },
+   "r2_change": 0.21,
+   "r2_year": -0.051
+  },
+  "huntsville-al": {
+   "kind": "building",
+   "years": [
+    2019,
+    2023
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    30.0,
+    29.0
+   ],
+   "rho_plain": 0.807,
+   "tes_still_plain": [
+    0.123,
+    null
+   ],
+   "aef_still_plain": 0.081,
+   "aef_plain": {
+    "auc": 0.616,
+    "ap": 0.087
+   },
+   "tes_plain": {
+    "auc": 0.712,
+    "ap": 0.359
+   },
+   "rho_models": 0.644,
+   "ap": {
+    "aef": 0.511,
+    "tes": 0.497,
+    "both": 0.557,
+    "aef_gated": 0.491,
+    "agree": 0.522
+   },
+   "found": {
+    "aef": 0.598,
+    "tes": 0.7,
+    "both": 0.68,
+    "aef_gated": 0.559,
+    "agree": 0.553
+   },
+   "false_alarm": {
+    "aef": 0.073,
+    "tes": 0.155,
+    "both": 0.106,
+    "aef_gated": 0.058,
+    "agree": 0.036
+   },
+   "moved_split": {
+    "both": 0.553,
+    "aef_only": 0.006,
+    "tes_only": 0.146,
+    "neither": 0.294
+   },
+   "r2_change": 0.262,
+   "r2_year": 0.139
+  },
+  "fishers-in": {
+   "kind": "building",
+   "years": [
+    2017,
+    2023
+   ],
+   "valid": 0.388,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    25.0,
+    30.0
+   ],
+   "rho_plain": 0.591,
+   "tes_still_plain": [
+    0.131,
+    null
+   ],
+   "aef_still_plain": 0.037,
+   "aef_plain": {
+    "auc": 0.945,
+    "ap": 0.552
+   },
+   "tes_plain": {
+    "auc": 0.946,
+    "ap": 0.69
+   },
+   "rho_models": 0.5,
+   "ap": {
+    "aef": 0.755,
+    "tes": 0.771,
+    "both": 0.786,
+    "aef_gated": 0.751,
+    "agree": 0.769
+   },
+   "found": {
+    "aef": 0.883,
+    "tes": 0.898,
+    "both": 0.835,
+    "aef_gated": 0.781,
+    "agree": 0.757
+   },
+   "false_alarm": {
+    "aef": 0.09,
+    "tes": 0.091,
+    "both": 0.037,
+    "aef_gated": 0.034,
+    "agree": 0.024
+   },
+   "moved_split": {
+    "both": 0.757,
+    "aef_only": 0.025,
+    "tes_only": 0.141,
+    "neither": 0.077
+   },
+   "r2_change": 0.083,
+   "r2_year": 0.124
+  },
+  "las-vegas-se-nv": {
+   "kind": "building",
+   "years": [
+    2017,
+    2022
+   ],
+   "valid": 0.984,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    56.0,
+    30.0
+   ],
+   "rho_plain": 0.495,
+   "tes_still_plain": [
+    0.112,
+    null
+   ],
+   "aef_still_plain": 0.062,
+   "aef_plain": {
+    "auc": 0.929,
+    "ap": 0.603
+   },
+   "tes_plain": {
+    "auc": 0.918,
+    "ap": 0.672
+   },
+   "rho_models": 0.237,
+   "ap": {
+    "aef": 0.609,
+    "tes": 0.673,
+    "both": 0.718,
+    "aef_gated": 0.728,
+    "agree": 0.772
+   },
+   "found": {
+    "aef": 0.914,
+    "tes": 0.885,
+    "both": 0.92,
+    "aef_gated": 0.796,
+    "agree": 0.741
+   },
+   "false_alarm": {
+    "aef": 0.259,
+    "tes": 0.221,
+    "both": 0.25,
+    "aef_gated": 0.039,
+    "agree": 0.018
+   },
+   "moved_split": {
+    "both": 0.741,
+    "aef_only": 0.055,
+    "tes_only": 0.144,
+    "neither": 0.06
+   },
+   "r2_change": -0.28,
+   "r2_year": -0.102
+  },
+  "las-vegas-nw-nv": {
+   "kind": "building",
+   "years": [
+    2017,
+    2022
+   ],
+   "valid": 0.995,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    46.0,
+    30.0
+   ],
+   "rho_plain": 0.253,
+   "tes_still_plain": [
+    0.127,
+    null
+   ],
+   "aef_still_plain": 0.075,
+   "aef_plain": {
+    "auc": 0.871,
+    "ap": 0.659
+   },
+   "tes_plain": {
+    "auc": 0.798,
+    "ap": 0.556
+   },
+   "rho_models": 0.58,
+   "ap": {
+    "aef": 0.779,
+    "tes": 0.851,
+    "both": 0.851,
+    "aef_gated": 0.804,
+    "agree": 0.808
+   },
+   "found": {
+    "aef": 0.764,
+    "tes": 0.927,
+    "both": 0.9,
+    "aef_gated": 0.584,
+    "agree": 0.58
+   },
+   "false_alarm": {
+    "aef": 0.021,
+    "tes": 0.049,
+    "both": 0.035,
+    "aef_gated": 0.005,
+    "agree": 0.004
+   },
+   "moved_split": {
+    "both": 0.58,
+    "aef_only": 0.004,
+    "tes_only": 0.346,
+    "neither": 0.069
+   },
+   "r2_change": -0.876,
+   "r2_year": -0.413
+  },
+  "lancaster-ca": {
+   "kind": "building",
+   "years": [
+    2017,
+    2023
+   ],
+   "valid": 0.976,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    56.0,
+    59.0
+   ],
+   "rho_plain": 0.514,
+   "tes_still_plain": [
+    0.083,
+    null
+   ],
+   "aef_still_plain": 0.035,
+   "aef_plain": {
+    "auc": 0.895,
+    "ap": 0.097
+   },
+   "tes_plain": {
+    "auc": 0.896,
+    "ap": 0.108
+   },
+   "rho_models": 0.312,
+   "ap": {
+    "aef": 0.13,
+    "tes": 0.105,
+    "both": 0.121,
+    "aef_gated": 0.118,
+    "agree": 0.119
+   },
+   "found": {
+    "aef": 0.759,
+    "tes": 0.848,
+    "both": 0.915,
+    "aef_gated": 0.244,
+    "agree": 0.234
+   },
+   "false_alarm": {
+    "aef": 0.075,
+    "tes": 0.377,
+    "both": 0.302,
+    "aef_gated": 0.012,
+    "agree": 0.011
+   },
+   "moved_split": {
+    "both": 0.234,
+    "aef_only": 0.01,
+    "tes_only": 0.614,
+    "neither": 0.142
+   },
+   "r2_change": -1.255,
+   "r2_year": -1.438
+  },
+  "mountain-pass-ca": {
+   "kind": "mining",
+   "years": [
+    2019,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    71.0,
+    73.0
+   ],
+   "rho_plain": 0.373,
+   "tes_still_plain": [
+    0.102,
+    null
+   ],
+   "aef_still_plain": 0.055,
+   "aef_plain": {
+    "auc": 0.912,
+    "ap": 0.654
+   },
+   "tes_plain": {
+    "auc": 0.888,
+    "ap": 0.609
+   },
+   "rho_models": 0.607,
+   "ap": {
+    "aef": 0.695,
+    "tes": 0.732,
+    "both": 0.794,
+    "aef_gated": 0.71,
+    "agree": 0.759
+   },
+   "found": {
+    "aef": 0.912,
+    "tes": 0.72,
+    "both": 0.88,
+    "aef_gated": 0.742,
+    "agree": 0.599
+   },
+   "false_alarm": {
+    "aef": 0.06,
+    "tes": 0.017,
+    "both": 0.025,
+    "aef_gated": 0.017,
+    "agree": 0.008
+   },
+   "moved_split": {
+    "both": 0.599,
+    "aef_only": 0.143,
+    "tes_only": 0.121,
+    "neither": 0.137
+   },
+   "r2_change": -2.667,
+   "r2_year": -0.643
+  },
+  "four-corners-fl": {
+   "kind": "mining",
+   "years": [
+    2018,
+    2024
+   ],
+   "valid": 0.999,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    58.0,
+    58.0
+   ],
+   "rho_plain": 0.782,
+   "tes_still_plain": [
+    0.151,
+    null
+   ],
+   "aef_still_plain": 0.077,
+   "aef_plain": {
+    "auc": 0.703,
+    "ap": 0.394
+   },
+   "tes_plain": {
+    "auc": 0.755,
+    "ap": 0.551
+   },
+   "rho_models": 0.549,
+   "ap": {
+    "aef": 0.278,
+    "tes": 0.429,
+    "both": 0.293,
+    "aef_gated": 0.295,
+    "agree": 0.351
+   },
+   "found": {
+    "aef": 0.31,
+    "tes": 0.464,
+    "both": 0.276,
+    "aef_gated": 0.284,
+    "agree": 0.246
+   },
+   "false_alarm": {
+    "aef": 0.178,
+    "tes": 0.197,
+    "both": 0.147,
+    "aef_gated": 0.118,
+    "agree": 0.084
+   },
+   "moved_split": {
+    "both": 0.246,
+    "aef_only": 0.039,
+    "tes_only": 0.218,
+    "neither": 0.497
+   },
+   "r2_change": 0.109,
+   "r2_year": -0.013
+  },
+  "hibbing-mn": {
+   "kind": "mining",
+   "years": [
+    2020,
+    2022
+   ],
+   "valid": 0.995,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    50.0,
+    40.0
+   ],
+   "rho_plain": 0.326,
+   "tes_still_plain": [
+    0.073,
+    null
+   ],
+   "aef_still_plain": 0.02,
+   "aef_plain": {
+    "auc": 0.894,
+    "ap": 0.468
+   },
+   "tes_plain": {
+    "auc": 0.819,
+    "ap": 0.457
+   },
+   "rho_models": 0.822,
+   "ap": {
+    "aef": 0.364,
+    "tes": 0.523,
+    "both": 0.459,
+    "aef_gated": 0.501,
+    "agree": 0.512
+   },
+   "found": {
+    "aef": 0.855,
+    "tes": 0.878,
+    "both": 0.98,
+    "aef_gated": 0.29,
+    "agree": 0.284
+   },
+   "false_alarm": {
+    "aef": 0.143,
+    "tes": 0.124,
+    "both": 0.257,
+    "aef_gated": 0.006,
+    "agree": 0.005
+   },
+   "moved_split": {
+    "both": 0.284,
+    "aef_only": 0.006,
+    "tes_only": 0.595,
+    "neither": 0.115
+   },
+   "r2_change": -1.101,
+   "r2_year": -0.699
+  },
+  "cameron-peak-co": {
+   "kind": "burn",
+   "years": [
+    2019,
+    2023
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    78.0,
+    89.0
+   ],
+   "rho_plain": 0.905,
+   "tes_still_plain": [
+    0.355,
+    null
+   ],
+   "aef_still_plain": 0.267,
+   "aef_plain": {
+    "auc": 0.183,
+    "ap": 0.001
+   },
+   "tes_plain": {
+    "auc": 0.219,
+    "ap": 0.001
+   },
+   "r2_change": -0.621,
+   "r2_year": -1.55
+  },
+  "grizzly-flats-ca": {
+   "kind": "burn",
+   "years": [
+    2019,
+    2022
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    100.0,
+    60.0
+   ],
+   "rho_plain": 0.886,
+   "tes_still_plain": [
+    0.244,
+    null
+   ],
+   "aef_still_plain": 0.29,
+   "aef_plain": {
+    "auc": 0.511,
+    "ap": 0.001
+   },
+   "tes_plain": {
+    "auc": 0.57,
+    "ap": 0.001
+   },
+   "r2_change": -1.001,
+   "r2_year": -1.912
+  },
+  "white-sands-nm": {
+   "kind": "dunes",
+   "years": [
+    2018,
+    2019
+   ],
+   "valid": 0.958,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    61.0,
+    60.0
+   ],
+   "rho_plain": 0.713,
+   "tes_still_plain": [
+    0.007,
+    null
+   ],
+   "aef_still_plain": 0.009,
+   "aef_plain": {
+    "auc": 0.288,
+    "ap": 0.268
+   },
+   "tes_plain": {
+    "auc": 0.426,
+    "ap": 0.323
+   },
+   "r2_change": -1.414,
+   "r2_year": -5.37
+  },
+  "mexico-beach-fl": {
+   "kind": "storm",
+   "years": [
+    2017,
+    2020
+   ],
+   "valid": 0.955,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    23.0,
+    29.0
+   ],
+   "rho_plain": 0.871,
+   "tes_still_plain": [
+    0.279,
+    null
+   ],
+   "aef_still_plain": 0.16,
+   "aef_plain": {
+    "auc": 0.466,
+    "ap": 0.012
+   },
+   "tes_plain": {
+    "auc": 0.424,
+    "ap": 0.009
+   },
+   "rho_models": 0.68,
+   "false_alarm": {
+    "aef": 0.211,
+    "tes": 0.328,
+    "both": 0.251,
+    "aef_gated": 0.172,
+    "agree": 0.13
+   },
+   "found": {
+    "aef": 0.613,
+    "tes": 0.702,
+    "both": 0.804,
+    "aef_gated": 0.345,
+    "agree": 0.312
+   },
+   "r2_change": -0.064,
+   "r2_year": -0.222
+  },
+  "antelope-farm-ne": {
+   "kind": "farm",
+   "years": [
+    2017,
+    2020
+   ],
+   "valid": 0.564,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    43.0,
+    57.0
+   ],
+   "rho_plain": 0.732,
+   "tes_still_plain": [
+    0.177,
+    null
+   ],
+   "aef_still_plain": 0.07,
+   "aef_plain": {
+    "auc": 0.614,
+    "ap": 0.005
+   },
+   "tes_plain": {
+    "auc": 0.781,
+    "ap": 0.027
+   },
+   "rho_models": 0.57,
+   "false_alarm": {
+    "aef": 0.112,
+    "tes": 0.009,
+    "both": 0.024,
+    "aef_gated": 0.09,
+    "agree": 0.003
+   },
+   "found": {
+    "aef": 0.843,
+    "tes": 0.712,
+    "both": 0.783,
+    "aef_gated": 0.615,
+    "agree": 0.522
+   },
+   "r2_change": 0.349,
+   "r2_year": 0.115
+  },
+  "box-butte-farm-ne": {
+   "kind": "farm",
+   "years": [
+    2017,
+    2023
+   ],
+   "valid": 0.943,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    30.0,
+    90.0
+   ],
+   "rho_plain": 0.686,
+   "tes_still_plain": [
+    0.27,
+    null
+   ],
+   "aef_still_plain": 0.217,
+   "aef_plain": {
+    "auc": 0.392,
+    "ap": 0.0
+   },
+   "tes_plain": {
+    "auc": 0.389,
+    "ap": 0.0
+   },
+   "rho_models": 0.416,
+   "false_alarm": {
+    "aef": 0.26,
+    "tes": 0.107,
+    "both": 0.06,
+    "aef_gated": 0.226,
+    "agree": 0.052
+   },
+   "found": {
+    "aef": 0.759,
+    "tes": 0.708,
+    "both": 0.703,
+    "aef_gated": 0.503,
+    "agree": 0.41
+   },
+   "r2_change": 0.297,
+   "r2_year": 0.233
+  },
+  "fresno-farm-ca": {
+   "kind": "farm",
+   "years": [
+    2019,
+    2023
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    142.0,
+    89.0
+   ],
+   "rho_plain": 0.822,
+   "tes_still_plain": [
+    0.121,
+    null
+   ],
+   "aef_still_plain": 0.07,
+   "aef_plain": {
+    "auc": 0.385,
+    "ap": 0.008
+   },
+   "tes_plain": {
+    "auc": 0.297,
+    "ap": 0.008
+   },
+   "rho_models": 0.65,
+   "false_alarm": {
+    "aef": 0.359,
+    "tes": 0.376,
+    "both": 0.419,
+    "aef_gated": 0.231,
+    "agree": 0.186
+   },
+   "found": {
+    "aef": 0.681,
+    "tes": 0.643,
+    "both": 0.724,
+    "aef_gated": 0.099,
+    "agree": 0.086
+   },
+   "r2_change": 0.145,
+   "r2_year": -1.062
+  },
+  "hamilton-farm-in": {
+   "kind": "farm",
+   "years": [
+    2017,
+    2023
+   ],
+   "valid": 0.232,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    25.0,
+    30.0
+   ],
+   "rho_plain": 0.62,
+   "tes_still_plain": [
+    0.147,
+    null
+   ],
+   "aef_still_plain": 0.051,
+   "aef_plain": {
+    "auc": 0.805,
+    "ap": 0.021
+   },
+   "tes_plain": {
+    "auc": 0.877,
+    "ap": 0.198
+   },
+   "rho_models": 0.443,
+   "false_alarm": {
+    "aef": 0.045,
+    "tes": 0.091,
+    "both": 0.045,
+    "aef_gated": 0.026,
+    "agree": 0.015
+   },
+   "found": {
+    "aef": 0.643,
+    "tes": 0.782,
+    "both": 0.712,
+    "aef_gated": 0.594,
+    "agree": 0.563
+   },
+   "r2_change": 0.278,
+   "r2_year": 0.315
+  },
+  "arkansas-delta-ar": {
+   "kind": "farm",
+   "years": [
+    2017,
+    2024
+   ],
+   "valid": 0.997,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    32.0,
+    23.0
+   ],
+   "rho_plain": 0.811,
+   "tes_still_plain": [
+    0.152,
+    null
+   ],
+   "aef_still_plain": 0.061,
+   "aef_plain": {
+    "auc": 0.298,
+    "ap": 0.015
+   },
+   "tes_plain": {
+    "auc": 0.367,
+    "ap": 0.017
+   },
+   "rho_models": 0.421,
+   "false_alarm": {
+    "aef": 0.09,
+    "tes": 0.126,
+    "both": 0.066,
+    "aef_gated": 0.062,
+    "agree": 0.012
+   },
+   "found": {
+    "aef": 0.797,
+    "tes": 0.811,
+    "both": 0.843,
+    "aef_gated": 0.101,
+    "agree": 0.099
+   },
+   "r2_change": 0.345,
+   "r2_year": -0.443
+  },
+  "othello-pivots-wa": {
+   "kind": "farm",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    85.0,
+    91.0
+   ],
+   "rho_plain": 0.754,
+   "tes_still_plain": [
+    0.117,
+    null
+   ],
+   "aef_still_plain": 0.063,
+   "rho_models": 0.55,
+   "false_alarm": {
+    "aef": 0.051,
+    "tes": 0.121,
+    "both": 0.116,
+    "aef_gated": 0.035,
+    "agree": 0.024
+   },
+   "r2_change": 0.246,
+   "r2_year": -0.234
+  },
+  "brazoria-tx": {
+   "kind": "marsh",
+   "years": [
+    2017,
+    2024
+   ],
+   "valid": 0.982,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    84.0,
+    58.0
+   ],
+   "rho_plain": 0.696,
+   "tes_still_plain": [
+    0.034,
+    null
+   ],
+   "aef_still_plain": 0.02,
+   "aef_plain": {
+    "auc": 0.811,
+    "ap": 0.074
+   },
+   "tes_plain": {
+    "auc": 0.784,
+    "ap": 0.054
+   },
+   "rho_models": -0.488,
+   "false_alarm": {
+    "aef": 0.743,
+    "tes": 0.473,
+    "both": 0.805,
+    "aef_gated": 0.009,
+    "agree": 0.008
+   },
+   "found": {
+    "aef": 0.78,
+    "tes": 0.946,
+    "both": 0.94,
+    "aef_gated": 0.074,
+    "agree": 0.074
+   },
+   "r2_change": -0.619,
+   "r2_year": 0.113
+  },
+  "anahuac-tx": {
+   "kind": "marsh",
+   "years": [
+    2017,
+    2024
+   ],
+   "valid": 0.949,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    23.0,
+    23.0
+   ],
+   "rho_plain": 0.538,
+   "tes_still_plain": [
+    0.252,
+    null
+   ],
+   "aef_still_plain": 0.135,
+   "aef_plain": {
+    "auc": 0.446,
+    "ap": 0.01
+   },
+   "tes_plain": {
+    "auc": 0.416,
+    "ap": 0.01
+   },
+   "rho_models": 0.144,
+   "false_alarm": {
+    "aef": 0.26,
+    "tes": 0.728,
+    "both": 0.39,
+    "aef_gated": 0.104,
+    "agree": 0.1
+   },
+   "found": {
+    "aef": 0.207,
+    "tes": 0.606,
+    "both": 0.417,
+    "aef_gated": 0.078,
+    "agree": 0.076
+   },
+   "r2_change": -0.582,
+   "r2_year": -0.894
+  },
+  "myakka-fl": {
+   "kind": "marsh",
+   "years": [
+    2018,
+    2024
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    58.0,
+    58.0
+   ],
+   "rho_plain": 0.621,
+   "tes_still_plain": [
+    0.101,
+    null
+   ],
+   "aef_still_plain": 0.042,
+   "aef_plain": {
+    "auc": 0.827,
+    "ap": 0.233
+   },
+   "tes_plain": {
+    "auc": 0.825,
+    "ap": 0.267
+   },
+   "rho_models": 0.485,
+   "false_alarm": {
+    "aef": 0.084,
+    "tes": 0.054,
+    "both": 0.07,
+    "aef_gated": 0.049,
+    "agree": 0.027
+   },
+   "found": {
+    "aef": 0.511,
+    "tes": 0.451,
+    "both": 0.507,
+    "aef_gated": 0.424,
+    "agree": 0.342
+   },
+   "r2_change": -0.06,
+   "r2_year": -0.147
+  },
+  "cdl-antelope-ne-pivots-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    49.0,
+    58.0
+   ],
+   "rho_plain": 0.647,
+   "tes_still_plain": [
+    0.188,
+    null
+   ],
+   "aef_still_plain": 0.532,
+   "rho_models": 0.524,
+   "false_alarm": {
+    "aef": 0.195,
+    "tes": 0.0,
+    "both": 0.003,
+    "aef_gated": 0.195,
+    "agree": 0.0
+   }
+  },
+  "cdl-antelope-ne-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    87.0,
+    120.0
+   ],
+   "rho_plain": -0.111,
+   "tes_still_plain": [
+    0.26,
+    null
+   ],
+   "aef_still_plain": 0.509,
+   "rho_models": 0.227,
+   "false_alarm": {
+    "aef": 0.082,
+    "tes": 0.0,
+    "both": 0.023,
+    "aef_gated": 0.081,
+    "agree": 0.0
+   }
+  },
+  "cdl-bolivar-ms-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    29.0,
+    28.0
+   ],
+   "rho_plain": 0.101,
+   "tes_still_plain": [
+    0.136,
+    null
+   ],
+   "aef_still_plain": 0.439,
+   "rho_models": -0.124,
+   "false_alarm": {
+    "aef": 0.014,
+    "tes": 0.149,
+    "both": 0.053,
+    "aef_gated": 0.014,
+    "agree": 0.009
+   }
+  },
+  "cdl-bolivar-ms-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    24.0,
+    28.0
+   ],
+   "rho_plain": 0.494,
+   "tes_still_plain": [
+    0.167,
+    null
+   ],
+   "aef_still_plain": 0.346,
+   "rho_models": 0.197,
+   "false_alarm": {
+    "aef": 0.052,
+    "tes": 0.373,
+    "both": 0.222,
+    "aef_gated": 0.051,
+    "agree": 0.041
+   }
+  },
+  "cdl-box-butte-ne-pivots-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    40.0,
+    59.0
+   ],
+   "rho_plain": 0.243,
+   "tes_still_plain": [
+    0.31,
+    null
+   ],
+   "aef_still_plain": 0.59,
+   "rho_models": -0.018,
+   "false_alarm": {
+    "aef": 0.292,
+    "tes": 0.075,
+    "both": 0.12,
+    "aef_gated": 0.292,
+    "agree": 0.026
+   }
+  },
+  "cdl-box-butte-ne-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    90.0,
+    95.0
+   ],
+   "rho_plain": 0.551,
+   "tes_still_plain": [
+    0.355,
+    null
+   ],
+   "aef_still_plain": 0.581,
+   "rho_models": -0.019,
+   "false_alarm": {
+    "aef": 0.602,
+    "tes": 0.155,
+    "both": 0.149,
+    "aef_gated": 0.602,
+    "agree": 0.105
+   }
+  },
+  "cdl-dallam-tx-pivots-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    74.0,
+    89.0
+   ],
+   "rho_plain": 0.518,
+   "tes_still_plain": [
+    0.266,
+    null
+   ],
+   "aef_still_plain": 0.331,
+   "rho_models": -0.006,
+   "false_alarm": {
+    "aef": 0.016,
+    "tes": 0.012,
+    "both": 0.007,
+    "aef_gated": 0.016,
+    "agree": 0.0
+   }
+  },
+  "cdl-dallam-tx-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    89.0,
+    103.0
+   ],
+   "rho_plain": 0.316,
+   "tes_still_plain": [
+    0.237,
+    null
+   ],
+   "aef_still_plain": 0.208,
+   "rho_models": 0.024,
+   "false_alarm": {
+    "aef": 0.017,
+    "tes": 0.003,
+    "both": 0.002,
+    "aef_gated": 0.017,
+    "agree": 0.002
+   }
+  },
+  "cdl-darke-oh-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    55.0,
+    53.0
+   ],
+   "rho_plain": 0.355,
+   "tes_still_plain": [
+    0.218,
+    null
+   ],
+   "aef_still_plain": 0.52,
+   "rho_models": 0.286,
+   "false_alarm": {
+    "aef": 0.007,
+    "tes": 0.007,
+    "both": 0.001,
+    "aef_gated": 0.007,
+    "agree": 0.001
+   }
+  },
+  "cdl-haskell-ks-pivots-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    29.0,
+    29.0
+   ],
+   "rho_plain": 0.419,
+   "tes_still_plain": [
+    0.345,
+    null
+   ],
+   "aef_still_plain": 0.653,
+   "rho_models": 0.695,
+   "false_alarm": {
+    "aef": 0.509,
+    "tes": 0.267,
+    "both": 0.366,
+    "aef_gated": 0.509,
+    "agree": 0.259
+   }
+  },
+  "cdl-haskell-ks-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    87.0,
+    75.0
+   ],
+   "rho_plain": 0.708,
+   "tes_still_plain": [
+    0.326,
+    null
+   ],
+   "aef_still_plain": 0.558,
+   "rho_models": 0.405,
+   "false_alarm": {
+    "aef": 0.141,
+    "tes": 0.004,
+    "both": 0.041,
+    "aef_gated": 0.141,
+    "agree": 0.002
+   }
+  },
+  "cdl-imperial-ca-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    30.0,
+    81.0
+   ],
+   "rho_plain": 0.547,
+   "tes_still_plain": [
+    0.366,
+    null
+   ],
+   "aef_still_plain": 0.403,
+   "rho_models": 0.114,
+   "false_alarm": {
+    "aef": 0.329,
+    "tes": 0.525,
+    "both": 0.563,
+    "aef_gated": 0.329,
+    "agree": 0.222
+   }
+  },
+  "cdl-lubbock-tx-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    56.0,
+    60.0
+   ],
+   "rho_plain": 0.572,
+   "tes_still_plain": [
+    0.188,
+    null
+   ],
+   "aef_still_plain": 0.222,
+   "rho_models": 0.056,
+   "false_alarm": {
+    "aef": 0.007,
+    "tes": 0.049,
+    "both": 0.002,
+    "aef_gated": 0.007,
+    "agree": 0.001
+   }
+  },
+  "cdl-lubbock-tx-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    90.0,
+    102.0
+   ],
+   "rho_plain": 0.491,
+   "tes_still_plain": [
+    0.206,
+    null
+   ],
+   "aef_still_plain": 0.196,
+   "rho_models": 0.279,
+   "false_alarm": {
+    "aef": 0.018,
+    "tes": 0.056,
+    "both": 0.003,
+    "aef_gated": 0.018,
+    "agree": 0.01
+   }
+  },
+  "cdl-minidoka-id-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    43.0,
+    98.0
+   ],
+   "rho_plain": 0.235,
+   "tes_still_plain": [
+    0.289,
+    null
+   ],
+   "aef_still_plain": 0.5,
+   "rho_models": 0.197,
+   "false_alarm": {
+    "aef": 0.268,
+    "tes": 0.647,
+    "both": 0.22,
+    "aef_gated": 0.268,
+    "agree": 0.199
+   }
+  },
+  "cdl-minidoka-id-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    60.0,
+    101.0
+   ],
+   "rho_plain": 0.522,
+   "tes_still_plain": [
+    0.277,
+    null
+   ],
+   "aef_still_plain": 0.458,
+   "rho_models": 0.374,
+   "false_alarm": {
+    "aef": 0.268,
+    "tes": 0.391,
+    "both": 0.159,
+    "aef_gated": 0.268,
+    "agree": 0.18
+   }
+  },
+  "cdl-platte-ne-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    60.0,
+    60.0
+   ],
+   "rho_plain": 0.043,
+   "tes_still_plain": [
+    0.178,
+    null
+   ],
+   "aef_still_plain": 0.549,
+   "rho_models": -0.347,
+   "false_alarm": {
+    "aef": 0.473,
+    "tes": 0.013,
+    "both": 0.025,
+    "aef_gated": 0.473,
+    "agree": 0.01
+   }
+  },
+  "cdl-quincy-wa-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    56.0,
+    97.0
+   ],
+   "rho_plain": 0.547,
+   "tes_still_plain": [
+    0.305,
+    null
+   ],
+   "aef_still_plain": 0.431,
+   "rho_models": 0.18,
+   "false_alarm": {
+    "aef": 0.227,
+    "tes": 0.506,
+    "both": 0.366,
+    "aef_gated": 0.227,
+    "agree": 0.179
+   }
+  },
+  "cdl-red-river-mn-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    58.0,
+    54.0
+   ],
+   "rho_plain": 0.477,
+   "tes_still_plain": [
+    0.317,
+    null
+   ],
+   "aef_still_plain": 0.478,
+   "rho_models": 0.235,
+   "false_alarm": {
+    "aef": 0.073,
+    "tes": 0.461,
+    "both": 0.042,
+    "aef_gated": 0.073,
+    "agree": 0.037
+   }
+  },
+  "cdl-red-river-mn-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    54.0,
+    65.0
+   ],
+   "rho_plain": 0.143,
+   "tes_still_plain": [
+    0.269,
+    null
+   ],
+   "aef_still_plain": 0.532,
+   "rho_models": 0.111,
+   "false_alarm": {
+    "aef": 0.012,
+    "tes": 0.042,
+    "both": 0.0,
+    "aef_gated": 0.012,
+    "agree": 0.0
+   }
+  },
+  "cdl-san-luis-co-pivots-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    81.0,
+    90.0
+   ],
+   "rho_plain": 0.775,
+   "tes_still_plain": [
+    0.183,
+    null
+   ],
+   "aef_still_plain": 0.264,
+   "rho_models": 0.057,
+   "false_alarm": {
+    "aef": 0.057,
+    "tes": 0.327,
+    "both": 0.025,
+    "aef_gated": 0.057,
+    "agree": 0.018
+   }
+  },
+  "cdl-san-luis-co-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    89.0,
+    96.0
+   ],
+   "rho_plain": 0.638,
+   "tes_still_plain": [
+    0.162,
+    null
+   ],
+   "aef_still_plain": 0.262,
+   "rho_models": -0.129,
+   "false_alarm": {
+    "aef": 0.063,
+    "tes": 0.51,
+    "both": 0.08,
+    "aef_gated": 0.063,
+    "agree": 0.063
+   }
+  },
+  "cdl-story-ia-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    57.0,
+    59.0
+   ],
+   "rho_plain": 0.263,
+   "tes_still_plain": [
+    0.205,
+    null
+   ],
+   "aef_still_plain": 0.495,
+   "rho_models": -0.08,
+   "false_alarm": {
+    "aef": 0.002,
+    "tes": 0.0,
+    "both": 0.0,
+    "aef_gated": 0.002,
+    "agree": 0.0
+   }
+  },
+  "cdl-story-ia-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    46.0,
+    48.0
+   ],
+   "rho_plain": 0.505,
+   "tes_still_plain": [
+    0.204,
+    null
+   ],
+   "aef_still_plain": 0.559,
+   "rho_models": 0.285,
+   "false_alarm": {
+    "aef": 0.001,
+    "tes": 0.004,
+    "both": 0.001,
+    "aef_gated": 0.001,
+    "agree": 0.001
+   }
+  },
+  "cdl-tift-ga-pivots-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    30.0,
+    29.0
+   ],
+   "rho_plain": 0.515,
+   "tes_still_plain": [
+    0.133,
+    null
+   ],
+   "aef_still_plain": 0.391,
+   "rho_models": 0.138,
+   "false_alarm": {
+    "aef": 0.001,
+    "tes": 0.061,
+    "both": 0.017,
+    "aef_gated": 0.001,
+    "agree": 0.0
+   }
+  },
+  "cdl-tulare-ca-2019-2021": {
+   "kind": "crop",
+   "years": [
+    2019,
+    2021
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    99.0,
+    117.0
+   ],
+   "rho_plain": 0.477,
+   "tes_still_plain": [
+    0.288,
+    null
+   ],
+   "aef_still_plain": 0.424,
+   "rho_models": 0.717,
+   "false_alarm": {
+    "aef": 0.395,
+    "tes": 0.412,
+    "both": 0.338,
+    "aef_gated": 0.395,
+    "agree": 0.333
+   }
+  },
+  "cdl-tulare-ca-2023-2025": {
+   "kind": "crop",
+   "years": [
+    2023,
+    2025
+   ],
+   "valid": 1.0,
+   "radar_flip": 0.0,
+   "s1_median_obs": [
+    60.0,
+    100.0
+   ],
+   "rho_plain": 0.885,
+   "tes_still_plain": [
+    0.259,
+    null
+   ],
+   "aef_still_plain": 0.377,
+   "rho_models": 0.803,
+   "false_alarm": {
+    "aef": 0.39,
+    "tes": 0.556,
+    "both": 0.218,
+    "aef_gated": 0.383,
+    "agree": 0.35
+   }
+  }
+ },
+ "mean_ap_digging": {
+  "aef": 0.535,
+  "tes": 0.549,
+  "both": 0.575,
+  "aef_gated": 0.553,
+  "agree": 0.569
+ },
+ "mean_ap_building": {
+  "aef": 0.559,
+  "tes": 0.545,
+  "both": 0.591,
+  "aef_gated": 0.567,
+  "agree": 0.577
+ },
+ "mean_found_digging": {
+  "aef": 0.798,
+  "tes": 0.81,
+  "both": 0.819,
+  "aef_gated": 0.631,
+  "agree": 0.589
+ },
+ "mean_found_building": {
+  "aef": 0.827,
+  "tes": 0.844,
+  "both": 0.848,
+  "aef_gated": 0.684,
+  "agree": 0.647
+ },
+ "false_alarm_by_kind": {
+  "storm": {
+   "aef": 0.211,
+   "tes": 0.328,
+   "both": 0.251,
+   "aef_gated": 0.172,
+   "agree": 0.13
+  },
+  "farm": {
+   "aef": 0.153,
+   "tes": 0.138,
+   "both": 0.122,
+   "aef_gated": 0.112,
+   "agree": 0.049
+  },
+  "marsh": {
+   "aef": 0.362,
+   "tes": 0.418,
+   "both": 0.422,
+   "aef_gated": 0.054,
+   "agree": 0.045
+  },
+  "crop": {
+   "aef": 0.167,
+   "tes": 0.208,
+   "both": 0.113,
+   "aef_gated": 0.167,
+   "agree": 0.076
+  }
+ },
+ "r2_change_mean": -0.277,
+ "r2_year_mean": -0.519,
+ "r2_change_per_aef_dim": [
+  -0.195,
+  -0.288,
+  -0.393,
+  -0.484,
+  -1.003,
+  -0.442,
+  -0.629,
+  -0.821,
+  -0.229,
+  -0.352,
+  -0.022,
+  -0.277,
+  -0.401,
+  -0.431,
+  -0.172,
+  -0.333,
+  -0.448,
+  0.131,
+  -0.537,
+  -0.517,
+  -0.406,
+  -0.456,
+  0.027,
+  -0.226,
+  -0.318,
+  -0.339,
+  -0.36,
+  -0.309,
+  -0.319,
+  -0.117,
+  -0.871,
+  -0.687,
+  -0.274,
+  -0.24,
+  -0.168,
+  -1.224,
+  -0.418,
+  -0.552,
+  -0.611,
+  0.032,
+  -0.15,
+  -0.395,
+  -0.749,
+  -1.149,
+  -0.017,
+  -0.049,
+  -0.019,
+  -0.322,
+  -0.405,
+  -0.235,
+  -0.414,
+  -0.191,
+  -0.344,
+  -0.413,
+  -0.529,
+  -0.543,
+  -0.759,
+  -0.411,
+  0.047,
+  -0.398,
+  -1.106,
+  -0.858,
+  -0.303,
+  -0.578
+ ],
+ "cca_change_all": [
+  0.944,
+  0.892,
+  0.888,
+  0.881,
+  0.861,
+  0.851,
+  0.835,
+  0.832,
+  0.81,
+  0.798
+ ],
+ "cca_change_moved": [
+  0.96,
+  0.934,
+  0.925,
+  0.9,
+  0.885,
+  0.874,
+  0.85,
+  0.846,
+  0.834,
+  0.82
+ ]
+}

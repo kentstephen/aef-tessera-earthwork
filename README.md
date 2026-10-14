@@ -49,6 +49,11 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   pits and valleys, flood silt) and splits the reservoirs by a per-year Sentinel-2 water mask.
 - `spans.py` scores the digging sites at wider pairs of years than their lidar window; `calib.py` tries cutoffs
   set from each place's own scores.
+- `separate.py` reads every year of both embeddings, with each pixel's surroundings, under forest that was cleared
+  and dug, cleared and not dug (Hansen loss split by the lidar), the clearcut regions, the satellite-laser mines and
+  clearing picked near each mine; `separate_test.py` teaches small heads to tell the two kinds of clearing apart,
+  held out by place; `near_panels.py` draws the clearing near each mine against Sentinel-2.
+- `pyodide_probe/` reads TESSERA inside Pyodide (Node), through zarr-python and through a small fetch reader.
 - `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
   aggregate (the joint model muted where neither embedding changed).
 
@@ -68,6 +73,8 @@ uv run python ground.py          # reads 31 places, then scores them with models
 CUT=1 uv run python fire_teach.py   # about half an hour, writes data/scores-fire-abroad-cut
 uv run python years.py           # 20 places x 9 years, every pair
 uv run python coarse.py          # about 40 minutes
+uv run python separate.py read   # about 2 hours, 4.2 GB into data/separate
+uv run python separate.py test   # SECTIONS=ABCD, writes results/separate.json
 ```
 
 ## Data and credits
@@ -80,6 +87,7 @@ uv run python coarse.py          # about 40 minutes
 - **Global Forest Change** v1.12 (Hansen, Potapov et al., University of Maryland; CC BY 4.0): tree cover loss
   year, tree cover in 2000 and the water mask, to place and group the new ground.
 - **USPVDB** (US Large-Scale Solar Photovoltaic Database, USGS and LBNL; public domain) for the solar arrays;
-  **Sentinel-2 L2A** (Copernicus, through Element84's earth-search) for the water masks.
+  **Sentinel-2 L2A** (Copernicus, through Element84's earth-search) for the water masks and the pictures of the
+  clearing near each mine.
 - Abroad labels through the Earthwork cache: IGN France RGE ALTI and LiDAR HD (Licence Ouverte / Etalab 2.0),
   Hong Kong CEDD lidar, VIRTUAL SHIZUOKA (CC BY 4.0), NASA ICESat-2 and GEDI.
