@@ -152,4 +152,4 @@ reads every 10 m pixel and is slow (FINDINGS 23).
   Hong Kong CEDD lidar, VIRTUAL SHIZUOKA (CC BY 4.0), NASA ICESat-2 and GEDI.
 - **NYC building footprints** (NYC Open Data `5zhs-2jue`) and **Earth Genome's Sentinel-2 yearly mosaics** (CC BY 4.0,
   contains modified Copernicus Sentinel data) for the white roofs.
-- The notebook's basemap: © CARTO, © OpenStreetMap contributors; place search by Photon (komoot), OpenStreetMap data.
+- The notebook's basemap: © CARTO, © OpenStreetMap contributors; place search by Photon (komoot), with Nominatim when Photon is slow, OpenStreetMap data.
