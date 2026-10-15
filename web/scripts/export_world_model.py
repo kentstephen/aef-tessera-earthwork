@@ -1,8 +1,7 @@
 """The world recipe's three layers (aggregate, AlphaEarth, TESSERA), its TESSERA gate bounds and each layer's
-cutoff (60% of held-out digging found), from aef-tessera-earthwork's models/model_world.npz to public/models:
+cutoff (60% of held-out digging found), from models/model_world.npz to web/public/models (run from the repo root):
 
-    uv run --project ../aef-tessera-earthwork python web/scripts/export_world_model.py \
-        ../aef-tessera-earthwork/models/model_world.npz web/public/models/world.json
+    uv run python web/scripts/export_world_model.py models/model_world.npz web/public/models/world.json
 """
 import json
 import sys

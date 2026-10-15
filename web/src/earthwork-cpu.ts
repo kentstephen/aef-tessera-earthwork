@@ -8,7 +8,7 @@ export const LAYERS: LayerKind[] = ["aggregate", "aef", "tessera"];
 export type Model = { w: number[]; b: number };
 
 /**
- * The world recipe (aef-tessera-earthwork, models/model_world.npz): a logistic
+ * The world recipe (models/model_world.npz): a logistic
  * regression per layer on [b, a, a*b, (a-b)^2] of unit vectors (the aggregate's
  * 768 weights take AlphaEarth's 256 then TESSERA's 512), TESSERA's gate bounds,
  * and each layer's cutoff (60% of held-out digging found).
