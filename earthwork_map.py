@@ -18,7 +18,7 @@
 #     "pmtiles",
 #     "mapbox-vector-tile",
 #     "scipy",
-#     "scikit-learn",
+#     "scikit-learn==1.9.1",
 #     "shapely>=2",
 #     "rasterio",
 #     "requests",
@@ -196,6 +196,7 @@ def _(mo):
     | `-` `=` | the window's first year, earlier, later |
     | `_` `+` | the window's last year, earlier, later |
     | `M` | the layer: Aggregate, AEF, TESSERA |
+    | `G` | the structure gate off or on: ground a structure stood on both years is not lit (from zoom 13.2) |
     | `L` | place names on the map, off and on |
     | `/` | search a place, or paste an H3 string |
     | `X` | fill the window, and back |
@@ -275,6 +276,8 @@ def _(os, tempfile):
     # Wildwood, Florida: The Villages grading new neighborhoods out of farmland. Zoom 13.3, past 13.2 where the
     # 10 m reads (and so TESSERA) begin, so all three layers have something from the start
     HOME = {"longitude": -81.989804, "latitude": 28.751057, "zoom": 13.3}
+    # the structure gate's model (structures.py, under models/)
+    STRUCTURE_MODEL = "structure_hgb_small.pkl"
 
     # how long a still press takes to become a hold, and how far the pointer
     # may drift before it counts as a pan instead
@@ -340,6 +343,7 @@ def _(os, tempfile):
         S2_YEARS,
         S3_OPTS,
         SETTLE,
+        STRUCTURE_MODEL,
         VIEW_H,
         VIEW_W,
         VIRIDIS,
@@ -437,6 +441,7 @@ def _(
     ObjectStore,
     S3Store,
     S3_OPTS,
+    STRUCTURE_MODEL,
     source_coop,
     Transformer,
     Window,
@@ -699,6 +704,49 @@ def _(
         emb = await _mosaic(_ti[year], y0, y1, x0, x1)
         return emb, AEF_X0 + x0 * AEF_RES, AEF_Y0 - y0 * AEF_RES, AEF_RES
 
+    # THE STRUCTURE GATE (FINDINGS 28): from the 10 m mosaic, the chance that a structure stands on each pixel,
+    # from its 64 values and the mean of its 3 x 3 (structures.py's boosted trees, taught on Overture footprints
+    # in 26 city squares; pickled, so scikit-learn is pinned to the version that wrote it). It is folded with the
+    # embeddings, and a finer cell that stands in both years is not lit (build_frame): a roof painted, a block
+    # whose radar changed. Only where the mosaic is read (from zoom 13.2): the COG overviews have no 3 x 3 at 10 m
+    import pickle
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", STRUCTURE_MODEL), "rb") as _f:
+        _sm = pickle.load(_f)
+    _SM, STAND = _sm["model"], float(_sm["stand"])
+
+    def _stand(emb):
+        """(h, w) float32: the chance a structure stands on each pixel of a (64, h, w) int8 window, NaN no data."""
+        from scipy.ndimage import uniform_filter
+        _, h, w = emb.shape
+        out = np.full((h, w), np.nan, np.float32)
+        for r0 in range(0, h, 256):  # row bands, a row either side for the 3 x 3: the features never sit whole
+            a, b = max(r0 - 1, 0), min(r0 + 257, h)
+            V = emb[:, a:b].astype(np.float32)
+            V = np.sign(V) * (V / 127.5) ** 2
+            V /= np.maximum(np.linalg.norm(V, axis=0), 1e-9)
+            M = uniform_filter(V, size=(1, 3, 3), mode="nearest")
+            k0, k1 = r0 - a, r0 - a + min(256, h - r0)
+            F = np.concatenate([V[:, k0:k1], M[:, k0:k1]]).reshape(128, -1).T
+            out[r0:r0 + k1 - k0] = _SM.predict_proba(F)[:, 1].astype(np.float32).reshape(k1 - k0, w)
+        out[emb[0] == AEF_NODATA] = np.nan
+        return out
+
+    def _fold_stand(res, box, P, lat, lon, cells):
+        """The mean structure chance per cell of a fold (its sorted cells), NaN where no pixel fell."""
+        from h3ronpy.vector import coordinates_to_cells
+        W_, S_, E_, N_ = box
+        out = np.full(len(cells), np.nan, np.float32)
+        m = np.isfinite(P) & (lon >= W_) & (lon < E_) & (lat >= S_) & (lat < N_)
+        if not len(cells) or not m.any():
+            return out
+        c = np.asarray(coordinates_to_cells(lat[m], lon[m], res)).astype(np.uint64)
+        i = np.clip(np.searchsorted(cells, c), 0, len(cells) - 1)
+        hit = cells[i] == c
+        n = np.bincount(i[hit], minlength=len(cells))
+        sm = np.bincount(i[hit], P[m][hit], len(cells))
+        out[n > 0] = (sm[n > 0] / n[n > 0]).astype(np.float32)
+        return out
+
     async def aef_fold(box, res, year, read_res=None):
         """Mean AlphaEarth vector per res cell over the box for one year, from
         the source that suits read_res (default res): a finer res than the
@@ -717,7 +765,9 @@ def _(
 
             def _fold_mosaic():
                 LON, LAT = np.meshgrid(lon, lat)
-                return _compact(_fold_rows_sync(res, box, emb.reshape(64, -1), LAT.ravel(), LON.ravel()))
+                out = _compact(_fold_rows_sync(res, box, emb.reshape(64, -1), LAT.ravel(), LON.ravel()))
+                out["S"] = _fold_stand(res, box, _stand(emb).ravel(), LAT.ravel(), LON.ravel(), out["cell"])
+                return out
 
             # RES 13 THE OTHER WAY ROUND: a 10 m pixel holds about 2.3 res 13 cells, so folding
             # pixel centers leaves most res 13 cells empty (dots with gaps). Every res 13 cell in
@@ -738,7 +788,7 @@ def _(
                 nrm = np.linalg.norm(V, axis=1)
                 V /= np.maximum(nrm, 1e-9)[:, None]
                 V[bad | (nrm == 0)] = np.nan
-                return {"cell": cells[ok], "V": V}
+                return {"cell": cells[ok], "V": V, "S": _stand(emb)[r[ok], c[ok]]}
 
             if res >= 13:
                 _fold_mosaic = _fold_centers  # noqa: F811
@@ -777,7 +827,7 @@ def _(
             + (f" · {len(bad)} files failed ({type(bad[0]).__name__})" if bad else "")
         )
 
-    return aef_fold, aef_window
+    return STAND, aef_fold, aef_window
 
 
 @app.cell
@@ -1568,7 +1618,7 @@ def _(ADMIN_PQ, HOME, duckdb):
 
 
 @app.cell
-def _(change_resolution, np, os, pa):
+def _(STAND, change_resolution, np, os, pa):
     # ---- a FRAME: the three layers between the window's first and last year ------------------------------------
     # CARRY THE PEAK: the years arrive folded at a finer res than the hexagons (about a pixel of the
     # read per finer cell). Every finer cell is scored, and each hexagon takes its highest-scoring
@@ -1637,37 +1687,53 @@ def _(change_resolution, np, os, pa):
         base = aef_by_year[y0]["cell"]
         nfine = len(base)
         t = aef_by_year[y1]
+        S0, Sl = aef_by_year[y0].get("S"), t.get("S")
         if t["cell"] is base:
             Vl = t["V"]
         else:
             Vl = np.full((nfine, 64), np.nan, np.float32)
+            if Sl is not None:
+                Sl, S_ = np.full(nfine, np.nan, np.float32), Sl
             if len(t["cell"]):
                 pos = np.clip(np.searchsorted(t["cell"], base), 0, len(t["cell"]) - 1)
                 m_ = t["cell"][pos] == base
                 Vl[m_] = t["V"][pos[m_]]
+                if Sl is not None:
+                    Sl[m_] = S_[pos[m_]]
         par = pa.array(change_resolution(base, res)).to_numpy(zero_copy_only=False).astype(np.uint64)
         cellid = np.unique(par)
         n = len(cellid)
         hix = np.searchsorted(cellid, par)
         T = tes_at(base) if tes_at is not None else None
-        fine = score_layers(aef_by_year[y0]["V"], Vl, T)
-        earth = {}
-        for k, v in fine.items():
-            e = np.full(n, -1.0, np.float32)
-            ok = np.isfinite(v)
-            if n and ok.any():
-                np.maximum.at(e, hix[ok], v[ok])
-            earth[k] = np.where(e >= 0, e, np.nan).astype(np.float32)
+        raw = score_layers(aef_by_year[y0]["V"], Vl, T)
+        # the structure gate: a finer cell whose structure chance is STAND or more both years (FINDINGS 28) scores 0 in every layer (still scored, so drawn
+        # nowhere and its hexagon takes its other cells' peak). Kept ungated too, for the G key
+        stood = (np.nan_to_num(S0, nan=0.0) >= STAND) & (np.nan_to_num(Sl, nan=0.0) >= STAND) if S0 is not None and Sl is not None else None
+        fine = {k: np.where(stood & np.isfinite(v), 0.0, v).astype(np.float32) for k, v in raw.items()} if stood is not None else raw
+
+        def peaks(sc):
+            out_ = {}
+            for k, v in sc.items():
+                e = np.full(n, -1.0, np.float32)
+                ok = np.isfinite(v)
+                if n and ok.any():
+                    np.maximum.at(e, hix[ok], v[ok])
+                out_[k] = np.where(e >= 0, e, np.nan).astype(np.float32)
+            return out_
+
+        earth = peaks(fine)
+        earth_raw = peaks(raw) if stood is not None else earth
         nkids = np.bincount(hix, minlength=n).astype(np.int32)
         scored = np.isfinite(earth["aggregate"])
         tes_n = int(np.isfinite(earth["tessera"]).sum())
         cells = pa.table({"cell": pa.array(cellid), "finer_cells": pa.array(nkids),
                           **{k: pa.array(v) for k, v in earth.items()}})
         return {
-            "cells": cells, "cellid": cellid, "res": res, "earth": earth, "years": [y0, y1], "y0": y0, "y1": y1,
-            "tes": T is not None,
+            "cells": cells, "cellid": cellid, "res": res, "earth": earth, "earth_raw": earth_raw, "years": [y0, y1], "y0": y0, "y1": y1,
+            "tes": T is not None, "stood": float(stood.mean()) if stood is not None and nfine else None,
             "score": f"{y0} to {y1}: {int(scored.sum()):,} of {n:,} hexagons scored, {tes_n:,} with TESSERA, "
-                     f"peak of {nfine:,} finer cells",
+                     f"peak of {nfine:,} finer cells"
+                     + (f", {100 * stood.mean():.0f}% of them standing both years (gated)" if stood is not None and nfine else ""),
         }
 
     return CUTS, LAYERS, build_frame
@@ -2475,6 +2541,7 @@ def _(anywidget, asyncio, time, traitlets):
               <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; <kbd>[</kbd> <kbd>]</kbd> step its year.</li>
               <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
               <li><b>Layer</b> in the Earthwork card: Aggregate (both joined), AEF or TESSERA; <kbd>M</kbd> switches them. Aggregate and TESSERA come in from zoom 13.2; zoomed out, AEF alone (the other two grayed out). <b>AEF Years</b> are the years compared.</li>
+              <li><b>Structure gate</b> (<kbd>G</kbd>, on to start): from zoom 13.2, ground where AlphaEarth reads a structure standing in both years is not lit, in every layer: a roof painted white, a city block whose radar changed. Taught on Overture's building footprints; it hides almost no digging at the lidar sites.</li>
               <li>Earthwork shows from zoom ${HEXZ} in. <kbd>/</kbd> searches a place.</li>
             </ul>
             <p><small><kbd>?</kbd> has everything else. The code: <a href="https://github.com/kentstephen/aef-tessera-earthwork" target="_blank" rel="noopener">aef-tessera-earthwork</a> on GitHub.</small></p>
@@ -3456,6 +3523,10 @@ def _(anywidget, asyncio, time, traitlets):
             else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }
             else if (k === "l" || k === "L") { st.labels = !st.labels; labels(st.labels); swLab.sty(); }
             else if (k === "x" || k === "X") { st.fit = !st.fit; sizes(); }
+            else if (k === "g" || k === "G") {
+              st.gate = st.gate === false; send("gate", {on: st.gate});
+              note(st.gate ? "Structure gate on: ground a structure stood on both years is not lit (from zoom 13.2)" : "Structure gate off: every finer cell scored as read", 3500);
+            }
             else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === st.s2comp); setComp(COMPS[(i + 1) % COMPS.length][0]); }
             else if ((k === "m" || k === "M") && MODELS.length > 1) {
               // only the layers the zoom allows: zoomed out past TESSERA's zoom that is AEF alone
@@ -3781,7 +3852,7 @@ def _(
         fr = HOLD["frame"]
         if fr is None or HOLD["sent"] is fr:
             return
-        ew = fr["earth"][HOLD.get("model", "aggregate")]
+        ew = fr["earth" if HOLD.get("gate", True) else "earth_raw"][HOLD.get("model", "aggregate")]
         eb = np.where(np.isnan(ew), 0, 1 + np.round(254 * np.nan_to_num(ew))).astype(np.uint8)
         at = np.zeros((len(ew), 17), np.uint8)
         at[:, 1], at[:, 8], at[:, 16] = eb, 1, eb
@@ -4119,6 +4190,13 @@ def _(
                 _paint()
                 if HOLD.get("card_pick"):
                     _card_send(HOLD["card_pick"])
+            return
+        if act == "gate":
+            # the structure gate on or off: every frame holds both, so a switch only paints again
+            HOLD["gate"] = bool(c.get("on", True))
+            _cfg(gate=HOLD["gate"])
+            HOLD["sent"] = None
+            _paint()
             return
         if act == "aef":
             a, b = int(c.get("y0", HOLD["y0"])), int(c.get("y1", HOLD["y1"]))

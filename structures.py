@@ -40,7 +40,11 @@ from tessera_sites import AEF_RES, AEF_X0, AEF_Y0
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DIR = os.path.join(HERE, "data", "structures")
-OUT = os.path.join(HERE, "results", "structures.json")
+# MODEL: hgb (200 trees of 63 leaves, as height_ground.py), hgb_small (100 of 31: 0.74 s a million pixels against
+# 1.9, for the map) or lr (a logistic regression: as good held out in the cities, AUC .850 against .856, but it
+# reads a third of the lidar sites as standing both years). The boosted trees are written to models/ for the map
+MODEL = os.environ.get("MODEL", "hgb")
+OUT = os.path.join(HERE, "results", "structures.json" if MODEL == "hgb" else f"structures_{MODEL}.json")
 OVERTURE = "s3://overturemaps-us-west-2/release/2026-09-23.0/theme=buildings/type=building/*"
 SQUARES = list(cities.CITIES) + [n for n in whiteroofs.SQUARES if n not in cities.CITIES]
 NYC = [n for n in whiteroofs.SQUARES]
@@ -83,8 +87,12 @@ def feats(E, shape):
 
 
 def fit(X, y):
+    if MODEL == "lr":
+        from sklearn.linear_model import LogisticRegression
+        return LogisticRegression(C=1.0, max_iter=2000, class_weight="balanced").fit(X, y)
     from sklearn.ensemble import HistGradientBoostingClassifier
-    return HistGradientBoostingClassifier(max_iter=200, learning_rate=0.1, max_leaf_nodes=63, l2_regularization=1.0,
+    it, leaves = (100, 31) if MODEL == "hgb_small" else (200, 63)
+    return HistGradientBoostingClassifier(max_iter=it, learning_rate=0.1, max_leaf_nodes=leaves, l2_regularization=1.0,
                                           class_weight="balanced", random_state=0).fit(X, y)
 
 
@@ -255,6 +263,12 @@ def sites(res=None, rows=None, rec=None):
         rows = {n: teach_rows(n, rng) for n in SQUARES}
     allm = fit(np.concatenate([r[0] for r in rows.values()]), np.concatenate([r[1] for r in rows.values()]))
     del rows
+    if MODEL.startswith("hgb"):  # the map's copy (its scikit-learn pinned to this one's, so the pickle loads)
+        import pickle
+        import sklearn
+        with open(os.path.join(HERE, "models", f"structure_{MODEL}.pkl"), "wb") as f:
+            pickle.dump({"model": allm, "stand": STAND, "sklearn": sklearn.__version__, "release": OVERTURE.split("/")[3],
+                         "features": "the pixel's 64 unit values and the mean of its 3 x 3 (structures.feats)"}, f)
     res["sites"] = {}
     for n in teaching_names():
         if json.loads(str(np.load(f"{HERE}/data/tessera/{n}.npz", allow_pickle=True)["meta"]))["kind"] not in TEACH_KINDS:

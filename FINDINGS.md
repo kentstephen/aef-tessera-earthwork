@@ -1062,6 +1062,16 @@ white roofs out and halves TESSERA's city noise. The soft gate costs real diggin
 (Las Vegas northwest found .59 to .42, Mountain Pass .69 to .57): the reading calls some bright desert and pit
 ground half standing.
 
+On the map (`G`, on to start): the reading has to run on every 10 m pixel the map reads, so a smaller model (100
+trees of 31 leaves, 0.74 s a million pixels against 1.9) was tested the same way: hard gate, aggregate, whitened
+roofs lit .011, US city pixels .006 / .011, sites moved found .684, unlit .026, AP .652, about the full model's. A
+logistic regression, though as good held out in the cities (AUC .850 against .856), reads 28% of the sites' moved
+ground and 32% of their unchanged ground as standing both years (the trees: under 2%), and the hard gate would take
+moved found from .685 to .532: it does not carry from city blocks to suburbs, desert and pits. The map reads the
+small trees (pickled, scikit-learn pinned) where it reads the 10 m mosaic, from zoom 13.2, and a finer cell that
+stands both years scores 0 in every layer. At Wildwood 2% of finer cells stood both years; on the Lower East Side,
+47%, and the scattered block hexagons go while East River Park stays. The read adds about a second a year.
+
 ## Open
 
 - Clearcuts against forest mines, a second stage (section 19): a head taught on cleared-and-dug against

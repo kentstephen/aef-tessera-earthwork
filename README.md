@@ -105,6 +105,7 @@ uv run python cities.py sites    # the 14 digging sites again, about 10 GB at pe
 uv run python heights.py [3dep|copernicus]  # about 5 minutes; heights.py report [3dep|copernicus]
 uv run python heights.py head    # about 8 minutes, 15 GB at peak; heights.py head report
 uv run python structures.py      # about 25 minutes (Overture read once); structures.py sites, structures.py report
+MODEL=hgb_small uv run python structures.py   # the map's structure model, written to models/structure_hgb_small.pkl
 ```
 
 ## The map
@@ -114,6 +115,9 @@ TESSERA joined pixel by pixel), AEF and TESSERA, in H3 hexagons that each carry 
 Earth Genome's Sentinel-2 under a held space bar. AlphaEarth is read from its COG overviews zoomed out and its 10 m
 mosaic from zoom 13.2; TESSERA has no coarser product, so it and the aggregate come in from zoom 13.2. Zoomed out past it the
 map moves to AEF and grays the other two out; zoomed back in, the layer it moved from comes back. The model is `models/model_abroad.npz` (`pyodide_probe/export_model.py`).
+From zoom 13.2 a structure gate (G turns it off and on) leaves unlit any ground where AlphaEarth reads a structure
+standing in both years, in every layer: a roof painted white, a city block whose radar changed (FINDINGS 28). Its
+model is `models/structure_hgb_small.pkl` (`structures.py`), which is why the notebook pins scikit-learn.
 
 ```sh
 uv run marimo run earthwork_map.py --sandbox --watch
@@ -130,6 +134,10 @@ reads every 10 m pixel and is slow (FINDINGS 23).
   the Earthwork cache (Source Cooperative `tge-labs/aef-mosaic`) and, in the notebook, its native COGs
   (`tge-labs/aef`).
 - **USGS 3D Elevation Program (3DEP)** 1 m DEMs (public domain), the labels, through the Earthwork cache.
+- **Overture Maps** building footprints (release 2026-09-23.0; ODbL, with OpenStreetMap contributors and others), the
+  structure gate's teacher.
+- **Mapterhorn** terrain tiles and the **Copernicus DEM** GLO-30 (DLR and Airbus, provided under COPERNICUS by the
+  European Union and ESA), the heights test only.
 - **Global Forest Change** v1.12 (Hansen, Potapov et al., University of Maryland; CC BY 4.0): tree cover loss
   year, tree cover in 2000 and the water mask, to place and group the new ground.
 - **USPVDB** (US Large-Scale Solar Photovoltaic Database, USGS and LBNL; public domain) for the solar arrays;
