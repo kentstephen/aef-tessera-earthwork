@@ -3269,10 +3269,14 @@ def _(anywidget, asyncio, time, traitlets):
             if (ov) ov.setProps({layers: layers()});
             if (ov2) ov2.setProps({layers: layers2()});
           }
+          // place names on the vector basemap only: hidden over the Sentinel-2 imagery (the main map while space
+          // is held, the pair's left map while it shows Sentinel-2), back when the basemap is
           function labels(on) {
             for (const m of [map, map2]) {
               if (!m || !m.isStyleLoaded()) continue;
-              (m.getStyle().layers || []).forEach((l) => { if (l.layout && l.layout["text-field"] !== undefined) m.setLayoutProperty(l.id, "visibility", on ? "visible" : "none"); });
+              const overImagery = m === map ? st.holding : st.pair && st.left === "s2";
+              const vis = on && !overImagery ? "visible" : "none";
+              (m.getStyle().layers || []).forEach((l) => { if (l.layout && l.layout["text-field"] !== undefined && m.getLayoutProperty(l.id, "visibility") !== vis) m.setLayoutProperty(l.id, "visibility", vis); });
             }
           }
 
@@ -3317,7 +3321,7 @@ def _(anywidget, asyncio, time, traitlets):
               map2.jumpTo({center: map.getCenter(), zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch()});
               if (st.left === "s2" && st.s2comp !== "tci") send("s2comp", {comp: st.s2comp});
             }
-            renderYear(); update();
+            labels(st.labels); renderYear(); update();
           }
 
           // ---- hold: the imagery ------------------------------------------------------------
@@ -3347,7 +3351,7 @@ def _(anywidget, asyncio, time, traitlets):
             tip.style.display = "none";
             // false colors are stretched for the view: taken again if this hold is somewhere else
             if (st.s2comp !== "tci") send("s2comp", {comp: st.s2comp});
-            renderYear(); update();
+            labels(st.labels); renderYear(); update();
           }
           function endHold(by) {
             if (by !== "key") { clearTimeout(holdT); holdT = null; holdAt = null; }
@@ -3356,7 +3360,7 @@ def _(anywidget, asyncio, time, traitlets):
             mapEl.classList.remove("holding");
             if (map) map.dragPan.enable();
             wheelAcc = 0;
-            renderYear(); update();
+            labels(st.labels); renderYear(); update();
             if (lastPt && map) showHexTip(lastPt);
           }
           mapEl.addEventListener("pointermove", (e) => {
