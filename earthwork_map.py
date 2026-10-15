@@ -4046,14 +4046,16 @@ def _(
     _AEF_KEEP_BYTES = 512 * 1024 ** 2
     _TES_KEEP_BYTES = 3 * 1024 ** 3
     TENM_MAX_KM2 = 1600
-    # zoomed out with the 10 m reads (read res 9 and 10), the hexagons go this many levels finer than the read
-    # res: the reads are 10 m pixels there, so a finer hexagon still holds many of them
-    ZOOMOUT_UP = 1
+    # with the 10 m reads the hexagons are never coarser than res 11 (about 21 of the 10 m pixels each, 50 m
+    # across), however far out: zoomed out to 10.4 that is as fine as at 13.2, so the paint's mask follows the
+    # ground closely (zoom 11, 1,400 km2: about 650,000 hexagons, 4.5 million res 12 cells)
+    TENM_MIN_RES = 11
 
     def _hres(rres, box):
         """(the 10 m reads?, the hexagons' res) for a read res and its box."""
         tenm = rres >= MOSAIC_MIN_RES and box_km2(box) <= TENM_MAX_KM2
-        return tenm, min(15, rres + HEX_UP + (ZOOMOUT_UP if tenm and rres <= 10 else 0))
+        res = min(15, rres + HEX_UP)
+        return tenm, max(res, TENM_MIN_RES) if tenm else res
 
     def _tbytes(t):
         return sum(a.nbytes for k in ("emb", "ok", "radar") for a in t.get(k, {}).values()) if t and "emb" in t else 0
