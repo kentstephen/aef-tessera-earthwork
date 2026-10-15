@@ -41,9 +41,9 @@ own. FINDINGS.md has how each was tested.
 Only the window's first and last year are read, folded to H3 one level finer than the hexagons
 drawn. Every finer cell is scored and each hexagon takes its highest-scoring finer cell (carry the
 peak), so one dig is not averaged away by the quiet ground around it. AlphaEarth is read from its
-COG overviews zoomed out and its 10 m mosaic from zoom 13.2; TESSERA has no coarser product, so it is
-read at 10 m only, from zoom 13.2, at each finer cell's center pixel. The aggregate is drawn only where
-both were read; zoomed out past 13.2 the map moves to AEF and grays the other two out. Each layer has its own ramp, hidden under its cutoff. Hold
+COG overviews zoomed out and its 10 m mosaic from zoom 11.8; TESSERA has no coarser product, so it is
+read at 10 m only, from zoom 11.8, at each finer cell's center pixel. The aggregate is drawn only where
+both were read; zoomed out past 11.8 the map moves to AEF and grays the other two out. Each layer has its own ramp, hidden under its cutoff. Hold
 space for Earth Genome's Sentinel-2, or P to pair it with the map, to see what each hot spot is.
 Click a hexagon for its score; the place comes from Overture's divisions.
 
@@ -178,7 +178,7 @@ def _(mo):
     filled or graded between the first and last year of the window, taught on
     3DEP repeat lidar, in three layers: Aggregate (AlphaEarth and TESSERA joined
     pixel by pixel), AEF and TESSERA. TESSERA is read at 10 m only, so it and the
-    aggregate come in from zoom 13.2; zoomed out past it the map moves to AEF
+    aggregate come in from zoom 11.8; zoomed out past it the map moves to AEF
     and grays the other two out, and zooming back in brings the layer back.
     Each layer has its own ramp, dark unlikely to light likely (cividis the
     aggregate, viridis AEF, plasma TESSERA); the Show slider in the Earthwork
@@ -196,7 +196,7 @@ def _(mo):
     | `-` `=` | the window's first year, earlier, later |
     | `_` `+` | the window's last year, earlier, later |
     | `M` | the layer: Aggregate, AEF, TESSERA |
-    | `G` | the structure gate off or on: ground a structure stood on both years is not lit (from zoom 13.2) |
+    | `G` | the structure gate off or on: ground a structure stood on both years is not lit (from zoom 11.8) |
     | `L` | place names on the map, off and on |
     | `/` | search a place, or paste an H3 string |
     | `X` | fill the window, and back |
@@ -231,7 +231,8 @@ def _(os, tempfile):
     ZOOM0, PER_RES, BASE_RES = 6.2, 1.4, 6
     MIN_RES, MAX_RES = 5, 13
     CELL_BUDGET = 800_000
-    MOSAIC_MIN_RES = 11
+    # from res 10 (zoom 11.8) AlphaEarth is read from its 10 m mosaic, and TESSERA (10 m only) with it
+    MOSAIC_MIN_RES = 10
     AEF_LEVEL_FOR_RES = {5: 7, 6: 7, 7: 5, 8: 4, 9: 3, 10: 1}
     AEF_MAX_FILES = 2500
 
@@ -273,7 +274,7 @@ def _(os, tempfile):
     HEX_ZOOM = 9.0
     LABELS_SLOT = "watername_ocean"
     RASTER_TILE = 256
-    # Wildwood, Florida: The Villages grading new neighborhoods out of farmland. Zoom 13.3, past 13.2 where the
+    # Wildwood, Florida: The Villages grading new neighborhoods out of farmland. Zoom 13.3, past 11.8 where the
     # 10 m reads (and so TESSERA) begin, so all three layers have something from the start
     HOME = {"longitude": -81.989804, "latitude": 28.751057, "zoom": 13.3}
     # the structure gate's model (structures.py, under models/)
@@ -708,7 +709,7 @@ def _(
     # from its 64 values and the mean of its 3 x 3 (structures.py's boosted trees, taught on Overture footprints
     # in 26 city squares; pickled, so scikit-learn is pinned to the version that wrote it). It is folded with the
     # embeddings, and a finer cell that stands in both years is not lit (build_frame): a roof painted, a block
-    # whose radar changed. Only where the mosaic is read (from zoom 13.2): the COG overviews have no 3 x 3 at 10 m
+    # whose radar changed. Only where the mosaic is read (from zoom 11.8): the COG overviews have no 3 x 3 at 10 m
     import pickle
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", STRUCTURE_MODEL), "rb") as _f:
         _sm = pickle.load(_f)
@@ -846,7 +847,9 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
 
     TES_ROOT = "tessera/tessera/zarr/v1.1-dclimate"
     TES_YEARS = range(2017, 2026)
-    TES_MAX_KM2 = 400  # past this the box is too big to read at 10 m quickly: no TESSERA
+    # past this the box is too big to read at 10 m in reasonable time: no TESSERA. A zoom 11.8 view in a 2560 x 1440
+    # window is about 1,550 km2 (15 Mpx a year, 2 GB of embeddings each)
+    TES_MAX_KM2 = 1600
     _tstore = source_coop(**S3_OPTS)
     _tsem = asyncio.Semaphore(64)
     _SH, _IN = 4096, 32
@@ -2290,14 +2293,14 @@ def _(anywidget, asyncio, time, traitlets):
           // words under them; M switches them. Every frame holds all three, so a switch draws at once
           const MODELS = cfg.ew_models || ["aggregate"];
           const MODEL_INFO = {
-            aggregate: ["Aggregate", "AlphaEarth and TESSERA joined pixel by pixel, only where both are read at 10 m: from zoom 13.2."],
-            aef: ["AEF", "AlphaEarth's own model, muted where AlphaEarth barely changed. The only layer zoomed out past 13.2."],
-            tessera: ["TESSERA", "TESSERA's own model. From zoom 13.2 only: TESSERA is read at 10 m, it has no coarser product."],
+            aggregate: ["Aggregate", "AlphaEarth and TESSERA joined pixel by pixel, only where both are read at 10 m: from zoom 11.8."],
+            aef: ["AEF", "AlphaEarth's own model, muted where AlphaEarth barely changed. The only layer zoomed out past 11.8."],
+            tessera: ["TESSERA", "TESSERA's own model. From zoom 11.8 only: TESSERA is read at 10 m, it has no coarser product."],
           };
           // TESSERA is read at 10 m only: out from tes_zoom it is not read, so its layer and the aggregate have
           // nothing to draw. Zoomed out past it the map moves to AEF and the other two gray out; zoomed back in,
           // the layer it moved from comes back (unless another was picked meanwhile)
-          const TESZ = cfg.tes_zoom || 13.2;
+          const TESZ = cfg.tes_zoom || 11.8;
           const needsTes = (k) => k !== "aef";
           // (map is made further down: before it is, nothing is out)
           const tesOut = () => { try { return !!map && map.getZoom() < TESZ; } catch (e) { return false; } };
@@ -2523,7 +2526,7 @@ def _(anywidget, asyncio, time, traitlets):
           const about = el_("div", "at-about");
           about.innerHTML = `<div class="box at-glass">
             <h2>Earthwork</h2>
-            <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read, taught where 3DEP lidar flew the same ground twice. Three layers (M switches them): <b>Aggregate</b>, one model on AlphaEarth and TESSERA joined pixel by pixel; <b>AEF</b>, AlphaEarth's own; <b>TESSERA</b>, TESSERA's own. TESSERA is read at 10 m only (it has no coarser product), so it and the aggregate come in from zoom 13.2; zoomed out past it the map moves to AEF and the other two gray out, and zoomed back in the layer you had comes back. Each hexagon shows its highest-scoring finer cell, so a single dig stands out. Pair (P) with Sentinel-2 to see what it is.</p>
+            <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read, taught where 3DEP lidar flew the same ground twice. Three layers (M switches them): <b>Aggregate</b>, one model on AlphaEarth and TESSERA joined pixel by pixel; <b>AEF</b>, AlphaEarth's own; <b>TESSERA</b>, TESSERA's own. TESSERA is read at 10 m only (it has no coarser product), so it and the aggregate come in from zoom 11.8; zoomed out past it the map moves to AEF and the other two gray out, and zoomed back in the layer you had comes back. Each hexagon shows its highest-scoring finer cell, so a single dig stands out. Pair (P) with Sentinel-2 to see what it is.</p>
             <p>Earthwork is drawn in H3 hexagons from zoom ${HEXZ}. <b>Click</b> a hexagon for its account.</p>
             <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the hexagons; scroll while holding to step through the years.</p>
             <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest, C its colors; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); X fill the window; Esc close.</small></p>
@@ -2544,8 +2547,8 @@ def _(anywidget, asyncio, time, traitlets):
               <li><b>Click</b> a hexagon: where it is, its H3 string and center to copy, and its score.</li>
               <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; <kbd>[</kbd> <kbd>]</kbd> step its year.</li>
               <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
-              <li><b>Layer</b> in the Earthwork card: Aggregate (both joined), AEF or TESSERA; <kbd>M</kbd> switches them. Aggregate and TESSERA come in from zoom 13.2; zoomed out, AEF alone (the other two grayed out). <b>AEF Years</b> are the years compared.</li>
-              <li><b>Structure gate</b> (<kbd>G</kbd>, on to start): from zoom 13.2, ground where AlphaEarth reads a structure standing in both years is not lit, in every layer: a roof painted white, a city block whose radar changed. Taught on Overture's building footprints; it hides almost no digging at the lidar sites.</li>
+              <li><b>Layer</b> in the Earthwork card: Aggregate (both joined), AEF or TESSERA; <kbd>M</kbd> switches them. Aggregate and TESSERA come in from zoom 11.8; zoomed out, AEF alone (the other two grayed out). <b>AEF Years</b> are the years compared.</li>
+              <li><b>Structure gate</b> (<kbd>G</kbd>, on to start): from zoom 11.8, ground where AlphaEarth reads a structure standing in both years is not lit, in every layer: a roof painted white, a city block whose radar changed. Taught on Overture's building footprints; it hides almost no digging at the lidar sites.</li>
               <li>Earthwork shows from zoom ${HEXZ} in. <kbd>/</kbd> searches a place.</li>
             </ul>
             <p><small><kbd>?</kbd> has everything else. The code: <a href="https://github.com/kentstephen/aef-tessera-earthwork" target="_blank" rel="noopener">aef-tessera-earthwork</a> on GitHub.</small></p>
@@ -3621,7 +3624,7 @@ def _(anywidget, asyncio, time, traitlets):
             else if (k === "x" || k === "X") { st.fit = !st.fit; sizes(); }
             else if (k === "g" || k === "G") {
               st.gate = st.gate === false; send("gate", {on: st.gate});
-              note(st.gate ? "Structure gate on: ground a structure stood on both years is not lit (from zoom 13.2)" : "Structure gate off: every finer cell scored as read", 3500);
+              note(st.gate ? "Structure gate on: ground a structure stood on both years is not lit (from zoom 11.8)" : "Structure gate off: every finer cell scored as read", 3500);
             }
             else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === st.s2comp); setComp(COMPS[(i + 1) % COMPS.length][0]); }
             else if ((k === "m" || k === "M") && MODELS.length > 1) {
@@ -3766,7 +3769,7 @@ def _(mo):
 
     **One read per view.** AlphaEarth's first and last year of the window
     are read for what is in view: an overview of the annual COGs zoomed out,
-    the 10 m mosaic from about zoom 13.2. Each pixel's lon/lat goes through
+    the 10 m mosaic from about zoom 11.8. Each pixel's lon/lat goes through
     an h3ronpy UDF inside DataFusion (via xarray-sql) and the pixels are
     averaged per cell, one level finer than the hexagons drawn.
 
@@ -3962,6 +3965,7 @@ def _(
         HOLD["sent"] = fr
 
     _AEF_KEEP_BYTES = 512 * 1024 ** 2
+    _TES_KEEP_BYTES = 3 * 1024 ** 3
 
     def _trim(bkey=None):
         # the kept folds: AlphaEarth's by bytes (a year in a 2x box at zoom
@@ -4021,7 +4025,10 @@ def _(
                 HOLD["aef"][(y, bkey)] = r
             if rres >= MOSAIC_MIN_RES:
                 HOLD["tes"][tkey] = tw
-                while len(HOLD["tes"]) > 3:
+                # held by size, not count: a zoom 12 window is several times a zoom 13 one
+                def _tbytes(t):
+                    return sum(a.nbytes for k in ("emb", "ok", "radar") for a in (t or {}).get(k, {}).values()) if t else 0
+                while len(HOLD["tes"]) > 1 and sum(_tbytes(t) for t in HOLD["tes"].values()) > _TES_KEEP_BYTES:
                     HOLD["tes"].pop(next(iter(HOLD["tes"])))
             _trim(bkey)
             # zoomed or moved on while these were read (a fast zoom in): they
@@ -4051,7 +4058,7 @@ def _(
                     continue
                 m_ = re.search(r"([\d.]+) s · fold [\d,]+ ([\d.]+) s", HOLD["aef"][(y, bkey)][1] or "")
                 _rd.append(f"{y} c" if y not in need else f"{y} {m_.group(1)}+{m_.group(2)} s" if m_ else f"{y} ?")
-            tes_s = (tw["status"] if tes_ok else tw["error"] if tw else "TESSERA from zoom 13.2 (10 m only)")
+            tes_s = (tw["status"] if tes_ok else tw["error"] if tw else "TESSERA from zoom 11.8 (10 m only)")
             stats = (
                 f"read res {rres}, hexagons res {res}, peak of res {fres} | AEF read+fold {', '.join(_rd)} "
                 f"| {tes_s} (all {t1 - t0:.1f} s) | frame {time.time() - t1:.1f} s"
