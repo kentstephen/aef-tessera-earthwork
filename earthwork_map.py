@@ -41,9 +41,9 @@ own. FINDINGS.md has how each was tested.
 Only the window's first and last year are read, folded to H3 one level finer than the hexagons
 drawn. Every finer cell is scored and each hexagon takes its highest-scoring finer cell (carry the
 peak), so one dig is not averaged away by the quiet ground around it. AlphaEarth is read from its
-COG overviews zoomed out and its 10 m mosaic from zoom 11.8; TESSERA has no coarser product, so it is
-read at 10 m only, from zoom 11.8, at each finer cell's center pixel. The aggregate is drawn only where
-both were read; zoomed out past 11.8 the map moves to AEF and grays the other two out. Each layer has its own ramp, hidden under its cutoff. Hold
+COG overviews zoomed out and its 10 m mosaic from zoom 10.4; TESSERA has no coarser product, so it is
+read at 10 m only, from zoom 10.4, at each finer cell's center pixel. The aggregate is drawn only where
+both were read; zoomed out past 10.4 the map moves to AEF and grays the other two out. Each layer has its own ramp, hidden under its cutoff. Hold
 space for Earth Genome's Sentinel-2, or P to pair it with the map, to see what each hot spot is.
 Click a hexagon for its score; the place comes from Overture's divisions.
 
@@ -178,7 +178,7 @@ def _(mo):
     filled or graded between the first and last year of the window, taught on
     3DEP repeat lidar, in three layers: Aggregate (AlphaEarth and TESSERA joined
     pixel by pixel), AEF and TESSERA. TESSERA is read at 10 m only, so it and the
-    aggregate come in from zoom 11.8; zoomed out past it the map moves to AEF
+    aggregate come in from zoom 10.4; zoomed out past it the map moves to AEF
     and grays the other two out, and zooming back in brings the layer back.
     Each layer has its own ramp, dark unlikely to light likely (cividis the
     aggregate, viridis AEF, plasma TESSERA); the Show slider in the Earthwork
@@ -196,7 +196,7 @@ def _(mo):
     | `-` `=` | the window's first year, earlier, later |
     | `_` `+` | the window's last year, earlier, later |
     | `M` | the layer: Aggregate, AEF, TESSERA |
-    | `G` | the structure gate off or on: ground a structure stood on both years is not lit (from zoom 11.8) |
+    | `G` | the structure gate off or on: ground a structure stood on both years is not lit (from zoom 10.4) |
     | `L` | place names on the map, off and on |
     | `/` | search a place, or paste an H3 string |
     | `X` | fill the window, and back |
@@ -231,8 +231,9 @@ def _(os, tempfile):
     ZOOM0, PER_RES, BASE_RES = 6.2, 1.4, 6
     MIN_RES, MAX_RES = 5, 13
     CELL_BUDGET = 800_000
-    # from res 10 (zoom 11.8) AlphaEarth is read from its 10 m mosaic, and TESSERA (10 m only) with it
-    MOSAIC_MIN_RES = 10
+    # from res 9 (zoom 10.4) AlphaEarth is read from its 10 m mosaic, and TESSERA (10 m only) with it, for views up to
+    # 1,600 km2 (TENM_MAX_KM2 in the wiring; past it, AlphaEarth's COG overviews and no TESSERA)
+    MOSAIC_MIN_RES = 9
     AEF_LEVEL_FOR_RES = {5: 7, 6: 7, 7: 5, 8: 4, 9: 3, 10: 1}
     AEF_MAX_FILES = 2500
 
@@ -274,7 +275,7 @@ def _(os, tempfile):
     HEX_ZOOM = 9.0
     LABELS_SLOT = "watername_ocean"
     RASTER_TILE = 256
-    # Wildwood, Florida: The Villages grading new neighborhoods out of farmland. Zoom 12.5, past 11.8 where the
+    # Wildwood, Florida: The Villages grading new neighborhoods out of farmland. Zoom 12.5, past 10.4 where the
     # 10 m reads (and so TESSERA) begin, so all three layers have something from the start
     HOME = {"longitude": -81.989804, "latitude": 28.751057, "zoom": 12.5}
     # the structure gate's model (structures.py, under models/)
@@ -709,7 +710,7 @@ def _(
     # from its 64 values and the mean of its 3 x 3 (structures.py's boosted trees, taught on Overture footprints
     # in 26 city squares; pickled, so scikit-learn is pinned to the version that wrote it). It is folded with the
     # embeddings, and a finer cell that stands in both years is not lit (build_frame): a roof painted, a block
-    # whose radar changed. Only where the mosaic is read (from zoom 11.8): the COG overviews have no 3 x 3 at 10 m
+    # whose radar changed. Only where the mosaic is read (from zoom 10.4): the COG overviews have no 3 x 3 at 10 m
     import pickle
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", STRUCTURE_MODEL), "rb") as _f:
         _sm = pickle.load(_f)
@@ -748,7 +749,7 @@ def _(
         out[n > 0] = (sm[n > 0] / n[n > 0]).astype(np.float32)
         return out
 
-    async def aef_fold(box, res, year, read_res=None):
+    async def aef_fold(box, res, year, read_res=None, mosaic=None):
         """Mean AlphaEarth vector per res cell over the box for one year, from
         the source that suits read_res (default res): a finer res than the
         read's own gives cells of about a pixel each (the carried peak).
@@ -756,7 +757,7 @@ def _(
         t0 = time.time()
         W_, S_, E_, N_ = box
         rr = res if read_res is None else read_res
-        if rr >= MOSAIC_MIN_RES:
+        if (rr >= MOSAIC_MIN_RES) if mosaic is None else mosaic:
             x0, x1 = int((W_ - AEF_X0) / AEF_RES), int((E_ - AEF_X0) / AEF_RES)
             y0, y1 = int((AEF_Y0 - N_) / AEF_RES), int((AEF_Y0 - S_) / AEF_RES)
             emb = await _mosaic(_ti[year], y0, y1, x0, x1)
@@ -796,7 +797,7 @@ def _(
 
             out = await cpu(_fold_mosaic)
             return out, f"AEF {year} mosaic {t1 - t0:.1f} s · fold {len(out['cell']):,} {time.time() - t1:.1f} s"
-        li = AEF_LEVEL_FOR_RES[rr]
+        li = AEF_LEVEL_FOR_RES[min(rr, 10)]
         ix = _IDX[year]
         hit = np.where(
             (ix["wgs84_east"] > W_) & (ix["wgs84_west"] < E_) & (ix["wgs84_north"] > S_) & (ix["wgs84_south"] < N_)
@@ -847,8 +848,8 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
 
     TES_ROOT = "tessera/tessera/zarr/v1.1-dclimate"
     TES_YEARS = range(2017, 2026)
-    # past this the box is too big to read at 10 m in reasonable time: no TESSERA. A zoom 11.8 view in a 2560 x 1440
-    # window is about 1,550 km2 (15 Mpx a year, 2 GB of embeddings each)
+    # past this the box is too big to read at 10 m: no TESSERA (the same as TENM_MAX_KM2 in the wiring). A zoom 11 view
+    # in a 1400 x 900 window is about 1,400 km2: 77 s to read, the kernel's peak 24.5 GB (measured at Wildwood)
     TES_MAX_KM2 = 1600
     _tstore = source_coop(**S3_OPTS)
     _tsem = asyncio.Semaphore(64)
@@ -2212,7 +2213,10 @@ def _(anywidget, asyncio, time, traitlets):
           const HEXZ = cfg.hex_zoom || 9, HOLD_MS = cfg.hold_ms || 200, SLOP = cfg.hold_slop || 5;
           const st = {
             gmode: "earth", want: "earth", noPick: false, hideKinds: new Set(), focus: "all", y0: cfg.aef_from || 2022, y1: cfg.aef_to || 2025,
-            imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: true, s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
+            imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: (() => { try { return ["all", "cities", "major", "off"].includes(localStorage.getItem("ew-names")) ? localStorage.getItem("ew-names") : "cities"; } catch (e) { return "cities"; } })(),
+            s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
+            // the paint's own imagery colors (C while painting); s2comp is the plain imagery's (space, the pair's left)
+            paintComp: cfg.paint_comp || "blueyellow",
             fit: !!cfg.fit, holding: false,
             // the paint (I): Sentinel-2 is the map, gray but for the lit hexagons, which keep its colors
             paint: cfg.paint !== false,
@@ -2293,14 +2297,14 @@ def _(anywidget, asyncio, time, traitlets):
           // words under them; M switches them. Every frame holds all three, so a switch draws at once
           const MODELS = cfg.ew_models || ["aggregate"];
           const MODEL_INFO = {
-            aggregate: ["Aggregate", "AlphaEarth and TESSERA joined pixel by pixel, only where both are read at 10 m: from zoom 11.8."],
-            aef: ["AEF", "AlphaEarth's own model, muted where AlphaEarth barely changed. The only layer zoomed out past 11.8."],
-            tessera: ["TESSERA", "TESSERA's own model. From zoom 11.8 only: TESSERA is read at 10 m, it has no coarser product."],
+            aggregate: ["Aggregate", "AlphaEarth and TESSERA joined pixel by pixel, only where both are read at 10 m: from zoom 10.4."],
+            aef: ["AEF", "AlphaEarth's own model, muted where AlphaEarth barely changed. The only layer zoomed out past 10.4."],
+            tessera: ["TESSERA", "TESSERA's own model. From zoom 10.4 only: TESSERA is read at 10 m, it has no coarser product."],
           };
           // TESSERA is read at 10 m only: out from tes_zoom it is not read, so its layer and the aggregate have
           // nothing to draw. Zoomed out past it the map moves to AEF and the other two gray out; zoomed back in,
           // the layer it moved from comes back (unless another was picked meanwhile)
-          const TESZ = cfg.tes_zoom || 11.8;
+          const TESZ = cfg.tes_zoom || 10.4;
           const needsTes = (k) => k !== "aef";
           // (map is made further down: before it is, nothing is out)
           const tesOut = () => { try { return !!map && map.getZoom() < TESZ; } catch (e) { return false; } };
@@ -2507,12 +2511,41 @@ def _(anywidget, asyncio, time, traitlets):
           // the Sentinel-2 card's second line
           const COMP_SHORT = {tci: "true color", urban: "urban", blueyellow: "blue-yellow"};
           const compBox = el_("div");
-          const styleComp = segOf(compBox, COMPS.map(([k, l, t]) => [k, l, t, ""]), (k) => k === st.s2comp, (k) => setComp(k));
-          // new colors are new tiles: the year shown loads alone first again (s2Warm)
-          function setComp(k) { st.s2comp = k; s2Warm = false; send("s2comp", {comp: k}); styleComp(); renderYear(); }
+          // the colors drawn on a map: the paint's on the main map while painting (not holding space), the plain
+          // imagery's otherwise and on the pair's left
+          const compOf = (left = false) => (!left && st.paint && !st.holding ? st.paintComp : st.s2comp);
+          const styleComp = segOf(compBox, COMPS.map(([k, l, t]) => [k, l, t, ""]), (k) => k === compOf(), (k) => setComp(k));
+          // the false colors wait for the kernel's stretch of their view: asked when the colors shown have none.
+          // (the kernel holds one stretch, so true color asks for none and never takes the paint's away)
+          const stretchFor = (c) => { if (c !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === c)) send("s2comp", {comp: c}); };
+          // new colors are new tiles: the year shown loads alone first again (s2Warm). C sets the colors of the view
+          // shown: the paint's while painting, the plain imagery's while holding space
+          function setComp(k) {
+            if (st.paint && !st.holding) st.paintComp = k; else st.s2comp = k;
+            s2Warm = false;
+            if (k !== "tci") send("s2comp", {comp: k}); else if (!S2GPU) send("s2comp", {comp: k});
+            styleComp(); renderYear(); update();
+          }
           item("Imagery colors", "<kbd>C</kbd> steps them", compBox);
-          const swLab = sw(() => st.labels, (v) => { st.labels = v; labels(v); });
-          item("Place names", "<kbd>L</kbd>", swLab);
+          // PLACE NAMES (L), fewer or more: CARTO puts each kind of place in its own symbol layer, so a setting keeps
+          // some layers' names and hides the rest. All; Cities (cities, states, countries and seas: no towns,
+          // villages, suburbs, roads or rivers, the start); Major (CARTO's bigger cities, rank 5 and up); None.
+          // Kept in this browser
+          const NAMES = [["all", "All", "every place name the basemap has"], ["cities", "Cities", "cities only: no towns, villages, suburbs, roads or rivers"],
+                         ["major", "Major", "the bigger cities only"], ["off", "None", "no place names"]];
+          const NAMES_KEEP = {
+            cities: /^(place_(city|capital|country|state|continent)|watername_(ocean|sea))/,
+            major: /^(place_(city_r5|city_dot_r2|city_dot_r4|capital|country|state|continent)|watername_(ocean|sea))/,
+          };
+          const namesBox = el_("div");
+          const styleNames = segOf(namesBox, NAMES.map(([k, l, t]) => [k, l, t, ""]), (k) => k === st.labels, (k) => setNames(k));
+          function setNames(m) {
+            st.labels = m;
+            try { localStorage.setItem("ew-names", m); } catch (e) {}
+            labels(m); styleNames();
+            note({all: "All place names", cities: "City names only", major: "The bigger cities only", off: "No place names"}[m] + " (L)", 2000);
+          }
+          item("Place names", "<kbd>L</kbd> steps them", namesBox);
           // picking: the tooltip and the click's card, off to look at the map (or shoot it) clean
           const rPick = rowOf("Picking");
           const swPick = sw(() => !st.noPick, (v) => { st.noPick = !v; tip.style.display = "none"; hover = null; update(); });
@@ -2526,7 +2559,7 @@ def _(anywidget, asyncio, time, traitlets):
           const about = el_("div", "at-about");
           about.innerHTML = `<div class="box at-glass">
             <h2>Earthwork</h2>
-            <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read, taught where 3DEP lidar flew the same ground twice. Three layers (M switches them): <b>Aggregate</b>, one model on AlphaEarth and TESSERA joined pixel by pixel; <b>AEF</b>, AlphaEarth's own; <b>TESSERA</b>, TESSERA's own. TESSERA is read at 10 m only (it has no coarser product), so it and the aggregate come in from zoom 11.8; zoomed out past it the map moves to AEF and the other two gray out, and zoomed back in the layer you had comes back. Each hexagon shows its highest-scoring finer cell, so a single dig stands out. Pair (P) with Sentinel-2 to see what it is.</p>
+            <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read, taught where 3DEP lidar flew the same ground twice. Three layers (M switches them): <b>Aggregate</b>, one model on AlphaEarth and TESSERA joined pixel by pixel; <b>AEF</b>, AlphaEarth's own; <b>TESSERA</b>, TESSERA's own. TESSERA is read at 10 m only (it has no coarser product), so it and the aggregate come in from zoom 10.4; zoomed out past it the map moves to AEF and the other two gray out, and zoomed back in the layer you had comes back. Each hexagon shows its highest-scoring finer cell, so a single dig stands out. Pair (P) with Sentinel-2 to see what it is.</p>
             <p>Earthwork is drawn in H3 hexagons from zoom ${HEXZ}. <b>Click</b> a hexagon for its account.</p>
             <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the hexagons; scroll while holding to step through the years.</p>
             <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest, C its colors; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); X fill the window; Esc close.</small></p>
@@ -2547,8 +2580,8 @@ def _(anywidget, asyncio, time, traitlets):
               <li><b>Click</b> a hexagon: where it is, its H3 string and center to copy, and its score.</li>
               <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; <kbd>[</kbd> <kbd>]</kbd> step its year.</li>
               <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
-              <li><b>Layer</b> in the Earthwork card: Aggregate (both joined), AEF or TESSERA; <kbd>M</kbd> switches them. Aggregate and TESSERA come in from zoom 11.8; zoomed out, AEF alone (the other two grayed out). <b>AEF Years</b> are the years compared.</li>
-              <li><b>Structure gate</b> (<kbd>G</kbd>, on to start): from zoom 11.8, ground where AlphaEarth reads a structure standing in both years is not lit, in every layer: a roof painted white, a city block whose radar changed. Taught on Overture's building footprints; it hides almost no digging at the lidar sites.</li>
+              <li><b>Layer</b> in the Earthwork card: Aggregate (both joined), AEF or TESSERA; <kbd>M</kbd> switches them. Aggregate and TESSERA come in from zoom 10.4; zoomed out, AEF alone (the other two grayed out). <b>AEF Years</b> are the years compared.</li>
+              <li><b>Structure gate</b> (<kbd>G</kbd>, on to start): from zoom 10.4, ground where AlphaEarth reads a structure standing in both years is not lit, in every layer: a roof painted white, a city block whose radar changed. Taught on Overture's building footprints; it hides almost no digging at the lidar sites.</li>
               <li>Earthwork shows from zoom ${HEXZ} in. <kbd>/</kbd> searches a place.</li>
             </ul>
             <p><small><kbd>?</kbd> has everything else. The code: <a href="https://github.com/kentstephen/aef-tessera-earthwork" target="_blank" rel="noopener">aef-tessera-earthwork</a> on GitHub.</small></p>
@@ -2777,8 +2810,8 @@ def _(anywidget, asyncio, time, traitlets):
             // the imagery's card: its year, while the imagery shows (held, or the pair's left)
             const showImg = st.holding || st.paint || (st.pair && st.left === "s2");
             // a small card, the search's width: the year (what the imagery shows), what it is, its keys
-            const stretching = st.s2comp !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === st.s2comp);
-            s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
+            const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
+            s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
               + `<div class="ew-keys">${showImg
                 ? `${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
                 : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
@@ -2936,7 +2969,7 @@ def _(anywidget, asyncio, time, traitlets):
           // the colors before settling with nothing pending came too soon, and the other years then took
           // the reads from the year shown)
           function s2WarmUp(key) {
-            const want = (st.s2comp === "tci" ? "" : st.s2comp + " ") + st.imgYear;
+            const want = (compOf() === "tci" ? "" : compOf() + " ") + st.imgYear;
             if (s2Warm || s2Stat.pending !== 0 || !(key === want || key === want + " fill")) return;
             s2Warm = true; setTimeout(update, 250);
           }
@@ -3193,7 +3226,7 @@ def _(anywidget, asyncio, time, traitlets):
             // every parent's visible on each draw. Hidden years still load their tiles
             const visible = (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === st.imgYear;
             const paint = left ? {} : PAINT_PROPS;
-            const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[st.s2comp] ? st.s2comp : "tci";
+            const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[compOf(left)] ? compOf(left) : "tci";
             const pre = (left ? "s2gl-" : "s2g-") + (comp === "tci" ? "" : comp + "-");
             // the false colors wait, still loading, for the stretch of their view
             const sx = cfg.s2_stretch, stretched = comp === "tci" || (sx && sx.comp === comp);
@@ -3312,13 +3345,17 @@ def _(anywidget, asyncio, time, traitlets):
           }
           // place names (L): hidden over the plain Sentinel-2 imagery (the main map while space is held, the pair's
           // left map while it shows Sentinel-2), back when the basemap is; the paint keeps them
-          function labels(on) {
+          function labels(mode) {
+            const keep = NAMES_KEEP[mode];
             for (const m of [map, map2]) {
               if (!m || !m.isStyleLoaded()) continue;
               // painting, the imagery is the map and keeps its place names (they sit above the imagery's slot)
               const overImagery = m === map ? st.holding : st.pair && st.left === "s2";
-              const vis = on && !overImagery ? "visible" : "none";
-              (m.getStyle().layers || []).forEach((l) => { if (l.layout && l.layout["text-field"] !== undefined && m.getLayoutProperty(l.id, "visibility") !== vis) m.setLayoutProperty(l.id, "visibility", vis); });
+              (m.getStyle().layers || []).forEach((l) => {
+                if (!l.layout || l.layout["text-field"] === undefined) return;
+                const vis = !overImagery && (mode === "all" || (mode !== "off" && !!keep && keep.test(l.id))) ? "visible" : "none";
+                if (m.getLayoutProperty(l.id, "visibility") !== vis) m.setLayoutProperty(l.id, "visibility", vis);
+              });
             }
           }
 
@@ -3392,8 +3429,8 @@ def _(anywidget, asyncio, time, traitlets):
             if (by === "mouse") map.dragPan.disable();
             tip.style.display = "none";
             // false colors are stretched for the view: taken again if this hold is somewhere else
-            if (st.s2comp !== "tci") send("s2comp", {comp: st.s2comp});
-            labels(st.labels); renderYear(); update();
+            if (compOf() !== "tci") send("s2comp", {comp: compOf()});
+            labels(st.labels); styleComp(); renderYear(); update();
           }
           function endHold(by) {
             if (by !== "key") { clearTimeout(holdT); holdT = null; holdAt = null; }
@@ -3402,7 +3439,8 @@ def _(anywidget, asyncio, time, traitlets):
             mapEl.classList.remove("holding");
             if (map) map.dragPan.enable();
             wheelAcc = 0;
-            labels(st.labels); renderYear(); update();
+            if (st.paint) stretchFor(compOf());
+            labels(st.labels); styleComp(); renderYear(); update();
             if (lastPt && map) showHexTip(lastPt);
           }
           mapEl.addEventListener("pointermove", (e) => {
@@ -3609,7 +3647,7 @@ def _(anywidget, asyncio, time, traitlets):
             else if (k === "p" || k === "P") setPair(!st.pair);
             // I: the paint (Sentinel-2 gray, the lit hexagons in color) or the hexagons over the basemap
             else if (k === "i" || k === "I") {
-              st.paint = !st.paint; labels(st.labels); renderYear(); update();
+              st.paint = !st.paint; if (st.paint) stretchFor(compOf()); labels(st.labels); styleComp(); renderYear(); update();
               note(st.paint ? "Sentinel-2, gray but for the lit hexagons (I for the hexagons on the basemap)" : "Hexagons on the basemap (I for Sentinel-2 in gray, the lit hexagons in color)", 3000);
             }
             else if (k === "[" || k === "]") stepImg(k === "]" ? 1 : -1);
@@ -3621,13 +3659,13 @@ def _(anywidget, asyncio, time, traitlets):
               st.imgYear = st.imgYear === b ? a : b; renderYear(); update();
             }
             else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }
-            else if (k === "l" || k === "L") { st.labels = !st.labels; labels(st.labels); swLab.sty(); }
+            else if (k === "l" || k === "L") setNames(NAMES[(NAMES.findIndex(([m]) => m === st.labels) + 1) % NAMES.length][0]);
             else if (k === "x" || k === "X") { st.fit = !st.fit; sizes(); }
             else if (k === "g" || k === "G") {
               st.gate = st.gate === false; send("gate", {on: st.gate});
-              note(st.gate ? "Structure gate on: ground a structure stood on both years is not lit (from zoom 11.8)" : "Structure gate off: every finer cell scored as read", 3500);
+              note(st.gate ? "Structure gate on: ground a structure stood on both years is not lit (from zoom 10.4)" : "Structure gate off: every finer cell scored as read", 3500);
             }
-            else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === st.s2comp); setComp(COMPS[(i + 1) % COMPS.length][0]); }
+            else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === compOf()); setComp(COMPS[(i + 1) % COMPS.length][0]); }
             else if ((k === "m" || k === "M") && MODELS.length > 1) {
               // only the layers the zoom allows: zoomed out past TESSERA's zoom that is AEF alone
               const can = MODELS.filter((m) => !(needsTes(m) && tesOut()));
@@ -3684,6 +3722,8 @@ def _(anywidget, asyncio, time, traitlets):
                 } catch (e) { console.error("divisions", e); }
               }
               update(); sendView(); renderYear();
+              // the paint's false colors need the kernel's stretch of this view (asked after the view, which it reads)
+              if (st.paint) stretchFor(compOf());
             });
             map.on("moveend", sendView);
             // a new view: the footprints under it asked for
@@ -3770,7 +3810,7 @@ def _(mo):
 
     **One read per view.** AlphaEarth's first and last year of the window
     are read for what is in view: an overview of the annual COGs zoomed out,
-    the 10 m mosaic from about zoom 11.8. Each pixel's lon/lat goes through
+    the 10 m mosaic from about zoom 10.4. Each pixel's lon/lat goes through
     an h3ronpy UDF inside DataFusion (via xarray-sql) and the pixels are
     averaged per cell, one level finer than the hexagons drawn.
 
@@ -3872,6 +3912,7 @@ def _(
     cmap,
     contains,
     cpu,
+    box_km2,
     division_at,
     json,
     np,
@@ -3967,6 +4008,18 @@ def _(
 
     _AEF_KEEP_BYTES = 512 * 1024 ** 2
     _TES_KEEP_BYTES = 3 * 1024 ** 3
+    TENM_MAX_KM2 = 1600
+    # zoomed out with the 10 m reads (read res 9 and 10), the hexagons go this many levels finer than the read
+    # res: the reads are 10 m pixels there, so a finer hexagon still holds many of them
+    ZOOMOUT_UP = 1
+
+    def _hres(rres, box):
+        """(the 10 m reads?, the hexagons' res) for a read res and its box."""
+        tenm = rres >= MOSAIC_MIN_RES and box_km2(box) <= TENM_MAX_KM2
+        return tenm, min(15, rres + HEX_UP + (ZOOMOUT_UP if tenm and rres <= 10 else 0))
+
+    def _tbytes(t):
+        return sum(a.nbytes for k in ("emb", "ok", "radar") for a in t.get(k, {}).values()) if t and "emb" in t else 0
 
     def _trim(bkey=None):
         # the kept folds: AlphaEarth's by bytes (a year in a 2x box at zoom
@@ -3988,11 +4041,12 @@ def _(
         box = pad_box(view)
         fr0 = HOLD["frame"]
         if (fr0 is not None and HOLD["box"] is not None and contains(HOLD["box"], view) and not force
-                and min(15, res_for_view(vsd, box) + HEX_UP) <= HOLD["res"] and (fr0["y0"], fr0["y1"]) == (HOLD["y0"], HOLD["y1"])):
+                and _hres(res_for_view(vsd, box), box)[1] <= HOLD["res"] and (fr0["y0"], fr0["y1"]) == (HOLD["y0"], HOLD["y1"])):
             HOLD["hex_status"] = HOLD.get("hex_ready") or HOLD["hex_status"]
             return
         rres = res_for_view(vsd, box)
-        res = min(15, rres + HEX_UP)
+        # the 10 m reads (AlphaEarth's mosaic, TESSERA): from MOSAIC_MIN_RES, for a box up to TENM_MAX_KM2
+        tenm, res = _hres(rres, box)
         fres = min(13, res + CARRY_RES)
         y0, y1 = HOLD["y0"], HOLD["y1"]
         rbox = tuple(round(v, 3) for v in box)
@@ -4009,7 +4063,13 @@ def _(
             need = [y for y in years if (y, bkey) not in HOLD["aef"]]
             # TESSERA only where AlphaEarth is read at 10 m too (the mosaic): it has no coarser product
             tkey = (y0, y1, rbox)
-            want_tes = rres >= MOSAIC_MIN_RES and tkey not in HOLD["tes"]
+            want_tes = tenm and tkey not in HOLD["tes"]
+            if want_tes:
+                # the windows held let go first when this one would put them past the cap (a zoom 11 window
+                # is several GB: two at once doubled the peak)
+                _new = box_km2(box) * 1e4 * 128 * 2
+                while HOLD["tes"] and sum(_tbytes(t) for t in HOLD["tes"].values()) + _new > _TES_KEEP_BYTES:
+                    HOLD["tes"].pop(next(iter(HOLD["tes"])))
 
             async def _tes():
                 try:
@@ -4020,15 +4080,13 @@ def _(
                     return {"error": f"TESSERA failed: {type(e).__name__}: {str(e)[:80]}"}
 
             got, tw = await asyncio.gather(
-                asyncio.gather(*(aef_fold(box, fres, y, read_res=rres) for y in need)),
+                asyncio.gather(*(aef_fold(box, fres, y, read_res=rres, mosaic=tenm) for y in need)),
                 _tes() if want_tes else asyncio.sleep(0, HOLD["tes"].get(tkey)))
             for y, r in zip(need, got):
                 HOLD["aef"][(y, bkey)] = r
-            if rres >= MOSAIC_MIN_RES:
+            if tenm:
                 HOLD["tes"][tkey] = tw
-                # held by size, not count: a zoom 12 window is several times a zoom 13 one
-                def _tbytes(t):
-                    return sum(a.nbytes for k in ("emb", "ok", "radar") for a in (t or {}).get(k, {}).values()) if t else 0
+                # held by size, not count: a zoom 11 window is several times a zoom 13 one
                 while len(HOLD["tes"]) > 1 and sum(_tbytes(t) for t in HOLD["tes"].values()) > _TES_KEEP_BYTES:
                     HOLD["tes"].pop(next(iter(HOLD["tes"])))
             _trim(bkey)
@@ -4037,11 +4095,11 @@ def _(
             pend = HOLD.get("pending")
             if pend is not None and not force:
                 pv = _vsd(pend)
-                if pv["zoom"] < HEX_ZOOM or min(15, res_for_view(pv, pad_box(view_to_bbox(pv))) + HEX_UP) != res or not contains(box, view_to_bbox(pv)):
+                if pv["zoom"] < HEX_ZOOM or _hres(res_for_view(pv, pad_box(view_to_bbox(pv))), pad_box(view_to_bbox(pv)))[1] != res or not contains(box, view_to_bbox(pv)):
                     return
             aef_by_year = {y: HOLD["aef"][(y, bkey)][0] for y in years if (y, bkey) in HOLD["aef"]}
             t1 = time.time()
-            tw = HOLD["tes"].get(tkey) if rres >= MOSAIC_MIN_RES else None
+            tw = HOLD["tes"].get(tkey) if tenm else None
             tes_ok = tw is not None and "error" not in tw
             async with HOLD["build_lock"]:
                 fr = await cpu(build_frame, aef_by_year, y0, y1, res, tes_sampler(tw, y0, y1) if tes_ok else None)
@@ -4059,7 +4117,7 @@ def _(
                     continue
                 m_ = re.search(r"([\d.]+) s · fold [\d,]+ ([\d.]+) s", HOLD["aef"][(y, bkey)][1] or "")
                 _rd.append(f"{y} c" if y not in need else f"{y} {m_.group(1)}+{m_.group(2)} s" if m_ else f"{y} ?")
-            tes_s = (tw["status"] if tes_ok else tw["error"] if tw else "TESSERA from zoom 11.8 (10 m only)")
+            tes_s = (tw["status"] if tes_ok else tw["error"] if tw else f"TESSERA from zoom 10.4 and up to {TENM_MAX_KM2:,} km2 (10 m only)")
             stats = (
                 f"read res {rres}, hexagons res {res}, peak of res {fres} | AEF read+fold {', '.join(_rd)} "
                 f"| {tes_s} (all {t1 - t0:.1f} s) | frame {time.time() - t1:.1f} s"
