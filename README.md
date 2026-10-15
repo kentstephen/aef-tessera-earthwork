@@ -70,6 +70,9 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   cities) and their cost at the digging sites.
 - `whiteroofs.py` finds New York roofs that went from dark to white (or white to dark) in Earth Genome's Sentinel-2
   yearly mosaics, on NYC building footprints built before 2015, and counts how much of each each layer lights.
+- `heights.py` reads the height in the embeddings back (a ridge from each pixel's embedding to a static DEM, out of
+  fold over 1 km blocks) and asks whether its change between years follows the lidar's dz at the digging sites and
+  whether a whitened roof moves it; against Mapterhorn or 3DEP from its S3 bucket.
 - `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
   aggregate (the joint model muted where neither embedding changed).
 
@@ -94,6 +97,8 @@ uv run python separate.py test   # SECTIONS=ABCD, writes results/separate.json
 uv run python distill.py         # about 45 minutes; distill.py report [catch]
 uv run python cities.py          # about an hour; cities.py report
 uv run python whiteroofs.py      # about 15 minutes, after cities.py has read its New York squares
+uv run python cities.py sites    # the 14 digging sites again, about 10 GB at peak
+uv run python heights.py [3dep]  # about 5 minutes; heights.py report [3dep]
 ```
 
 ## The map

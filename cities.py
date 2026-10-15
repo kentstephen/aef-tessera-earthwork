@@ -23,6 +23,7 @@ final models were taught on those sites, so their numbers run high; what matters
 makes.
 
 Run: uv run python cities.py          (reads into data/cities, writes results/cities.json)
+     uv run python cities.py sites     (the digging sites again, on the saved cities)
      uv run python cities.py report
 """
 
@@ -107,8 +108,9 @@ def pair(z, yb, ya):
     return d, np.flatnonzero(ok), group
 
 
-def correct(d, li, how, pcs=None):
-    """d with the correction applied over the pixels li (in place on copies of the changed arrays)."""
+def correct(d, li, how, pcs=None, med=None):
+    """d with the correction applied over the pixels li (in place on copies of the changed arrays). med, if given,
+    holds each embedding's shift ("t", "a") taken elsewhere, in place of the median over li."""
     if how == "none":
         return d
     d = dict(d)
@@ -116,7 +118,7 @@ def correct(d, li, how, pcs=None):
     for k in keys:
         b, a = d[f"{k}b"][li].astype(np.float32), d[f"{k}a"][li].astype(np.float32)
         ch = a - b
-        ch -= np.median(ch, axis=0)
+        ch -= np.median(ch, axis=0) if med is None else med[k]
         if how.startswith("pcs") and k == "t":
             ch -= (ch @ pcs.T) @ pcs
         new = d[f"{k}a"].astype(np.float32).copy()
@@ -184,13 +186,25 @@ def score_site(n, rec, pcs_by_k):
     li = np.flatnonzero(d0["ok"] & (d0["y"] >= 0))
     allok = np.flatnonzero(d0["ok"])
     y = d0["y"][li] == 1
+    # the shift is the median over the whole tile, as the map would take it over a view (from 200,000 pixels:
+    # the full tile at float32 for each correction outgrew memory)
+    samp = np.random.default_rng(0).choice(allok, min(len(allok), 200_000), replace=False)
+    med = {k: np.median(d0[f"{k}a"][samp].astype(np.float32) - d0[f"{k}b"][samp].astype(np.float32), axis=0)
+           for k in ("t", "a")}
+    N = len(d0["y"])
+    d0 = {k: v[li] if isinstance(v, np.ndarray) and len(v) == N else v for k, v in d0.items()}
     out = {}
     for how in CORR:
         pcs = pcs_by_k.get(int(how.split("_")[1])) if how.startswith("pcs") else None
-        d = correct(d0, allok, how, pcs)  # the median over the whole tile, as the map would over a view
-        s = base_scores(rec["models"], d, li)
+        V = {w: [] for w in RULES_SHOWN}
+        for i in range(0, len(li), 200_000):  # in pieces, so the features never sit whole in memory
+            part = np.arange(i, min(i + 200_000, len(li)))
+            dp = {k: v[part] if isinstance(v, np.ndarray) and len(v) == len(li) else v for k, v in d0.items()}
+            s = base_scores(rec["models"], correct(dp, np.arange(len(part)), how, pcs, med), np.arange(len(part)))
+            for w in RULES_SHOWN:
+                V[w].append(RULES[w](s, rec["bounds"]))
         for w in RULES_SHOWN:
-            v = RULES[w](s, rec["bounds"])
+            v = np.concatenate(V[w])
             lit = v > rec["cutoff"][0.6][w]
             out[f"{how}:{w}"] = {"found": float(lit[y].mean()) if y.any() else None, "lit": float(lit[~y].mean()),
                                  "ap": float(average_precision_score(y, v)) if y.any() else None}
@@ -203,7 +217,6 @@ def in_child(fn, *args):
 
 
 def main():
-    from compare import TEACH_KINDS, teaching_names
     from models import final
     zarr.config.set({"async.concurrency": 128})
     g = ObjectStore(HTTPStore.from_url(TESSERA), read_only=True)
@@ -222,7 +235,19 @@ def main():
         res["cities"][n] = in_child(score_city, n, rec, pcs_by_k)
         print(f"scored {n}: {time.time() - t:.0f} s", flush=True)
         json.dump(res, open(OUT, "w"))
+    sites(res, LR)
+
+
+def sites(res=None, LR=None):
+    """The digging sites alone (cities.py sites reruns them on the saved cities)."""
+    from compare import TEACH_KINDS, teaching_names
+    from models import final
+    rec = final("abroad")
+    res = res or json.load(open(OUT))
+    res["sites"] = {}
+    LR = LR or {n: look_rows(n) for n in CITIES}
     pcs_all = {k: look_changes(list(LR.values()), k) for k in (2, 8)}
+    del LR
     for n in teaching_names():
         if json.loads(str(np.load(f"{HERE}/data/tessera/{n}.npz", allow_pickle=True)["meta"]))["kind"] not in TEACH_KINDS:
             continue
@@ -279,4 +304,4 @@ def report():
 
 
 if __name__ == "__main__":
-    report() if sys.argv[1:] == ["report"] else main()
+    {"report": report, "sites": sites}.get(sys.argv[1] if sys.argv[1:] else "", main)()

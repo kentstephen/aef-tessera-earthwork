@@ -918,35 +918,98 @@ the main process at most 17.2 GB with one child scoring a site beside it.
 own and grays the Aggregate and TESSERA out (a click or M there says to zoom in); zoomed back in, the layer it moved
 from comes back, unless another was picked meanwhile. Checked headless in Chromium across 13.2 both ways.
 
-## 25. Dense cities (running)
+## 25. Dense cities
 
 On the map, Manhattan's Lower East Side from 2022 to 2025 lit block after block under TESSERA alone; AEF and the
 aggregate lit East River Park (torn up and raised on fill for flood protection from late 2021) and a few spots. TESSERA's
 own metadata there: about 30 ascending radar looks a year from 2017 to 2025, no descending looks until 2025 (17,
-when Sentinel-1C began). The radar-safe rule only catches radar coming or going, not a second look direction added.
+when Sentinel-1C began), and both in 2020. The radar-safe rule only catches radar coming or going, not a second look
+direction added.
 
-First look, the Lower East Side alone (share of pixels lit at the 60% cutoffs):
+`cities.py` takes 3 km squares in 22 dense cities (14 US, 8 abroad), every year pair 2017 to 2025, scored by the
+abroad recipe's final models at each rule's 60% cutoff, pixels grouped by their radar in the two years. Few city
+blocks are dug in a few years, so the share lit is close to a false-alarm rate. Mean over cities of the share lit:
 
-| pair | radar looks | AEF | TESSERA | aggregate |
+| | US, same looks | US, a direction added or dropped | abroad, same looks | abroad, added or dropped |
 |---|---|---|---|---|
-| 2019 to 2021 | same | .001 | .050 | .002 |
-| 2022 to 2024 | same | .004 | .104 | .010 |
-| 2022 to 2025 | descending added | .024 | .185 | .036 |
-| 2024 to 2025 | descending added | .018 | .093 | .015 |
+| AEF | .007 | .017 | .000 | .003 |
+| TESSERA | .075 | .085 | .018 | .011 |
+| aggregate | .008 | .013 | .001 | .001 |
 
-TESSERA is noisy over dense blocks with the same looks both years, and the added direction about doubles it.
-`cities.py` takes 22 cities (14 US, 8 abroad), every pair, grouped by looks, with corrections (the median shift over
-the square; the main directions of change where a look direction changed, learned at the other cities) and their
-cost at the digging sites. Results to follow.
+- TESSERA's city noise is mostly dense US blocks whatever the looks: .075 with the same looks both years, .085
+  with a direction added. The cities abroad (London, Paris, Berlin, Tokyo and others) have both directions every
+  year and light a quarter as much. Whether one look direction is what makes US blocks noisy is a reading, not
+  tested here.
+- The aggregate mostly does not inherit it (.008 and .013 in US cities, beside AEF's .007 and .017).
+- The Lower East Side is where the 2025 radar does show: the aggregate lights .036 for 2022 to 2025 against .010
+  for 2022 to 2024.
+- One US city had radar in one year only: TESSERA alone lit .97 of it, the aggregate none (the radar-safe rule).
 
-## 26. White roofs (queued)
+Corrections (each applied the same way at the cities and at the 14 digging sites; the final models were taught on
+those sites, so their numbers run high and only the change counts):
+
+| correction | US city lit, same / added (aggregate) | sites: moved found | unchanged lit | AP |
+|---|---|---|---|---|
+| none | .008 / .013 | .685 | .026 | .654 |
+| shift (TESSERA less the square's median change) | .008 / .014 | .695 | .038 | .647 |
+| shift_both (the same for AlphaEarth too) | .008 / .013 | .671 | .036 | .638 |
+| pcs_2 (two main directions of look change removed) | .007 / .012 | .678 | .035 | .644 |
+| pcs_8 (eight) | .004 / .008 | .640 | .029 | .634 |
+
+No correction is free. The median shift makes TESSERA alone noisier in cities (.075 to .097) and lights more
+unchanged ground at the sites. Removing eight directions of look change halves the aggregate's city lit, at a cost
+at the sites: moved found .685 to .640, AP .654 to .634, and a little more unchanged ground lit. Two directions do
+almost nothing. Lower East Side, 2022 to 2025, aggregate: .036 with none, .020 with pcs_8.
+
+## 26. White roofs
 
 New York coats roofs white (CoolRoofs since 2010; Local Law 94 since 2020 asks for a cool, green or solar roof on
 replacement). Nothing moves, but dark to white is one of the largest brightness changes a 10 m pixel makes, and the
 lidar never taught a repainted roof. No dated list of coated roofs exists after 2012, so `whiteroofs.py` finds roofs
 that went dark to white (and white to dark) in Earth Genome's Sentinel-2 yearly mosaics, 2022 to 2024 (the same
 radar looks both years at New York), on footprints built before 2015, in seven New York squares, and counts what
-each layer lights. Results to follow.
+each layer lights at the 60% cutoffs.
+
+Pooled over the seven squares and three pairs (2022 to 2023, 2023 to 2024, 2022 to 2024), share of pixels lit:
+
+| layer | whitened roofs | darkened roofs | steady roofs | off roofs |
+|---|---|---|---|---|
+| AEF | .101 | .007 | .001 | .004 |
+| TESSERA | .226 | .166 | .054 | .077 |
+| aggregate | .059 | .018 | .001 | .005 |
+
+Whitened roof pixels: 274, 369 and 704 for the three pairs (a few hundred buildings in all), so these are small
+counts. A white coat lights all three layers. AEF goes from almost nothing on steady roofs to a tenth of whitened
+ones, and the aggregate from .001 to .06. TESSERA lights a twentieth of steady roofs anyway (section 25's city
+noise) and about four times that on whitened ones. Darkened roofs barely light AEF or the aggregate. Most of it is
+in a few places: Hunts Point's warehouses, 2023 to 2024, lit AEF on 67% of whitened pixels (52 px on 12
+buildings) and the aggregate on 23%; East New York 2022 to 2024 lit about a fifth to a quarter under each layer.
+Midtown's whitened roofs lit TESSERA (.32 for 2022 to 2024) and neither AEF nor the aggregate.
+
+## 27. The height in the embeddings
+
+AlphaEarth was taught to reconstruct the Copernicus DEM and GEDI canopy height, so its embedding carries a height.
+Earthwork's relief notebook reads it back as the ghost: a ridge regression from each pixel's embedding (values and
+squares) to the real elevation, each pixel predicted out of fold over 1 km blocks. `heights.py` fits one ghost per
+place on every year at once against a static DEM and predicts each year, so the ghost's change between two years is
+the height change the embedding implies. Two DEMs: Mapterhorn's tiles (as the notebook), and 3DEP from its S3
+bucket (each site's first-flight 1 m DEM, the seamless 1/3 arc-second DEM in New York). They give the same numbers;
+3DEP's, mean over the 14 digging sites:
+
+| | AlphaEarth ghost | TESSERA ghost |
+|---|---|---|
+| fit to the terrain, R2 | .33 to .91 by site | lower |
+| AUC of the ghost's change size, moved against unchanged | .643 | .641 |
+| AUC of plain change (1 - cosine), for comparison | .852 | .860 |
+| correlation of the ghost's change with dz | .03 | .01 |
+| sign right on moved ground (cut or fill) | .52 | .51 |
+| median ghost change, moved / unchanged | 12.9 m / 7.8 m | 20.1 m / 11.6 m |
+
+The median moved ground at these sites moved 0.8 to 2 m (8.6 m at Mountain Pass, 4.6 m at Hibbing). The ghost
+wobbles by meters to tens of meters a year on ground that did not move, so it does not see meter-scale digging: its
+change is larger on moved ground only because the embedding changed there, and its direction is a coin flip. On New
+York's roofs it moves about 1 m whether the roof was whitened, darkened or left alone, and as much off the roofs: it
+says nothing moved at the white roofs, and says much the same on dug ground.
 
 ## Open
 
@@ -980,4 +1043,7 @@ each layer lights. Results to follow.
 - Ideas named, not to-dos: a disturbance layer marking clearcuts (never hiding them); ESD (Landsat-based, 30 m)
   compared at the lidar sites; TESSERA made ourselves from its open code and weights (2025 without the descending
   radar, optical only, the full 192-d); a study of one chosen area with every model on the same inputs and 3DEP.
+- Height (section 27): a ghost fitted to one static DEM cannot see meter-scale change. Untried: a head taught on
+  the lidar's own meters (signed dz from the embedding pair, held out by site), so cut and fill come apart; or a
+  ghost matched in time (each year against its own flight), held out by 1 km blocks, which comes close to that head.
 - Teaching on more ground outside the US (more abroad lidar or satellite truth): not yet on the list of runs.
