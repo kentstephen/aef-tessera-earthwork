@@ -11,7 +11,7 @@ import * as zarr from "zarrita";
 
 import { type AefArray, bandTexture, CHUNK, makeGetTileData, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
 import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
-import { EarthworkAggregate, EarthworkAlpha, EarthworkScore, EarthworkTessera } from "./earthwork-score";
+import { EarthworkAggregate, EarthworkAlpha, EarthworkCut, EarthworkScore, EarthworkTessera } from "./earthwork-score";
 import { TES_BANDS, tesseraOnChunk } from "./tessera";
 
 export type { LayerKind, WorldModel };
@@ -89,7 +89,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
     });
 
-  function renderPipeline(kind: LayerKind, data: TileData) {
+  function renderPipeline(kind: LayerKind, data: TileData, cut: number | null) {
     const g = gpu;
     if (!g) return [];
     const score =
@@ -119,6 +119,8 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
                 tHi: model.bounds[1],
               },
             };
+    // the paint's mask: the lit pixels only (the mask pass keeps where a fragment fell, not its color)
+    if (cut != null) return [score, { module: EarthworkCut, props: { cut } }];
     // the score as plain gray, opaque: for the headless checks against numpy (window.__ewGray)
     if ((globalThis as { __ewGray?: boolean }).__ewGray) return [score];
     return [
@@ -128,14 +130,24 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     ];
   }
 
-  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; onTile?: () => void }) {
+  /** The layer's id for the window: the paint's maskId while it is the mask. */
+  const layerId = (first: number, last: number) => `earthwork-${first}-${last}`;
+
+  /**
+   * The layer for the window and the layer chosen. As the paint's mask (mask: true) it is not
+   * drawn, only its lit pixels (over the layer's cutoff) marked; the same layer either way, so
+   * the chunks read for one serve the other.
+   */
+  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; mask?: boolean; onTile?: () => void }) {
     const { visible, first, last, minZoom, onTile } = opts;
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aggregate";
+    const cut = opts.mask ? model.cut[kind] : null;
     const firstIdx = first - YEAR_ORIGIN;
     const lastIdx = last - YEAR_ORIGIN;
     const readAef = makeGetTileData(firstIdx, lastIdx, onDevice);
     return new ZarrLayer<zarr.Readable, "int8", TileData>({
-      id: `earthwork-${first}-${last}`,
+      id: layerId(first, last),
+      operation: opts.mask ? "mask" : "draw",
       node: arr as AefArray,
       metadata: attrs,
       selection: { time: firstIdx, band: null },
@@ -165,7 +177,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           byteLength: (d.byteLength ?? 0) + t.first.byteLength + t.last.byteLength + t.flags.byteLength,
         };
       },
-      renderTile: (data: TileData) => ({ renderPipeline: renderPipeline(kind, data) }),
+      renderTile: (data: TileData) => ({ renderPipeline: renderPipeline(kind, data, cut) }),
       visible,
       minZoom,
       // source.coop answers over HTTP/2, so more than the browser's 6 per host
@@ -173,7 +185,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // each tile is AlphaEarth's two years x 64 bands and TESSERA's two x 128 (24 MB on the GPU)
       maxCacheSize: 24,
       onTileLoad: () => onTile && onTile(),
-      updateTriggers: { renderTile: [kind, !!gpu] },
+      updateTriggers: { renderTile: [kind, !!gpu, cut] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
@@ -234,6 +246,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
 
   return {
     layer,
+    layerId,
     scoreAt,
     readAt,
     chunksIn,

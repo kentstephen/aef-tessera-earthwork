@@ -7,6 +7,7 @@ import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&ur
 import {MapLibreOverlay as MapboxOverlay} from "@deck.gl/maplibre";
 import {BitmapLayer, PathLayer} from "@deck.gl/layers";
 import {TileLayer} from "@deck.gl/geo-layers";
+import {MaskExtension} from "@deck.gl/extensions";
 import {COGLayer, MosaicLayer} from "@developmentseed/deck.gl-geotiff";
 import {CreateTexture} from "@developmentseed/deck.gl-raster/gpu-modules";
 import {DecoderPool, GeoTIFF, PerOriginSemaphore} from "@developmentseed/geotiff";
@@ -112,7 +113,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const HEXZ = cfg.hex_zoom || 9, HOLD_MS = cfg.hold_ms || 200, SLOP = cfg.hold_slop || 5;
   const st = {
     gmode: "earth", want: "earth", noPick: false, hideKinds: new Set(), focus: "all", y0: cfg.aef_from || 2022, y1: cfg.aef_to || 2025,
-    imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: true, s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
+    imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: "cities", s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
+    // the paint (I): Sentinel-2 is the map, gray but where the layer is lit, which keeps its colors; and its own
+    // imagery colors (C while painting), apart from the plain imagery's (space, the pair's left)
+    paint: cfg.paint !== false, paintComp: cfg.paint_comp || "blueyellow",
     fit: !!cfg.fit, holding: false,
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
@@ -362,12 +366,42 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the Sentinel-2 card's second line
   const COMP_SHORT = {tci: "true color", urban: "urban", blueyellow: "blue-yellow"};
   const compBox = el_("div");
-  const styleComp = segOf(compBox, COMPS.map(([k, l, t]) => [k, l, t, ""]), (k) => k === st.s2comp, (k) => setComp(k));
-  // new colors are new tiles: the year shown loads alone first again (s2Warm)
-  function setComp(k) { st.s2comp = k; s2Warm = false; send("s2comp", {comp: k}); styleComp(); renderYear(); }
-  item("Imagery colors", "C steps them", compBox).style.display = COMPS.length > 1 ? "" : "none";
-  const swLab = sw(() => st.labels, (v) => { st.labels = v; labels(v); });
-  item("Place names", "<kbd>L</kbd>", swLab);
+  // the colors drawn on a map: the paint's on the main map while painting (not holding space), the plain
+  // imagery's otherwise and on the pair's left
+  const compOf = (left = false) => (!left && st.paint && !st.holding ? st.paintComp : st.s2comp);
+  // the paint shows one year only, the imagery's first (one year to load, so it comes in quickly); the
+  // years step on the plain imagery (space, the pair's left), loaded when it is asked for
+  const PAINT_YEAR = S2Y[0];
+  const yearOf = (left = false) => (!left && st.paint && !st.holding ? PAINT_YEAR : st.imgYear);
+  const styleComp = segOf(compBox, COMPS.map(([k, l, t]) => [k, l, t, ""]), (k) => k === compOf(), (k) => setComp(k));
+  // new colors are new tiles: the year shown loads alone first again (s2Warm). C sets the colors of the view
+  // shown: the paint's while painting, the plain imagery's while holding space
+  function setComp(k) {
+    if (st.paint && !st.holding) st.paintComp = k; else st.s2comp = k;
+    s2Warm = false; send("s2comp", {comp: k}); styleComp(); renderYear();
+  }
+  item("Imagery colors", "<kbd>C</kbd> steps them", compBox).style.display = COMPS.length > 1 ? "" : "none";
+  // PLACE NAMES (L), fewer or more: CARTO puts each kind of place in its own symbol layer, so a setting keeps
+  // some layers' names and hides the rest. All; Cities (cities, states, countries and seas: no towns,
+  // villages, suburbs, roads or rivers, the start); Major (CARTO's bigger cities, rank 5 and up); None.
+  // Kept in this browser
+  const NAMES = [["all", "All", "every place name the basemap has"], ["cities", "Cities", "cities only: no towns, villages, suburbs, roads or rivers"],
+                 ["major", "Major", "the bigger cities only"], ["off", "None", "no place names"]];
+  const NAMES_KEEP = {
+    cities: /^(place_(city|capital|country|state|continent)|watername_(ocean|sea))/,
+    major: /^(place_(city_r5|city_dot_r2|city_dot_r4|capital|country|state|continent)|watername_(ocean|sea))/,
+  };
+  try { const m = localStorage.getItem("ew-names"); if (NAMES.some(([k]) => k === m)) st.labels = m; } catch (e) {}
+  const namesBox = el_("div");
+  const styleNames = segOf(namesBox, NAMES.map(([k, l, t]) => [k, l, t, ""]), (k) => k === st.labels, (k) => setNames(k));
+  function setNames(m) {
+    st.labels = m;
+    try { localStorage.setItem("ew-names", m); } catch (e) {}
+    labels(m); styleNames();
+    note({all: "All place names", cities: "City names only", major: "The bigger cities only", off: "No place names"}[m] + " (L)", 2000);
+  }
+  styleNames();
+  item("Place names", "<kbd>L</kbd> steps them", namesBox);
   // picking: the tooltip and the click's card, off to look at the map (or shoot it) clean
   const rPick = rowOf("Picking");
   const swPick = sw(() => !st.noPick, (v) => { st.noPick = !v; tip.style.display = "none"; hover = null; update(); });
@@ -381,10 +415,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const about = el_("div", "at-about");
   about.innerHTML = `<div class="box at-glass">
     <h2>Earthwork</h2>
-    <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth taught where 3DEP lidar flew the same ground twice. Pair (P) with Sentinel-2 to see what it is.</p>
+    <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
-    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the earthwork; scroll while holding to step through the years.</p>
-    <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) in full color; scroll while holding to step through the years. The gray map shows ${S2Y[0]}.</p>
+    <p><small>Keys: I the gray map or the earthwork layer; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -395,11 +429,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const welcome = el_("div", "at-about ew-welcome");
   welcome.innerHTML = `<div class="box at-glass">
     <h2>Earthwork</h2>
-    <p>This map shows where the ground was dug, filled or graded between two years, for every 10 m of land. A model reads it from AlphaEarth, Google DeepMind's yearly picture of the land, taught where USGS lidar measured the same ground twice. Yellow is likely, dark is not.</p>
+    <p>This map shows where the ground was dug, filled or graded between two years, for every 10 m of land. A model reads it from two yearly pictures of the land, AlphaEarth (Google DeepMind) and TESSERA (Cambridge), taught where lidar measured the same ground twice. Sentinel-2 is shown in gray, and in its own colors where the ground was likely dug.</p>
     <p>This starts in Wildwood, Florida, where The Villages is grading new neighborhoods out of farmland, from 2023 to 2025.</p>
     <ul>
       <li><b>Click</b> a spot: where it is, its coordinates and H3 string to copy, and its score.</li>
-      <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; while holding, <b>scroll</b> (or <kbd>[</kbd> <kbd>]</kbd>) to step its year, ${S2Y[0]} to ${S2Y[S2Y.length - 1]}.</li>
+      <li><kbd>I</kbd> switches to the chance itself on the basemap, yellow likely and dark not, and back.</li>
+      <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in full color; while holding, <b>scroll</b> (or <kbd>[</kbd> <kbd>]</kbd>) to step its year, ${S2Y[0]} to ${S2Y[S2Y.length - 1]}.</li>
       <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
       <li><b>AEF Years</b> in the Earthwork card are the years compared; <kbd>M</kbd> switches the layer: Aggregate (AlphaEarth and TESSERA together), AEF or TESSERA.</li>
       <li>Earthwork shows from zoom ${EWZ} in. <kbd>/</kbd> searches a place.</li>
@@ -642,11 +677,13 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const zoomTxt = () => map ? map.getZoom().toFixed(1) : "";
   function renderYear() {
     // the imagery's card: its year, while the imagery shows (held, or the pair's left)
-    const showImg = st.holding || (st.pair && st.left === "s2");
+    const showImg = st.holding || st.paint || (st.pair && st.left === "s2");
     // a small card, the search's width: the year (what the imagery shows), what it is, its keys
-    const stretching = st.s2comp !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === st.s2comp);
-    s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
-      + `<div class="ew-keys">${showImg
+    const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
+    const stepping = st.holding || (st.pair && st.left === "s2");
+    s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
+      + `<div class="ew-keys">${showImg && !stepping ? `<kbd>Space</kbd> the years`
+        : showImg
         ? `${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
         : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
     s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
@@ -787,7 +824,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     return [W_ - dx, Math.max(-85, S_ - dy), E_ + dx, Math.min(85, N_ + dy)];
   }
   function s2Discover() {
-    if (!map || !S2GPU || !(st.holding || st.pair || map.getZoom() >= 9)) return;
+    if (!map || !S2GPU || !(st.holding || st.pair || st.paint || map.getZoom() >= 9)) return;
     const z = Math.max(cfg.s2_min_z || 7, Math.min(9, Math.floor(map.getZoom()))), n = 2 ** z;
     const tx = (lon) => Math.min(n - 1, Math.max(0, Math.floor((lon + 180) / 360 * n)));
     const ty = (lat) => { const v = Math.sin(lat * Math.PI / 180); return Math.min(n - 1, Math.max(0, Math.floor((0.5 - Math.log((1 + v) / (1 - v)) / (4 * Math.PI)) * n))); };
@@ -867,6 +904,29 @@ export function render({model, el, earthwork, s2Items, credits}) {
     uniformTypes: {gamma: "f32"},
     getUniforms: (q) => ({gamma: q.gamma}),
   };
+  // ---- the paint: Sentinel-2 in gray, in its own colors where the layer is lit, in one draw. deck.gl's
+  // MaskExtension draws the mask layer (the earthwork layer as a mask: its pixels over the cutoff) into a
+  // texture and its shader drops what falls outside; this one keeps its mask and turns what falls outside
+  // gray instead (its luminance), after the imagery's own colors are made, so the false colors gray the
+  // same way. An empty mask (nothing lit) is all gray; no mask layer at all (holding space, zoomed out past
+  // the earthwork) is the imagery as it is
+  const MASK_MOD = MaskExtension.prototype.getShaders.call({getAttributeManager: () => ({attributes: {}}), props: {}, state: {}}).modules[0];
+  const {"fs:#main-start": _maskDiscard, ...maskInject} = MASK_MOD.inject;
+  // outside: gray, and dimmed a little toward the dark basemap (PAINT_DIM) so the lit ground stands out. Dimmed,
+  // not see-through: footprints overlap and the fill lies under the yearly mosaic, so an alpha would stack
+  // into stripes and patches where they do
+  const PAINT_DIM = cfg.paint_dim != null ? Number(cfg.paint_dim) : 0.78;
+  const PAINT_MOD = {...MASK_MOD, inject: {...maskInject, "fs:#main-end": `
+  if (mask.enabled && !mask_isInBounds(mask_texCoords)) fragColor.rgb = vec3(dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722))) * ${PAINT_DIM.toFixed(3)};
+`}};
+  class PaintExtension extends MaskExtension {
+    // the raster is one mesh drawn as one instance: placed by its geometry, never by the instance
+    getShaders() { this.state.maskByInstance = false; return {modules: [PAINT_MOD]}; }
+  }
+  PaintExtension.extensionName = "PaintExtension";
+  const PAINT = new PaintExtension();
+  // the mask is the earthwork layer itself (its id changes with the years)
+  const paintProps = () => ({extensions: [PAINT], maskId: earthwork.layerId(st.y0, st.y1), maskByInstance: false});
   // ---- the false colors (S2_COMPOSITES in the kernel): R, G, B from the raw bands (uint16
   // reflectance x 10,000). The layer walks the first 20 m band's tiles; each other band is read
   // at the level of the same pixel size and placed by its own geotransform (the yearly
@@ -977,15 +1037,33 @@ export function render({model, el, earthwork, s2Items, credits}) {
       }
       const rgba = new Uint8Array(4 * width * height);
       if (chans.every(Boolean)) {
+        // nodata where every band is 0. A pixel with only some bands at 0 is real ground where it lies among
+        // data (water's shortwave infrared, B11 and B12, is 0 over rivers and flooded fields: dropped, it left
+        // holes there), but nodata where it touches an empty pixel: at a footprint's data edge a band placed
+        // from another grid (B02 onto B11's) reaches a pixel past the others, and that pixel drew black
+        // (dashes along the seams, where the neighbor underneath covers it)
+        const got = new Uint8Array(width * height);  // 0 empty, 1 some bands, 2 every band
         for (let r = 0; r < height; r++) for (let c = 0; c < width; c++) {
-          const o = 4 * (r * width + c);
-          let ok = true;
+          const i = r * width + c, o = 4 * i;
+          let n = 0;
           for (let k = 0; k < 3; k++) {
             const a = chans[k], v = r < a.h && c < a.w ? a.d[r * a.w + c] : 0;
-            if (!v) { ok = false; break; }
             rgba[o + k] = S2_SQRT[v];
+            if (v) n++;
           }
-          if (ok) rgba[o + 3] = 255; else rgba[o] = rgba[o + 1] = rgba[o + 2] = 0;
+          got[i] = n === 0 ? 0 : n === 3 ? 2 : 1;
+        }
+        for (let r = 0; r < height; r++) for (let c = 0; c < width; c++) {
+          const i = r * width + c;
+          let ok = got[i] === 2;
+          if (got[i] === 1) {
+            ok = true;
+            for (let dr = -1; dr <= 1 && ok; dr++) for (let dc = -1; dc <= 1; dc++) {
+              const rr = r + dr, cc = c + dc;
+              if (rr >= 0 && rr < height && cc >= 0 && cc < width && got[rr * width + cc] === 0) { ok = false; break; }
+            }
+          }
+          if (ok) rgba[4 * i + 3] = 255; else rgba[4 * i] = rgba[4 * i + 1] = rgba[4 * i + 2] = 0;
         }
       }
       s2Stat.tiles++; sy.tiles++;
@@ -1053,12 +1131,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // view's web mercator meters index them directly. One stretch for every year so the years compare;
   // taken again when the colors change or a hold starts outside the box it was taken for
   let s2StretchGen = 0;
-  async function s2TakeStretch() {
-    const comp = st.s2comp, spec = S2_FALSE[comp];
+  async function s2TakeStretch(force = false) {
+    const comp = compOf(), spec = S2_FALSE[comp];
     if (!spec || !spec.rgb || !map) return;
     const b = map.getBounds(), box = [b.getWest(), Math.max(-85, b.getSouth()), b.getEast(), Math.min(85, b.getNorth())];
     const sx = cfg.s2_stretch;
-    if (sx && sx.comp === comp && sx.box[0] <= box[0] && sx.box[1] <= box[1] && sx.box[2] >= box[2] && sx.box[3] >= box[3]) return;
+    if (!force && sx && sx.comp === comp && sx.box[0] <= box[0] && sx.box[1] <= box[1] && sx.box[2] >= box[2] && sx.box[3] >= box[3]) return;
     const gen = ++s2StretchGen;
     const mx = (lon) => 6378137 * lon * Math.PI / 180, my = (lat) => 6378137 * Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
     const x0 = mx(box[0]), x1 = mx(box[2]), y0 = my(box[1]), y1 = my(box[3]), tpx = Math.max(x1 - x0, y1 - y0) / 512;
@@ -1109,7 +1187,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
       got = Object.fromEntries(bands.map((bd) => [bd, vals[bd] || 3000]));
       break;
     }
-    if (gen !== s2StretchGen || st.s2comp !== comp) return;
+    if (gen !== s2StretchGen || compOf() !== comp) return;
     cfg.s2_stretch = {comp, box, ...(got || Object.fromEntries(bands.map((bd) => [bd, 3000])))};
     renderYear(); update();
   }
@@ -1121,8 +1199,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // keep each tile's raster layer as it was when the tile came in (an opacity change never
     // reaches them, so a tile loaded while holding stayed after the hold), while deck.gl checks
     // every parent's visible on each draw. Hidden years still load their tiles
-    const visible = (left ? st.pair && st.left === "s2" : st.holding) && year === st.imgYear;
-    const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[st.s2comp] ? st.s2comp : "tci";
+    const visible = (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === yearOf(left);
+    const paint = left ? {} : paintProps();
+    const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[compOf(left)] ? compOf(left) : "tci";
     const pre = (left ? "s2gl-" : "s2g-") + (comp === "tci" ? "" : comp + "-");
     // the false colors wait, still loading, for the stretch of their view
     const sx = cfg.s2_stretch, stretched = comp === "tci" || (sx && sx.comp === comp);
@@ -1141,20 +1220,25 @@ export function render({model, el, earthwork, s2Items, credits}) {
       // which it then cannot draw ("Cannot destructure property 'source' ... null")
       getSource: (src, o) => s2Tiff(comp === "tci" ? src.url : src.bands[s2Prim(comp)], o, year, part === "fill").catch(() => null),
       renderSource: (src, {data, signal}) => !data ? null : comp === "tci" ? new COGLayer({
-        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "fill" ? " fill" : "")), pool: s2Pool, signal,
+        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "fill" ? " fill" : "")), pool: s2Pool, signal, ...paint,
         refinementStrategy: "best-available", maxRequests: 16,
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, {module: S2Look, props: {gamma}}]}),
         updateTriggers: {renderTile: [gamma]},
       }) : new COGLayer({
-        id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16,
+        id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16, ...paint,
         getTileData: (img, o) => s2BandTileData(img, o, comp + " " + year + (part === "fill" ? " fill" : ""), data, src, comp, year, part === "fill"),
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, look]}),
         updateTriggers: {renderTile: [gamma, ...(scale || []), ...lo, ...hi]},
       }),
     }));
   };
-  // the years mounted: the one shown, the rest once it has loaded
-  const s2Years = () => (s2Warm ? [st.imgYear, ...S2Y.filter((y) => y !== st.imgYear)] : [st.imgYear]);
+  // the years mounted: the one shown, the rest once it has loaded. Painting (not holding), the paint's year
+  // alone; holding, the paint's year stays mounted under the plain imagery's, so letting go is instant
+  const s2Years = (left = false) => {
+    if (!left && st.paint && !st.holding) return [PAINT_YEAR];
+    const y = yearOf(left), ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y)] : [y];
+    return !left && st.paint && !ys.includes(PAINT_YEAR) ? [...ys, PAINT_YEAR] : ys;
+  };
   // every imagery year stays mounted once the view is close enough, the
   // ones not shown at opacity 0, so their tiles load ahead and a scroll
   // while holding is instant
@@ -1201,14 +1285,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // stays mounted (the one shown loads first, a scroll is instant); the kernel's tiles (no
     // GPU path) keep only the year shown for false colors, which read three bands. Paired,
     // the imagery is the left map's, so none here
-    if (!st.pair && (st.holding || z >= 9)) {
+    // painting, the imagery is the map (the pair's right side too) from its first zoom
+    if (st.paint ? z >= (cfg.s2_min_z || 7) : !st.pair && (st.holding || z >= 9)) {
       if (S2GPU) { s2Discover(); for (const y of s2Years()) out.push(...s2CogLayers(y)); }
       else for (const y of S2Y) if (st.s2comp === "tci" || y === st.imgYear) out.push(s2Layer(y));
     }
     // while holding: the imagery, and over it only the two outlines
     //
     // kept in the stack while hidden (holding, zoomed out) so its shapes stay built
-    out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn}));
+    // painting, it is the paint's mask (not drawn; in the imagery's slot, since an interleaved overlay draws
+    // the mask with the layers of its own slot)
+    out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, mask: st.paint, onTile: tileIn}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);
     // gold on the dark basemap (was near-black on the light one)
@@ -1226,7 +1313,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   function layers2() {
     if (!st.pair || !map2) return [];
     let out;
-    if (S2GPU) { s2Discover(); out = s2Years().flatMap((y) => s2CogLayers(y, true)); }
+    if (S2GPU) { s2Discover(); out = s2Years(true).flatMap((y) => s2CogLayers(y, true)); }
     else out = S2Y.filter((y) => st.s2comp === "tci" || y === st.imgYear).map((y) => s2Layer(y, true));
     const hv = hover != null && hover >= 0 ? outline("hover-l", hexes[hover], [255, 255, 255, 235], 2, map2) : null;
     if (hv) out.push(hv);
@@ -1245,10 +1332,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (ov) ov.setProps({layers: layers()});
     if (ov2) ov2.setProps({layers: layers2()});
   }
-  function labels(on) {
+  // place names (L): hidden over the plain Sentinel-2 imagery (the main map while space is held, the pair's
+  // left map while it shows Sentinel-2), back when the basemap is; the paint keeps them
+  function labels(mode) {
+    const keep = NAMES_KEEP[mode];
     for (const m of [map, map2]) {
       if (!m || !m.isStyleLoaded()) continue;
-      (m.getStyle().layers || []).forEach((l) => { if (l.layout && l.layout["text-field"] !== undefined) m.setLayoutProperty(l.id, "visibility", on ? "visible" : "none"); });
+      const overImagery = m === map ? st.holding : st.pair && st.left === "s2";
+      (m.getStyle().layers || []).forEach((l) => {
+        if (!l.layout || l.layout["text-field"] === undefined) return;
+        const vis = !overImagery && (mode === "all" || (mode !== "off" && !!keep && keep.test(l.id))) ? "visible" : "none";
+        if (m.getLayoutProperty(l.id, "visibility") !== vis) m.setLayoutProperty(l.id, "visibility", vis);
+      });
     }
   }
 
@@ -1325,7 +1420,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     tip.style.display = "none";
     // false colors are stretched for the view: taken again if this hold is somewhere else
     if (st.s2comp !== "tci") send("s2comp", {comp: st.s2comp});
-    renderYear(); update();
+    labels(st.labels); styleComp(); renderYear(); update();
   }
   function endHold(by) {
     if (by !== "key") { clearTimeout(holdT); holdT = null; holdAt = null; }
@@ -1334,7 +1429,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     mapEl.classList.remove("holding");
     if (map) map.dragPan.enable();
     wheelAcc = 0;
-    renderYear(); update();
+    labels(st.labels); styleComp(); renderYear(); update();
     if (lastPt && map) showHexTip(lastPt);
   }
   mapEl.addEventListener("pointermove", (e) => {
@@ -1498,18 +1593,23 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the kinds key's Built (W)
     else if (k === "w" || k === "W") { if (st.gmode !== "kinds") return; st.focus = "built"; recolorHex(); styleKey(); update(); }
     else if (k === "p" || k === "P") setPair(!st.pair);
-    else if (k === "[" || k === "]") stepImg(k === "]" ? 1 : -1);
+    // I: the paint (Sentinel-2 gray, the lit ground in its colors) or the earthwork layer over the basemap
+    else if (k === "i" || k === "I") {
+      st.paint = !st.paint; root.classList.toggle("ew-paint", st.paint); if (st.paint) send("s2comp"); styleComp(); renderYear(); update();
+      note(st.paint ? "Sentinel-2, gray but where the ground was likely dug (I for the earthwork layer on the basemap)" : "The earthwork layer on the basemap (I for Sentinel-2 in gray, the lit ground in color)", 3000);
+    }
+    else if (k === "[" || k === "]") { if (st.paint && !st.holding && !(st.pair && st.left === "s2")) { note(`The paint shows ${PAINT_YEAR}: hold space for the years`, 2500); return; } stepImg(k === "]" ? 1 : -1); }
     // B: the imagery's first year and its latest, back and forth (from any other year, the
     // latest), while it shows: holding space, or on the pair's left side
     else if (k === "b" || k === "B") {
-      if (!(st.holding || (st.pair && st.left === "s2"))) return;
+      if (!(st.holding || (st.pair && st.left === "s2"))) { if (st.paint) note(`The paint shows ${PAINT_YEAR}: hold space for the years`, 2500); return; }
       const a = S2Y[0], b = S2Y[S2Y.length - 1];
       st.imgYear = st.imgYear === b ? a : b; renderYear(); update();
     }
     else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }
-    else if (k === "l" || k === "L") { st.labels = !st.labels; labels(st.labels); swLab.sty(); }
+    else if (k === "l" || k === "L") { const i = NAMES.findIndex(([m]) => m === st.labels); setNames(NAMES[(i + 1) % NAMES.length][0]); }
     else if (k === "x" || k === "X") { st.fit = !st.fit; sizes(); }
-    else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === st.s2comp); setComp(COMPS[(i + 1) % COMPS.length][0]); }
+    else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === compOf()); setComp(COMPS[(i + 1) % COMPS.length][0]); }
     else if ((k === "m" || k === "M") && MODELS.length > 1) setModel(MODELS[(MODELS.indexOf(st.model) + 1) % MODELS.length]);
     // full screen (the browser's own; Esc or F again leaves it), filling the window inside it
     else if (k === "f" || k === "F") {
@@ -1574,8 +1674,25 @@ export function render({model, el, earthwork, s2Items, credits}) {
         } catch (e) { console.error("divisions", e); }
       }
       update(); sendView(); renderYear();
+      // the paint's false colors need the stretch of this view
+      if (st.paint) send("s2comp");
     });
     map.on("moveend", sendView);
+    // the paint's false colors are stretched for the view: moved a view's width away or zoomed two
+    // levels, the stretch is taken again (once the camera rests), so another place is not drawn in the
+    // last one's stretch
+    let stretchAt = null, stretchT = null;
+    map.on("moveend", () => {
+      if (!st.paint || st.holding || compOf() === "tci") return;
+      clearTimeout(stretchT);
+      stretchT = setTimeout(() => {
+        const c = map.getCenter(), z = map.getZoom(), b = map.getBounds(), w = b.getEast() - b.getWest();
+        if (stretchAt && Math.abs(c.lng - stretchAt.lng) < w && Math.abs(c.lat - stretchAt.lat) < (b.getNorth() - b.getSouth()) && Math.abs(z - stretchAt.z) < 2) return;
+        const first = !stretchAt;
+        stretchAt = {lng: c.lng, lat: c.lat, z};
+        s2TakeStretch(!first);
+      }, 800);
+    });
     map.once("dragstart", () => creditsEl.classList.add("folded"));
     // a new view: the footprints under it asked for
     // (and the batches near it mounted, the far ones let go)
@@ -1644,6 +1761,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   model.on("change:status", () => say(model.get("status")));
   model.on("change:config", () => { try { cfg = JSON.parse(model.get("config") || "{}"); } catch (e) { cfg = {}; } update(); });
   try {
+    root.classList.toggle("ew-paint", st.paint);
     sizes(); boot(); styleRows(); loadHex(); renderCard(); setCards(cardsHidden); say(model.get("status"));
   } catch (e) { say("boot: " + e.message); console.error(e); }
   return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("keyup", onKeyUp); window.removeEventListener("pointerup", endMouse, true); window.removeEventListener("pointercancel", endMouse, true); window.removeEventListener("blur", endAny); document.documentElement.classList.remove(FIT_CLS); try { map && map.remove(); } catch (e) {} };

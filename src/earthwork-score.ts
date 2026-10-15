@@ -308,3 +308,23 @@ uniform highp usampler2D tesFlags;
     tHi: props.tHi ?? 1,
   }),
 } as const satisfies ShaderModule<EarthworkAggregateProps>;
+
+/**
+ * The paint's mask: after a score module, drops the fragments under the
+ * layer's cutoff, so a mask drawn with it is exactly the lit pixels.
+ */
+export const EarthworkCut = {
+  name: "earthworkCut",
+  fs: `\
+uniform earthworkCutUniforms {
+  float cut;
+} earthworkCut;
+`,
+  inject: {
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      if (earthworkScore_v < earthworkCut.cut) discard;
+    `,
+  },
+  uniformTypes: { cut: "f32" },
+  getUniforms: (props: { cut?: number }) => ({ cut: props.cut ?? 0.5 }),
+} as const satisfies ShaderModule<{ cut: number }>;

@@ -203,6 +203,20 @@ body {
   display: none;
 }
 
+/* H hides the Earthwork card too */
+.at.ew-read-hidden .at-panel {
+  display: none;
+}
+
+/* painting, the earthwork is not drawn, so its ramp is not shown */
+.at.ew-paint .at-panel .ew-hramp {
+  display: none;
+}
+
+.at.ew-paint .at-panel .ew-hy {
+  flex: 1;
+}
+
 /* a card's head folds it: its arrow turns, and the head keeps what it says */
 .at .at-panel .at-hd,
 .ew-s2hd {

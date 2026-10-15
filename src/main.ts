@@ -54,7 +54,7 @@ const [earthwork, divPm] = await Promise.all([
 
 const cfg = {
   // Wildwood, Florida: the starting area, where The Villages grades new neighborhoods out of farmland
-  home: { longitude: -81.989804, latitude: 28.751057, zoom: 12.7 },
+  home: { longitude: -81.989804, latitude: 28.751057, zoom: 12.5 },
   fit: true,
   ew_zoom: 12,
   // the world recipe's three layers; the aggregate (AlphaEarth and TESSERA together) to start
