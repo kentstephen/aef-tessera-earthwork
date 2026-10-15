@@ -1,0 +1,330 @@
+import {
+  COLORMAP_INDEX,
+  Colormap,
+  createColormapTexture,
+  decodeColormapSprite,
+} from "@developmentseed/deck.gl-raster/gpu-modules";
+import colormapsUrl from "@developmentseed/deck.gl-raster/gpu-modules/colormaps.png?url";
+import { ZarrLayer } from "@developmentseed/deck.gl-zarr";
+import type { Device, Texture } from "@luma.gl/core";
+import * as zarr from "zarrita";
+
+import { type AefArray, bandTexture, CHUNK, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
+import ChunkWorker from "./chunk.worker.ts?worker";
+import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
+import { EarthworkAggregate, EarthworkAlpha, EarthworkCut, EarthworkScore, EarthworkTessera } from "./earthwork-score";
+import { TES_BANDS } from "./tessera";
+
+export type { LayerKind, WorldModel };
+
+/** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags. */
+type TileData = PairTileData & {
+  /** The chunk's key (keyOf), for the chunks loaded in view. */
+  key: string;
+  tesFirstTex: Texture;
+  tesLastTex: Texture;
+  tesFlagsTex: Texture;
+  tesFirst: Int8Array;
+  tesLast: Int8Array;
+  tesFlags: Uint8Array;
+};
+
+/**
+ * The earthwork map layer: per 256 x 256 chunk of the AlphaEarth mosaic, both
+ * years of AlphaEarth and of TESSERA (resampled onto AlphaEarth's pixels),
+ * scored on the GPU by the layer chosen (aggregate, AlphaEarth or TESSERA, the
+ * world recipe's three). Also keeps the last chunks' raw bytes so a point can be
+ * scored on the CPU for the tooltip and the card.
+ */
+export async function createEarthwork(modelUrl: string, beforeId: () => string) {
+  const model: WorldModel = await (await fetch(modelUrl)).json();
+  const { arr, attrs } = await openMosaic();
+
+  // the chunks are read in a worker (chunk.worker.ts): AlphaEarth, its scores, TESSERA where they point
+  type Read = { aefFirst: Int8Array; aefLast: Int8Array; tesFirst: Int8Array; tesLast: Int8Array; tesFlags: Uint8Array };
+  const worker = new ChunkWorker();
+  worker.postMessage({ type: "init", model });
+  const asked = new Map<number, { resolve: (r: Read) => void; reject: (e: unknown) => void }>();
+  let askId = 0;
+  worker.onmessage = (ev: MessageEvent<Read & { id: number; error?: { name: string; message: string } }>) => {
+    const { id, error, ...r } = ev.data;
+    const a = asked.get(id);
+    if (!a) return;
+    asked.delete(id);
+    if (error) a.reject(Object.assign(new Error(error.message), { name: error.name }));
+    else a.resolve(r);
+  };
+  function readChunk(px0: number, py0: number, w: number, h: number, firstIdx: number, lastIdx: number, signal?: AbortSignal): Promise<Read> {
+    if (signal?.aborted) return Promise.reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+    const id = ++askId;
+    return new Promise<Read>((resolve, reject) => {
+      asked.set(id, { resolve, reject });
+      worker.postMessage({ type: "read", id, px0, py0, w, h, firstIdx, lastIdx });
+      signal?.addEventListener("abort", () => {
+        if (!asked.has(id)) return;
+        asked.delete(id);
+        worker.postMessage({ type: "abort", id });
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+      });
+    });
+  }
+
+  let gpu: { weights: Record<LayerKind, Texture>; colormap: Texture } | null = null;
+  let gpuPending = false;
+  const colormapBytes = fetch(colormapsUrl).then((r) => r.arrayBuffer());
+  let onReady: () => void = () => {};
+
+  function onDevice(device: Device) {
+    if (gpu || gpuPending) return;
+    gpuPending = true;
+    const weight = (w: number[]) =>
+      device.createTexture({
+        format: "r32float",
+        width: w.length,
+        height: 1,
+        mipLevels: 1,
+        data: new Float32Array(w),
+        sampler: { minFilter: "nearest", magFilter: "nearest" },
+      });
+    colormapBytes
+      .then((buf) => decodeColormapSprite(buf))
+      .then((img) => {
+        const weights = Object.fromEntries(LAYERS.map((k) => [k, weight(model[k].w)])) as Record<LayerKind, Texture>;
+        gpu = { weights, colormap: createColormapTexture(device, img) };
+        onReady();
+      });
+  }
+
+  // the raw chunks by "first-last:row-col", the last used last. A view holds more chunks than are
+  // kept (about 70 at zoom 12.7 in a laptop window; each is 24 MB with TESSERA), so a point whose
+  // chunk was let go reads it again (readAt)
+  type Chunk = { aefFirst: Int8Array; aefLast: Int8Array; tesFirst: Int8Array; tesLast: Int8Array; tesFlags: Uint8Array; w: number; h: number };
+  const chunks = new Map<string, Chunk>();
+  const KEEP = 16;
+  const keyOf = (first: number, last: number, r: number, c: number) => `${first}-${last}:${r}-${c}`;
+  const keepChunk = (k: string, ch: Chunk) => {
+    chunks.delete(k);
+    chunks.set(k, ch);
+    while (chunks.size > KEEP) chunks.delete(chunks.keys().next().value as string);
+  };
+  const reading = new Map<string, Promise<void>>();
+
+  let tilesRead = 0;
+  const NONE = new Int8Array(0), NONE_U8 = new Uint8Array(0);
+  // the chunks on the GPU now, by key: whether the view's chunks are in
+  const loaded = new Set<string>();
+
+  const flagsTexture = (device: Device, data: Uint8Array, width: number, height: number) =>
+    device.createTexture({
+      format: "r8uint",
+      width,
+      height,
+      mipLevels: 1,
+      data,
+      sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
+    });
+
+  function renderPipeline(kind: LayerKind, data: TileData, cut: number | null) {
+    const g = gpu;
+    if (!g) return [];
+    const score =
+      kind === "aef"
+        ? {
+            module: EarthworkScore,
+            props: { firstTex: data.firstTex, lastTex: data.lastTex, weightTex: g.weights.aef, bias: model.aef.b, gateLo: GATE_LO, gateHi: GATE_HI },
+          }
+        : kind === "tessera"
+          ? {
+              module: EarthworkTessera,
+              props: { tesFirst: data.tesFirstTex, tesLast: data.tesLastTex, tesFlags: data.tesFlagsTex, weightTex: g.weights.tessera, bias: model.tessera.b },
+            }
+          : {
+              module: EarthworkAggregate,
+              props: {
+                aefFirst: data.firstTex,
+                aefLast: data.lastTex,
+                tesFirst: data.tesFirstTex,
+                tesLast: data.tesLastTex,
+                tesFlags: data.tesFlagsTex,
+                weightTex: g.weights.aggregate,
+                bias: model.aggregate.b,
+                gateLo: GATE_LO,
+                gateHi: GATE_HI,
+                tLo: model.bounds[0],
+                tHi: model.bounds[1],
+              },
+            };
+    // the paint's mask: the lit pixels only (the mask pass keeps where a fragment fell, not its color)
+    if (cut != null) return [score, { module: EarthworkCut, props: { cut } }];
+    // the score as plain gray, opaque: for the headless checks against numpy (window.__ewGray)
+    if ((globalThis as { __ewGray?: boolean }).__ewGray) return [score];
+    return [
+      score,
+      { module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.viridis } },
+      { module: EarthworkAlpha },
+    ];
+  }
+
+  /** The layer's id for the window: the paint's maskId while it is the mask. */
+  const layerId = (first: number, last: number) => `earthwork-${first}-${last}`;
+
+  /**
+   * The layer for the window and the layer chosen. As the paint's mask (mask: true) it is not
+   * drawn, only its lit pixels (over the layer's cutoff) marked; the same layer either way, so
+   * the chunks read for one serve the other.
+   */
+  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; mask?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
+    const { visible, first, last, minZoom, onTile, onViewportLoad } = opts;
+    const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aggregate";
+    const cut = opts.mask ? model.cut[kind] : null;
+    const firstIdx = first - YEAR_ORIGIN;
+    const lastIdx = last - YEAR_ORIGIN;
+    return new ZarrLayer<zarr.Readable, "int8", TileData>({
+      id: layerId(first, last),
+      operation: opts.mask ? "mask" : "draw",
+      node: arr as AefArray,
+      metadata: attrs,
+      selection: { time: firstIdx, band: null },
+      getTileData: async (_a, o) => {
+        const ys = o.sliceSpec[2] as zarr.Slice, xs = o.sliceSpec[3] as zarr.Slice;
+        const py0 = ys.start ?? 0, px0 = xs.start ?? 0;
+        const { device, width, height } = o;
+        onDevice(device);
+        const r = await readChunk(px0, py0, width, height, firstIdx, lastIdx, o.signal);
+        const d = {
+          firstTex: bandTexture(device, r.aefFirst, width, height),
+          lastTex: bandTexture(device, r.aefLast, width, height),
+          first: r.aefFirst,
+          last: r.aefLast,
+          width,
+          height,
+          byteLength: r.aefFirst.byteLength + r.aefLast.byteLength,
+        };
+        const t = { first: r.tesFirst, last: r.tesLast, flags: r.tesFlags };
+        const key = keyOf(first, last, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
+        keepChunk(key, {
+          aefFirst: d.first,
+          aefLast: d.last,
+          tesFirst: t.first,
+          tesLast: t.last,
+          tesFlags: t.flags,
+          w: width,
+          h: height,
+        });
+        tilesRead++;
+        loaded.add(key);
+        // the raw bytes stay only in the chunks kept for scoreAt (KEEP), not in every tile
+        return {
+          ...d,
+          first: NONE,
+          last: NONE,
+          key,
+          tesFirstTex: bandTexture(device, t.first, width, height, TES_BANDS),
+          tesLastTex: bandTexture(device, t.last, width, height, TES_BANDS),
+          tesFlagsTex: flagsTexture(device, t.flags, width, height),
+          tesFirst: NONE,
+          tesLast: NONE,
+          tesFlags: NONE_U8,
+          byteLength: (d.byteLength ?? 0) + t.first.byteLength + t.last.byteLength + t.flags.byteLength,
+        };
+      },
+      renderTile: (data: TileData) => ({ renderPipeline: renderPipeline(kind, data, cut) }),
+      visible,
+      minZoom,
+      // source.coop answers over HTTP/2, so more than the browser's 6 per host
+      maxRequests: 12,
+      // each tile is AlphaEarth's two years x 64 bands and TESSERA's two x 128 (24 MB on the GPU)
+      maxCacheSize: 8,
+      onTileLoad: () => onTile && onTile(),
+      // a tile let go frees its textures (about 24 MB on the GPU; nothing else does, and a jump to a new
+      // place piled up enough of them to crash the page)
+      onTileUnload: (tile: { content?: TileData | null }) => {
+        const t = tile.content;
+        if (!t) return;
+        loaded.delete(t.key);
+        for (const tex of [t.firstTex, t.lastTex, t.tesFirstTex, t.tesLastTex, t.tesFlagsTex]) tex?.destroy();
+      },
+      onViewportLoad: () => onViewportLoad && onViewportLoad(),
+      updateTriggers: { renderTile: [kind, !!gpu, cut] },
+      // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
+      beforeId: beforeId(),
+    });
+  }
+
+  const chunkAt = (lon: number, lat: number) => {
+    const px = Math.floor((lon - X0) / RES), py = Math.floor((Y0 - lat) / RES);
+    return { px, py, r: Math.floor(py / CHUNK), c: Math.floor(px / CHUNK) };
+  };
+
+  /**
+   * A layer's score at a point, as the shader computes it, from the chunk
+   * already read; null where that chunk is not in hand or the layer has none there.
+   */
+  function scoreAt(lon: number, lat: number, first: number, last: number, kind: LayerKind): number | null {
+    const { px, py, r, c } = chunkAt(lon, lat);
+    const k = keyOf(first, last, r, c), ch = chunks.get(k);
+    if (!ch) return null;
+    keepChunk(k, ch);
+    const ix = px - c * CHUNK, iy = py - r * CHUNK;
+    if (ix < 0 || iy < 0 || ix >= ch.w || iy >= ch.h) return null;
+    return scorePixel(LAYERS.includes(kind) ? kind : "aggregate", model, { ...ch, plane: ch.w * ch.h, at: iy * ch.w + ix });
+  }
+
+  /**
+   * Read the chunk under a point for this window if it is not in hand (a view holds more chunks
+   * than are kept); resolves once scoreAt can answer there, or with nothing where it cannot.
+   */
+  function readAt(lon: number, lat: number, first: number, last: number): Promise<void> {
+    const { px, py, r, c } = chunkAt(lon, lat);
+    const k = keyOf(first, last, r, c);
+    if (chunks.has(k)) return Promise.resolve();
+    let p = reading.get(k);
+    if (!p) {
+      const [, , H, W] = arr.shape;
+      if (px < 0 || py < 0 || px >= W || py >= H) return Promise.resolve();
+      const y0 = r * CHUNK, x0 = c * CHUNK, h = Math.min(CHUNK, H - y0), w = Math.min(CHUNK, W - x0);
+      p = readChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN)
+        .then((r) => keepChunk(k, { ...r, w, h }))
+        .catch(() => {})
+        .finally(() => reading.delete(k));
+      reading.set(k, p);
+    }
+    return p;
+  }
+
+  /** How many of the chunks under a box are loaded on the GPU for this window. */
+  function loadedIn(bbox: [number, number, number, number], first: number, last: number) {
+    const [W, S, E, N] = bbox;
+    const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
+    const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
+    let n = 0;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (loaded.has(keyOf(first, last, r, c))) n++;
+    return { loaded: n, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
+  }
+
+  /** How many of the chunks under a box are in hand for this window. */
+  function chunksIn(bbox: [number, number, number, number], first: number, last: number) {
+    const [W, S, E, N] = bbox;
+    const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
+    const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
+    let inHand = 0;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (chunks.has(keyOf(first, last, r, c))) inHand++;
+    return { inHand, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
+  }
+
+  return {
+    layer,
+    layerId,
+    scoreAt,
+    readAt,
+    chunksIn,
+    loadedIn,
+    model,
+    tilesRead: () => tilesRead,
+    whenReady: (f: () => void) => {
+      onReady = f;
+    },
+  };
+}
+
+export { COLORMAP_INDEX };

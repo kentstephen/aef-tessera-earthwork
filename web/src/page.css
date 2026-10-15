@@ -1,0 +1,555 @@
+/* This page's additions to the notebook's styles: two columns of small cards, the same paired or not */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0e0e0e;
+}
+
+.at {
+  --col: 264px;
+}
+
+/* the maps fill the pane (MapLibre's own stylesheet, loaded after, makes a map position: relative) */
+.at .at-map,
+.at .at-map2 {
+  position: absolute;
+}
+
+/* ---- the columns: the left (search, Earthwork, the imagery) and the right (buttons, the readout) ---- */
+.at .at-top {
+  width: var(--col);
+  max-width: calc(50% - 24px);
+  gap: 8px;
+}
+
+.at .at-tools {
+  gap: 6px;
+}
+
+.at .at-btn {
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  gap: 6px;
+  border-radius: 10px;
+}
+
+/* search: small until it is used, then wide enough to read a place */
+.at .at-search {
+  width: 212px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  transition: width 0.15s ease;
+}
+
+/* as wide as the card under it, no wider */
+.at .at-search:focus-within {
+  width: var(--col);
+}
+
+/* every card: the column's width, small type, no long words */
+.at .at-panel,
+.at .at-yc.at-s2c,
+.at .at-yc.ew-read {
+  width: var(--col);
+  max-width: calc(50vw - 24px);
+  padding: 9px 11px;
+  border-radius: 10px;
+  transform: none;
+}
+
+.at .at-panel {
+  gap: 6px;
+}
+
+.at .at-panel .at-hd {
+  margin: 0;
+}
+
+.at .at-panel .at-hd .t {
+  font-size: 13px;
+}
+
+.at .at-panel .at-mwhy,
+.at .at-panel .at-key .why {
+  display: none;
+}
+
+.at .at-panel .at-lab {
+  min-width: 46px;
+  font-size: 12px;
+}
+
+.at .at-panel .at-row {
+  gap: 8px;
+}
+
+.at .at-panel .seg-s button {
+  padding: 2px 6px;
+  font-size: 12.5px;
+}
+
+.at .at-panel .at-key {
+  flex-wrap: nowrap;
+  gap: 6px;
+  font-size: 11.5px;
+}
+
+.at .at-panel .at-ramp {
+  flex: 1;
+  width: auto;
+  height: 8px;
+}
+
+/* the sliders take what the row leaves, so the value keeps its line in the narrower column */
+.at .at-panel .at-win {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.at .at-panel .at-wtxt {
+  font-size: 12px;
+}
+
+.at-wkeys {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: -4px;
+}
+
+.at-row .at-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* the clicked hexagon: the notebook's card, at the column's width */
+.at .at-yc.ew-read .hex {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+  font-size: 12.5px;
+}
+
+.at .at-yc.ew-read .hex .place {
+  font-size: 12.5px;
+  padding-right: 24px;
+}
+
+.at .at-yc.ew-read .hex h3 {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.at .at-yc.ew-read .hex h4 {
+  margin: 0 0 3px;
+  font-size: 12.5px;
+}
+
+.at .at-yc.ew-read .hex p {
+  margin: 0 0 6px;
+}
+
+.at .at-yc.ew-read .hex p.sub {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.at .at-yc.ew-read .coords {
+  font-size: 11.5px;
+  margin: 4px 0 8px;
+  padding: 5px 7px;
+}
+
+.at .at-yc.ew-read .x {
+  right: -8px;
+  top: -4px;
+}
+
+/* ---- the right column: Earthwork, then the readout under it, at the button row's width (--rcol); it never
+   runs off the map ---- */
+.ew-col-r {
+  --col: var(--rcol, 264px);
+  position: absolute;
+  right: 12px;
+  top: 54px;
+  z-index: 6;
+  width: var(--col);
+  max-width: calc(50vw - 24px);
+  max-height: calc(100% - 96px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ew-col-r .at-panel {
+  flex: none;
+}
+
+.at .ew-col-r .at-yc.ew-read {
+  position: relative;
+  right: auto;
+  top: auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.at .at-yc.ew-read.ew-off,
+.at.ew-read-hidden .at-yc.ew-read {
+  display: none;
+}
+
+/* H hides the Earthwork card too */
+.at.ew-read-hidden .at-panel {
+  display: none;
+}
+
+/* painting, the earthwork is not drawn, so its ramp is not shown */
+.at.ew-paint .at-panel .ew-hramp {
+  display: none;
+}
+
+.at.ew-paint .at-panel .ew-hy {
+  flex: 1;
+}
+
+/* a card's head folds it: its arrow turns, and the head keeps what it says */
+.at .at-panel .at-hd,
+.ew-s2hd {
+  cursor: pointer;
+  user-select: none;
+}
+
+.at .at-panel .at-hd {
+  gap: 8px;
+}
+
+.ew-hramp {
+  flex: 1;
+  height: 7px;
+  min-width: 40px;
+  border-radius: 3px;
+}
+
+.ew-hy {
+  margin-left: 0;
+}
+
+.at .at-panel.collapsed {
+  padding: 7px 8px 7px 11px;
+}
+
+.at .at-panel.collapsed .at-row {
+  display: none;
+}
+
+/* the Sentinel-2 card: always on the left, under the search */
+.at .at-yc.at-s2c {
+  display: block;
+  position: relative;
+  right: auto;
+  top: auto;
+  padding: 7px 8px 7px 11px;
+}
+
+.ew-s2hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.at-s2c .ew-keys {
+  margin: 4px 0 2px;
+}
+
+.at-s2c.ew-folded .ew-keys {
+  display: none;
+}
+
+.ew-folded .at-cb svg {
+  transform: rotate(-90deg);
+}
+
+/* ---- keys on buttons ---- */
+.at-btn kbd,
+.at-search kbd,
+.at-row kbd,
+.at-more kbd,
+.at-chip kbd,
+.ew-keys kbd {
+  font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.at-btn.on kbd {
+  color: var(--on);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+/* ---- the credits: one line in the bottom right corner, as MapLibre's compact attribution; the
+   button at its end folds it away to just the button ---- */
+.at-credits {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  z-index: 5;
+  max-width: calc(100% - 80px);
+  box-sizing: border-box;
+  padding: 3px 30px 3px 11px;
+  background: rgba(14, 15, 17, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.at-credits.folded {
+  display: none;
+}
+
+.at-cr-b {
+  position: absolute;
+  right: 11px;
+  bottom: 9px;
+  z-index: 6;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(14, 15, 17, 0.6);
+  color: var(--muted);
+  font: italic 600 11px/16px Georgia, serif;
+  cursor: pointer;
+}
+
+.at-cr-b:hover {
+  color: var(--text);
+}
+
+.at-credits a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: rgba(155, 165, 175, 0.35);
+  text-underline-offset: 2px;
+}
+
+.at-credits a:hover {
+  color: var(--text);
+}
+
+.at-credits .sep::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 7px 2px;
+  border-radius: 50%;
+  background: var(--faint);
+  vertical-align: middle;
+}
+
+/* the zoom buttons in the bottom left corner, clear of the credits on the right */
+.at .maplibregl-ctrl-bottom-left {
+  bottom: 0;
+}
+
+.at-msg {
+  bottom: 40px;
+}
+
+@media (max-width: 760px) {
+  .at {
+    --col: 220px;
+  }
+
+  .at-credits {
+    font-size: 10px;
+  }
+}
+
+/* the years read, in the Earthwork card's head; the slider's own text is then not needed */
+.ew-hy {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.at .at-panel .at-wtxt {
+  display: none;
+}
+
+/* search: one focus ring, on the box */
+.at .at-search input:focus-visible {
+  outline: none;
+}
+
+.at .at-search:focus-within {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* the Sentinel-2 card: small, the search's width; the year first, so the pair always says which year */
+.at .at-yc.at-s2c {
+  width: 212px;
+  padding: 12px 12px 12px 14px;
+}
+
+.at .ew-s2hd {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ew-s2hd b {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.at-s2c:not(.ew-showing) .ew-s2hd b {
+  color: var(--muted);
+}
+
+.ew-s2hd span {
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+/* its keys in groups that wrap, so the card stays a small box */
+.at-s2c .ew-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 9px;
+  margin: 9px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.at-s2c .ew-keys > span {
+  white-space: nowrap;
+}
+
+/* the first visit's card: short, over a dimmed map */
+.at .ew-welcome .box {
+  width: min(440px, calc(100% - 32px));
+  padding: 20px 22px 18px;
+  font-size: 13.5px;
+}
+
+.ew-welcome ul {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+
+.ew-welcome li {
+  margin: 0 0 5px;
+}
+
+.ew-welcome kbd {
+  font: 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.ew-welcome a {
+  color: var(--text);
+  text-underline-offset: 2px;
+}
+
+/* the GitHub link in the button row: a button that is a link */
+.at .ew-code {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* the map's zoom, in the gap at the right of the Sentinel-2 card's head, two lines as the words beside it */
+.ew-s2hd span {
+  white-space: nowrap;
+}
+
+.ew-s2hd .ew-zw {
+  margin-left: auto;
+  text-align: right;
+}
+
+.ew-s2hd .ew-z {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the zoom note stands at the bottom; a status shown with it sits above it */
+.at.ew-zout .at-msg:not(.ew-zmsg) {
+  bottom: 78px;
+}
+
+/* the earthwork read for the view: a bar along the top filling as its chunks come in, and its count */
+.ew-load {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ew-load.on {
+  opacity: 1;
+}
+
+.ew-load i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--cool, #56b4e9);
+  transition: width 0.3s ease-out;
+}
+
+.ew-load-tag {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: none;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ew-load-tag.on {
+  display: block;
+}
+
+.ew-load-tag span {
+  margin-left: 6px;
+  color: var(--muted);
+}
