@@ -2097,6 +2097,7 @@ def _(anywidget, asyncio, time, traitlets):
         import {TileLayer, H3HexagonLayer} from "https://esm.sh/@deck.gl/geo-layers@9.3.10?__DEPS__";
         import {COGLayer, MosaicLayer} from "https://esm.sh/@developmentseed/deck.gl-geotiff@0.8.0?__DEPS__";
         import {CreateTexture} from "https://esm.sh/@developmentseed/deck.gl-raster@0.8.0/gpu-modules?__DEPS__";
+        import {MaskExtension} from "https://esm.sh/@deck.gl/extensions@9.3.10?__DEPS__";
         import {DecoderPool, GeoTIFF, PerOriginSemaphore} from "https://esm.sh/@developmentseed/geotiff@0.8.0?__DEPS__";
         import {latLngToCell, getResolution, cellToBoundary, cellToLatLng, isValidCell} from "https://esm.sh/h3-js@4.5.0";
         import {Protocol as PMProtocol} from "https://esm.sh/pmtiles@4.5.0";
@@ -2210,6 +2211,8 @@ def _(anywidget, asyncio, time, traitlets):
             gmode: "earth", want: "earth", noPick: false, hideKinds: new Set(), focus: "all", y0: cfg.aef_from || 2022, y1: cfg.aef_to || 2025,
             imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: true, s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
             fit: !!cfg.fit, holding: false,
+            // the paint (I): Sentinel-2 is the map, gray but for the lit hexagons, which keep its colors
+            paint: cfg.paint !== false,
             // the pair (P) and its left side (Sentinel-2)
             pair: false, left: "s2",
           };
@@ -2605,10 +2608,13 @@ def _(anywidget, asyncio, time, traitlets):
 
           // ---- the hexagons -----------------------------------------------------------
           let hexes = [], N = 0, res = -1, hexIndex = new Map(), hattrs = null, hmeta = {}, hcol = null, hcol32 = null, hexSeq = 0, hover = null, picked = null, imgPick = null;
+          // the lit hexagons (their indexes): the paint's mask, where the imagery keeps its colors
+          let lit = [];
           function recolorHex() {
-            if (!N || !hattrs || hattrs.length !== HB * N) { hcol = null; hcol32 = null; return; }
+            if (!N || !hattrs || hattrs.length !== HB * N) { hcol = null; hcol32 = null; lit = []; return; }
             hcol = new Uint8Array(4 * N);
             hcol32 = new Uint32Array(hcol.buffer);
+            lit = [];
             for (let i = 0; i < N; i++) {
               const a8 = HB * i, o = 4 * i, lv = hattrs[a8 + 1];
               let col, a;
@@ -2640,6 +2646,8 @@ def _(anywidget, asyncio, time, traitlets):
                 col = vir(t); a = Math.round(A_QUIET + (A_FILL - A_QUIET) * t);
               }
               hcol[o] = col[0]; hcol[o + 1] = col[1]; hcol[o + 2] = col[2]; hcol[o + 3] = a;
+              // quiet ground (the kinds' faint gray) is drawn but not lit
+              if (st.gmode !== "kinds" || hattrs[a8 + 6]) lit.push(i);
             }
             hexSeq++;
           }
@@ -2764,7 +2772,7 @@ def _(anywidget, asyncio, time, traitlets):
           const zoomTxt = () => map ? map.getZoom().toFixed(1) : "";
           function renderYear() {
             // the imagery's card: its year, while the imagery shows (held, or the pair's left)
-            const showImg = st.holding || (st.pair && st.left === "s2");
+            const showImg = st.holding || st.paint || (st.pair && st.left === "s2");
             // a small card, the search's width: the year (what the imagery shows), what it is, its keys
             const stretching = st.s2comp !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === st.s2comp);
             s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
@@ -2894,7 +2902,7 @@ def _(anywidget, asyncio, time, traitlets):
             return [W_ - dx, Math.max(-85, S_ - dy), E_ + dx, Math.min(85, N_ + dy)];
           }
           function s2Discover() {
-            if (!map || !S2GPU || !(st.holding || st.pair || map.getZoom() >= 9)) return;
+            if (!map || !S2GPU || !(st.holding || st.pair || st.paint || map.getZoom() >= 9)) return;
             const z = Math.max(cfg.s2_min_z || 7, Math.min(9, Math.floor(map.getZoom()))), n = 2 ** z;
             const tx = (lon) => Math.min(n - 1, Math.max(0, Math.floor((lon + 180) / 360 * n)));
             const ty = (lat) => { const v = Math.sin(lat * Math.PI / 180); return Math.min(n - 1, Math.max(0, Math.floor((0.5 - Math.log((1 + v) / (1 - v)) / (4 * Math.PI)) * n))); };
@@ -2975,6 +2983,24 @@ def _(anywidget, asyncio, time, traitlets):
             uniformTypes: {gamma: "f32"},
             getUniforms: (q) => ({gamma: q.gamma}),
           };
+          // ---- the paint: Sentinel-2 in gray, in its own colors inside the lit hexagons, in one draw.
+          // deck.gl's MaskExtension draws the mask layer ("paint-mask", the lit hexagons) into a texture
+          // and its shader drops what falls outside; this one keeps its mask and turns what falls
+          // outside gray instead (its luminance), after the imagery's own colors are made, so the
+          // false colors gray the same way. An empty mask (nothing lit) is all gray; no mask layer at
+          // all (holding space, zoomed out past the hexagons) is the imagery as it is
+          const MASK_MOD = MaskExtension.prototype.getShaders.call({getAttributeManager: () => ({attributes: {}}), props: {}, state: {}}).modules[0];
+          const {"fs:#main-start": _maskDiscard, ...maskInject} = MASK_MOD.inject;
+          const PAINT_MOD = {...MASK_MOD, inject: {...maskInject, "fs:#main-end": `
+  if (mask.enabled && !mask_isInBounds(mask_texCoords)) fragColor.rgb = vec3(dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722)));
+`}};
+          class PaintExtension extends MaskExtension {
+            // the raster is one mesh drawn as one instance: placed by its geometry, never by the instance
+            getShaders() { this.state.maskByInstance = false; return {modules: [PAINT_MOD]}; }
+          }
+          PaintExtension.extensionName = "PaintExtension";
+          const PAINT = new PaintExtension();
+          const PAINT_PROPS = {extensions: [PAINT], maskId: "paint-mask", maskByInstance: false};
           // ---- the false colors (S2_COMPOSITES in the kernel): R, G, B from the raw bands (uint16
           // reflectance x 10,000). The layer walks the first 20 m band's tiles; each other band is read
           // at the level of the same pixel size and placed by its own geotransform (the yearly
@@ -3162,7 +3188,8 @@ def _(anywidget, asyncio, time, traitlets):
             // keep each tile's raster layer as it was when the tile came in (an opacity change never
             // reaches them, so a tile loaded while holding stayed after the hold), while deck.gl checks
             // every parent's visible on each draw. Hidden years still load their tiles
-            const visible = (left ? st.pair && st.left === "s2" : st.holding) && year === st.imgYear;
+            const visible = (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === st.imgYear;
+            const paint = left ? {} : PAINT_PROPS;
             const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[st.s2comp] ? st.s2comp : "tci";
             const pre = (left ? "s2gl-" : "s2g-") + (comp === "tci" ? "" : comp + "-");
             // the false colors wait, still loading, for the stretch of their view
@@ -3182,12 +3209,12 @@ def _(anywidget, asyncio, time, traitlets):
               // which it then cannot draw ("Cannot destructure property 'source' ... null")
               getSource: (src, o) => s2Tiff(comp === "tci" ? src.url : src.bands[s2Prim(comp)], o, year, part === "fill").catch(() => null),
               renderSource: (src, {data, signal}) => !data ? null : comp === "tci" ? new COGLayer({
-                id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "fill" ? " fill" : "")), pool: s2Pool, signal,
+                id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "fill" ? " fill" : "")), pool: s2Pool, signal, ...paint,
                 refinementStrategy: "best-available", maxRequests: 16,
                 renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, {module: S2Look, props: {gamma}}]}),
                 updateTriggers: {renderTile: [gamma]},
               }) : new COGLayer({
-                id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16,
+                id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16, ...paint,
                 getTileData: (img, o) => s2BandTileData(img, o, comp + " " + year + (part === "fill" ? " fill" : ""), data, src, comp, year, part === "fill"),
                 renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, look]}),
                 updateTriggers: {renderTile: [gamma, ...(scale || []), ...lo, ...hi]},
@@ -3221,6 +3248,12 @@ def _(anywidget, asyncio, time, traitlets):
             filled: true, stroked: false, extruded: false, highPrecision: true, pickable: false,
             beforeId: slot(),
           });
+          const paintMask = () => new H3HexagonLayer({
+            id: "paint-mask", operation: "mask", data: lit,
+            getHexagon: (i) => hexes[i], updateTriggers: {getHexagon: [hexSeq]},
+            filled: true, stroked: false, extruded: false, highPrecision: true, pickable: false,
+            beforeId: slot(),
+          });
           const ring = (h) => { try { return cellToBoundary(h, true); } catch (e) { return null; } };
           const outline = (id, h, color, width, m = map) => { const r = h ? ring(h) : null; return r ? new PathLayer({id, data: [r], getPath: (d) => d, getColor: color, widthUnits: "pixels", getWidth: width, beforeId: slot(m)}) : null; };
           function layers() {
@@ -3230,14 +3263,18 @@ def _(anywidget, asyncio, time, traitlets):
             // stays mounted (the one shown loads first, a scroll is instant); the kernel's tiles (no
             // GPU path) keep only the year shown for false colors, which read three bands. Paired,
             // the imagery is the left map's, so none here
-            if (!st.pair && (st.holding || z >= 9)) {
+            // painting, the imagery is the map (the pair's right side too) from its first zoom
+            if (st.paint ? z >= (cfg.s2_min_z || 7) : !st.pair && (st.holding || z >= 9)) {
               if (S2GPU) { s2Discover(); for (const y of s2Years()) out.push(...s2CogLayers(y)); }
               else for (const y of S2Y) if (st.s2comp === "tci" || y === st.imgYear) out.push(s2Layer(y));
             }
             // while holding: the imagery, and over it only the two outlines
             //
             // kept in the stack while hidden (holding, zoomed out) so its shapes stay built
-            if (hexData && hcol) out.push(hexLayer(!st.holding && z >= HEXZ));
+            if (hexData && hcol) out.push(hexLayer(!st.paint && !st.holding && z >= HEXZ));
+            // the paint's mask, in the imagery's slot (an interleaved overlay draws the mask with the
+            // layers of its own slot)
+            if (st.paint && !st.holding && z >= HEXZ && hexData) out.push(paintMask());
             const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
             if (hv) out.push(hv);
             // gold on the dark basemap (was near-black on the light one)
@@ -3275,7 +3312,7 @@ def _(anywidget, asyncio, time, traitlets):
           function labels(on) {
             for (const m of [map, map2]) {
               if (!m || !m.isStyleLoaded()) continue;
-              const overImagery = m === map ? st.holding : st.pair && st.left === "s2";
+              const overImagery = m === map ? st.holding || (st.paint && m.getZoom() >= (cfg.s2_min_z || 7)) : st.pair && st.left === "s2";
               const vis = on && !overImagery ? "visible" : "none";
               (m.getStyle().layers || []).forEach((l) => { if (l.layout && l.layout["text-field"] !== undefined && m.getLayoutProperty(l.id, "visibility") !== vis) m.setLayoutProperty(l.id, "visibility", vis); });
             }
@@ -3375,8 +3412,8 @@ def _(anywidget, asyncio, time, traitlets):
           // the space bar: down starts a hold at the pointer (or the map's
           // center before the pointer has been over it), up ends it
           function spaceDown() {
-            // paired, the imagery is already on the left
-            if (st.holding || !map || st.pair) return;
+            // paired, the imagery is already on the left (painting, space shows the right side's as it is)
+            if (st.holding || !map || (st.pair && !st.paint)) return;
             const r = mapEl.getBoundingClientRect();
             const inMap = lastPt && lastPt.x >= r.left && lastPt.x <= r.right && lastPt.y >= r.top && lastPt.y <= r.bottom;
             const pt = inMap ? lastPt : {x: r.left + r.width / 2, y: r.top + r.height / 2};
@@ -3566,11 +3603,16 @@ def _(anywidget, asyncio, time, traitlets):
             // the kinds key's Built (W)
             else if (k === "w" || k === "W") { if (st.gmode !== "kinds") return; st.focus = "built"; recolorHex(); styleKey(); update(); }
             else if (k === "p" || k === "P") setPair(!st.pair);
+            // I: the paint (Sentinel-2 gray, the lit hexagons in color) or the hexagons over the basemap
+            else if (k === "i" || k === "I") {
+              st.paint = !st.paint; labels(st.labels); renderYear(); update();
+              note(st.paint ? "Sentinel-2, gray but for the lit hexagons (I for the hexagons on the basemap)" : "Hexagons on the basemap (I for Sentinel-2 in gray, the lit hexagons in color)", 3000);
+            }
             else if (k === "[" || k === "]") stepImg(k === "]" ? 1 : -1);
             // B: the imagery's first year and its latest, back and forth (from any other year, the
             // latest), while it shows: holding space, or on the pair's left side
             else if (k === "b" || k === "B") {
-              if (!(st.holding || (st.pair && st.left === "s2"))) return;
+              if (!(st.holding || st.paint || (st.pair && st.left === "s2"))) return;
               const a = S2Y[0], b = S2Y[S2Y.length - 1];
               st.imgYear = st.imgYear === b ? a : b; renderYear(); update();
             }
@@ -3643,7 +3685,7 @@ def _(anywidget, asyncio, time, traitlets):
             // a new view: the footprints under it asked for
             // (and the batches near it mounted, the far ones let go)
             map.on("moveend", () => { if (S2GPU) { s2Discover(); update(); } });
-            map.on("zoomend", () => { update(); renderYear(); styleKey(); tesZoom(); });
+            map.on("zoomend", () => { update(); renderYear(); styleKey(); tesZoom(); labels(st.labels); });
             tesZoom();
             // a zoom in crossing 8.3 (the kernel's _AHEAD_ZOOM) tells the kernel
             // at once, so it starts reading before the hexagons' zoom
