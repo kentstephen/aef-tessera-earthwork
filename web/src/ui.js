@@ -947,22 +947,6 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const PAINT = new PaintExtension();
   // the mask is the earthwork layer itself (its id changes with the years)
   const paintProps = () => ({extensions: [PAINT], maskId: earthwork.layerId(st.y0, st.y1), maskByInstance: false});
-  // ---- the gray outside the lit ground is the near infrared (B08), not the luminance: vegetation bright, water black,
-  // bare and built ground in between. Its own layers drawn over the paint's, with the same mask: they keep only what
-  // falls outside the lit ground, and draw nothing where the paint shows its colors everywhere (Shift held, the
-  // earthwork not in yet, no mask at all). Where they have not loaded, the paint's luminance gray shows under them
-  const NIR_MOD = {...MASK_MOD, inject: {...maskInject, "fs:#main-start": `
-  if (!mask.enabled || paintFill.full > 0.5 || mask_isInBounds(mask_texCoords)) discard;
-`}};
-  class NirExtension extends MaskExtension {
-    getShaders() { this.state.maskByInstance = false; return {modules: [NIR_MOD, PAINT_FILL]}; }
-    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({paintFill: {full: st.filled || !ewIn ? 1 : 0}}); }
-  }
-  NirExtension.extensionName = "NirExtension";
-  const NIR = new NirExtension();
-  const nirProps = () => ({extensions: [NIR], maskId: earthwork.layerId(st.y0, st.y1), maskByInstance: false});
-  // B08 reflectance shown as white (vegetation runs about 0.3 to 0.45)
-  const NIR_SCALE = cfg.nir_scale != null ? Number(cfg.nir_scale) : 0.45;
   // ---- the false colors (S2_COMPOSITES in the kernel): R, G, B from the raw bands (uint16
   // reflectance x 10,000). The layer walks the first 20 m band's tiles; each other band is read
   // at the level of the same pixel size and placed by its own geotransform (the yearly
@@ -981,13 +965,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
     ndbi: {bands: ["B11", "B8A"], kind: 0, q: (v, o) => { o[0] = (v[0] - v[1]) / (v[0] + v[1]); o[1] = o[2] = 0; }},
     mineral: {bands: ["B02", "B03", "B04", "B11", "B12", "B8A"], kind: 1,
               q: (v, o) => { o[0] = v[2] / v[0]; o[1] = v[3] / v[4]; o[2] = s2Bare(v[1], v[2], v[3], v[5]); }},
-    // the paint's gray outside the lit ground (S2Gray), not one of the colors C steps through
-    nir: {rgb: ["B08", "B08", "B08"]},
   };
   const S2_20M = new Set(["B11", "B12", "B8A"]);
   const s2BandsOf = (comp) => S2_FALSE[comp].rgb || S2_FALSE[comp].bands;
-  // the band whose tiles are walked: the first 20 m one, or with none (the near infrared alone) the first band, at 10 m
-  const s2Prim = (comp) => s2BandsOf(comp).find((b) => S2_20M.has(b)) || s2BandsOf(comp)[0];
+  const s2Prim = (comp) => s2BandsOf(comp).find((b) => S2_20M.has(b));
   // float -> half float bits (rgba16float takes them as a Uint16Array)
   const s2F32 = new Float32Array(1), s2U32 = new Uint32Array(s2F32.buffer);
   function s2Half(v) {
@@ -1134,25 +1115,6 @@ export function render({model, el, earthwork, s2Items, credits}) {
     uniformTypes: {gamma: "f32", scale: "vec3<f32>"},
     getUniforms: (q) => ({gamma: q.gamma, scale: q.scale}),
   };
-  // the near infrared as gray (the paint outside the lit ground): back from sqrt to reflectance, over NIR_SCALE,
-  // the gamma, then dimmed as the paint's luminance gray is
-  const S2Gray = {
-    name: "s2Gray",
-    fs: `uniform s2GrayUniforms {
-  float gamma;
-  float scale;
-  float dim;
-} s2Gray;
-`,
-    inject: {"fs:DECKGL_FILTER_COLOR": `
-  if (color.a < 0.5) discard;
-  float v = color.r / color.a;
-  v = clamp(v * v / s2Gray.scale, 0.0, 1.0);
-  color = vec4(vec3(pow(v, 1.0 / s2Gray.gamma) * s2Gray.dim), 1.0);
-`},
-    uniformTypes: {gamma: "f32", scale: "f32", dim: "f32"},
-    getUniforms: (q) => ({gamma: q.gamma, scale: q.scale, dim: q.dim}),
-  };
   // the indexes: each quantity over its stretch (the kernel's 2nd to 98th percentile for the view).
   // NDBI on blue (low: vegetation, water) to a light middle to orange (high: built-up, bare).
   // Mineral: iron oxides yellow, clays blue, both near white, on bare ground; vegetation dark.
@@ -1249,8 +1211,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     cfg.s2_stretch = {comp, box, ...(got || Object.fromEntries(bands.map((bd) => [bd, 3000])))};
     renderYear(); update();
   }
-  // nir: the paint's near infrared gray (NirExtension), over the paint's own layers
-  const s2CogLayers = (year, left = false, nir = false) => {
+  const s2CogLayers = (year, left = false) => {
     s2PoolGet();
     const e = s2Src.get(year);
     if (!e || !map) return [];
@@ -1258,17 +1219,16 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // keep each tile's raster layer as it was when the tile came in (an opacity change never
     // reaches them, so a tile loaded while holding stayed after the hold), while deck.gl checks
     // every parent's visible on each draw. Hidden years still load their tiles
-    const visible = nir ? st.paint && !st.holding && year === yearOf() : (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === yearOf(left);
-    const paint = left ? {} : nir ? nirProps() : paintProps();
-    const gamma = Number(st.s2scale) || 1, comp = nir ? "nir" : S2_FALSE[compOf(left)] ? compOf(left) : "tci";
+    const visible = (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === yearOf(left);
+    const paint = left ? {} : paintProps();
+    const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[compOf(left)] ? compOf(left) : "tci";
     const pre = (left ? "s2gl-" : "s2g-") + (comp === "tci" ? "" : comp + "-");
-    // the false colors wait, still loading, for the stretch of their view (the near infrared has a fixed one)
-    const sx = cfg.s2_stretch, stretched = nir || comp === "tci" || (sx && sx.comp === comp);
+    // the false colors wait, still loading, for the stretch of their view
+    const sx = cfg.s2_stretch, stretched = comp === "tci" || (sx && sx.comp === comp);
     const spec = S2_FALSE[comp];
-    const scale = nir || !spec || !spec.rgb ? null : spec.rgb.map((b) => ((sx && sx[b]) || 3000) / 10000);
+    const scale = !spec || !spec.rgb ? null : spec.rgb.map((b) => ((sx && sx[b]) || 3000) / 10000);
     const lo = (sx && sx.lo) || [0, 0, 0], hi = (sx && sx.hi) || [1, 1, 1];
-    const look = nir ? {module: S2Gray, props: {gamma, scale: NIR_SCALE, dim: PAINT_DIM}}
-      : !spec ? null : spec.rgb ? {module: S2Stretch, props: {gamma, scale}} : {module: S2Index, props: {lo, hi, kind: spec.kind}};
+    const look = !spec ? null : spec.rgb ? {module: S2Stretch, props: {gamma, scale}} : {module: S2Index, props: {lo, hi, kind: spec.kind}};
     const [W_, S_, E_, N_] = s2View();
     const live = e.batches.filter((bt) => bt.bbox[0] < E_ && bt.bbox[2] > W_ && bt.bbox[1] < N_ && bt.bbox[3] > S_);
     // every batch's fill under every batch's yearly footprints
@@ -1349,11 +1309,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the imagery is the left map's, so none here
     // painting, the imagery is the map (the pair's right side too) from its first zoom
     if (st.paint ? z >= (cfg.s2_min_z || 7) : !st.pair && (st.holding || z >= 9)) {
-      if (S2GPU) {
-        s2Discover(); for (const y of s2Years()) out.push(...s2CogLayers(y));
-        // painting, the near infrared gray over it for the paint's years (kept mounted while holding)
-        if (st.paint) for (const y of [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)]) out.push(...s2CogLayers(y, false, true));
-      }
+      if (S2GPU) { s2Discover(); for (const y of s2Years()) out.push(...s2CogLayers(y)); }
       else for (const y of S2Y) if (st.s2comp === "tci" || y === st.imgYear) out.push(s2Layer(y));
     }
     // while holding: the imagery, and over it only the two outlines
