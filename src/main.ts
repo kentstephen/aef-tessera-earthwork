@@ -42,7 +42,7 @@ const CREDITS = [
   "TESSERA v1.1 (University of Cambridge), via Source Cooperative",
   'Sentinel-2 &copy; Earth Genome (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), via <a href="https://source.coop" target="_blank" rel="noopener">Source Cooperative</a>',
   "Places: Overture Maps (ODbL)",
-  "Search: Photon",
+  "Search: Photon, Nominatim",
   '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
 ].join('<span class="sep"></span>');
 

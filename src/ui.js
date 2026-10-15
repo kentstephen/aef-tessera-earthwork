@@ -419,7 +419,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) in full color; scroll while holding to step through the years. The gray map shows ${S2Y[0]}.</p>
     <p><small>Keys: I the gray map or the earthwork layer; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
-    <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
+    <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
   about.querySelector("button").onclick = () => { about.style.display = "none"; };
@@ -1485,8 +1485,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
 
 
   // ---- search ------------------------------------------------------------------------
-  const PHOTON = "https://photon.komoot.io/api/";
+  // Photon as you type; when it is slow or finds nothing, Enter asks Nominatim (whose usage policy
+  // allows no search-as-you-type and at most one request a second, so it runs on Enter only)
+  const PHOTON = "https://photon.komoot.io/api/", NOMINATIM = "https://nominatim.openstreetmap.org/search";
+  const PHOTON_MS = 6000, PHOTON_ENTER_MS = 2500;
   let gcHits = [], gcSel = -1, gcTimer = null, gcSeq = 0, searched = null;
+  let gcBusy = null, gcAbort = null, nomLast = 0;
   // drop the searched cell's outline, staying where the map is
   function unsearch() {
     searched = null; update();
@@ -1502,17 +1506,62 @@ export function render({model, el, earthwork, s2Items, credits}) {
     gcHits.forEach((f, i) => { const r = el_("div", "at-hit" + (i === gcSel ? " sel" : "")); r.textContent = hitName(f); const k = el_("small"); k.textContent = hitKind(f); r.appendChild(k); r.onmousedown = (e) => { e.preventDefault(); gcFly(f); }; r.onmouseenter = () => { gcSel = i; gcShow(); }; hits.appendChild(r); });
     hits.style.display = "block";
   };
-  const gcAsk = async () => {
+  // one gray line in the list in place of hits: searching, or why there are none
+  const gcStatus = (t) => { hits.replaceChildren(); gcSel = -1; const r = el_("div", "at-hit wait"); r.textContent = t; hits.appendChild(r); hits.style.display = "block"; };
+  const photon = async (q, ms) => {
+    const params = new URLSearchParams({q, limit: "6", lang: "en"});
+    if (map) { const c = map.getCenter(); params.set("lon", c.lng.toFixed(4)); params.set("lat", c.lat.toFixed(4)); }
+    if (gcAbort) gcAbort.abort();
+    const ac = gcAbort = new AbortController(), t = setTimeout(() => ac.abort(), ms);
+    try { const r = await fetch(PHOTON + "?" + params.toString(), {signal: ac.signal}); const d = await r.json(); return (d.features || []).filter((f) => f.geometry && f.geometry.coordinates); }
+    finally { clearTimeout(t); }
+  };
+  // Nominatim's results in Photon's shape (extent is [west, north, east, south]), so the list and the
+  // fly-to read both alike
+  const nominatim = async (q) => {
+    const wait = nomLast + 1100 - Date.now();
+    if (wait > 0) await new Promise((ok) => setTimeout(ok, wait));
+    nomLast = Date.now();
+    const params = new URLSearchParams({q, format: "jsonv2", addressdetails: "1", limit: "6", "accept-language": "en"});
+    if (map) { const b = map.getBounds(); params.set("viewbox", [b.getWest(), b.getNorth(), b.getEast(), b.getSouth()].map((v) => v.toFixed(4)).join(",")); }
+    const r = await fetch(NOMINATIM + "?" + params.toString());
+    const d = await r.json();
+    return (d || []).map((h) => {
+      const a = h.address || {}, bb = (h.boundingbox || []).map(Number);
+      return {geometry: {coordinates: [Number(h.lon), Number(h.lat)]}, properties: {
+        name: h.name || (h.display_name || "").split(",")[0], city: a.city || a.town || a.village, state: a.state, country: a.country,
+        osm_value: h.type, type: "via Nominatim", extent: bb.length === 4 ? [bb[2], bb[1], bb[3], bb[0]] : undefined}};
+    });
+  };
+  // enter: Enter was pressed, so Photon gets a shorter wait and Nominatim follows when it fails
+  const gcAsk = async (enter = false) => {
     const q = gc.value.trim();
     if (!q && searched) { searched = null; update(); }
-    if (q.length < 2) { gcHits = []; gcHide(); return; }
+    if (q.length < 2) { gcHits = []; gcBusy = null; gcHide(); return; }
     const s = ++gcSeq;
     const h3 = h3Of(q);
     if (h3) { gcHits = [{h3}]; gcSel = 0; gcShow(); return; }
-    const params = new URLSearchParams({q, limit: "6", lang: "en"});
-    if (map) { const c = map.getCenter(); params.set("lon", c.lng.toFixed(4)); params.set("lat", c.lat.toFixed(4)); }
-    try { const r = await fetch(PHOTON + "?" + params.toString()); const d = await r.json(); if (s !== gcSeq) return; gcHits = (d.features || []).filter((f) => f.geometry && f.geometry.coordinates); gcSel = gcHits.length ? 0 : -1; gcShow(); }
-    catch (e) { if (s === gcSeq) note("search: " + e.message, 4000); }
+    // Enter while Photon is still on this same query: it has been waited on already
+    const skipPhoton = enter && gcBusy === q;
+    if (skipPhoton) { if (gcAbort) gcAbort.abort(); gcBusy = null; }
+    gcStatus("searching\u2026");
+    let found = [], why = "";
+    if (!skipPhoton) {
+      gcBusy = q;
+      try { found = await photon(q, enter ? PHOTON_ENTER_MS : PHOTON_MS); }
+      catch (e) { why = e.name === "AbortError" ? "slow" : "down"; }
+      if (s !== gcSeq) return;
+      gcBusy = null;
+    }
+    if (!found.length && enter) {
+      gcStatus("searching Nominatim\u2026");
+      try { found = await nominatim(q); } catch (e) { why = "down"; }
+      if (s !== gcSeq) return;
+    }
+    gcHits = found; gcSel = found.length ? 0 : -1;
+    if (found.length) gcShow();
+    else if (enter) gcStatus(why ? "search is not answering, try again in a moment" : "no match");
+    else gcStatus(why === "slow" ? "Photon is slow: press Enter to search Nominatim" : why ? "Photon is not answering: press Enter to search Nominatim" : "no match: press Enter to search Nominatim");
   };
   const gcFly = (f) => {
     if (f.h3) {
@@ -1542,7 +1591,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     e.stopPropagation();
     if (e.key === "ArrowDown" && gcHits.length) { gcSel = (gcSel + 1) % gcHits.length; gcShow(); e.preventDefault(); }
     else if (e.key === "ArrowUp" && gcHits.length) { gcSel = (gcSel - 1 + gcHits.length) % gcHits.length; gcShow(); e.preventDefault(); }
-    else if (e.key === "Enter") { e.preventDefault(); if (gcHits.length) gcFly(gcHits[Math.max(0, gcSel)]); else { clearTimeout(gcTimer); gcAsk().then(() => { if (gcHits.length) gcFly(gcHits[0]); else note("no match: " + gc.value.trim(), 4000); }); } }
+    else if (e.key === "Enter") { e.preventDefault(); if (gcHits.length) gcFly(gcHits[Math.max(0, gcSel)]); else { clearTimeout(gcTimer); gcAsk(true).then(() => { if (gcHits.length) gcFly(gcHits[0]); }); } }
     else if (e.key === "Escape") { gcHide(); gc.blur(); }
   });
 
