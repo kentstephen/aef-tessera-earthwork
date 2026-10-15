@@ -1685,7 +1685,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // Shift held while painting: the gray off, the imagery in its own colors everywhere, until it is let go
     else if (k === "Shift") { if (!e.repeat) setFilled(true); return; }
     // [ ]: the year shown, the paint's while painting (not holding space), the plain imagery's otherwise
-    else if (k === "[" || k === "]") { if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return; stepImg(k === "]" ? 1 : -1); }
+    // by the key itself, so they still step while Shift fills the paint (Shift makes them { and })
+    else if (e.code === "BracketLeft" || e.code === "BracketRight") { if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return; stepImg(e.code === "BracketRight" ? 1 : -1); }
     // B: the first year and the latest, back and forth (from any other year, the latest), while the
     // imagery shows: painting, holding space, or on the pair's left side
     else if (k === "b" || k === "B") {
