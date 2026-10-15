@@ -2054,6 +2054,10 @@ def _(anywidget, asyncio, time, traitlets):
         .ew-col-r .at-panel{flex:none}
         .at .ew-col-r .at-yc.ew-read{position:relative;right:auto;top:auto;flex:0 1 auto;min-height:0;overflow:auto}
         .at .at-yc.ew-read.ew-off,.at.ew-read-hidden .at-yc.ew-read{display:none}
+        /* H hides the Earthwork card too; painting, the hexagons are not drawn, so its ramp is not shown */
+        .at.ew-read-hidden .at-panel{display:none}
+        .at.ew-paint .at-panel .ew-hramp{display:none}
+        .at.ew-paint .at-panel .ew-hy{flex:1}
         /* the clicked hexagon: the card at the column's width */
         .at .at-yc.ew-read .hex{border-top:0;margin-top:0;padding-top:0;font-size:12.5px}
         .at .at-yc.ew-read .hex .place{font-size:12.5px;padding-right:24px}
@@ -2473,7 +2477,7 @@ def _(anywidget, asyncio, time, traitlets):
           const bPair = el_("button", "at-btn at-glass", ICON.pair + "<kbd>P</kbd>"); bPair.title = "pair the map with Sentinel-2 (P)";
           bPair.onclick = () => setPair(!st.pair);
           const bHide = el_("button", "at-btn at-glass", `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><kbd>H</kbd>`);
-          bHide.title = "hide or show the readout (H)";
+          bHide.title = "hide or show the Earthwork card and the readout (H)";
           bHide.onclick = (e) => { e.stopPropagation(); setCards(!cardsHidden); };
           // the code, always one click away
           const bCode = el_("a", "at-btn at-glass ew-code", `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`);
@@ -2481,6 +2485,7 @@ def _(anywidget, asyncio, time, traitlets):
           bCode.title = "the code on GitHub"; bCode.setAttribute("aria-label", "the code on GitHub");
           tools.append(bCode, bPair, bMore, bHide, bFit);
           let cardsHidden = keep("readout");
+          root.classList.toggle("ew-paint", st.paint);
           function setCards(hidden) { cardsHidden = hidden; keep("readout", hidden); root.classList.toggle("ew-read-hidden", hidden); bHide.classList.toggle("on", hidden); }
           pane.appendChild(tools);
           const yc = el_("div", "at-yc at-glass");
@@ -2562,7 +2567,7 @@ def _(anywidget, asyncio, time, traitlets):
             <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read, taught where 3DEP lidar flew the same ground twice. Three layers (M switches them): <b>Aggregate</b>, one model on AlphaEarth and TESSERA joined pixel by pixel; <b>AEF</b>, AlphaEarth's own; <b>TESSERA</b>, TESSERA's own. TESSERA is read at 10 m only (it has no coarser product), so it and the aggregate come in from zoom 10.4; zoomed out past it the map moves to AEF and the other two gray out, and zoomed back in the layer you had comes back. Each hexagon shows its highest-scoring finer cell, so a single dig stands out. Pair (P) with Sentinel-2 to see what it is.</p>
             <p>Earthwork is drawn in H3 hexagons from zoom ${HEXZ}. <b>Click</b> a hexagon for its account.</p>
             <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the hexagons; scroll while holding to step through the years.</p>
-            <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest, C its colors; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); X fill the window; Esc close.</small></p>
+            <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest, C its colors; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the Earthwork card and the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); X fill the window; Esc close.</small></p>
             <p><small>AlphaEarth Foundations Satellite Embedding dataset by Google and Google DeepMind (CC BY 4.0), via Source Cooperative (tge-labs/aef). TESSERA v1.1 embeddings by the University of Cambridge with dClimate, via Source Cooperative (tessera/tessera). Sentinel-2 mosaics by Earth Genome (CC BY 4.0), contains modified Copernicus Sentinel data. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap &copy;&nbsp;CARTO, &copy;&nbsp;OpenStreetMap contributors.</small></p>
             <p><small>The models were taught on USGS 3DEP lidar DEMs (public domain), AlphaEarth and TESSERA, and also on IGN France RGE ALTI and LiDAR HD (Licence Ouverte / Etalab 2.0), VIRTUAL SHIZUOKA (CC BY 4.0, ODbL), Hong Kong CEDD airborne lidar, NASA ICESat-2 (ATL03, ATL08) and GEDI (L2A), and the Copernicus DEM GLO-30 (&copy;&nbsp;DLR e.V. 2010-2014 and &copy;&nbsp;Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA). Details in the <a href="https://github.com/kentstephen/aef-tessera-earthwork#data-and-credits" target="_blank" rel="noopener">README</a>.</small></p>
             <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
@@ -3649,7 +3654,7 @@ def _(anywidget, asyncio, time, traitlets):
             else if (k === "p" || k === "P") setPair(!st.pair);
             // I: the paint (Sentinel-2 gray, the lit hexagons in color) or the hexagons over the basemap
             else if (k === "i" || k === "I") {
-              st.paint = !st.paint; if (st.paint) stretchFor(compOf()); labels(st.labels); styleComp(); renderYear(); update();
+              st.paint = !st.paint; root.classList.toggle("ew-paint", st.paint); if (st.paint) stretchFor(compOf()); labels(st.labels); styleComp(); renderYear(); update();
               note(st.paint ? "Sentinel-2, gray but for the lit hexagons (I for the hexagons on the basemap)" : "Hexagons on the basemap (I for Sentinel-2 in gray, the lit hexagons in color)", 3000);
             }
             else if (k === "[" || k === "]") stepImg(k === "]" ? 1 : -1);
