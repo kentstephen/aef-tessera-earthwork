@@ -2519,6 +2519,10 @@ def _(anywidget, asyncio, time, traitlets):
           // the colors drawn on a map: the paint's on the main map while painting (not holding space), the plain
           // imagery's otherwise and on the pair's left
           const compOf = (left = false) => (!left && st.paint && !st.holding ? st.paintComp : st.s2comp);
+          // the paint shows one year only, the imagery's first (one year to load, so it comes in quickly); the
+          // years step on the plain imagery (space, the pair's left), loaded when it is asked for
+          const PAINT_YEAR = S2Y[0];
+          const yearOf = (left = false) => (!left && st.paint && !st.holding ? PAINT_YEAR : st.imgYear);
           const styleComp = segOf(compBox, COMPS.map(([k, l, t]) => [k, l, t, ""]), (k) => k === compOf(), (k) => setComp(k));
           // the false colors wait for the kernel's stretch of their view: asked when the colors shown have none.
           // (the kernel holds one stretch, so true color asks for none and never takes the paint's away)
@@ -2816,8 +2820,10 @@ def _(anywidget, asyncio, time, traitlets):
             const showImg = st.holding || st.paint || (st.pair && st.left === "s2");
             // a small card, the search's width: the year (what the imagery shows), what it is, its keys
             const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
-            s2c.innerHTML = `<div class="ew-s2hd"><b>${st.imgYear}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
-              + `<div class="ew-keys">${showImg
+            const stepping = st.holding || (st.pair && st.left === "s2");
+            s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
+              + `<div class="ew-keys">${showImg && !stepping ? `<kbd>Space</kbd> the years`
+                : showImg
                 ? `${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
                 : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
             s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
@@ -2927,7 +2933,7 @@ def _(anywidget, asyncio, time, traitlets):
             let p = s2Tiffs.get(url);
             if (!p) {
               const near = opts && opts.getPriority;
-              const getPriority = () => [year === st.imgYear ? 0 : 1, fill ? 1 : 0, near ? near() : 0];
+              const getPriority = () => [year === yearOf() ? 0 : 1, fill ? 1 : 0, near ? near() : 0];
               p = GeoTIFF.fromUrl(url, {concurrencyLimiter: s2Limiter, getPriority});
               s2Tiffs.set(url, p);
               p.catch(() => { if (s2Tiffs.get(url) === p) s2Tiffs.delete(url); });  // a failed read is asked again next time
@@ -2949,7 +2955,7 @@ def _(anywidget, asyncio, time, traitlets):
             const ty = (lat) => { const v = Math.sin(lat * Math.PI / 180); return Math.min(n - 1, Math.max(0, Math.floor((0.5 - Math.log((1 + v) / (1 - v)) / (4 * Math.PI)) * n))); };
             const [W_, S_, E_, N_] = s2View(), x0 = tx(W_), x1 = tx(E_), y0 = ty(N_), y1 = ty(S_);
             if ((x1 - x0 + 1) * (y1 - y0 + 1) > 64) return;
-            for (const year of [st.imgYear, ...S2Y.filter((y) => y !== st.imgYear)])
+            for (const year of [yearOf(), ...S2Y.filter((y) => y !== yearOf())])
               for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
                 const k = `${year}/${z}/${x}/${y}`;
                 if (s2Asked.has(k)) continue;
@@ -2974,7 +2980,7 @@ def _(anywidget, asyncio, time, traitlets):
           // the colors before settling with nothing pending came too soon, and the other years then took
           // the reads from the year shown)
           function s2WarmUp(key) {
-            const want = (compOf() === "tci" ? "" : compOf() + " ") + st.imgYear;
+            const want = (compOf() === "tci" ? "" : compOf() + " ") + yearOf();
             if (s2Warm || s2Stat.pending !== 0 || !(key === want || key === want + " fill")) return;
             s2Warm = true; setTimeout(update, 250);
           }
@@ -3032,8 +3038,12 @@ def _(anywidget, asyncio, time, traitlets):
           // all (holding space, zoomed out past the hexagons) is the imagery as it is
           const MASK_MOD = MaskExtension.prototype.getShaders.call({getAttributeManager: () => ({attributes: {}}), props: {}, state: {}}).modules[0];
           const {"fs:#main-start": _maskDiscard, ...maskInject} = MASK_MOD.inject;
+          // outside: gray, and dimmed a little toward the dark basemap (PAINT_DIM) so the lit hexagons stand out. Dimmed,
+          // not see-through: footprints overlap and the fill lies under the yearly mosaic, so an alpha would stack
+          // into stripes and patches where they do
+          const PAINT_DIM = cfg.paint_dim != null ? Number(cfg.paint_dim) : 0.78;
           const PAINT_MOD = {...MASK_MOD, inject: {...maskInject, "fs:#main-end": `
-  if (mask.enabled && !mask_isInBounds(mask_texCoords)) fragColor.rgb = vec3(dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722)));
+  if (mask.enabled && !mask_isInBounds(mask_texCoords)) fragColor.rgb = vec3(dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722))) * ${PAINT_DIM.toFixed(3)};
 `}};
           class PaintExtension extends MaskExtension {
             // the raster is one mesh drawn as one instance: placed by its geometry, never by the instance
@@ -3231,7 +3241,7 @@ def _(anywidget, asyncio, time, traitlets):
             // keep each tile's raster layer as it was when the tile came in (an opacity change never
             // reaches them, so a tile loaded while holding stayed after the hold), while deck.gl checks
             // every parent's visible on each draw. Hidden years still load their tiles
-            const visible = (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === st.imgYear;
+            const visible = (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === yearOf(left);
             const paint = left ? {} : PAINT_PROPS;
             const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[compOf(left)] ? compOf(left) : "tci";
             const pre = (left ? "s2gl-" : "s2g-") + (comp === "tci" ? "" : comp + "-");
@@ -3265,7 +3275,13 @@ def _(anywidget, asyncio, time, traitlets):
             }));
           };
           // the years mounted: the one shown, the rest once it has loaded
-          const s2Years = () => (s2Warm ? [st.imgYear, ...S2Y.filter((y) => y !== st.imgYear)] : [st.imgYear]);
+          // painting (not holding), the paint's year alone; holding, the paint's year stays mounted under the
+          // plain imagery's, so letting go is instant
+          const s2Years = (left = false) => {
+            if (!left && st.paint && !st.holding) return [PAINT_YEAR];
+            const y = yearOf(left), ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y)] : [y];
+            return !left && st.paint && !ys.includes(PAINT_YEAR) ? [...ys, PAINT_YEAR] : ys;
+          };
           // every imagery year stays mounted once the view is close enough, the
           // ones not shown at opacity 0, so their tiles load ahead and a scroll
           // while holding is instant
@@ -3333,7 +3349,7 @@ def _(anywidget, asyncio, time, traitlets):
           function layers2() {
             if (!st.pair || !map2) return [];
             let out;
-            if (S2GPU) { s2Discover(); out = s2Years().flatMap((y) => s2CogLayers(y, true)); }
+            if (S2GPU) { s2Discover(); out = s2Years(true).flatMap((y) => s2CogLayers(y, true)); }
             else out = S2Y.filter((y) => st.s2comp === "tci" || y === st.imgYear).map((y) => s2Layer(y, true));
             const hv = hover != null && hover >= 0 ? outline("hover-l", hexes[hover], [255, 255, 255, 235], 2, map2) : null;
             if (hv) out.push(hv);
@@ -3657,11 +3673,11 @@ def _(anywidget, asyncio, time, traitlets):
               st.paint = !st.paint; root.classList.toggle("ew-paint", st.paint); if (st.paint) stretchFor(compOf()); labels(st.labels); styleComp(); renderYear(); update();
               note(st.paint ? "Sentinel-2, gray but for the lit hexagons (I for the hexagons on the basemap)" : "Hexagons on the basemap (I for Sentinel-2 in gray, the lit hexagons in color)", 3000);
             }
-            else if (k === "[" || k === "]") stepImg(k === "]" ? 1 : -1);
+            else if (k === "[" || k === "]") { if (st.paint && !st.holding && !(st.pair && st.left === "s2")) { note(`The paint shows ${PAINT_YEAR}: hold space for the years`, 2500); return; } stepImg(k === "]" ? 1 : -1); }
             // B: the imagery's first year and its latest, back and forth (from any other year, the
             // latest), while it shows: holding space, or on the pair's left side
             else if (k === "b" || k === "B") {
-              if (!(st.holding || st.paint || (st.pair && st.left === "s2"))) return;
+              if (!(st.holding || (st.pair && st.left === "s2"))) { if (st.paint) note(`The paint shows ${PAINT_YEAR}: hold space for the years`, 2500); return; }
               const a = S2Y[0], b = S2Y[S2Y.length - 1];
               st.imgYear = st.imgYear === b ? a : b; renderYear(); update();
             }
