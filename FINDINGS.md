@@ -1032,6 +1032,36 @@ flip at every site (.43 to .68), and how much is barely there (correlation .14 t
 trees, its sign .47). Even as a detector, the size of the predicted change separates moved from unchanged worse than
 plain change does. The embeddings say the ground changed, not how far or which way.
 
+## 28. A gate for ground something stood on both years
+
+The flat ground reading of the built-up work (embeddings-built-up, height_ground.py: at New Capital, held out, AUC
+.996) says from AlphaEarth alone whether a structure stands on a pixel, any year. `structures.py` teaches it here:
+Overture building footprints (2026-09-23.0) on AlphaEarth 2025 in the 22 city squares and four more in New York, a
+pixel center under a footprint a structure, a pixel with no footprint on it or beside it ground; gradient boosting on
+the pixel and its 3 x 3 mean, classes balanced, held out by fold (New York's seven squares one fold). The gate: hard,
+a pixel standing (50% or more) both years of the pair is not lit; soft, the score times one less the smaller chance.
+
+Held out, the reading is weaker than at New Capital (one year of teaching, Overture's footprints, dense blocks where
+ground is a street beside a building): AUC .81 to .90 by fold, structures found .66 to .92, ground flat .70 to .85.
+
+| | no gate | hard | soft |
+|---|---|---|---|
+| New York whitened roofs lit, aggregate | .059 | .007 | .000 |
+| New York whitened roofs lit, AEF / TESSERA | .101 / .226 | .027 / .022 | .003 / .001 |
+| US city pixels lit, same looks / added, aggregate | .008 / .013 | .006 / .010 | .004 / .007 |
+| US city pixels lit, same looks / added, TESSERA | .075 / .085 | .035 / .047 | .014 / .021 |
+| Lower East Side 2022 to 2025, aggregate | .036 | .029 | .025 |
+| 14 digging sites, aggregate: moved found | .685 | .683 | .653 |
+| unchanged lit | .026 | .026 | .024 |
+| AP | .654 | .650 | .633 |
+
+90% of the whitened roofs read standing both years, as do 88% of steady roofs and 58% of the pixels off roofs in
+New York's squares. At the digging sites 1.2% of moved ground reads standing both years (2.1% before, 6.9% after:
+the new buildings) and 1.8% of unchanged ground. So the hard gate costs almost nothing at the sites and takes the
+white roofs out and halves TESSERA's city noise. The soft gate costs real digging in the desert and at the mines
+(Las Vegas northwest found .59 to .42, Mountain Pass .69 to .57): the reading calls some bright desert and pit
+ground half standing.
+
 ## Open
 
 - Clearcuts against forest mines, a second stage (section 19): a head taught on cleared-and-dug against

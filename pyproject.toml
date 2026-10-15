@@ -5,6 +5,7 @@ description = "Earthwork with a second embedding: does TESSERA see the ground li
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "duckdb>=1.5.6",
     "geotessera>=0.11.0",
     "matplotlib>=3.11.2",
     "numpy>=2.5.4",

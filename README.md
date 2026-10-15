@@ -74,6 +74,9 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   fold over 1 km blocks) and asks whether its change between years follows the lidar's dz at the digging sites and
   whether a whitened roof moves it; against Mapterhorn, 3DEP from its S3 bucket or the Copernicus DEM. `head` teaches
   the lidar's meters from the embedding pair instead, held out by site.
+- `structures.py` reads from AlphaEarth whether a structure stands on each pixel (taught on Overture footprints in the
+  city squares) and tests it as a gate: a pixel standing both years is not lit. Cities, white roofs and the cost at
+  the digging sites.
 - `panels.py` draws a site: lidar truth, each model, which of the two calls the ground moved, both, and the
   aggregate (the joint model muted where neither embedding changed).
 
@@ -101,6 +104,7 @@ uv run python whiteroofs.py      # about 15 minutes, after cities.py has read it
 uv run python cities.py sites    # the 14 digging sites again, about 10 GB at peak
 uv run python heights.py [3dep|copernicus]  # about 5 minutes; heights.py report [3dep|copernicus]
 uv run python heights.py head    # about 8 minutes, 15 GB at peak; heights.py head report
+uv run python structures.py      # about 25 minutes (Overture read once); structures.py sites, structures.py report
 ```
 
 ## The map
