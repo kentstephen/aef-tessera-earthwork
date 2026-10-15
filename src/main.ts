@@ -39,6 +39,7 @@ const VIRIDIS = "440154472d7b3b528b2c728e21918c28ae805ec9626dbb2ab5de2bfde725";
 // one line; the About page (?) has them in full
 const CREDITS = [
   "AlphaEarth &copy; Google, Google DeepMind",
+  "TESSERA v1.1 (University of Cambridge), via Source Cooperative",
   'Sentinel-2 &copy; Earth Genome (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), via <a href="https://source.coop" target="_blank" rel="noopener">Source Cooperative</a>',
   "Places: Overture Maps (ODbL)",
   "Search: Photon",
@@ -47,7 +48,7 @@ const CREDITS = [
 
 const base = import.meta.env.BASE_URL;
 const [earthwork, divPm] = await Promise.all([
-  createEarthwork({ current: `${base}models/current.json`, abroad: `${base}models/abroad.json` }, () => "watername_ocean"),
+  createEarthwork(`${base}models/world.json`, () => "watername_ocean"),
   divisionsUrl(),
 ]);
 
@@ -56,9 +57,9 @@ const cfg = {
   home: { longitude: -81.989804, latitude: 28.751057, zoom: 12.7 },
   fit: true,
   ew_zoom: 12,
-  ew_models: ["current", "abroad"],
-  // US only: the model taught on US lidar alone, for a start inside the US
-  model: "current",
+  // the world recipe's three layers; the aggregate (AlphaEarth and TESSERA together) to start
+  ew_models: ["aggregate", "aef", "tessera"],
+  model: "aggregate",
   aef_from: 2023,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],

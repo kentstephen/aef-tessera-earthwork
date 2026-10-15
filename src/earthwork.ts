@@ -9,30 +9,35 @@ import { ZarrLayer } from "@developmentseed/deck.gl-zarr";
 import type { Device, Texture } from "@luma.gl/core";
 import * as zarr from "zarrita";
 
-import { type AefArray, makeGetTileData, openMosaic, type PairTileData, YEAR_ORIGIN } from "./aef";
-import { EarthworkAlpha, EarthworkScore } from "./earthwork-score";
+import { type AefArray, bandTexture, CHUNK, makeGetTileData, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
+import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
+import { EarthworkAggregate, EarthworkAlpha, EarthworkScore, EarthworkTessera } from "./earthwork-score";
+import { TES_BANDS, tesseraOnChunk } from "./tessera";
 
-export type Model = { w: number[]; b: number };
+export type { LayerKind, WorldModel };
 
-/** The AEF mosaic's grid (EPSG:4326, pixel registered). */
-const RES = 8.983111749910169e-5;
-const X0 = -180;
-const Y0 = 83.68570533713473;
-const CHUNK = 256;
-const GATE_LO = 0.05;
-const GATE_HI = 0.15;
+/** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags. */
+type TileData = PairTileData & {
+  tesFirstTex: Texture;
+  tesLastTex: Texture;
+  tesFlagsTex: Texture;
+  tesFirst: Int8Array;
+  tesLast: Int8Array;
+  tesFlags: Uint8Array;
+};
 
 /**
- * The earthwork map layer: AlphaEarth's two years per chunk, scored on the GPU.
- * Also keeps each chunk's raw bytes (the last few dozen) so a point can be
+ * The earthwork map layer: per 256 x 256 chunk of the AlphaEarth mosaic, both
+ * years of AlphaEarth and of TESSERA (resampled onto AlphaEarth's pixels),
+ * scored on the GPU by the layer chosen (aggregate, AlphaEarth or TESSERA, the
+ * world recipe's three). Also keeps the last chunks' raw bytes so a point can be
  * scored on the CPU for the tooltip and the card.
  */
-export async function createEarthwork(modelUrls: Record<string, string>, beforeId: () => string) {
-  const models: Record<string, Model> = {};
-  for (const [k, url] of Object.entries(modelUrls)) models[k] = await (await fetch(url)).json();
+export async function createEarthwork(modelUrl: string, beforeId: () => string) {
+  const model: WorldModel = await (await fetch(modelUrl)).json();
   const { arr, attrs } = await openMosaic();
 
-  let gpu: { weights: Record<string, Texture>; colormap: Texture } | null = null;
+  let gpu: { weights: Record<LayerKind, Texture>; colormap: Texture } | null = null;
   let gpuPending = false;
   const colormapBytes = fetch(colormapsUrl).then((r) => r.arrayBuffer());
   let onReady: () => void = () => {};
@@ -40,31 +45,30 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
   function onDevice(device: Device) {
     if (gpu || gpuPending) return;
     gpuPending = true;
-    const weight = (m: Model) =>
+    const weight = (w: number[]) =>
       device.createTexture({
         format: "r32float",
-        width: 256,
+        width: w.length,
         height: 1,
         mipLevels: 1,
-        data: new Float32Array(m.w),
+        data: new Float32Array(w),
         sampler: { minFilter: "nearest", magFilter: "nearest" },
       });
     colormapBytes
       .then((buf) => decodeColormapSprite(buf))
       .then((img) => {
-        const weights: Record<string, Texture> = {};
-        for (const [k, m] of Object.entries(models)) weights[k] = weight(m);
+        const weights = Object.fromEntries(LAYERS.map((k) => [k, weight(model[k].w)])) as Record<LayerKind, Texture>;
         gpu = { weights, colormap: createColormapTexture(device, img) };
         onReady();
       });
   }
 
   // the raw chunks by "first-last:row-col", the last used last. A view holds more chunks than are
-  // kept (about 70 at zoom 12.7 in a laptop window, hundreds full screen or paired; each is 8 MB),
-  // so a point whose chunk was let go reads it again (readAt)
-  type Chunk = { first: Int8Array; last: Int8Array; w: number; h: number };
+  // kept (about 70 at zoom 12.7 in a laptop window; each is 24 MB with TESSERA), so a point whose
+  // chunk was let go reads it again (readAt)
+  type Chunk = { aefFirst: Int8Array; aefLast: Int8Array; tesFirst: Int8Array; tesLast: Int8Array; tesFlags: Uint8Array; w: number; h: number };
   const chunks = new Map<string, Chunk>();
-  const KEEP = 48;
+  const KEEP = 16;
   const keyOf = (first: number, last: number, r: number, c: number) => `${first}-${last}:${r}-${c}`;
   const keepChunk = (k: string, ch: Chunk) => {
     chunks.delete(k);
@@ -75,92 +79,123 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
 
   let tilesRead = 0;
 
-  function layer(opts: { visible: boolean; first: number; last: number; model: string; minZoom: number; onTile?: () => void }) {
-    const { visible, first, last, model, minZoom, onTile } = opts;
+  const flagsTexture = (device: Device, data: Uint8Array, width: number, height: number) =>
+    device.createTexture({
+      format: "r8uint",
+      width,
+      height,
+      mipLevels: 1,
+      data,
+      sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
+    });
+
+  function renderPipeline(kind: LayerKind, data: TileData) {
+    const g = gpu;
+    if (!g) return [];
+    const score =
+      kind === "aef"
+        ? {
+            module: EarthworkScore,
+            props: { firstTex: data.firstTex, lastTex: data.lastTex, weightTex: g.weights.aef, bias: model.aef.b, gateLo: GATE_LO, gateHi: GATE_HI },
+          }
+        : kind === "tessera"
+          ? {
+              module: EarthworkTessera,
+              props: { tesFirst: data.tesFirstTex, tesLast: data.tesLastTex, tesFlags: data.tesFlagsTex, weightTex: g.weights.tessera, bias: model.tessera.b },
+            }
+          : {
+              module: EarthworkAggregate,
+              props: {
+                aefFirst: data.firstTex,
+                aefLast: data.lastTex,
+                tesFirst: data.tesFirstTex,
+                tesLast: data.tesLastTex,
+                tesFlags: data.tesFlagsTex,
+                weightTex: g.weights.aggregate,
+                bias: model.aggregate.b,
+                gateLo: GATE_LO,
+                gateHi: GATE_HI,
+                tLo: model.bounds[0],
+                tHi: model.bounds[1],
+              },
+            };
+    // the score as plain gray, opaque: for the headless checks against numpy (window.__ewGray)
+    if ((globalThis as { __ewGray?: boolean }).__ewGray) return [score];
+    return [
+      score,
+      { module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.viridis } },
+      { module: EarthworkAlpha },
+    ];
+  }
+
+  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; onTile?: () => void }) {
+    const { visible, first, last, minZoom, onTile } = opts;
+    const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aggregate";
     const firstIdx = first - YEAR_ORIGIN;
     const lastIdx = last - YEAR_ORIGIN;
-    const g = gpu;
-    const m = models[model] || Object.values(models)[0];
-    const read = makeGetTileData(firstIdx, lastIdx, onDevice);
-    return new ZarrLayer<zarr.Readable, "int8", PairTileData>({
+    const readAef = makeGetTileData(firstIdx, lastIdx, onDevice);
+    return new ZarrLayer<zarr.Readable, "int8", TileData>({
       id: `earthwork-${first}-${last}`,
       node: arr as AefArray,
       metadata: attrs,
       selection: { time: firstIdx, band: null },
       getTileData: async (a, o) => {
-        const d = await read(a, o);
         const ys = o.sliceSpec[2] as zarr.Slice, xs = o.sliceSpec[3] as zarr.Slice;
-        const r = Math.floor((ys.start ?? 0) / CHUNK), c = Math.floor((xs.start ?? 0) / CHUNK);
-        keepChunk(keyOf(first, last, r, c), { first: d.first, last: d.last, w: d.width, h: d.height });
+        const py0 = ys.start ?? 0, px0 = xs.start ?? 0;
+        const [d, t] = await Promise.all([readAef(a, o), tesseraOnChunk(px0, py0, o.width, o.height, firstIdx, lastIdx, o.signal)]);
+        const { device, width, height } = o;
+        keepChunk(keyOf(first, last, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK)), {
+          aefFirst: d.first,
+          aefLast: d.last,
+          tesFirst: t.first,
+          tesLast: t.last,
+          tesFlags: t.flags,
+          w: width,
+          h: height,
+        });
         tilesRead++;
-        return d;
+        return {
+          ...d,
+          tesFirstTex: bandTexture(device, t.first, width, height, TES_BANDS),
+          tesLastTex: bandTexture(device, t.last, width, height, TES_BANDS),
+          tesFlagsTex: flagsTexture(device, t.flags, width, height),
+          tesFirst: t.first,
+          tesLast: t.last,
+          tesFlags: t.flags,
+          byteLength: (d.byteLength ?? 0) + t.first.byteLength + t.last.byteLength + t.flags.byteLength,
+        };
       },
-      renderTile: (data: PairTileData) => ({
-        renderPipeline: g
-          ? [
-              {
-                module: EarthworkScore,
-                props: {
-                  firstTex: data.firstTex,
-                  lastTex: data.lastTex,
-                  weightTex: g.weights[model] || Object.values(g.weights)[0],
-                  bias: m.b,
-                  gateLo: GATE_LO,
-                  gateHi: GATE_HI,
-                },
-              },
-              { module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.viridis } },
-              { module: EarthworkAlpha },
-            ]
-          : [],
-      }),
+      renderTile: (data: TileData) => ({ renderPipeline: renderPipeline(kind, data) }),
       visible,
       minZoom,
       // source.coop answers over HTTP/2, so more than the browser's 6 per host
       maxRequests: 12,
-      // each tile is two years x 64 bands (8 MB on the GPU)
+      // each tile is AlphaEarth's two years x 64 bands and TESSERA's two x 128 (24 MB on the GPU)
       maxCacheSize: 24,
       onTileLoad: () => onTile && onTile(),
-      updateTriggers: { renderTile: [model, !!g] },
+      updateTriggers: { renderTile: [kind, !!gpu] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
   }
 
-  /**
-   * The earthwork score at a point, as the shader computes it, from the chunk
-   * already read; null where that chunk is not in hand or a year has no data.
-   */
-  function scoreAt(lon: number, lat: number, first: number, last: number, model: string): number | null {
+  const chunkAt = (lon: number, lat: number) => {
     const px = Math.floor((lon - X0) / RES), py = Math.floor((Y0 - lat) / RES);
-    const r = Math.floor(py / CHUNK), c = Math.floor(px / CHUNK);
+    return { px, py, r: Math.floor(py / CHUNK), c: Math.floor(px / CHUNK) };
+  };
+
+  /**
+   * A layer's score at a point, as the shader computes it, from the chunk
+   * already read; null where that chunk is not in hand or the layer has none there.
+   */
+  function scoreAt(lon: number, lat: number, first: number, last: number, kind: LayerKind): number | null {
+    const { px, py, r, c } = chunkAt(lon, lat);
     const k = keyOf(first, last, r, c), ch = chunks.get(k);
-    const m = models[model];
-    if (!ch || !m) return null;
+    if (!ch) return null;
     keepChunk(k, ch);
     const ix = px - c * CHUNK, iy = py - r * CHUNK;
     if (ix < 0 || iy < 0 || ix >= ch.w || iy >= ch.h) return null;
-    const plane = ch.w * ch.h, at = iy * ch.w + ix;
-    const b = new Float64Array(64), a = new Float64Array(64);
-    let nb = 0, na = 0;
-    for (let i = 0; i < 64; i++) {
-      const vb = ch.first[i * plane + at], va = ch.last[i * plane + at];
-      if (vb === -128 || va === -128) return null;
-      const fb = vb / 127.5, fa = va / 127.5;
-      b[i] = fb * Math.abs(fb);
-      a[i] = fa * Math.abs(fa);
-      nb += b[i] * b[i];
-      na += a[i] * a[i];
-    }
-    const ib = 1 / Math.max(Math.sqrt(nb), 1e-9), ia = 1 / Math.max(Math.sqrt(na), 1e-9);
-    let z = m.b, cos = 0;
-    for (let i = 0; i < 64; i++) {
-      const bi = b[i] * ib, ai = a[i] * ia, d = ai - bi;
-      cos += ai * bi;
-      z += m.w[i] * bi + m.w[64 + i] * ai + m.w[128 + i] * ai * bi + m.w[192 + i] * d * d;
-    }
-    const gate = Math.min(1, Math.max(0, (1 - cos - GATE_LO) / (GATE_HI - GATE_LO)));
-    return gate / (1 + Math.exp(-z));
+    return scorePixel(LAYERS.includes(kind) ? kind : "aggregate", model, { ...ch, plane: ch.w * ch.h, at: iy * ch.w + ix });
   }
 
   /**
@@ -168,16 +203,18 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
    * than are kept); resolves once scoreAt can answer there, or with nothing where it cannot.
    */
   function readAt(lon: number, lat: number, first: number, last: number): Promise<void> {
-    const px = Math.floor((lon - X0) / RES), py = Math.floor((Y0 - lat) / RES);
-    const r = Math.floor(py / CHUNK), c = Math.floor(px / CHUNK), k = keyOf(first, last, r, c);
+    const { px, py, r, c } = chunkAt(lon, lat);
+    const k = keyOf(first, last, r, c);
     if (chunks.has(k)) return Promise.resolve();
     let p = reading.get(k);
     if (!p) {
       const [, , H, W] = arr.shape;
       if (px < 0 || py < 0 || px >= W || py >= H) return Promise.resolve();
-      const ys = zarr.slice(r * CHUNK, Math.min((r + 1) * CHUNK, H)), xs = zarr.slice(c * CHUNK, Math.min((c + 1) * CHUNK, W));
-      p = Promise.all([first, last].map((y) => zarr.get(arr as AefArray, [y - YEAR_ORIGIN, null, ys, xs])))
-        .then(([f, l]) => keepChunk(k, { first: f.data as Int8Array, last: l.data as Int8Array, w: f.shape[2], h: f.shape[1] }))
+      const y0 = r * CHUNK, x0 = c * CHUNK, h = Math.min(CHUNK, H - y0), w = Math.min(CHUNK, W - x0);
+      const ys = zarr.slice(y0, y0 + h), xs = zarr.slice(x0, x0 + w);
+      const aef = (y: number) => zarr.get(arr as AefArray, [y - YEAR_ORIGIN, null, ys, xs]).then((ch) => ch.data as Int8Array);
+      p = Promise.all([aef(first), aef(last), tesseraOnChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN)])
+        .then(([aefFirst, aefLast, t]) => keepChunk(k, { aefFirst, aefLast, tesFirst: t.first, tesLast: t.last, tesFlags: t.flags, w, h }))
         .catch(() => {})
         .finally(() => reading.delete(k));
       reading.set(k, p);
@@ -185,18 +222,14 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
     return p;
   }
 
-  /** The chunks in hand for this window that lie under a box, with their raw bytes. */
+  /** How many of the chunks under a box are in hand for this window. */
   function chunksIn(bbox: [number, number, number, number], first: number, last: number) {
     const [W, S, E, N] = bbox;
     const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
     const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
-    const out = [];
-    for (let r = r0; r <= r1; r++)
-      for (let c = c0; c <= c1; c++) {
-        const k = keyOf(first, last, r, c), ch = chunks.get(k);
-        if (ch) out.push({ key: k, r, c, w: ch.w, h: ch.h, first: ch.first, last: ch.last });
-      }
-    return { chunks: out, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
+    let inHand = 0;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (chunks.has(keyOf(first, last, r, c))) inHand++;
+    return { inHand, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
   }
 
   return {
@@ -204,7 +237,7 @@ export async function createEarthwork(modelUrls: Record<string, string>, beforeI
     scoreAt,
     readAt,
     chunksIn,
-    models,
+    model,
     tilesRead: () => tilesRead,
     whenReady: (f: () => void) => {
       onReady = f;

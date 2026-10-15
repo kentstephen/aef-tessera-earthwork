@@ -127,3 +127,184 @@ export const EarthworkAlpha = {
     `,
   },
 } as const satisfies ShaderModule;
+
+/**
+ * One embedding's pair in a single pass, for 128 bands without holding both
+ * vectors: with B = |b| and A = |a|, z = (b.wb) / B + (a.wa) / A + (a*b).wab /
+ * (A B) + sum wd (a / A - b / B)^2, the last term expanded into a.a, b.b and
+ * a.b sums. AlphaEarth is dequantized first and missing at -128; TESSERA is
+ * taken as is.
+ */
+const HALF_GLSL = /* glsl */ `
+precision highp isampler2DArray;
+precision highp usampler2D;
+precision highp sampler2D;
+uniform highp sampler2D weightTex;
+
+// the score, kept for the steps after it (EarthworkAlpha, EarthworkCut)
+float earthworkScore_v;
+
+float earthworkHalf_w(int i) {
+  return texelFetch(weightTex, ivec2(i, 0), 0).r;
+}
+
+float earthworkHalf_v(int v, bool dq) {
+  float f = float(v);
+  if (!dq) return f;
+  f /= 127.5;
+  return f * abs(f);
+}
+
+// z from weights off .. off + 4d, and the pair's cosine; false where a year is missing
+bool earthworkHalf(highp isampler2DArray fT, highp isampler2DArray lT, ivec2 px, int d, int off, bool dq,
+                   out float z, out float cosine) {
+  float sb = 0.0, sa = 0.0, sab = 0.0, daa = 0.0, dbb = 0.0, dab = 0.0, nb = 0.0, na = 0.0, ab = 0.0;
+  for (int i = 0; i < d; i++) {
+    int vb = texelFetch(fT, ivec3(px, i), 0).r;
+    int va = texelFetch(lT, ivec3(px, i), 0).r;
+    if (dq && (vb == -128 || va == -128)) return false;
+    float b = earthworkHalf_v(vb, dq);
+    float a = earthworkHalf_v(va, dq);
+    float wd = earthworkHalf_w(off + 3 * d + i);
+    sb += earthworkHalf_w(off + i) * b;
+    sa += earthworkHalf_w(off + d + i) * a;
+    sab += earthworkHalf_w(off + 2 * d + i) * a * b;
+    daa += wd * a * a;
+    dbb += wd * b * b;
+    dab += wd * a * b;
+    nb += b * b;
+    na += a * a;
+    ab += a * b;
+  }
+  float ib = 1.0 / max(sqrt(nb), 1e-9);
+  float ia = 1.0 / max(sqrt(na), 1e-9);
+  z = sb * ib + sa * ia + sab * ia * ib + daa * ia * ia + dbb * ib * ib - 2.0 * dab * ia * ib;
+  cosine = ab * ia * ib;
+  return true;
+}
+`;
+
+/** Props for {@link EarthworkTessera}. */
+export type EarthworkTesseraProps = {
+  /** r8sint Texture2DArray, 128 layers: TESSERA's first and last year on the chunk's pixels. */
+  tesFirst: Texture;
+  tesLast: Texture;
+  /** r8uint: bit 0 both years embedded, bit 1 its radar came or went. */
+  tesFlags: Texture;
+  /** r32float 512 x 1. */
+  weightTex: Texture;
+  bias: number;
+};
+
+const TES_NAME = "earthworkTessera";
+
+/**
+ * TESSERA's own layer: the logistic regression on its unit vectors, no gate
+ * (as the notebook's). Pixels not embedded in either year are discarded.
+ */
+export const EarthworkTessera = {
+  name: TES_NAME,
+  fs: `\
+uniform ${TES_NAME}Uniforms {
+  float bias;
+} ${TES_NAME};
+`,
+  inject: {
+    "fs:#decl": `${HALF_GLSL}
+uniform highp isampler2DArray tesFirst;
+uniform highp isampler2DArray tesLast;
+uniform highp usampler2D tesFlags;
+`,
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      ivec2 size = textureSize(tesFlags, 0);
+      ivec2 px = clamp(ivec2(geometry.uv * vec2(size)), ivec2(0), size - 1);
+      if ((texelFetch(tesFlags, px, 0).r & 1u) == 0u) discard;
+      float z, ct;
+      earthworkHalf(tesFirst, tesLast, px, 128, 0, false, z, ct);
+      float score = 1.0 / (1.0 + exp(-(z + ${TES_NAME}.bias)));
+      earthworkScore_v = score;
+      color = vec4(score, score, score, 1.0);
+    `,
+  },
+  uniformTypes: { bias: "f32" },
+  getUniforms: (props: Partial<EarthworkTesseraProps>) => ({
+    tesFirst: props.tesFirst,
+    tesLast: props.tesLast,
+    tesFlags: props.tesFlags,
+    weightTex: props.weightTex,
+    bias: props.bias ?? 0,
+  }),
+} as const satisfies ShaderModule<EarthworkTesseraProps>;
+
+/** Props for {@link EarthworkAggregate}. */
+export type EarthworkAggregateProps = EarthworkTesseraProps & {
+  /** r8sint Texture2DArray, 64 layers: AlphaEarth's first and last year. */
+  aefFirst: Texture;
+  aefLast: Texture;
+  /** r32float 768 x 1: AlphaEarth's 256 weights, then TESSERA's 512. */
+  weightTex: Texture;
+  /** AlphaEarth's gate (1 - cos): opens, fully open. */
+  gateLo: number;
+  gateHi: number;
+  /** TESSERA's gate (1 - cos): opens, fully open. */
+  tLo: number;
+  tHi: number;
+};
+
+const AGG_NAME = "earthworkAggregate";
+
+/**
+ * The aggregate: one logistic regression on both embeddings' pairs, times a
+ * gate that opens on either one's change (only AlphaEarth's where TESSERA's
+ * radar came or went). Only where both years of both exist.
+ */
+export const EarthworkAggregate = {
+  name: AGG_NAME,
+  fs: `\
+uniform ${AGG_NAME}Uniforms {
+  float bias;
+  float gateLo;
+  float gateHi;
+  float tLo;
+  float tHi;
+} ${AGG_NAME};
+`,
+  inject: {
+    "fs:#decl": `${HALF_GLSL}
+uniform highp isampler2DArray aefFirst;
+uniform highp isampler2DArray aefLast;
+uniform highp isampler2DArray tesFirst;
+uniform highp isampler2DArray tesLast;
+uniform highp usampler2D tesFlags;
+`,
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      ivec2 size = textureSize(tesFlags, 0);
+      ivec2 px = clamp(ivec2(geometry.uv * vec2(size)), ivec2(0), size - 1);
+      uint fl = texelFetch(tesFlags, px, 0).r;
+      if ((fl & 1u) == 0u) discard;
+      float za, ca, zt, ct;
+      if (!earthworkHalf(aefFirst, aefLast, px, 64, 0, true, za, ca)) discard;
+      earthworkHalf(tesFirst, tesLast, px, 128, 256, false, zt, ct);
+      float ga = clamp(((1.0 - ca) - ${AGG_NAME}.gateLo) / (${AGG_NAME}.gateHi - ${AGG_NAME}.gateLo), 0.0, 1.0);
+      float gt = clamp(((1.0 - ct) - ${AGG_NAME}.tLo) / max(${AGG_NAME}.tHi - ${AGG_NAME}.tLo, 1e-6), 0.0, 1.0);
+      float gate = (fl & 2u) != 0u ? ga : max(ga, gt);
+      float score = gate / (1.0 + exp(-(za + zt + ${AGG_NAME}.bias)));
+      earthworkScore_v = score;
+      color = vec4(score, score, score, 1.0);
+    `,
+  },
+  uniformTypes: { bias: "f32", gateLo: "f32", gateHi: "f32", tLo: "f32", tHi: "f32" },
+  getUniforms: (props: Partial<EarthworkAggregateProps>) => ({
+    aefFirst: props.aefFirst,
+    aefLast: props.aefLast,
+    tesFirst: props.tesFirst,
+    tesLast: props.tesLast,
+    tesFlags: props.tesFlags,
+    weightTex: props.weightTex,
+    bias: props.bias ?? 0,
+    gateLo: props.gateLo ?? 0.05,
+    gateHi: props.gateHi ?? 0.15,
+    tLo: props.tLo ?? 0,
+    tHi: props.tHi ?? 1,
+  }),
+} as const satisfies ShaderModule<EarthworkAggregateProps>;

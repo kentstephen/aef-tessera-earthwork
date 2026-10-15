@@ -17,6 +17,12 @@ export const YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
  */
 export const MIN_ZOOM = 12;
 
+/** The mosaic's grid (EPSG:4326, pixel registered) and its chunk size. */
+export const RES = 8.983111749910169e-5;
+export const X0 = -180;
+export const Y0 = 83.68570533713473;
+export const CHUNK = 256;
+
 export type AefArray = zarr.Array<"int8", zarr.Readable>;
 
 /** One spatial chunk, both years of the window. */
@@ -38,7 +44,7 @@ export async function openMosaic(): Promise<{ arr: AefArray; attrs: unknown }> {
   return { arr, attrs: root.attrs };
 }
 
-function bandTexture(device: Device, data: Int8Array, width: number, height: number): Texture {
+export function bandTexture(device: Device, data: Int8Array, width: number, height: number, depth = NUM_BANDS): Texture {
   // zarrita's [band, y, x] row-major layout is the Texture2DArray's
   // layer-major storage, so the chunk uploads as is
   return device.createTexture({
@@ -46,7 +52,7 @@ function bandTexture(device: Device, data: Int8Array, width: number, height: num
     format: "r8sint",
     width,
     height,
-    depth: NUM_BANDS,
+    depth,
     mipLevels: 1,
     data,
     sampler: {

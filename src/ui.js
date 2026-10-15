@@ -193,25 +193,27 @@ export function render({model, el, earthwork, s2Items, credits}) {
                           (k) => k === st.gmode, (k) => { if (k === "kinds" && !hmeta.kinds_ready) return; st.want = k; st.gmode = drawnMode(); recolorHex(); styleRows(); renderYear(); update(); });
   // one layer (Earthwork): no choice to show
   rFill.style.display = "none";
-  // the two models (EW_MODELS in the kernel), side by side under the title, the one drawn lit and in
-  // words under them; M switches them
-  const MODELS = cfg.ew_models || ["current"];
+  // the world recipe's three layers (LAYERS in the notebook), side by side under the title, the one
+  // drawn lit and in words under them; M switches them. Every chunk holds both embeddings, so a
+  // switch draws at once
+  const MODELS = cfg.ew_models || ["aggregate"];
   const MODEL_INFO = {
-    current: ["US only", "Taught on US lidar only. Stronger in the US."],
-    abroad: ["US + abroad", "Taught with truth from outside the US too. Stronger outside it."],
+    aggregate: ["Aggregate", "AlphaEarth and TESSERA joined pixel by pixel, only where both are read."],
+    aef: ["AEF", "AlphaEarth's own model, muted where AlphaEarth barely changed."],
+    tessera: ["TESSERA", "TESSERA's own model, on AlphaEarth's pixels."],
   };
-  st.model = cfg.model || "current";
-  const rModel = rowOf("Model");
+  st.model = cfg.model || "aggregate";
+  const rModel = rowOf("Layer");
   const styleModelSeg = segOf(rModel, MODELS.map((k) => [k, (MODEL_INFO[k] || [k])[0], (MODEL_INFO[k] || [k, ""])[1], ""]), (k) => k === st.model, (k) => setModel(k));
   rModel.querySelector(".seg-s").classList.remove("col");
   const modelKey = el_("kbd", "at-mkey", "M");
-  modelKey.title = "M swaps the model";
+  modelKey.title = "M switches the layer";
   rModel.appendChild(modelKey);
   const modelWhy = el_("span", "at-mwhy");
   rModel.appendChild(modelWhy);
   const styleModel = () => { styleModelSeg(); modelWhy.textContent = (MODEL_INFO[st.model] || ["", ""])[1]; };
   styleModel();
-  function setModel(k) { if (k === st.model) return; st.model = k; send("model", {model: k}); styleModel(); note(`Model: ${(MODEL_INFO[k] || [k])[0]}`, 2500); }
+  function setModel(k) { if (k === st.model) return; st.model = k; send("model", {model: k}); styleModel(); note(`Layer: ${(MODEL_INFO[k] || [k])[0]}`, 2500); }
   if (MODELS.length < 2) rModel.style.display = "none";
   // while Kinds of change waits: its button grayed, and a line under it with the zoom it
   // appears at and the zoom now
@@ -382,7 +384,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth taught where 3DEP lidar flew the same ground twice. Pair (P) with Sentinel-2 to see what it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the earthwork; scroll while holding to step through the years.</p>
-    <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; P pairs the map with Sentinel-2; M swaps the model (US only, US + abroad); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -399,7 +401,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
       <li><b>Click</b> a spot: where it is, its coordinates and H3 string to copy, and its score.</li>
       <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in place of earthwork; while holding, <b>scroll</b> (or <kbd>[</kbd> <kbd>]</kbd>) to step its year, ${S2Y[0]} to ${S2Y[S2Y.length - 1]}.</li>
       <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
-      <li><b>AEF Years</b> in the Earthwork card are the years compared; <kbd>M</kbd> swaps the model.</li>
+      <li><b>AEF Years</b> in the Earthwork card are the years compared; <kbd>M</kbd> switches the layer: Aggregate (AlphaEarth and TESSERA together), AEF or TESSERA.</li>
       <li>Earthwork shows from zoom ${EWZ} in. <kbd>/</kbd> searches a place.</li>
     </ul>
     <p><small><kbd>?</kbd> has everything else. The code: <a href="https://github.com/kentstephen/aef-earthwork-web" target="_blank" rel="noopener">aef-earthwork-web</a> on GitHub, from the notebook in <a href="https://github.com/kentstephen/aef-earthwork" target="_blank" rel="noopener">aef-earthwork</a>.</small></p>
@@ -1604,7 +1606,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     window.__cmState = () => ({st: Object.assign({}, st), hex: N, res, hmeta, tiles: tstat, s2: s2Stat, s2stretch: cfg.s2_stretch, card: cardData, status: model.get("status"),
       lc: hattrs ? Array.from({length: N}, (_, i) => hattrs[HB * i + 7]).reduce((c, v) => (c[v]++, c), [0, 0, 0, 0]) : null});
     window.__cmTiles = () => ({log: tlog, frames: flog});
-    window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1); return {inHand: r.chunks.length, wanted: r.wanted, read: earthwork.tilesRead()}; };
+    window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1); return {inHand: r.inHand, wanted: r.wanted, read: earthwork.tilesRead()}; };
     // for tests: the center of the first hexagon whose biggest step is year y and that moved a fair amount
     window.__cmHexAt = (y) => { const b = map.getBounds(); for (let i = 0; i < N; i++) if (hattrs && hattrs[HB * i] === y - 2000 && hattrs[HB * i + 1] >= FAIR) { const r = cellToBoundary(hexes[i], true); const c = r.slice(0, -1).reduce((a, p) => [a[0] + p[0] / (r.length - 1), a[1] + p[1] / (r.length - 1)], [0, 0]); if (b.contains(c) && map.project(c).x < mapEl.clientWidth - 420 && map.project(c).y > 200) return c; } return null; };
   }
