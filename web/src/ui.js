@@ -925,7 +925,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the earthwork) is the imagery as it is
   const MASK_MOD = MaskExtension.prototype.getShaders.call({getAttributeManager: () => ({attributes: {}}), props: {}, state: {}}).modules[0];
   const {"fs:#main-start": _maskDiscard, ...maskInject} = MASK_MOD.inject;
-  // outside: gray, and dimmed a little toward the dark basemap (PAINT_DIM) so the lit ground stands out. Dimmed,
+  // outside: gray (a print, PAINT_BLACK below), and dimmed a little toward the dark basemap (PAINT_DIM) so the lit ground stands out. Dimmed,
   // not see-through: footprints overlap and the fill lies under the yearly mosaic, so an alpha would stack
   // into stripes and patches where they do
   const PAINT_DIM = cfg.paint_dim != null ? Number(cfg.paint_dim) : 0.78;
@@ -935,8 +935,27 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // then gray but for the lit ground; back to color when the view moves somewhere mostly not read yet (ewCheck)
   let ewIn = false;
   const PAINT_FILL = {name: "paintFill", fs: "layout(std140) uniform paintFillUniforms {\n  float full;\n} paintFill;\n", uniformTypes: {full: "f32"}};
+  // outside, the gray as a print: brightness levels set from PAINT_BLACK to PAINT_WHITE (the imagery is mostly
+  // dark, so a curve around the middle would crush it), then an S-curve for real blacks and bright roofs and sand.
+  // Inside, the lit ground lifted: saturation and contrast up, so it stands out by more than keeping its colors
+  const PAINT_BLACK = cfg.paint_black != null ? Number(cfg.paint_black) : 0.02;
+  // how much of the S-curve (0 levels only, 1 the full curve)
+  const PAINT_CURVE = cfg.paint_curve != null ? Number(cfg.paint_curve) : 0.6;
+  const PAINT_WHITE = cfg.paint_white != null ? Number(cfg.paint_white) : 0.85;
+  const PAINT_SAT = cfg.paint_sat != null ? Number(cfg.paint_sat) : 1.4;
+  const PAINT_CON = cfg.paint_con != null ? Number(cfg.paint_con) : 1.15;
+  const f3 = (v) => v.toFixed(3);
   const PAINT_MOD = {...MASK_MOD, inject: {...maskInject, "fs:#main-end": `
-  if (mask.enabled && paintFill.full < 0.5 && !mask_isInBounds(mask_texCoords)) fragColor.rgb = vec3(dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722))) * ${PAINT_DIM.toFixed(3)};
+  if (mask.enabled && paintFill.full < 0.5) {
+    float l = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if (!mask_isInBounds(mask_texCoords)) {
+      float g = clamp((l - ${f3(PAINT_BLACK)}) / ${f3(PAINT_WHITE - PAINT_BLACK)}, 0.0, 1.0);
+      fragColor.rgb = vec3(mix(g, g * g * (3.0 - 2.0 * g), ${f3(PAINT_CURVE)})) * ${f3(PAINT_DIM)};
+    } else {
+      vec3 c = mix(vec3(l), fragColor.rgb, ${f3(PAINT_SAT)});
+      fragColor.rgb = clamp((c - l) + (l - 0.35) * ${f3(PAINT_CON)} + 0.35, 0.0, 1.0);
+    }
+  }
 `}};
   class PaintExtension extends MaskExtension {
     // the raster is one mesh drawn as one instance: placed by its geometry, never by the instance
