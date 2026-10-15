@@ -3147,15 +3147,17 @@ def _(anywidget, asyncio, time, traitlets):
               }
               const rgba = new Uint8Array(4 * width * height);
               if (chans.every(Boolean)) {
+                // nodata only where every band is 0: one band at 0 is real ground (water's shortwave infrared,
+                // B11 and B12, is 0 over rivers and flooded fields; treated as nodata, it left holes there)
                 for (let r = 0; r < height; r++) for (let c = 0; c < width; c++) {
                   const o = 4 * (r * width + c);
-                  let ok = true;
+                  let any = false;
                   for (let k = 0; k < 3; k++) {
                     const a = chans[k], v = r < a.h && c < a.w ? a.d[r * a.w + c] : 0;
-                    if (!v) { ok = false; break; }
                     rgba[o + k] = S2_SQRT[v];
+                    if (v) any = true;
                   }
-                  if (ok) rgba[o + 3] = 255; else rgba[o] = rgba[o + 1] = rgba[o + 2] = 0;
+                  rgba[o + 3] = any ? 255 : 0;
                 }
               }
               s2Stat.tiles++; sy.tiles++;
@@ -3726,6 +3728,20 @@ def _(anywidget, asyncio, time, traitlets):
               if (st.paint) stretchFor(compOf());
             });
             map.on("moveend", sendView);
+            // the paint's false colors are stretched for the view: moved a view's width away or zoomed two
+            // levels, the stretch is taken again (once the camera rests), so another place is not drawn in the
+            // last one's stretch
+            let stretchAt = null, stretchT = null;
+            map.on("moveend", () => {
+              if (!st.paint || st.holding || compOf() === "tci") return;
+              clearTimeout(stretchT);
+              stretchT = setTimeout(() => {
+                const c = map.getCenter(), z = map.getZoom(), b = map.getBounds(), w = b.getEast() - b.getWest();
+                if (stretchAt && Math.abs(c.lng - stretchAt.lng) < w && Math.abs(c.lat - stretchAt.lat) < (b.getNorth() - b.getSouth()) && Math.abs(z - stretchAt.z) < 2) return;
+                stretchAt = {lng: c.lng, lat: c.lat, z};
+                send("s2comp", {comp: compOf()});
+              }, 800);
+            });
             // a new view: the footprints under it asked for
             // (and the batches near it mounted, the far ones let go)
             map.on("moveend", () => { if (S2GPU) { s2Discover(); update(); } });
