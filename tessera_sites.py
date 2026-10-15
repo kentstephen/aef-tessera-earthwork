@@ -135,6 +135,8 @@ def place_names():
 
 def site_path(name):
     """A site's AlphaEarth side: Earthwork's cache, or the AlphaEarth this repo read for a place with no truth."""
+    if name.startswith("world-"):  # repeat lidar abroad, built by world_sites.py
+        return os.path.join(HERE, "data", "world", f"{name}.npz")
     return f"{PLACES_DIR}/{name}.npz" if name.startswith(("place-", "ground-")) else f"{EARTHWORK}/{name}.npz"
 
 
