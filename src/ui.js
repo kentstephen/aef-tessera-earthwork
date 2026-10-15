@@ -325,7 +325,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // top right: settings and fill the window, then the year card
   const tools = el_("div", "at-tools");
   const bMore = el_("button", "at-btn at-glass", ICON.more + "<kbd>O</kbd>"); bMore.title = "settings and about (O)";
-  const bFit = el_("button", "at-btn at-glass", ICON.expand); bFit.title = "fill the window (X); full screen (F)";
+  const bFit = el_("button", "at-btn at-glass", ICON.expand + "<kbd>F</kbd>"); bFit.title = "full screen (F)";
   const bPair = el_("button", "at-btn at-glass", ICON.pair + "<kbd>P</kbd>"); bPair.title = "pair the map with Sentinel-2 (P)";
   bPair.onclick = () => setPair(!st.pair);
   const bHide = el_("button", "at-btn at-glass", `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><kbd>H</kbd>`);
@@ -335,7 +335,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const bCode = el_("a", "at-btn at-glass ew-code", `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`);
   bCode.href = "https://github.com/kentstephen/aef-earthwork-web"; bCode.target = "_blank"; bCode.rel = "noopener";
   bCode.title = "the code on GitHub"; bCode.setAttribute("aria-label", "the code on GitHub");
-  tools.append(bCode, bPair, bMore, bHide);
+  // the GitHub button (bCode) is left out of the row for now
+  tools.append(bPair, bMore, bHide, bFit);
   let cardsHidden = keep("readout");
   function setCards(hidden) { cardsHidden = hidden; keep("readout", hidden); root.classList.toggle("ew-read-hidden", hidden); bHide.classList.toggle("on", hidden); }
   pane.appendChild(tools);
@@ -348,6 +349,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const ewCol = el_("div", "ew-col-r");
   ewCol.append(panel, yc);
   pane.appendChild(ewCol);
+  // the right column is the button row's width, so its cards line up under the buttons, edge to edge
+  const fitCol = () => { if (tools.offsetWidth) root.style.setProperty("--rcol", tools.offsetWidth + "px"); };
+  try { new ResizeObserver(fitCol).observe(tools); } catch (e) {}
   const tip = el_("div", "at-tip");
   pane.appendChild(tip);
   const more = el_("div", "at-more at-glass");
@@ -685,11 +689,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // a small card, the search's width: the year (what the imagery shows), what it is, its keys
     const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
     const stepping = st.holding || (st.pair && st.left === "s2");
+    const ends = `${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`;
     s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
-      + `<div class="ew-keys">${showImg && !stepping ? `<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)} <kbd>Shift</kbd> fill`
+      + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span>`
         : showImg
-        ? `${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
-        : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
+        ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span>`
+        : `<span><kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
     s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
     // the readout: the clicked hexagon's account, nothing until a click
     const h = cardData && cardData.kind === "spot" ? hexSection(cardData) : "";
@@ -1630,10 +1635,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
     root.classList.toggle("fit", st.fit);
     document.documentElement.classList.toggle(FIT_CLS, st.fit);
     pane.style.height = st.fit ? "100vh" : (cfg.height || 780) + "px";
-    bFit.innerHTML = st.fit ? ICON.shrink : ICON.expand; bFit.title = st.fit ? "back to the notebook (X or Esc); full screen (F)" : "fill the window (X); full screen (F)";
+    fsIcon();
     setTimeout(() => { try { map && map.resize(); } catch (e) {} }, 30);
   }
-  bFit.onclick = () => { st.fit = !st.fit; sizes(); };
+  // the page always fills the window, so the button is the browser's full screen (F)
+  function fsIcon() { const on = !!document.fullscreenElement; bFit.innerHTML = (on ? ICON.shrink : ICON.expand) + "<kbd>F</kbd>"; bFit.title = on ? "leave full screen (F or Esc)" : "full screen (F)"; }
+  function toggleFull() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else { if (!st.fit) { st.fit = true; sizes(); } (root.requestFullscreen ? root.requestFullscreen() : Promise.reject()).catch(() => note("full screen is not allowed here", 2500)); }
+  }
+  bFit.onclick = (e) => { e.stopPropagation(); toggleFull(); };
+  document.addEventListener("fullscreenchange", () => { fsIcon(); setTimeout(() => { try { map && map.resize(); } catch (e) {} }, 30); });
   bMore.onclick = (e) => { e.stopPropagation(); const open = more.style.display !== "block"; more.style.display = open ? "block" : "none"; yc.style.visibility = open ? "hidden" : ""; bMore.classList.toggle("on", open); };
   more.addEventListener("click", (e) => e.stopPropagation());
   const closeMore = () => { more.style.display = "none"; yc.style.visibility = ""; bMore.classList.remove("on"); };
@@ -1687,10 +1699,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     else if (k === "c" || k === "C") { const i = COMPS.findIndex(([c]) => c === compOf()); setComp(COMPS[(i + 1) % COMPS.length][0]); }
     else if ((k === "m" || k === "M") && MODELS.length > 1) setModel(MODELS[(MODELS.indexOf(st.model) + 1) % MODELS.length]);
     // full screen (the browser's own; Esc or F again leaves it), filling the window inside it
-    else if (k === "f" || k === "F") {
-      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-      else { if (!st.fit) { st.fit = true; sizes(); } (root.requestFullscreen ? root.requestFullscreen() : Promise.reject()).catch(() => note("full screen is not allowed here", 2500)); }
-    }
+    else if (k === "f" || k === "F") toggleFull();
     else if (k === "/") gc.focus();
     // H: every card folded, or all open again
     else if (k === "h" || k === "H") setCards(!cardsHidden);
