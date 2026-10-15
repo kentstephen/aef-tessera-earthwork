@@ -505,3 +505,51 @@ body {
 .at.ew-zout .at-msg:not(.ew-zmsg) {
   bottom: 78px;
 }
+
+/* the earthwork read for the view: a bar along the top filling as its chunks come in, and its count */
+.ew-load {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ew-load.on {
+  opacity: 1;
+}
+
+.ew-load i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--cool, #56b4e9);
+  transition: width 0.3s ease-out;
+}
+
+.ew-load-tag {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: none;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ew-load-tag.on {
+  display: block;
+}
+
+.ew-load-tag span {
+  margin-left: 6px;
+  color: var(--muted);
+}

@@ -9,15 +9,18 @@ import { ZarrLayer } from "@developmentseed/deck.gl-zarr";
 import type { Device, Texture } from "@luma.gl/core";
 import * as zarr from "zarrita";
 
-import { type AefArray, bandTexture, CHUNK, makeGetTileData, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
-import { aefScores, GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
+import { type AefArray, bandTexture, CHUNK, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
+import ChunkWorker from "./chunk.worker.ts?worker";
+import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
 import { EarthworkAggregate, EarthworkAlpha, EarthworkCut, EarthworkScore, EarthworkTessera } from "./earthwork-score";
-import { TES_BANDS, tesseraOnChunk } from "./tessera";
+import { TES_BANDS } from "./tessera";
 
 export type { LayerKind, WorldModel };
 
 /** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags. */
 type TileData = PairTileData & {
+  /** The chunk's key (keyOf), for the chunks loaded in view. */
+  key: string;
   tesFirstTex: Texture;
   tesLastTex: Texture;
   tesFlagsTex: Texture;
@@ -36,6 +39,35 @@ type TileData = PairTileData & {
 export async function createEarthwork(modelUrl: string, beforeId: () => string) {
   const model: WorldModel = await (await fetch(modelUrl)).json();
   const { arr, attrs } = await openMosaic();
+
+  // the chunks are read in a worker (chunk.worker.ts): AlphaEarth, its scores, TESSERA where they point
+  type Read = { aefFirst: Int8Array; aefLast: Int8Array; tesFirst: Int8Array; tesLast: Int8Array; tesFlags: Uint8Array };
+  const worker = new ChunkWorker();
+  worker.postMessage({ type: "init", model });
+  const asked = new Map<number, { resolve: (r: Read) => void; reject: (e: unknown) => void }>();
+  let askId = 0;
+  worker.onmessage = (ev: MessageEvent<Read & { id: number; error?: { name: string; message: string } }>) => {
+    const { id, error, ...r } = ev.data;
+    const a = asked.get(id);
+    if (!a) return;
+    asked.delete(id);
+    if (error) a.reject(Object.assign(new Error(error.message), { name: error.name }));
+    else a.resolve(r);
+  };
+  function readChunk(px0: number, py0: number, w: number, h: number, firstIdx: number, lastIdx: number, signal?: AbortSignal): Promise<Read> {
+    if (signal?.aborted) return Promise.reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+    const id = ++askId;
+    return new Promise<Read>((resolve, reject) => {
+      asked.set(id, { resolve, reject });
+      worker.postMessage({ type: "read", id, px0, py0, w, h, firstIdx, lastIdx });
+      signal?.addEventListener("abort", () => {
+        if (!asked.has(id)) return;
+        asked.delete(id);
+        worker.postMessage({ type: "abort", id });
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+      });
+    });
+  }
 
   let gpu: { weights: Record<LayerKind, Texture>; colormap: Texture } | null = null;
   let gpuPending = false;
@@ -78,6 +110,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   const reading = new Map<string, Promise<void>>();
 
   let tilesRead = 0;
+  const NONE = new Int8Array(0), NONE_U8 = new Uint8Array(0);
+  // the chunks on the GPU now, by key: whether the view's chunks are in
+  const loaded = new Set<string>();
 
   const flagsTexture = (device: Device, data: Uint8Array, width: number, height: number) =>
     device.createTexture({
@@ -138,27 +173,36 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * drawn, only its lit pixels (over the layer's cutoff) marked; the same layer either way, so
    * the chunks read for one serve the other.
    */
-  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; mask?: boolean; onTile?: () => void }) {
-    const { visible, first, last, minZoom, onTile } = opts;
+  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; mask?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
+    const { visible, first, last, minZoom, onTile, onViewportLoad } = opts;
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aggregate";
     const cut = opts.mask ? model.cut[kind] : null;
     const firstIdx = first - YEAR_ORIGIN;
     const lastIdx = last - YEAR_ORIGIN;
-    const readAef = makeGetTileData(firstIdx, lastIdx, onDevice);
     return new ZarrLayer<zarr.Readable, "int8", TileData>({
       id: layerId(first, last),
       operation: opts.mask ? "mask" : "draw",
       node: arr as AefArray,
       metadata: attrs,
       selection: { time: firstIdx, band: null },
-      getTileData: async (a, o) => {
+      getTileData: async (_a, o) => {
         const ys = o.sliceSpec[2] as zarr.Slice, xs = o.sliceSpec[3] as zarr.Slice;
         const py0 = ys.start ?? 0, px0 = xs.start ?? 0;
-        // AlphaEarth first: its own scores say which TESSERA blocks are worth reading
-        const d = await readAef(a, o);
-        const t = await tesseraOnChunk(px0, py0, o.width, o.height, firstIdx, lastIdx, o.signal, aefScores(d.first, d.last, o.width * o.height, model));
         const { device, width, height } = o;
-        keepChunk(keyOf(first, last, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK)), {
+        onDevice(device);
+        const r = await readChunk(px0, py0, width, height, firstIdx, lastIdx, o.signal);
+        const d = {
+          firstTex: bandTexture(device, r.aefFirst, width, height),
+          lastTex: bandTexture(device, r.aefLast, width, height),
+          first: r.aefFirst,
+          last: r.aefLast,
+          width,
+          height,
+          byteLength: r.aefFirst.byteLength + r.aefLast.byteLength,
+        };
+        const t = { first: r.tesFirst, last: r.tesLast, flags: r.tesFlags };
+        const key = keyOf(first, last, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
+        keepChunk(key, {
           aefFirst: d.first,
           aefLast: d.last,
           tesFirst: t.first,
@@ -168,14 +212,19 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           h: height,
         });
         tilesRead++;
+        loaded.add(key);
+        // the raw bytes stay only in the chunks kept for scoreAt (KEEP), not in every tile
         return {
           ...d,
+          first: NONE,
+          last: NONE,
+          key,
           tesFirstTex: bandTexture(device, t.first, width, height, TES_BANDS),
           tesLastTex: bandTexture(device, t.last, width, height, TES_BANDS),
           tesFlagsTex: flagsTexture(device, t.flags, width, height),
-          tesFirst: t.first,
-          tesLast: t.last,
-          tesFlags: t.flags,
+          tesFirst: NONE,
+          tesLast: NONE,
+          tesFlags: NONE_U8,
           byteLength: (d.byteLength ?? 0) + t.first.byteLength + t.last.byteLength + t.flags.byteLength,
         };
       },
@@ -185,8 +234,17 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // source.coop answers over HTTP/2, so more than the browser's 6 per host
       maxRequests: 12,
       // each tile is AlphaEarth's two years x 64 bands and TESSERA's two x 128 (24 MB on the GPU)
-      maxCacheSize: 24,
+      maxCacheSize: 8,
       onTileLoad: () => onTile && onTile(),
+      // a tile let go frees its textures (about 24 MB on the GPU; nothing else does, and a jump to a new
+      // place piled up enough of them to crash the page)
+      onTileUnload: (tile: { content?: TileData | null }) => {
+        const t = tile.content;
+        if (!t) return;
+        loaded.delete(t.key);
+        for (const tex of [t.firstTex, t.lastTex, t.tesFirstTex, t.tesLastTex, t.tesFlagsTex]) tex?.destroy();
+      },
+      onViewportLoad: () => onViewportLoad && onViewportLoad(),
       updateTriggers: { renderTile: [kind, !!gpu, cut] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
@@ -225,18 +283,23 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       const [, , H, W] = arr.shape;
       if (px < 0 || py < 0 || px >= W || py >= H) return Promise.resolve();
       const y0 = r * CHUNK, x0 = c * CHUNK, h = Math.min(CHUNK, H - y0), w = Math.min(CHUNK, W - x0);
-      const ys = zarr.slice(y0, y0 + h), xs = zarr.slice(x0, x0 + w);
-      const aef = (y: number) => zarr.get(arr as AefArray, [y - YEAR_ORIGIN, null, ys, xs]).then((ch) => ch.data as Int8Array);
-      p = Promise.all([aef(first), aef(last)])
-        .then(async ([aefFirst, aefLast]) => {
-          const t = await tesseraOnChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN, undefined, aefScores(aefFirst, aefLast, w * h, model));
-          keepChunk(k, { aefFirst, aefLast, tesFirst: t.first, tesLast: t.last, tesFlags: t.flags, w, h });
-        })
+      p = readChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN)
+        .then((r) => keepChunk(k, { ...r, w, h }))
         .catch(() => {})
         .finally(() => reading.delete(k));
       reading.set(k, p);
     }
     return p;
+  }
+
+  /** How many of the chunks under a box are loaded on the GPU for this window. */
+  function loadedIn(bbox: [number, number, number, number], first: number, last: number) {
+    const [W, S, E, N] = bbox;
+    const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
+    const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
+    let n = 0;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (loaded.has(keyOf(first, last, r, c))) n++;
+    return { loaded: n, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
   }
 
   /** How many of the chunks under a box are in hand for this window. */
@@ -255,6 +318,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     scoreAt,
     readAt,
     chunksIn,
+    loadedIn,
     model,
     tilesRead: () => tilesRead,
     whenReady: (f: () => void) => {

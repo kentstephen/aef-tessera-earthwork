@@ -151,8 +151,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
   crBtn.title = "credits"; crBtn.setAttribute("aria-label", "credits");
   crBtn.onclick = (e) => { e.stopPropagation(); creditsEl.classList.toggle("folded"); };
   // under zoom 12 there is no earthwork: a standing note at the bottom says so, in the status line's style
-  const zmsg = el_("div", "at-msg at-glass ew-zmsg", `Zoom in past z${EWZ} to see earthwork`);
-  pane.append(mapEl2, mapEl, bar, msg, zmsg, creditsEl, crBtn);
+  const zmsg = el_("div", "at-msg at-glass ew-zmsg", `Zoom in past z${EWZ} to see where the ground was dug`);
+  // the earthwork read for the view: a bar along the top that fills as its chunks come in, and how many
+  const ewBar = el_("div", "ew-load", "<i></i>");
+  const ewTag = el_("div", "ew-load-tag at-glass");
+  pane.append(mapEl2, mapEl, bar, ewBar, ewTag, msg, zmsg, creditsEl, crBtn);
   root.appendChild(pane);
   el.appendChild(root);
 
@@ -928,6 +931,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const PAINT_DIM = cfg.paint_dim != null ? Number(cfg.paint_dim) : 0.78;
   // Shift held fills it in: one uniform skips the gray, so the mask layer and every tile stay as they are and
   // each way is one redraw
+  // the paint waits for the earthwork: the imagery in its own colors until the view's chunks are in (onViewportLoad),
+  // then gray but for the lit ground; back to color when the view moves somewhere mostly not read yet (ewCheck)
+  let ewIn = false;
   const PAINT_FILL = {name: "paintFill", fs: "layout(std140) uniform paintFillUniforms {\n  float full;\n} paintFill;\n", uniformTypes: {full: "f32"}};
   const PAINT_MOD = {...MASK_MOD, inject: {...maskInject, "fs:#main-end": `
   if (mask.enabled && paintFill.full < 0.5 && !mask_isInBounds(mask_texCoords)) fragColor.rgb = vec3(dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722))) * ${PAINT_DIM.toFixed(3)};
@@ -935,7 +941,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   class PaintExtension extends MaskExtension {
     // the raster is one mesh drawn as one instance: placed by its geometry, never by the instance
     getShaders() { this.state.maskByInstance = false; return {modules: [PAINT_MOD, PAINT_FILL]}; }
-    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({paintFill: {full: st.filled ? 1 : 0}}); }
+    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({paintFill: {full: st.filled || !ewIn ? 1 : 0}}); }
   }
   PaintExtension.extensionName = "PaintExtension";
   const PAINT = new PaintExtension();
@@ -1293,7 +1299,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
   // a chunk read: the year card's line and the tooltip under a still pointer
   let tileT = null;
-  function tileIn() { clearTimeout(tileT); tileT = setTimeout(() => { if (cardData && cardData.kind === "spot" && cardData.score == null) { rescoreSpot(); } renderYear(); if (lastPt && !st.holding) showHexTip(lastPt); }, 200); }
+  function tileIn() { ewProgress(); clearTimeout(tileT); tileT = setTimeout(() => { if (cardData && cardData.kind === "spot" && cardData.score == null) { rescoreSpot(); } renderYear(); if (lastPt && !st.holding) showHexTip(lastPt); }, 200); }
   function layers() {
     const out = [];
     const z = map ? map.getZoom() : 0;
@@ -1311,7 +1317,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // kept in the stack while hidden (holding, zoomed out) so its shapes stay built
     // painting, it is the paint's mask (not drawn; in the imagery's slot, since an interleaved overlay draws
     // the mask with the layers of its own slot)
-    out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, mask: st.paint, onTile: tileIn}));
+    out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, mask: st.paint, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);
     // gold on the dark basemap (was near-black on the light one)
@@ -1341,7 +1347,30 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (sp) out.push(sp);
     return out;
   }
+  function ewLoaded() { if (!ewIn) { ewIn = true; if (map) map.triggerRepaint(); } ewProgress(); }
+  // how much of the view's earthwork is in: the bar and its tag, hidden when all of it is (or zoomed out, or holding)
+  let ewTagFor = "";
+  function ewProgress() {
+    if (!map) return;
+    const z = map.getZoom();
+    let r = {loaded: 0, wanted: 0};
+    if (z >= EWZ && !st.holding) { const b = map.getBounds(); r = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1); }
+    const on = r.wanted > 0 && r.loaded < r.wanted;
+    ewBar.classList.toggle("on", on); ewTag.classList.toggle("on", on);
+    if (!on) return;
+    ewBar.firstChild.style.width = (100 * r.loaded / r.wanted).toFixed(1) + "%";
+    // a big view is slow: zooming in reads fewer chunks
+    const t = `Earthwork ${r.loaded} of ${r.wanted}` + (r.wanted > 20 ? ` <span>zoom in to load faster</span>` : "");
+    if (t !== ewTagFor) { ewTagFor = t; ewTag.innerHTML = t; }
+  }
+  // less than half the view's chunks in (a jump, a search, other years): the imagery in color again until they are
+  function ewCheck() {
+    if (!map || !ewIn || map.getZoom() < EWZ) return;
+    const b = map.getBounds(), r = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1);
+    if (r.loaded < r.wanted / 2) { ewIn = false; map.triggerRepaint(); }
+  }
   function update() {
+    ewCheck(); ewProgress();
     const zout = !!map && map.getZoom() < EWZ && !st.holding;
     zmsg.style.display = zout ? "block" : "none";
     root.classList.toggle("ew-zout", zout);
