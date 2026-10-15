@@ -55,7 +55,7 @@ def window(site, crs, half_km=None):
 
 def read_cogs(urls, crs, grid, nodata_below=-1000):
     """The rasters at urls (GDAL paths: /vsicurl/..., /vsis3/...) mosaicked onto the 2 m grid (west, south, east,
-    north, width, height in crs), each averaged down from its own resolution, warped when its CRS differs:
+    north, width, height in crs), each averaged down from its full resolution, warped when its CRS differs:
     float32, NaN where none has data."""
     import rasterio
     from rasterio.enums import Resampling
@@ -67,7 +67,10 @@ def read_cogs(urls, crs, grid, nodata_below=-1000):
     with rasterio.Env(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", AWS_NO_SIGN_REQUEST="YES", GDAL_HTTP_MAX_RETRY="5",
                       GDAL_HTTP_RETRY_DELAY="2", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.tiff,.TIF,.vrt"):
         for u in urls:
-            with rasterio.open(u) as s0:
+            # full resolution averaged down: a COG's own overviews differ from year to year on slopes (5 cm median,
+            # 14 cm at the 99th percentile in New Zealand's LERC overviews), which reads as moved ground. Through
+            # vrt://...?ovr=NONE, since the OVERVIEW_LEVEL open option let nodata into the averages (AHN4)
+            with rasterio.open(u if u.startswith("vrt://") else f"vrt://{u}?ovr=NONE") as s0:
                 src = s0 if s0.crs == crs else WarpedVRT(s0, crs=crs, resampling=Resampling.bilinear)
                 b = src.bounds
                 x0, x1 = max(W, b.left), min(E, b.right)

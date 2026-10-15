@@ -9,6 +9,7 @@ survey. Windows are read at 2 m over HTTP.
 import datetime
 import json
 import os
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import requests
@@ -22,7 +23,6 @@ HAMILTON = ("waikato/hamilton_2019", "waikato/hamilton_2023")
 CHCH = ("canterbury/christchurch-and-ashley-river_2018-2019", "canterbury/christchurch_2020-2021")
 BANKS = ("canterbury/banks-peninsula_2018-2019", "canterbury/banks-peninsula_2023")
 BOP = ("bay-of-plenty/bay-of-plenty_2018-2019", "bay-of-plenty/bay-of-plenty_2024")
-SELWYN = ("canterbury/christchurch-and-ashley-river_2018-2019", "canterbury/selwyn_2023")
 NORTH = ("northland/northland_2018-2020", "northland/northland_2024")
 HAWKES = ("hawkes-bay/hawkes-bay_2020-2021", "hawkes-bay/hawkes-bay_2023")
 OTAGO = ("otago/central-otago_2021", "otago/central-otago_2022-2023")
@@ -43,14 +43,23 @@ SITES = [
     S("tauranga-tauriko", "building", -37.763, 176.088, BOP, note="Tauriko business estate and The Lakes earthworks"),
     S("papamoa-east", "building", -37.742, 176.277, BOP, note="Papamoa East cut (Wairakei or a quarry)"),
     S("matata-quarry", "mining", -37.894, 176.750, BOP, 1.5, "a quarry near Matata or Awakeri (by its dz)"),
-    S("rolleston-north", "building", -43.550, 172.405, SELWYN, 2.0, "north Rolleston to Templeton: growth and logistics parks"),
     S("whangarei", "survey", -35.725, 174.320, NORTH, note="Whangarei, subtropical north"),
     S("esk-valley", "storm", -39.405, 176.825, HAWKES, note="Cyclone Gabrielle silt and slips (natural, test only)"),
-    S("cromwell", "survey", -45.040, 169.200, OTAGO, note="Central Otago, semi-arid"),
+    S("otago-roxburgh", "survey", -45.450, 169.380, OTAGO, note="Central Otago between Alexandra and Roxburgh, semi-arid"),
     S("palmerston-north", "survey", -40.360, 175.640, PALM, note="Palmerston North, possibly the Te Ahu a Turanga works"),
 ]
 
 _items = {}
+
+
+def get(url, tries=5):
+    for k in range(tries):
+        try:
+            return requests.get(url, timeout=60).json()
+        except (requests.RequestException, ValueError):
+            if k == tries - 1:
+                raise
+            time.sleep(2 + 3 * k)
 
 
 def items(survey):
@@ -62,11 +71,11 @@ def items(survey):
         _items[survey] = json.load(open(cache))
         return _items[survey]
     base = f"{BUCKET}/{survey}/dem_1m/2193"
-    col = requests.get(f"{base}/collection.json", timeout=60).json()
+    col = get(f"{base}/collection.json")
     hrefs = [l["href"] for l in col["links"] if l["rel"] == "item"]
 
     def one(h):
-        it = requests.get(f"{base}/{h.lstrip('./')}", timeout=60).json()
+        it = get(f"{base}/{h.lstrip('./')}")
         tif = next(a["href"] for a in it["assets"].values() if a["href"].endswith((".tiff", ".tif")))
         return [f"/vsis3/nz-elevation/{survey}/dem_1m/2193/{tif.lstrip('./')}", it["bbox"]]
     with ThreadPoolExecutor(16) as ex:

@@ -48,6 +48,7 @@ N_POS, N_NEG = 4000, 20000  # taught pixels a site, every group alike
 W_SPACE = 5.0
 FOLDS = 4
 WHICH = ("aef", "both")
+WORLD_DEEP_M = float(os.environ.get("WORLD_DEEP_M", "2.0"))  # world sites teach moved ground deeper than this (0: all)
 STRUCT = os.path.join(HERE, "models", "structure_hgb_small.pkl")
 t0 = time.time()
 say = lambda *a: print(f"[{time.time() - t0:6.0f} s]", *a, flush=True)
@@ -64,7 +65,8 @@ def have(n):
 def world():
     """Every world site with TESSERA read: name -> (country, kind)."""
     from world_sites import names
-    return {n: (m["country"], m["kind"]) for n in names() if have(n) for m in [tmeta(n)]}
+    code = {"estonia": "ee", "poland": "pl"}  # two sources first wrote the name
+    return {n: (code.get(m["country"], m["country"]), m["kind"]) for n in names() if have(n) for m in [tmeta(n)]}
 
 
 def rules(s, bounds):
@@ -101,8 +103,11 @@ def score_site(n, models, bounds, path, role, group, standing=True):
                 p = np.concatenate([mdl.predict_proba(x)[:, 1] for x in np.array_split(sfeats(d[k], shape), max(1, len(d["y"]) // 300_000))])
                 P.append(p[li] >= STAND)
             stand = P[0] & P[1]
+    from tessera_sites import site_path
+    z = np.load(site_path(n), allow_pickle=True)
+    dz = z["dz"][li].astype(np.float32) if "dz" in z.files and len(z["dz"]) == len(d["y"]) else np.full(len(li), np.nan, np.float32)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    np.savez(path, y=d["y"][li], patch=d["patch"][li], role=role, group=group, kind=d["kind"], bounds=np.array(bounds),
+    np.savez(path, y=d["y"][li], patch=d["patch"][li], dz=dz, role=role, group=group, kind=d["kind"], bounds=np.array(bounds),
              aplain=d["aplain"][li], tplain=d["tplain"][li], flip=d["radar_flip"][li], stand=stand, **s)
     return len(li)
 
@@ -166,6 +171,10 @@ def rows():
         d = load(n)
         if tmeta(n).get("quiet_only"):
             d["y"] = np.where(d["y"] == 1, -1, d["y"]).astype(np.int8)
+        if WORLD_DEEP_M:  # shallower moves abroad are often the lidar's ground under vegetation (as on the islands)
+            from tessera_sites import site_path
+            dz = np.load(site_path(n), allow_pickle=True)["dz"]
+            d["y"] = np.where((d["y"] == 1) & (np.abs(dz) <= WORLD_DEEP_M), -1, d["y"]).astype(np.int8)
         if (d["y"][labeled(d)] == 0).sum() < 10:
             continue
         T[n], info[n] = subset(d, sample(d, N_POS, N_NEG)), (c, "world")
@@ -340,12 +349,15 @@ def summarize(d, cut=None):
     for n, z in Z.items():
         role, g = str(z["role"]), str(z["group"])
         key = "us dig" if role == "teach" else f"us {z['kind']}" if g == "us" else g if role in ("world", "abroad") else f"{g} ({role})"
+        if role == "world" and str(z["kind"]) == "storm":
+            role = "worldtest"
         if role == "worldtest":
             key = f"{g} storm"
         r = rules(z, tuple(z["bounds"]))
         y = z["y"] == 1
         for w, v in r.items():
-            e = rows.setdefault(key, {}).setdefault(w, {"found": [], "lit": [], "ap": [], "med": [], "sites": 0, "moved": 0})
+            e = rows.setdefault(key, {}).setdefault(w, {"found": [], "lit": [], "ap": [], "med": [], "sites": 0, "moved": 0,
+                                                         "found_deep": [], "ap_deep": [], "med_deep": []})
             e["sites"] += 1
             e["moved"] += int(y.sum())
             if y.sum() >= 50:
@@ -353,11 +365,19 @@ def summarize(d, cut=None):
                 e["med"].append(float(np.median(v[y])))
                 if (~y).sum() >= 50:
                     e["ap"].append(float(average_precision_score(y, v)))
+            deep = y & (np.abs(z["dz"]) > 2) if "dz" in z else np.zeros_like(y)
+            if deep.sum() >= 50:
+                e["found_deep"].append(float((v[deep] > cut[w]).mean()))
+                e["med_deep"].append(float(np.median(v[deep])))
+                keep = deep | ~y
+                if (~y).sum() >= 50:
+                    e["ap_deep"].append(float(average_precision_score(deep[keep], v[keep])))
             if (~y).sum() >= 50:
                 e["lit"].append(float((v[~y] > cut[w]).mean()))
         if "aggregate" in r and z["stand"].any():
             v = np.where(z["stand"], 0, r["aggregate"])
-            e = rows[key].setdefault("aggregate+gate", {"found": [], "lit": [], "ap": [], "med": [], "sites": 0, "moved": 0})
+            e = rows[key].setdefault("aggregate+gate", {"found": [], "lit": [], "ap": [], "med": [], "sites": 0, "moved": 0,
+                                                         "found_deep": [], "ap_deep": [], "med_deep": []})
             e["sites"] += 1
             if y.sum() >= 50:
                 e["found"].append(float((v[y] > cut["aggregate"]).mean()))
@@ -366,7 +386,9 @@ def summarize(d, cut=None):
     mean = lambda v: round(float(np.mean(v)), 3) if v else None
     return {"cutoff": {w: round(c, 3) for w, c in cut.items()},
             "groups": {k: {w: {"sites": e["sites"], "moved_px": e["moved"], "found": mean(e["found"]), "lit": mean(e["lit"]),
-                               "ap": mean(e["ap"]), "median_moved": mean(e["med"])} for w, e in v.items()} for k, v in sorted(rows.items())}}
+                               "ap": mean(e["ap"]), "median_moved": mean(e["med"]), "found_deep": mean(e["found_deep"]),
+                               "ap_deep": mean(e["ap_deep"]), "median_deep": mean(e["med_deep"])}
+                           for w, e in v.items()} for k, v in sorted(rows.items())}}
 
 
 def site_table(d, cut):
@@ -446,11 +468,13 @@ def report():
         if name not in out:
             continue
         print(f"\n== {name}: cutoffs {out[name]['cutoff']}")
-        print(f"  {'group':28s} {'layer':15s} {'sites':>5s} {'moved':>8s} {'found':>6s} {'lit':>6s} {'AP':>6s} {'med':>6s}")
+        print(f"  {'group':28s} {'layer':15s} {'sites':>5s} {'moved':>8s} {'found':>6s} {'lit':>6s} {'AP':>6s} {'med':>6s}"
+              f"  | deep > 2 m: {'found':>6s} {'AP':>6s} {'med':>6s}")
         for g, v in out[name]["groups"].items():
             for w, e in v.items():
                 f = lambda x: f"{x:6.3f}" if x is not None else "     -"
-                print(f"  {g:28s} {w:15s} {e['sites']:5d} {e['moved_px']:8d} {f(e['found'])} {f(e['lit'])} {f(e['ap'])} {f(e['median_moved'])}")
+                print(f"  {g:28s} {w:15s} {e['sites']:5d} {e['moved_px']:8d} {f(e['found'])} {f(e['lit'])} {f(e['ap'])} {f(e['median_moved'])}"
+                      f"  |             {f(e['found_deep'])} {f(e['ap_deep'])} {f(e['median_deep'])}")
     if "cities" in out:
         for recipe, C in out["cities"].items():
             for w in ("aef_gated", "aggregate"):
