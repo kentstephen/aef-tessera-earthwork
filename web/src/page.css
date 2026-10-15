@@ -548,6 +548,12 @@ body {
 .ew-load-tag.on {
   display: block;
 }
+/* see-through as the other cards are */
+.ew-load-tag.at-glass {
+  background: var(--card);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+}
 
 .ew-load-tag span {
   margin-left: 6px;
