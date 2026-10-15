@@ -6,7 +6,7 @@
 const STAC = "https://stac.earthgenome.org/search";
 const YEARLY = "sentinel2-yearly-mosaics";
 const FILL = "sentinel2-temporal-mosaics";
-const BANDS = ["B02", "B03", "B04", "B8A", "B11", "B12"];
+const BANDS = ["B02", "B03", "B04", "B08", "B8A", "B11", "B12"];
 
 type StacFeature = {
   id: string;
