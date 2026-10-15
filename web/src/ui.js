@@ -119,7 +119,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     paint: cfg.paint !== false, paintComp: cfg.paint_comp || "tci",
     // the paint's own year ([ ] and B while painting; imgYear is the plain imagery's), and Shift held: the
     // gray off, the imagery in its own colors everywhere
-    paintYear: cfg.paint_year || S2Y[0], filled: false,
+    paintYear: cfg.paint_year || S2Y[S2Y.length - 1], filled: false,
     fit: !!cfg.fit, holding: false,
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
@@ -379,7 +379,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the colors drawn on a map: the paint's on the main map while painting (not holding space), the plain
   // imagery's otherwise and on the pair's left
   const compOf = (left = false) => (!left && st.paint && !st.holding ? st.paintComp : st.s2comp);
-  // the paint has its own year, the imagery's first to start, stepped with [ ] and B while painting; the
+  // the paint has its own year, the latest to start (it matches the ground as it is; step back to see it dug), stepped with [ ] and B while painting; the
   // plain imagery (space, the pair's left) keeps its own. The paint mounts only the years it has been
   // stepped to (paintSeen), never all four: every year mounted at once slowed the map down
   const yearOf = (left = false) => (!left && st.paint && !st.holding ? st.paintYear : st.imgYear);
@@ -428,7 +428,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <h2>Earthwork</h2>
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
-    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) in full color; scroll while holding to step through the years. The gray map has its own year, ${S2Y[0]} to start: [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
+    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) in full color; scroll while holding to step through the years. The gray map has its own year, ${S2Y[S2Y.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
     <p><small>Keys: I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
