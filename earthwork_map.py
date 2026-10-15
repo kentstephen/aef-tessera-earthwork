@@ -3310,12 +3310,13 @@ def _(anywidget, asyncio, time, traitlets):
             if (ov) ov.setProps({layers: layers()});
             if (ov2) ov2.setProps({layers: layers2()});
           }
-          // place names on the vector basemap only: hidden over the Sentinel-2 imagery (the main map while space
-          // is held, the pair's left map while it shows Sentinel-2), back when the basemap is
+          // place names (L): hidden over the plain Sentinel-2 imagery (the main map while space is held, the pair's
+          // left map while it shows Sentinel-2), back when the basemap is; the paint keeps them
           function labels(on) {
             for (const m of [map, map2]) {
               if (!m || !m.isStyleLoaded()) continue;
-              const overImagery = m === map ? st.holding || (st.paint && m.getZoom() >= (cfg.s2_min_z || 7)) : st.pair && st.left === "s2";
+              // painting, the imagery is the map and keeps its place names (they sit above the imagery's slot)
+              const overImagery = m === map ? st.holding : st.pair && st.left === "s2";
               const vis = on && !overImagery ? "visible" : "none";
               (m.getStyle().layers || []).forEach((l) => { if (l.layout && l.layout["text-field"] !== undefined && m.getLayoutProperty(l.id, "visibility") !== vis) m.setLayoutProperty(l.id, "visibility", vis); });
             }
