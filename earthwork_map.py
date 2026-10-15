@@ -274,9 +274,9 @@ def _(os, tempfile):
     HEX_ZOOM = 9.0
     LABELS_SLOT = "watername_ocean"
     RASTER_TILE = 256
-    # Wildwood, Florida: The Villages grading new neighborhoods out of farmland. Zoom 13.3, past 11.8 where the
+    # Wildwood, Florida: The Villages grading new neighborhoods out of farmland. Zoom 12.5, past 11.8 where the
     # 10 m reads (and so TESSERA) begin, so all three layers have something from the start
-    HOME = {"longitude": -81.989804, "latitude": 28.751057, "zoom": 13.3}
+    HOME = {"longitude": -81.989804, "latitude": 28.751057, "zoom": 12.5}
     # the structure gate's model (structures.py, under models/)
     STRUCTURE_MODEL = "structure_hgb_small.pkl"
 
