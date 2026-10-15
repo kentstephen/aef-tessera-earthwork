@@ -34,8 +34,6 @@ HOST = "https://fsn1.your-objectstorage.com/hwh-ahn"  # basisdata.nl redirects h
 PDOK = "https://service.pdok.nl/rws/actueel-hoogtebestand-nederland/atom/downloads/dtm_05m"
 # flight swath envelopes with a date each (the flight-line files, AUX/vlieglijnen, miss the 2024 southeast)
 SWATHS = {4: "AUX/omhullen/AHN4_omhullen_valid_date.gpkg", 5: "AUX/omhullen/AHN5_omhullen_clip.gpkg"}
-
-
 AHN3_LINES = "AUX/vlieglijnen/AHN3_clip.gpkg"  # AHN3 has no dated swaths, only lines
 LINE_HALF_M = 500  # about half a swath: lines this far outside a window still cover its edge
 
@@ -52,8 +50,10 @@ SITES = [
       note="Blankenburgverbinding: Rozenburg ramp fill, the Scheur tunnel approaches and the Maassluis side"),
     S("rijnlandroute", "building", 52.142, 4.452,
       note="Rijnlandroute: A44 junction Leiden-West cut and the Corbulo tunnel at Voorschoten"),
-    S("valkenburg", "building", 52.180, 4.428, note="Valkenburg (Katwijk): new district on the old air base, sand fills"),
-    S("moerdijk-logistics", "building", 51.684, 4.630, note="Logistiek Park Moerdijk site preparation and fill"),
+    S("valkenburg", "building", 52.180, 4.428,
+      note="Valkenburg (Katwijk): new district on the old air base, sand fills"),
+    S("moerdijk-logistics", "building", 51.684, 4.630,
+      note="Logistiek Park Moerdijk site preparation and fill"),
     S("hedwigepolder", "survey", 51.352, 4.228, 1.5,
       note="Hedwigepolder depoldering: dikes removed and creeks dug, flooded by the tide in Feb 2022; "
            "AHN5 has no data on the water, so the flooded polder drops out"),
@@ -69,8 +69,9 @@ SITES = [
       note="Meerstad and the east edge of Groningen: new housing districts, sand fills and dug water; "
            "AHN3 (Feb 2019) against AHN4, the window kept inside one AHN3 sheet (07GN1)", pair="ahn3"),
     S("heuvelrug", "quiet", 52.060, 5.330, note="Utrechtse Heuvelrug forest, quiet"),
-    S("beemster", "quiet", 52.550, 4.920,
-      note="Beemster polder fields, quiet; a few cm level shift between the covers (removed with the median)"),
+    S("beemster", "quiet", 52.565, 4.885,
+      note="Beemster polder fields (west), quiet, clear of the Middenbeemster housing fill; a few cm level shift "
+           "between the covers (removed with the median)"),
 ]
 
 
@@ -90,9 +91,10 @@ def aux(rel):
 def tiles(grid):
     """The AHN tiles (sheet code and AHN5 0.5 m DTM URL, None where there is no AHN5) over the grid."""
     import pyogrio
+    import shapely
     W, S_, E, N = grid[:4]
     df = pyogrio.read_dataframe(aux("AUX/bladwijzer.gpkg"), columns=["AHN", "AHN5_05M_M"], bbox=(W, S_, E, N))
-    df = df[df.intersects(__import__("shapely").box(W, S_, E, N))]
+    df = df[df.intersects(shapely.box(W, S_, E, N))]
     return [(r.AHN, r.AHN5_05M_M if isinstance(r.AHN5_05M_M, str) else None) for r in df.itertuples()]
 
 
