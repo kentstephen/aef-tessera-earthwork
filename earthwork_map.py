@@ -3162,17 +3162,33 @@ def _(anywidget, asyncio, time, traitlets):
               }
               const rgba = new Uint8Array(4 * width * height);
               if (chans.every(Boolean)) {
-                // nodata only where every band is 0: one band at 0 is real ground (water's shortwave infrared,
-                // B11 and B12, is 0 over rivers and flooded fields; treated as nodata, it left holes there)
+                // nodata where every band is 0. A pixel with only some bands at 0 is real ground where it lies among
+                // data (water's shortwave infrared, B11 and B12, is 0 over rivers and flooded fields: dropped, it left
+                // holes there), but nodata where it touches an empty pixel: at a footprint's data edge a band placed
+                // from another grid (B02 onto B11's) reaches a pixel past the others, and that pixel drew black
+                // (dashes along the seams, where the neighbor underneath covers it)
+                const got = new Uint8Array(width * height);  // 0 empty, 1 some bands, 2 every band
                 for (let r = 0; r < height; r++) for (let c = 0; c < width; c++) {
-                  const o = 4 * (r * width + c);
-                  let any = false;
+                  const i = r * width + c, o = 4 * i;
+                  let n = 0;
                   for (let k = 0; k < 3; k++) {
                     const a = chans[k], v = r < a.h && c < a.w ? a.d[r * a.w + c] : 0;
                     rgba[o + k] = S2_SQRT[v];
-                    if (v) any = true;
+                    if (v) n++;
                   }
-                  rgba[o + 3] = any ? 255 : 0;
+                  got[i] = n === 0 ? 0 : n === 3 ? 2 : 1;
+                }
+                for (let r = 0; r < height; r++) for (let c = 0; c < width; c++) {
+                  const i = r * width + c;
+                  let ok = got[i] === 2;
+                  if (got[i] === 1) {
+                    ok = true;
+                    for (let dr = -1; dr <= 1 && ok; dr++) for (let dc = -1; dc <= 1; dc++) {
+                      const rr = r + dr, cc = c + dc;
+                      if (rr >= 0 && rr < height && cc >= 0 && cc < width && got[rr * width + cc] === 0) { ok = false; break; }
+                    }
+                  }
+                  rgba[4 * i + 3] = ok ? 255 : 0;
                 }
               }
               s2Stat.tiles++; sy.tiles++;
