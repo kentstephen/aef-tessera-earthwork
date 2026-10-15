@@ -1,5 +1,5 @@
 import { NUM_BANDS } from "./aef";
-import { TES_BANDS, TES_FLIP, TES_OK } from "./tessera";
+import { TES_BANDS, TES_FLIP, TES_OK, TES_SKIP } from "./tessera";
 
 /** The map's three layers, as the notebook names them. */
 export type LayerKind = "aggregate" | "aef" | "tessera";
@@ -92,6 +92,8 @@ export function scorePixel(kind: LayerKind, m: WorldModel, p: PixelInputs): numb
   const needAef = kind !== "tessera", needTes = kind !== "aef";
   if (needAef && !unitAef(p.aefFirst, plane, at, bA)) return null;
   if (needAef && !unitAef(p.aefLast, plane, at, aA)) return null;
+  // TESSERA not read here (AlphaEarth saw nothing worth it, see aefScores): the aggregate scores none
+  if (kind === "aggregate" && p.tesFlags && p.tesFlags[at] & TES_SKIP) return 0;
   if (needTes) {
     if (!p.tesFirst || !p.tesLast || !p.tesFlags || !(p.tesFlags[at] & TES_OK)) return null;
     unitTes(p.tesFirst, plane, at, bT);
@@ -106,4 +108,22 @@ export function scorePixel(kind: LayerKind, m: WorldModel, p: PixelInputs): numb
   const gate = p.tesFlags![at] & TES_FLIP ? ga : Math.max(ga, gt);
   const w = m.aggregate.w;
   return sig(half(bA, aA, w, 0, NUM_BANDS) + half(bT, aT, w, 4 * NUM_BANDS, TES_BANDS) + m.aggregate.b) * gate;
+}
+
+/**
+ * AlphaEarth's own gated score at every pixel of a chunk, -1 where a year is missing. TESSERA is read
+ * only in its blocks where some pixel scores at least TES_READ_AT: elsewhere the aggregate lights almost
+ * nothing (on 277 lidar sites, reading half of TESSERA lost 0.2% of the digging the aggregate finds).
+ */
+export function aefScores(first: Int8Array, last: Int8Array, plane: number, m: WorldModel): Float32Array {
+  const out = new Float32Array(plane);
+  for (let at = 0; at < plane; at++) {
+    if (!unitAef(first, plane, at, bA) || !unitAef(last, plane, at, aA)) {
+      out[at] = -1;
+      continue;
+    }
+    const ga = clip01((1 - cosine(bA, aA, NUM_BANDS) - GATE_LO) / (GATE_HI - GATE_LO));
+    out[at] = ga > 0 ? sig(half(bA, aA, m.aef.w, 0, NUM_BANDS) + m.aef.b) * ga : 0;
+  }
+  return out;
 }

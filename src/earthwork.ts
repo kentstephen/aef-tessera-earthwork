@@ -10,7 +10,7 @@ import type { Device, Texture } from "@luma.gl/core";
 import * as zarr from "zarrita";
 
 import { type AefArray, bandTexture, CHUNK, makeGetTileData, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
-import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
+import { aefScores, GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
 import { EarthworkAggregate, EarthworkAlpha, EarthworkCut, EarthworkScore, EarthworkTessera } from "./earthwork-score";
 import { TES_BANDS, tesseraOnChunk } from "./tessera";
 
@@ -154,7 +154,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       getTileData: async (a, o) => {
         const ys = o.sliceSpec[2] as zarr.Slice, xs = o.sliceSpec[3] as zarr.Slice;
         const py0 = ys.start ?? 0, px0 = xs.start ?? 0;
-        const [d, t] = await Promise.all([readAef(a, o), tesseraOnChunk(px0, py0, o.width, o.height, firstIdx, lastIdx, o.signal)]);
+        // AlphaEarth first: its own scores say which TESSERA blocks are worth reading
+        const d = await readAef(a, o);
+        const t = await tesseraOnChunk(px0, py0, o.width, o.height, firstIdx, lastIdx, o.signal, aefScores(d.first, d.last, o.width * o.height, model));
         const { device, width, height } = o;
         keepChunk(keyOf(first, last, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK)), {
           aefFirst: d.first,
@@ -225,8 +227,11 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       const y0 = r * CHUNK, x0 = c * CHUNK, h = Math.min(CHUNK, H - y0), w = Math.min(CHUNK, W - x0);
       const ys = zarr.slice(y0, y0 + h), xs = zarr.slice(x0, x0 + w);
       const aef = (y: number) => zarr.get(arr as AefArray, [y - YEAR_ORIGIN, null, ys, xs]).then((ch) => ch.data as Int8Array);
-      p = Promise.all([aef(first), aef(last), tesseraOnChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN)])
-        .then(([aefFirst, aefLast, t]) => keepChunk(k, { aefFirst, aefLast, tesFirst: t.first, tesLast: t.last, tesFlags: t.flags, w, h }))
+      p = Promise.all([aef(first), aef(last)])
+        .then(async ([aefFirst, aefLast]) => {
+          const t = await tesseraOnChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN, undefined, aefScores(aefFirst, aefLast, w * h, model));
+          keepChunk(k, { aefFirst, aefLast, tesFirst: t.first, tesLast: t.last, tesFlags: t.flags, w, h });
+        })
         .catch(() => {})
         .finally(() => reading.delete(k));
       reading.set(k, p);

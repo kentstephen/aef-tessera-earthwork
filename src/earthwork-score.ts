@@ -189,7 +189,7 @@ export type EarthworkTesseraProps = {
   /** r8sint Texture2DArray, 128 layers: TESSERA's first and last year on the chunk's pixels. */
   tesFirst: Texture;
   tesLast: Texture;
-  /** r8uint: bit 0 both years embedded, bit 1 its radar came or went. */
+  /** r8uint: bit 0 both years embedded, bit 1 its radar came or went, bit 2 not read (AlphaEarth quiet). */
   tesFlags: Texture;
   /** r32float 512 x 1. */
   weightTex: Texture;
@@ -281,14 +281,18 @@ uniform highp usampler2D tesFlags;
       ivec2 size = textureSize(tesFlags, 0);
       ivec2 px = clamp(ivec2(geometry.uv * vec2(size)), ivec2(0), size - 1);
       uint fl = texelFetch(tesFlags, px, 0).r;
-      if ((fl & 1u) == 0u) discard;
-      float za, ca, zt, ct;
-      if (!earthworkHalf(aefFirst, aefLast, px, 64, 0, true, za, ca)) discard;
-      earthworkHalf(tesFirst, tesLast, px, 128, 256, false, zt, ct);
-      float ga = clamp(((1.0 - ca) - ${AGG_NAME}.gateLo) / (${AGG_NAME}.gateHi - ${AGG_NAME}.gateLo), 0.0, 1.0);
-      float gt = clamp(((1.0 - ct) - ${AGG_NAME}.tLo) / max(${AGG_NAME}.tHi - ${AGG_NAME}.tLo, 1e-6), 0.0, 1.0);
-      float gate = (fl & 2u) != 0u ? ga : max(ga, gt);
-      float score = gate / (1.0 + exp(-(za + zt + ${AGG_NAME}.bias)));
+      float score = 0.0;
+      // bit 2: TESSERA not read here, AlphaEarth saw nothing worth it (aefScores): scored 0
+      if ((fl & 4u) == 0u) {
+        if ((fl & 1u) == 0u) discard;
+        float za, ca, zt, ct;
+        if (!earthworkHalf(aefFirst, aefLast, px, 64, 0, true, za, ca)) discard;
+        earthworkHalf(tesFirst, tesLast, px, 128, 256, false, zt, ct);
+        float ga = clamp(((1.0 - ca) - ${AGG_NAME}.gateLo) / (${AGG_NAME}.gateHi - ${AGG_NAME}.gateLo), 0.0, 1.0);
+        float gt = clamp(((1.0 - ct) - ${AGG_NAME}.tLo) / max(${AGG_NAME}.tHi - ${AGG_NAME}.tLo, 1e-6), 0.0, 1.0);
+        float gate = (fl & 2u) != 0u ? ga : max(ga, gt);
+        score = gate / (1.0 + exp(-(za + zt + ${AGG_NAME}.bias)));
+      }
       earthworkScore_v = score;
       color = vec4(score, score, score, 1.0);
     `,

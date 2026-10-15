@@ -15,6 +15,12 @@ const TES_PX = 10;
 /** Bits of the flags plane. */
 export const TES_OK = 1;
 export const TES_FLIP = 2;
+/** Not read: AlphaEarth saw nothing in its block worth reading TESSERA for (see aefScores). */
+export const TES_SKIP = 4;
+/** AlphaEarth's own score at which a pixel's TESSERA block is read. */
+export const TES_READ_AT = 0.3;
+/** TESSERA's inner chunk: 32 x 32 pixels, all 128 bands. */
+const TES_BLOCK = 32;
 
 /** TESSERA on one AlphaEarth chunk's pixels, both years of the window. */
 export type TesseraChunk = {
@@ -45,10 +51,18 @@ type Zone = {
  * neighbors merged into one request, as the notebook's reader does, and at most
  * MAX_IN_FLIGHT requests are out at once across every zone. A failed request is
  * tried again, up to three times.
+ *
+ * Each inner chunk's bytes are kept (the last CACHE_MAX bytes' worth) and a read
+ * already on its way is shared: neighboring AlphaEarth chunks need the same
+ * TESSERA blocks along their edges, which were otherwise downloaded twice. A
+ * shard's index is read with no abort signal, so a tile let go mid-read (a pan)
+ * cannot fail the other tiles waiting on that index (zarrita issue #465); a shared
+ * read cut off by one tile's signal is read again for the others.
  */
 const MAX_IN_FLIGHT = 48;
 const MERGE_GAP = 1 << 16;
 const MERGE_MAX = 1 << 23;
+const CACHE_MAX = 192 << 20;
 let inFlight = 0;
 const waiting: (() => void)[] = [];
 
@@ -76,9 +90,14 @@ async function retried<T>(f: () => Promise<T>, signal?: AbortSignal): Promise<T>
 
 type Ask = { offset: number; length: number; signal?: AbortSignal; resolve: (v: Uint8Array | undefined) => void; reject: (e: unknown) => void };
 
+const isAbort = (e: unknown) => (e as { name?: string })?.name === "AbortError";
+
 class MergingStore implements zarr.AsyncReadable {
   private inner: zarr.FetchStore;
   private asks = new Map<zarr.AbsolutePath, Ask[]>();
+  private kept = new Map<string, Promise<Uint8Array | undefined>>();
+  private keptBytes = 0;
+  private sizes = new Map<string, number>();
 
   constructor(url: string) {
     this.inner = new zarr.FetchStore(url);
@@ -89,7 +108,42 @@ class MergingStore implements zarr.AsyncReadable {
   }
 
   getRange(key: zarr.AbsolutePath, range: zarr.RangeQuery, opts?: { signal?: AbortSignal }): Promise<Uint8Array | undefined> {
-    if ("suffixLength" in range) return retried(() => this.inner.getRange(key, range, opts), opts?.signal);
+    // the shard's index: shared by every tile reading that shard, so no one tile's signal
+    if ("suffixLength" in range) return retried(() => this.inner.getRange(key, range));
+    const k = `${key}:${range.offset}:${range.length}`;
+    const have = this.kept.get(k);
+    if (have) {
+      this.kept.delete(k);
+      this.kept.set(k, have);
+      return have.catch((e) => {
+        if (!isAbort(e) || opts?.signal?.aborted) throw e;
+        return this.getRange(key, range, opts);
+      });
+    }
+    const p = this.ask(key, range, opts?.signal);
+    this.kept.set(k, p);
+    p.then(
+      (buf) => {
+        if (this.kept.get(k) !== p) return;
+        const n = buf ? buf.byteLength : 0;
+        this.sizes.set(k, n);
+        this.keptBytes += n;
+        for (const [old] of this.kept) {
+          if (this.keptBytes <= CACHE_MAX) break;
+          if (old === k) continue;
+          this.keptBytes -= this.sizes.get(old) ?? 0;
+          this.sizes.delete(old);
+          this.kept.delete(old);
+        }
+      },
+      () => {
+        if (this.kept.get(k) === p) this.kept.delete(k);
+      },
+    );
+    return p;
+  }
+
+  private ask(key: zarr.AbsolutePath, range: { offset: number; length: number }, signal?: AbortSignal): Promise<Uint8Array | undefined> {
     return new Promise((resolve, reject) => {
       let list = this.asks.get(key);
       if (!list) {
@@ -97,7 +151,7 @@ class MergingStore implements zarr.AsyncReadable {
         this.asks.set(key, list);
         setTimeout(() => this.flush(key), 0);
       }
-      list.push({ offset: range.offset, length: range.length, signal: opts?.signal, resolve, reject });
+      list.push({ offset: range.offset, length: range.length, signal, resolve, reject });
     });
   }
 
@@ -116,7 +170,8 @@ class MergingStore implements zarr.AsyncReadable {
       // a request serving several reads is let go only when all of them share one signal
       const sig = g.asks.every((a) => a.signal === g.asks[0].signal) ? g.asks[0].signal : undefined;
       retried(() => this.inner.getRange(key, { offset: g.start, length: g.end - g.start }, { signal: sig }), sig).then(
-        (buf) => g.asks.forEach((a) => a.resolve(buf && buf.subarray(a.offset - g.start, a.offset - g.start + a.length))),
+        // copies, so a kept inner chunk does not hold the whole merged response
+        (buf) => g.asks.forEach((a) => a.resolve(buf && buf.slice(a.offset - g.start, a.offset - g.start + a.length))),
         (e) => g.asks.forEach((a) => a.reject(e)),
       );
     }
@@ -154,6 +209,10 @@ function openZone(zone: number): Promise<Zone | null> {
  * (px0, py0) on the mosaic's grid, w x h pixels: the TESSERA pixel holding the
  * center (r = floor((y0 - N) / 10), c = floor((E - x0) / 10)), each pixel in
  * the UTM zone of its own longitude. Not embedded, or outside the store: flags 0.
+ *
+ * With AlphaEarth's own scores (aefScores, -1 where AlphaEarth is missing), only the
+ * TESSERA blocks (32 x 32) holding a pixel that scores TES_READ_AT or more are read;
+ * the other pixels with AlphaEarth get TES_SKIP.
  */
 export async function tesseraOnChunk(
   px0: number,
@@ -163,6 +222,7 @@ export async function tesseraOnChunk(
   firstIdx: number,
   lastIdx: number,
   signal?: AbortSignal,
+  aef?: Float32Array,
 ): Promise<TesseraChunk> {
   const plane = w * h;
   const first = new Int8Array(TES_BANDS * plane);
@@ -204,16 +264,48 @@ export async function tesseraOnChunk(
       c1 = Math.min(c1, zn.cols - 1);
       if (r1 < r0 || c1 < c0) return;
       const ys = zarr.slice(r0, r1 + 1), xs = zarr.slice(c0, c1 + 1);
-      const ww = c1 - c0 + 1, wplane = (r1 - r0 + 1) * ww;
+      const ww = c1 - c0 + 1, wh = r1 - r0 + 1, wplane = wh * ww;
+      // the TESSERA blocks to read: under a pixel AlphaEarth scores high enough (all of them without its scores)
+      const b0 = Math.floor(r0 / TES_BLOCK), bc0 = Math.floor(c0 / TES_BLOCK);
+      const bw = Math.floor(c1 / TES_BLOCK) - bc0 + 1, bh = Math.floor(r1 / TES_BLOCK) - b0 + 1;
+      const want = new Uint8Array(bw * bh);
+      for (let j = 0, k = 0; j < h; j++)
+        for (let i = i0; i < i1; i++, k++) {
+          const r = rr[k], c = cc[k];
+          if (r < r0 || r > r1 || c < c0 || c > c1) continue;
+          if (!aef || aef[j * w + i] >= TES_READ_AT) want[(Math.floor(r / TES_BLOCK) - b0) * bw + Math.floor(c / TES_BLOCK) - bc0] = 1;
+        }
+      // a year's embeddings over the window, block by block (one inner chunk each), zeros where not read
+      const emb = async (t: number) => {
+        const out = new Int8Array(TES_BANDS * wplane);
+        const reads: Promise<void>[] = [];
+        for (let by = 0; by < bh; by++)
+          for (let bx = 0; bx < bw; bx++) {
+            if (!want[by * bw + bx]) continue;
+            const y0 = Math.max(r0, (b0 + by) * TES_BLOCK), y1 = Math.min(r1 + 1, (b0 + by + 1) * TES_BLOCK);
+            const x0 = Math.max(c0, (bc0 + bx) * TES_BLOCK), x1 = Math.min(c1 + 1, (bc0 + bx + 1) * TES_BLOCK);
+            reads.push(
+              zarr.get(zn.emb, [t, null, zarr.slice(y0, y1), zarr.slice(x0, x1)], { signal }).then((got) => {
+                const d = got.data as Int8Array, gw = x1 - x0, gp = (y1 - y0) * gw;
+                for (let b = 0; b < TES_BANDS; b++)
+                  for (let y = y0; y < y1; y++) {
+                    const from = b * gp + (y - y0) * gw;
+                    out.set(d.subarray(from, from + gw), b * wplane + (y - r0) * ww + (x0 - c0));
+                  }
+              }),
+            );
+          }
+        await Promise.all(reads);
+        return out;
+      };
       const year = (t: number) =>
         Promise.all([
-          zarr.get(zn.emb, [t, null, ys, xs], { signal }),
+          emb(t),
           zarr.get(zn.scales, [t, ys, xs], { signal }),
           zarr.get(zn.asc, [t, ys, xs], { signal }),
           zarr.get(zn.desc, [t, ys, xs], { signal }),
         ]);
-      const [[ef, sf, af, df], [el, sl, al, dl]] = await Promise.all([year(firstIdx), year(lastIdx)]);
-      const embF = ef.data as Int8Array, embL = el.data as Int8Array;
+      const [[embF, sf, af, df], [embL, sl, al, dl]] = await Promise.all([year(firstIdx), year(lastIdx)]);
       const scF = sf.data as Float32Array, scL = sl.data as Float32Array;
       const ascF = af.data as Uint16Array, descF = df.data as Uint16Array;
       const ascL = al.data as Uint16Array, descL = dl.data as Uint16Array;
@@ -225,6 +317,10 @@ export async function tesseraOnChunk(
           const r = rr[k], c = cc[k];
           if (r < r0 || r > r1 || c < c0 || c > c1) continue;
           const s = (r - r0) * ww + (c - c0);
+          if (!want[(Math.floor(r / TES_BLOCK) - b0) * bw + Math.floor(c / TES_BLOCK) - bc0]) {
+            if (aef && aef[dst[k]] >= 0) flags[dst[k]] = TES_SKIP;
+            continue;
+          }
           const okF = scF[s] > 0, okL = scL[s] > 0; // false for NaN
           const radarF = ascF[s] + descF[s] > 0, radarL = ascL[s] + descL[s] > 0;
           flags[dst[k]] = (okF && okL ? TES_OK : 0) | (radarF !== radarL ? TES_FLIP : 0);
