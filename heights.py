@@ -10,6 +10,8 @@ embedding implies, with no lidar in it. Two DEMs, each its own run:
   mapterhorn  Mapterhorn's terrarium tiles at zoom 13, as the notebook reads them
   3dep        USGS 3DEP from its S3 bucket: at each site the first flight's own 1 m DEM (the one the labels were
               cut from), in New York the seamless 1/3 arc-second DEM (about 10 m)
+  copernicus  the Copernicus DEM GLO-30 from its AWS bucket: a surface model (buildings and trees in it) and the
+              one AlphaEarth was taught to reconstruct
 
   sites   the 14 digging sites, against the lidar's own dz: does the ghost's change follow dz (correlation, and the
           sign on moved ground: cut or fill), and does its size separate moved from unchanged (AUC), beside plain
@@ -19,8 +21,15 @@ embedding implies, with no lidar in it. Two DEMs, each its own run:
 
 TESSERA was taught no height, but its ghost is fitted the same way, for comparison.
 
-Run: uv run python heights.py [3dep]   (DEMs cached in data/heights, writes results/heights.json or heights_3dep.json)
-     uv run python heights.py report [3dep]
+The head (heights.py head) asks it the other way round: not whether the embedding's own height moves, but whether
+the lidar's meters can be learned from the embedding pair. A ridge regression on the pair's features (as the
+Earthwork models take them: before, after, their product and squared difference) to the signed dz, and a boosted
+tree on both embeddings joined, each held out by site over the 14 digging sites: does it follow dz, does it get cut
+or fill right, and does its size separate moved from unchanged as well as plain change does.
+
+Run: uv run python heights.py [3dep|copernicus]   (DEMs cached in data/heights, writes results/heights[_source].json)
+     uv run python heights.py report [3dep|copernicus]
+     uv run python heights.py head        (writes results/heights_head.json; head report)
 """
 
 import io
@@ -113,6 +122,18 @@ def seamless_at(lon, lat):
     return out
 
 
+def copernicus_at(lon, lat):
+    """The Copernicus DEM GLO-30, from every one-degree tile under the points."""
+    out = np.full(len(lon), np.nan, np.float32)
+    for n in range(int(np.floor(lat.min())), int(np.floor(lat.max())) + 1):
+        for e in range(int(np.floor(lon.min())), int(np.floor(lon.max())) + 1):
+            m = (lat >= n) & (lat < n + 1) & (lon >= e) & (lon < e + 1)
+            if m.any():
+                t = f"Copernicus_DSM_COG_10_{'N' if n >= 0 else 'S'}{abs(n):02d}_00_{'E' if e >= 0 else 'W'}{abs(e):03d}_00_DEM"
+                out[m] = raster_at(f"https://copernicus-dem-30m.s3.amazonaws.com/{t}/{t}.tif", lon[m], lat[m], 30.0)
+    return out
+
+
 def elevation(name, lon, lat, tiles=None):
     """The DEM SOURCE gives for a place, cached."""
     path = f"{DIR}/{SOURCE}_{name}.npy"
@@ -120,6 +141,8 @@ def elevation(name, lon, lat, tiles=None):
         return np.load(path)
     if SOURCE == "mapterhorn":
         v = dem_at(lon, lat)
+    elif SOURCE == "copernicus":
+        v = copernicus_at(lon, lat)
     else:
         v = raster_at(tiles[0], lon, lat) if tiles else seamless_at(lon, lat)
     os.makedirs(DIR, exist_ok=True)
@@ -299,8 +322,100 @@ def report(res=None):
     print("  R2 per square (aef/tes): " + ", ".join(f"{n} {v['r2']['aef']:.2f}/{v['r2']['tes']:.2f}" for n, v in R.items()))
 
 
+HEAD_OUT = os.path.join(HERE, "results", "heights_head.json")
+MOVED, CALM, BETWEEN = 15_000, 15_000, 5_000  # pixels sampled a site: moved, unchanged and in between
+DZ_CLIP = 15.0  # meters: a deep mine's cut does not swamp the rest
+
+
+def head_rows(n):
+    """One digging site's sampled pixels: the features of each embedding, dz, the class and plain change."""
+    from compare import feats as pair_feats, load
+    d = load(n)
+    dz = np.load(site_path(n), allow_pickle=True)["dz"]
+    ok = d["ok"] & np.isfinite(dz)
+    rng = np.random.default_rng(0)
+    pick = []
+    for m, k in ((ok & (np.abs(dz) > 0.5), MOVED), (ok & (np.abs(dz) < 0.1), CALM), (ok & (np.abs(dz) >= 0.1) & (np.abs(dz) <= 0.5), BETWEEN)):
+        i = np.flatnonzero(m)
+        pick.append(rng.choice(i, min(k, len(i)), replace=False))
+    idx = np.sort(np.concatenate(pick))
+    return {"X": {w: pair_feats(d, idx, w).astype(np.float32) for w in ("aef", "tes", "both")}, "dz": dz[idx].astype(np.float32),
+            "aplain": d["aplain"][idx], "tplain": d["tplain"][idx]}
+
+
+def head_metrics(pred, dz, plain):
+    mv, calm = np.abs(dz) > 0.5, np.abs(dz) < 0.1
+    lab = mv | calm
+    return {"corr_moved": float(np.corrcoef(pred[mv], dz[mv])[0, 1]), "corr_all": float(np.corrcoef(pred, dz)[0, 1]),
+            "sign_moved": float((np.sign(pred[mv]) == np.sign(dz[mv])).mean()),
+            "auc_size": float(roc_auc_score(mv[lab], np.abs(pred[lab]))), "auc_plain": float(roc_auc_score(mv[lab], plain[lab])),
+            "abs_moved": float(np.median(np.abs(pred[mv]))), "abs_calm": float(np.median(np.abs(pred[calm]))),
+            "dz_moved": float(np.median(np.abs(dz[mv]))), "moved": int(mv.sum())}
+
+
+def head():
+    from sklearn.ensemble import HistGradientBoostingRegressor
+    from sklearn.linear_model import Ridge
+    names = [n for n in teaching_names() if json.loads(str(np.load(f"{HERE}/data/tessera/{n}.npz", allow_pickle=True)["meta"]))["kind"] in TEACH_KINDS]
+    R = {}
+    for n in names:
+        t = time.time()
+        R[n] = cities.in_child(head_rows, n)  # a child per site: the full load's memory goes back when it ends
+        print(f"rows {n}: {len(R[n]['dz'])} px, {time.time() - t:.0f} s", flush=True)
+    fits = [("ridge", w) for w in ("aef", "tes", "both")] + [("hgb", "both")]
+    # every site's rows in one array per embedding, the held-out site left out by a mask or a zero weight
+    # (no copy of the training rows for each fold)
+    site = np.concatenate([np.full(len(R[n]["dz"]), k) for k, n in enumerate(names)])
+    Y = np.clip(np.concatenate([R[n]["dz"] for n in names]), -DZ_CLIP, DZ_CLIP)
+    XS = {w: np.concatenate([R[n]["X"][w] for n in names]) for w in ("aef", "tes", "both")}
+    for n in names:
+        R[n].pop("X")
+    import gc
+    import resource
+    res = {}
+    for k, n in enumerate(names):
+        res[n] = {}
+        held = site == k
+        for how, w in fits:
+            t = time.time()
+            if how == "ridge":
+                mdl = Ridge(alpha=10.0).fit(XS[w][~held], Y[~held])
+            else:
+                mdl = HistGradientBoostingRegressor(max_iter=300, learning_rate=0.08, random_state=0, early_stopping=False)
+                mdl.fit(XS[w], Y, sample_weight=(~held).astype(np.float32))
+            pred = mdl.predict(XS[w][held]).astype(np.float32)
+            del mdl
+            gc.collect()
+            res[n][f"{how}:{w}"] = head_metrics(pred, R[n]["dz"], R[n]["tplain"] if w == "tes" else R[n]["aplain"])
+            r = res[n][f"{how}:{w}"]
+            print(f"{n} {how}:{w}: corr moved {r['corr_moved']:.2f}, sign {r['sign_moved']:.2f}, AUC size {r['auc_size']:.3f} "
+                  f"(plain {r['auc_plain']:.3f}), {time.time() - t:.0f} s, peak {resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e9:.1f} GB", flush=True)
+        json.dump(res, open(HEAD_OUT, "w"), indent=1)
+    head_report(res)
+
+
+def head_report(res=None):
+    res = res or json.load(open(HEAD_OUT))
+    keys = list(next(iter(res.values())))
+    print("\nthe lidar's meters learned from the embedding pair, each site held out (moved |dz| > 0.5 m, unchanged < 0.1 m)")
+    print(f"  {'site':22s} " + "  ".join(f"{k:>34s}" for k in keys) + f"  {'|dz| mv':>7s}")
+    print(f"  {'':22s} " + "  ".join(f"{'corr  sign  AUC  plain  |p|mv |p|un':>34s}" for _ in keys))
+    for n, v in res.items():
+        print(f"  {n:22s} " + "  ".join(f"{v[k]['corr_moved']:5.2f} {v[k]['sign_moved']:5.2f} {v[k]['auc_size']:5.3f} {v[k]['auc_plain']:5.3f} {v[k]['abs_moved']:5.2f} {v[k]['abs_calm']:5.2f}" for k in keys)
+              + f"  {v[keys[0]]['dz_moved']:7.2f}")
+    for k in keys:
+        m = lambda key: np.mean([v[k][key] for v in res.values()])
+        print(f"  mean {k:11s}: corr moved {m('corr_moved'):.2f}, all {m('corr_all'):.2f}, sign {m('sign_moved'):.2f}, "
+              f"AUC size {m('auc_size'):.3f} against plain {m('auc_plain'):.3f}, |pred| moved {m('abs_moved'):.2f} m, unchanged {m('abs_calm'):.2f} m")
+
+
 if __name__ == "__main__":
     import sys
-    if "3dep" in sys.argv[1:]:
-        SOURCE, OUT = "3dep", os.path.join(HERE, "results", "heights_3dep.json")
-    report() if "report" in sys.argv[1:] else main()
+    a = sys.argv[1:]
+    for src in ("3dep", "copernicus"):
+        if src in a:
+            SOURCE, OUT = src, os.path.join(HERE, "results", f"heights_{src}.json")
+    if "head" in a:
+        head_report() if "report" in a else head()
+    else:
+        report() if "report" in a else main()

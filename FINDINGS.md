@@ -1005,11 +1005,32 @@ bucket (each site's first-flight 1 m DEM, the seamless 1/3 arc-second DEM in New
 | sign right on moved ground (cut or fill) | .52 | .51 |
 | median ghost change, moved / unchanged | 12.9 m / 7.8 m | 20.1 m / 11.6 m |
 
+The Copernicus DEM GLO-30 (a surface model, buildings and trees in it, and the one AlphaEarth was taught to
+reconstruct) gives the same at the sites: AUC .629, correlation .02, sign .52. So the target is not why.
+
 The median moved ground at these sites moved 0.8 to 2 m (8.6 m at Mountain Pass, 4.6 m at Hibbing). The ghost
 wobbles by meters to tens of meters a year on ground that did not move, so it does not see meter-scale digging: its
 change is larger on moved ground only because the embedding changed there, and its direction is a coin flip. On New
 York's roofs it moves about 1 m whether the roof was whitened, darkened or left alone, and as much off the roofs: it
-says nothing moved at the white roofs, and says much the same on dug ground.
+says nothing moved at the white roofs, and says much the same on dug ground. Fitted to Copernicus, whose buildings
+stand in the surface, the ghost moves 3.4 m on whitened roofs, 3.3 m on darkened ones and 2.8 m on steady ones
+(2022 to 2024): no more separation than against the bare earth.
+
+The other way round (`heights.py head`): the lidar's own meters taught from the embedding pair, as the Earthwork
+models take it (before, after, their product, their squared difference), signed dz clipped at 15 m, each of the 14
+digging sites held out in turn (35,000 pixels a site: moved, unchanged and in between). Means over the sites:
+
+| head | correlation with dz, moved | sign right, moved (cut or fill) | AUC of its size | plain change's AUC | median size, moved / unchanged |
+|---|---|---|---|---|---|
+| ridge, AlphaEarth | .18 | .54 | .581 | .859 | 1.39 / 1.08 m |
+| ridge, TESSERA | .05 | .53 | .552 | .860 | 1.00 / 0.87 m |
+| ridge, both | .14 | .55 | .601 | .859 | 1.48 / 1.11 m |
+| boosted trees, both | .14 | .55 | .716 | .859 | 0.51 / 0.19 m |
+
+Taught on the meters themselves, the pair still does not carry them to a new site: cut against fill is near a coin
+flip at every site (.43 to .68), and how much is barely there (correlation .14 to .18; Lakewood Ranch .54 with the
+trees, its sign .47). Even as a detector, the size of the predicted change separates moved from unchanged worse than
+plain change does. The embeddings say the ground changed, not how far or which way.
 
 ## Open
 
@@ -1043,7 +1064,8 @@ says nothing moved at the white roofs, and says much the same on dug ground.
 - Ideas named, not to-dos: a disturbance layer marking clearcuts (never hiding them); ESD (Landsat-based, 30 m)
   compared at the lidar sites; TESSERA made ourselves from its open code and weights (2025 without the descending
   radar, optical only, the full 192-d); a study of one chosen area with every model on the same inputs and 3DEP.
-- Height (section 27): a ghost fitted to one static DEM cannot see meter-scale change. Untried: a head taught on
-  the lidar's own meters (signed dz from the embedding pair, held out by site), so cut and fill come apart; or a
-  ghost matched in time (each year against its own flight), held out by 1 km blocks, which comes close to that head.
+- Height (section 27): no ghost (Mapterhorn, 3DEP, Copernicus) and no head taught on dz carries meters or cut
+  against fill to a new site. Untried: a ghost matched in time (each year against its own flight, held out by 1 km
+  blocks, close to the head); building height (NYC footprints' height_roof) as the target for roofs and new
+  buildings, where the change is tens of meters, not one or two.
 - Teaching on more ground outside the US (more abroad lidar or satellite truth): not yet on the list of runs.
