@@ -2023,12 +2023,12 @@ def _(anywidget, asyncio, time, traitlets):
         @media (max-width:760px){.at-top{max-width:calc(100% - 24px)}.at-search{width:calc(100vw - 48px)}.at-yc{top:auto;bottom:12px;max-height:45%;overflow:auto}.at-tools{top:108px}}
         /* ---- two columns of small cards, the same one map or paired: the left (search, Sentinel-2), the
            right (buttons, Earthwork, the readout) ---- */
-        .at{--col:270px}
+        .at{--col:264px}
         .at .at-top{width:var(--col);max-width:calc(50% - 24px);gap:8px}
         .at .at-tools{gap:6px}
         .at .at-btn{height:34px;min-width:34px;padding:0 10px;gap:6px;border-radius:10px}
-        /* search: the cards' width; one focus ring, on the box */
-        .at .at-search{width:var(--col);height:34px;padding:0 10px;border-radius:10px;transition:width .15s ease}
+        /* search: small until it is used, then the cards' width, wide enough to read a place; one focus ring, on the box */
+        .at .at-search{width:212px;height:34px;padding:0 10px;border-radius:10px;transition:width .15s ease}
         .at .at-search:focus-within{width:var(--col);border-color:rgba(255,255,255,.3)}
         .at .at-search input:focus-visible{outline:none}
         /* every card: the column's width, small type, no long words */
@@ -2039,18 +2039,20 @@ def _(anywidget, asyncio, time, traitlets):
         .at .at-panel .at-mwhy,.at .at-panel .at-key .why,.at .at-panel .at-wtxt{display:none}
         .at .at-panel .at-lab{min-width:46px;font-size:12px}
         .at .at-panel .at-row{gap:8px}
-        .at .at-panel .seg-s button{padding:2px 8px;font-size:12.5px}
+        .at .at-panel .seg-s button{padding:2px 6px;font-size:12.5px}
         .at .at-panel .at-key{flex-wrap:nowrap;gap:6px;font-size:11.5px}
         .at .at-panel .at-ramp{flex:1;width:auto;height:8px}
-        .at .at-panel .at-win{width:132px}
+        /* the sliders take what the row leaves, so the value keeps its line in the narrower column */
+        .at .at-panel .at-win{flex:1;width:auto;min-width:0}
         .at .at-panel.collapsed{padding:7px 8px 7px 11px}
         .at .at-panel.collapsed .at-row{display:none}
         .at-row .at-pick{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
         /* the Earthwork card's head: its ramp and the years read, open or folded */
         .at .at-panel .ew-hramp{flex:1;height:7px;min-width:40px;border-radius:3px}
         .ew-hy{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-        /* the right column: Earthwork, then the readout under it; it never runs off the map */
-        .ew-col-r{position:absolute;right:12px;top:54px;z-index:6;width:var(--col);max-width:calc(50% - 24px);max-height:calc(100% - 96px);display:flex;flex-direction:column;gap:8px}
+        /* the right column: Earthwork, then the readout under it, at the button row's width (--rcol); it never
+           runs off the map */
+        .ew-col-r{--col:var(--rcol,264px);position:absolute;right:12px;top:54px;z-index:6;width:var(--col);max-width:calc(50% - 24px);max-height:calc(100% - 96px);display:flex;flex-direction:column;gap:8px}
         .ew-col-r .at-panel{flex:none}
         .at .ew-col-r .at-yc.ew-read{position:relative;right:auto;top:auto;flex:0 1 auto;min-height:0;overflow:auto}
         .at .at-yc.ew-read.ew-off,.at.ew-read-hidden .at-yc.ew-read{display:none}
@@ -2068,24 +2070,22 @@ def _(anywidget, asyncio, time, traitlets):
         .at .at-yc.ew-read .coords{font-size:11.5px;margin:4px 0 8px;padding:5px 7px}
         .at .at-yc.ew-read .x{right:-8px;top:-4px}
         .at .at-yc.ew-read svg{max-width:100%;height:auto}
-        /* the Sentinel-2 card: always on the left under the search, the search's width, wide enough for its
-           keys on one line; the year first, so the pair always says which year */
-        .at .at-yc.at-s2c{display:block;position:relative;right:auto;top:auto;width:var(--col);padding:16px 14px 15px 16px}
-        .at .ew-s2hd{display:flex;align-items:center;gap:11px;margin:0}
-        .ew-s2hd b{font-size:42px;line-height:1;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+        /* the Sentinel-2 card: always on the left under the search, a small box at the search's width, its keys
+           in groups that wrap; the year first, so the pair always says which year */
+        .at .at-yc.at-s2c{display:block;position:relative;right:auto;top:auto;width:212px;padding:12px 12px 12px 14px}
+        .at .ew-s2hd{display:flex;align-items:center;gap:9px;margin:0}
+        .ew-s2hd b{font-size:34px;line-height:1;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
         .at-s2c:not(.ew-showing) .ew-s2hd b{color:var(--muted)}
-        .ew-s2hd span{font-size:13px;line-height:1.3;color:var(--muted);white-space:nowrap}
+        .ew-s2hd span{font-size:12px;line-height:1.25;color:var(--muted);white-space:nowrap}
         /* the map's zoom, in the gap at the right of the head, two lines as the words beside it */
         .ew-s2hd .ew-zw{margin-left:auto;text-align:right}
         .ew-s2hd .ew-z{font-style:normal;font-variant-numeric:tabular-nums}
-        .at-s2c .ew-keys{margin:13px 0 0;font-size:13px;line-height:1.5;white-space:nowrap}
-        .at-s2c .ew-keys .ew-ck{margin-left:8px}
+        .at-s2c .ew-keys{display:flex;flex-wrap:wrap;gap:3px 9px;margin:9px 0 0;font-size:12px;line-height:1.5}
+        .at-s2c .ew-keys>span{white-space:nowrap}
         .at-about a{color:var(--text);text-underline-offset:2px}
         /* keys on buttons */
         .at-btn kbd,.at-search kbd,.at-row kbd,.at-more kbd,.at-chip kbd,.ew-keys kbd{font:10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 4px}
         .at-btn.on kbd{color:var(--on);border-color:rgba(0,0,0,.35)}
-        /* the GitHub link in the button row: a button that is a link */
-        .at .ew-code{color:inherit;text-decoration:none}
         /* the first visit's card: short, over a dimmed map */
         .at .ew-welcome .box{width:min(440px,calc(100% - 32px));padding:20px 22px 18px;font-size:13.5px}
         .ew-welcome ul{margin:0 0 10px;padding-left:18px}
@@ -2483,7 +2483,8 @@ def _(anywidget, asyncio, time, traitlets):
           const bCode = el_("a", "at-btn at-glass ew-code", `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`);
           bCode.href = "https://github.com/kentstephen/aef-tessera-earthwork"; bCode.target = "_blank"; bCode.rel = "noopener";
           bCode.title = "the code on GitHub"; bCode.setAttribute("aria-label", "the code on GitHub");
-          tools.append(bCode, bPair, bMore, bHide, bFit);
+          // the GitHub button (bCode) is left out of the row for now
+          tools.append(bPair, bMore, bHide, bFit);
           let cardsHidden = keep("readout");
           root.classList.toggle("ew-paint", st.paint);
           function setCards(hidden) { cardsHidden = hidden; keep("readout", hidden); root.classList.toggle("ew-read-hidden", hidden); bHide.classList.toggle("on", hidden); }
@@ -2495,6 +2496,9 @@ def _(anywidget, asyncio, time, traitlets):
           const ewCol = el_("div", "ew-col-r");
           ewCol.append(panel, yc);
           pane.appendChild(ewCol);
+          // the right column is the button row's width, so its cards line up under the buttons, edge to edge
+          const fitCol = () => { if (tools.offsetWidth) root.style.setProperty("--rcol", tools.offsetWidth + "px"); };
+          try { new ResizeObserver(fitCol).observe(tools); } catch (e) {}
           const tip = el_("div", "at-tip");
           pane.appendChild(tip);
           const more = el_("div", "at-more at-glass");
@@ -2821,11 +2825,12 @@ def _(anywidget, asyncio, time, traitlets):
             // a small card, the search's width: the year (what the imagery shows), what it is, its keys
             const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
             const stepping = st.holding || (st.pair && st.left === "s2");
+            const ends = `${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`;
             s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
-              + `<div class="ew-keys">${showImg && !stepping ? `<kbd>Space</kbd> the years`
+              + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>Space</kbd> the years</span>`
                 : showImg
-                ? `${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year <kbd>B</kbd> ${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`
-                : `<kbd>Space</kbd> or <kbd>P</kbd> to see it`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
+                ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span>`
+                : `<span><kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
             s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
             // the readout: the clicked hexagon's account, nothing until a click; compact, More for the whole account
             const pc = cardData && cardData.kind ? cardData : null;
