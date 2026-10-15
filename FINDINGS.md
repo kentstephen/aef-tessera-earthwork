@@ -1072,6 +1072,143 @@ small trees (pickled, scikit-learn pinned) where it reads the 10 m mosaic, from 
 stands both years scores 0 in every layer. At Wildwood 2% of finer cells stood both years; on the Lower East Side,
 47%, and the scattered block hexagons go while East River Park stays. The read adds about a second a year.
 
+## 29. Repeat lidar abroad: does the score mean the same thing everywhere?
+
+London lit nothing on the map (Brent Cross, Earls Court) while Frisco looked right, and the abroad tests so far
+(sections 4, 5) said the ranking holds abroad but the score's level drops. This section builds truth to test that
+directly: open repeat lidar outside the US, built the way Earthwork built the 3DEP sites (`world_sites.py`), then the
+map's model on it, then a model taught with it, each country held out.
+
+**The sites.** Two bare-earth DEMs, the first flown 2017 or later, the second by 2024, read on one 2 m grid, second
+minus first with the median removed, each AlphaEarth pixel moved (mean |dz| > 0.5 m) or unchanged (< 0.1 m); a 4 km
+square about a dug place (some 2 to 6 km), plus quiet squares. One module per source (`world_<source>.py`):
+
+| Country | Source | Sites | Flights | Moved px |
+|---|---|---|---|---|
+| Netherlands | AHN4 against AHN5 (one AHN3 against AHN4), PDOK and AHN COGs | 13 | 2019-2021 / 2022-2024 | 105,041 |
+| England | EA National LIDAR Programme, 1 m tiles (whole zips) | 21 | 2018-2020 / 2021-2023 | 120,801 with Scotland |
+| Scotland | SRSP Phase 4 / 5 and 6, 0.5 m COGs | 11 | 2017-2018 / 2020-2021 | |
+| Lyon | IGN LiDAR HD 2021 / Grand Lyon 2023 | 9 | 2021 / 2023 | 36,354 |
+| Switzerland | swissALTI3D 2019 / 2026 releases, Geneva SITG 2019 / 2023 | 9 | 2018 / 2024, 2019 / 2023 | 55,734 |
+| Norway | hoydedata.no projects, one locked raster each | 8 | 2018-2022 / 2021-2024 | 70,116 |
+| Poland | GUGiK NMT lidar sheets | 9 | 2018-2022 / 2021-2024 | 296,098 |
+| Estonia | Maa-amet LAZ, ground gridded here | 8 | 2018-2020 / 2020-2024 | 69,136 |
+| Canada | NRCan HRDEM projects, 1 m COGs | 13 | 2017-2019 / 2019-2023 | 219,473 |
+| New Zealand | LINZ nz-elevation, 1 m COGs | 13 | 2018-2021 / 2020-2024 | 131,722 |
+| Kanagawa | prefecture point cloud, 0.5 m ground grids | 9 | FY2019-2020 / FY2024 | 127,958 |
+| Sao Paulo | GeoSampa MDT LAZ (two sites stopped by the server's firewall) | 5 | 2017 / 2020 | 3,310 |
+
+128 sites. Lessons from building them: a COG's own overviews differ from year to year by 5 cm (median) to 14 cm
+(99th percentile) on slopes, which reads as moved ground, so every DEM is read at full resolution and averaged down
+(and through `vrt://...?ovr=NONE`: the OVERVIEW_LEVEL open option let nodata into the averages); rivers, tidal
+banks and reservoirs at a different level in each flight need a water mask (OpenStreetMap in England and Scotland,
+flat-and-shifted cells in Norway and Geneva); Canada's national grid is rotated enough to lose half a window, so
+each site uses its UTM zone. Shallow moves abroad are often the lidar's ground under vegetation (steep forest in
+Kanagawa and New Zealand: plain AlphaEarth change ranks all moved ground at AUC .54 to .75 there, moved ground
+deeper than 2 m at .80 to .98), so every table also gives moves deeper than 2 m, and the world sites teach only
+those, as the islands did.
+
+**The map's model as shipped** (abroad recipe, cutoff .777, the aggregate; AlphaEarth gated in brackets):
+
+| | found | unchanged lit | AP | found, deeper than 2 m |
+|---|---|---|---|---|
+| US digging (held out, for scale) | .60 (.60) | .04 | .57 | .66 |
+| Canada | .61 (.63) | .06 | .62 | .74 |
+| Estonia | .68 (.68) | .23 | .57 | .75 |
+| Netherlands | .40 (.33) | .04 | .55 | .50 |
+| Poland | .33 (.28) | .01 | .43 | .50 |
+| Britain | .27 (.16) | .01 | .31 | .41 |
+| Sao Paulo | .24 (.23) | .01 | .39 | .45 |
+| Norway | .22 (.19) | .01 | .29 | .32 |
+| Switzerland | .17 (.08) | .00 | .31 | .23 |
+| New Zealand | .06 (.05) | .00 | .37 | .13 |
+| Kanagawa | .06 (.04) | .00 | .33 | .24 |
+| Lyon | .01 (.01) | .00 | .13 | .02 |
+
+So London was not alone: the level is US-like in Canada and Estonia, half in the Netherlands and Poland, and near
+nothing in New Zealand, Kanagawa and Lyon. The ranking is weaker abroad too (AP .13 to .43 against .57).
+
+**Why: the digs are smaller.** Median patch of moved ground deeper than 2 m: US sites 20 ha, Canada 33, Estonia 65;
+Britain 6, Netherlands 5, Kanagawa 5, Poland 3.5, Switzerland 1.0, Norway 0.9, Lyon 0.4. AlphaEarth's change on
+that ground follows (median 1 - cos: US .23, Canada .26, Estonia .22; Britain .10, Norway .07, Lyon .04), while
+unchanged ground abroad is as calm or calmer (.02 to .045 in Europe, Japan and New Zealand, .05 in the US, .05 to
+.08 in Canada and Estonia). By patch size the regions line up much better (aggregate, world recipe below, found):
+
+| | < 0.1 ha | 0.1 to 1 | 1 to 10 | > 10 ha |
+|---|---|---|---|---|
+| US | .30 | .49 | .62 | .68 |
+| Netherlands | .22 | .37 | .54 | .78 |
+| Poland | .12 | .32 | .56 | .74 |
+| Canada | .18 | .34 | .43 | .71 |
+| Estonia | .21 | .39 | .48 | .82 |
+| Switzerland | .07 | .24 | .40 | .67 (2 sites) |
+| Britain | .16 | .42 | .43 | .56 |
+| Norway | .03 | .17 | .33 | - |
+| Lyon | .05 | .15 | .34 | - |
+| New Zealand | .02 | .05 | .19 | .41 |
+| Kanagawa | .01 | .04 | .21 | .27 |
+
+Big digs are found about alike in the US, Canada and Europe. New Zealand and Kanagawa stay low at every size: steep,
+vegetated ground (noisier truth), and Kanagawa's second flight may be as late as March 2025.
+
+**Taught with the world lidar.** Two recipes on the same rows (3,000 moved and 15,000 unchanged pixels a site),
+every number held out: "abroad" (the shipped recipe's sites, refit; it reproduces the shipped numbers) and "world"
+(those plus the 127 world sites that are not natural change, each country held out in turn; US sites in four
+folds, islands and satellite labels in four). Each recipe's cutoff finds 60% at its held-out US digging sites
+(abroad .739, world .809). Aggregate found (unchanged lit):
+
+| | abroad | world |
+|---|---|---|
+| US digging | .60 (.039), AP .571 | .60 (.043), AP .557 |
+| Islands | .53 (.010), AP .40 | .51 (.013), AP .33 |
+| Satellite labels | .46 (.050) | .49 (.071) |
+| Canada | .61 (.068) | .52 (.028) |
+| Estonia | .71 (.242) | .54 (.054) |
+| Netherlands | .42 (.037) | .47 (.040) |
+| Poland | .32 (.008) | .39 (.013) |
+| Britain | .30 (.017) | .35 (.012) |
+| Switzerland | .14 (.001) | .29 (.006) |
+| Sao Paulo | .25 (.006) | .24 (.006) |
+| Norway | .22 (.011) | .15 (.003) |
+| New Zealand | .07 (.001) | .15 (.004) |
+| Kanagawa | .07 (.004) | .08 (.013) |
+| Lyon | .01 (.000) | .14 (.005) |
+| Shizuoka (test) | .05 | .09 |
+| Crop switches lit (test) | .044 | .056 |
+| Fields and towns abroad lit (Reunion, Guadeloupe) | .005 | .028 |
+| Deserts and places with no truth lit | .073 | .063 |
+| US farm, marsh, storm lit | .011, .017, .124 | .022, .028, .031 |
+| Dense cities lit (22 squares, three pairs) | .007 | .015 |
+| AlphaEarth layer: crop switches lit | .228 | .320 |
+
+One worldwide model moves the weak places up (Lyon .01 to .14, Switzerland .14 to .29, New Zealand .07 to .15,
+Britain .30 to .35) and quiets Estonia's and Canada's unchanged ground (.24 to .05, .07 to .03), at a cost: fields,
+dense cities and the islands' fields light about twice as much, and the AlphaEarth layer lights crop switches .23 to
+.32. It does not level the score: found still runs .08 (Kanagawa) to .54 (Estonia) at one cutoff.
+
+**A cutoff per region does not fix it either.** Finding 60% held out at each region's own cutoff (world recipe)
+would light 12% of Britain's unchanged ground, 17% of Switzerland's, 25% of Norway's, 28% of New Zealand's, 37% of
+Sao Paulo's and 52% of Kanagawa's, against 4% in the US: the small digs do not rank far enough above calm ground.
+Only Canada (.56, lit 6%), Estonia (.60, 12%) and the Netherlands (.46, 5%) are near the US cutoff.
+
+**A calibrated chance is not portable.** Fit isotonic (each site weighted equally) on the held-out aggregate: the
+score where half the ground moved runs from .36 (Sao Paulo) to .999 (Netherlands), because the share of moved
+ground in a window is set by where the window was put (1% on the islands, 29% in Sao Paulo). Among the highest
+scores (.9 to 1) the share that moved is more alike (.46 Lyon and the islands, .53 Netherlands, .59 US, .65
+Britain, .72 to .79 Poland, Switzerland, Norway, Estonia, Kanagawa, .82 Canada, .89 New Zealand): a pixel the map
+lights is about as trustworthy abroad; what differs is how much of the digging it reaches.
+
+**The structure gate abroad** (hard, section 28) costs .00 to .02 of found and changes unchanged lit by under .01
+in every country: it does not hide European digging.
+
+So: the level gap abroad is mostly the size of the digging (European, Japanese and New Zealand works are small,
+urban and mixed with buildings, where the US sites are 20 ha grading pads), not a regional offset a calibration can
+remove. The world recipe is saved as `models/model_world.npz` (the map's format; TESSERA's layer keeps the shipped
+model) but the map still reads `model_abroad.npz`.
+
+Run: `uv run python world_sites.py [source ...]`, then `world_eval.py baseline | teach | calib | report`
+(teach about an hour, peak 27 GB); results in `results/world.json`.
+
 ## Open
 
 - Clearcuts against forest mines, a second stage (section 19): a head taught on cleared-and-dug against
@@ -1108,4 +1245,10 @@ stands both years scores 0 in every layer. At Wildwood 2% of finer cells stood b
   against fill to a new site. Untried: a ghost matched in time (each year against its own flight, held out by 1 km
   blocks, close to the head); building height (NYC footprints' height_roof) as the target for roofs and new
   buildings, where the change is tens of meters, not one or two.
-- Teaching on more ground outside the US (more abroad lidar or satellite truth): not yet on the list of runs.
+- Worldwide (section 29): one model taught with 127 lidar sites abroad lifts the weak places but does not level the
+  score, and a cutoff per region would light 12% to 52% of calm ground where digs are small. Not tried: a model
+  that reads the pixel's surroundings (section 19's ctx head) for small urban digs; teaching by patch size;
+  weighting the world sites against the US; per-site AlphaEarth years from the flight dates of each tile (some
+  windows span several flight days); the US-only and world recipes on the map side by side. Sao Paulo's two
+  sites behind GeoSampa's firewall, Spain (captcha), Australia (orders by email), Denmark (token) and Sweden
+  (second scans 2025 and 2026) are still unbuilt.

@@ -53,6 +53,11 @@ pixel), TESSERA from Sentinel-2 and Sentinel-1 time series (128 numbers). TESSER
   and dug, cleared and not dug (Hansen loss split by the lidar), the clearcut regions, the satellite-laser mines and
   clearing picked near each mine; `separate_test.py` teaches small heads to tell the two kinds of clearing apart,
   held out by place; `near_panels.py` draws the clearing near each mine against Sentinel-2.
+- `world_sites.py` builds repeat lidar outside the US into Earthwork's site format, one module per source
+  (`world_ahn.py` Netherlands, `world_england.py`, `world_scotland.py`, `world_lyon.py`, `world_swiss.py`,
+  `world_norway.py`, `world_poland.py`, `world_estonia.py`, `world_canada.py`, `world_nz.py`, `world_kanagawa.py`,
+  `world_saopaulo.py`): 128 sites in 11 countries. `world_eval.py` scores them with the map's model, teaches a
+  worldwide recipe with each country held out, and maps the score to a chance per region (FINDINGS 29).
 - `pyodide_probe/` reads TESSERA inside Pyodide (Node), through zarr-python and through a small fetch reader.
   `both_reader.py` reads AlphaEarth's native UTM COGs and TESSERA on one grid with ranged requests (Pyodide or CPython;
   `check_both_reader.py` checks it against rasterio and zarr-python). `sql_probe.py` and `udf_probe.py` score the

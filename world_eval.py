@@ -44,7 +44,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DIR = os.path.join(HERE, "data", "scores-world")
 RES = os.path.join(HERE, "results", "world.json")
 CATCH = 0.6
-N_POS, N_NEG = 4000, 20000  # taught pixels a site, every group alike
+N_POS, N_NEG = 3000, 15000  # taught pixels a site, every group alike
 W_SPACE = 5.0
 FOLDS = 4
 WHICH = ("aef", "both")
@@ -185,7 +185,15 @@ def rows():
 
 
 def fit(T, Wt, train, which):
-    X = np.concatenate([feats(T[n], np.arange(len(T[n]["y"])), which) for n in train])
+    # written into one array: a list of per-site blocks joined would hold the rows twice (about 15 GB for the
+    # joint model on every site)
+    d = 256 if which == "aef" else 768
+    X = np.empty((sum(len(T[n]["y"]) for n in train), d), np.float32)
+    i = 0
+    for n in train:
+        k = len(T[n]["y"])
+        X[i:i + k] = feats(T[n], np.arange(k), which)
+        i += k
     y = np.concatenate([(T[n]["y"] == 1).astype(int) for n in train])
     w = np.concatenate([Wt[n] for n in train])
     m = LogisticRegression(C=0.3, max_iter=3000, class_weight="balanced").fit(X, y, sample_weight=w)
@@ -374,7 +382,7 @@ def summarize(d, cut=None):
                     e["ap_deep"].append(float(average_precision_score(deep[keep], v[keep])))
             if (~y).sum() >= 50:
                 e["lit"].append(float((v[~y] > cut[w]).mean()))
-        if "aggregate" in r and z["stand"].any():
+        if "aggregate" in r:  # every site, so the gated row is over the same sites as the plain one
             v = np.where(z["stand"], 0, r["aggregate"])
             e = rows[key].setdefault("aggregate+gate", {"found": [], "lit": [], "ap": [], "med": [], "sites": 0, "moved": 0,
                                                          "found_deep": [], "ap_deep": [], "med_deep": []})

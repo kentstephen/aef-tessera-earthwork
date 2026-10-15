@@ -1,0 +1,9724 @@
+{
+ "us_reference_median_moved_aggregate": 0.802,
+ "shipped": {
+  "cutoff": {
+   "aef_gated": 0.598,
+   "aggregate": 0.777,
+   "tes": 0.802
+  },
+  "groups": {
+   "br": {
+    "aef_gated": {
+     "sites": 5,
+     "moved_px": 3310,
+     "found": 0.231,
+     "lit": 0.006,
+     "ap": 0.319,
+     "median_moved": 0.249,
+     "found_deep": 0.438,
+     "ap_deep": 0.42,
+     "median_deep": 0.368
+    },
+    "aggregate": {
+     "sites": 5,
+     "moved_px": 3310,
+     "found": 0.24,
+     "lit": 0.006,
+     "ap": 0.392,
+     "median_moved": 0.255,
+     "found_deep": 0.451,
+     "ap_deep": 0.577,
+     "median_deep": 0.558
+    },
+    "tes": {
+     "sites": 5,
+     "moved_px": 3310,
+     "found": 0.26,
+     "lit": 0.005,
+     "ap": 0.432,
+     "median_moved": 0.339,
+     "found_deep": 0.565,
+     "ap_deep": 0.609,
+     "median_deep": 0.81
+    },
+    "aggregate+gate": {
+     "sites": 5,
+     "moved_px": 0,
+     "found": 0.24,
+     "lit": 0.006,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ca": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 219473,
+     "found": 0.633,
+     "lit": 0.125,
+     "ap": 0.567,
+     "median_moved": 0.754,
+     "found_deep": 0.747,
+     "ap_deep": 0.577,
+     "median_deep": 0.82
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 219473,
+     "found": 0.605,
+     "lit": 0.064,
+     "ap": 0.622,
+     "median_moved": 0.783,
+     "found_deep": 0.741,
+     "ap_deep": 0.637,
+     "median_deep": 0.852
+    },
+    "tes": {
+     "sites": 13,
+     "moved_px": 219473,
+     "found": 0.684,
+     "lit": 0.103,
+     "ap": 0.631,
+     "median_moved": 0.869,
+     "found_deep": 0.844,
+     "ap_deep": 0.656,
+     "median_deep": 0.943
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.604,
+     "lit": 0.064,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ch": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 55734,
+     "found": 0.084,
+     "lit": 0.001,
+     "ap": 0.244,
+     "median_moved": 0.018,
+     "found_deep": 0.123,
+     "ap_deep": 0.244,
+     "median_deep": 0.044
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 55734,
+     "found": 0.171,
+     "lit": 0.002,
+     "ap": 0.307,
+     "median_moved": 0.172,
+     "found_deep": 0.225,
+     "ap_deep": 0.298,
+     "median_deep": 0.253
+    },
+    "tes": {
+     "sites": 9,
+     "moved_px": 55734,
+     "found": 0.413,
+     "lit": 0.041,
+     "ap": 0.329,
+     "median_moved": 0.575,
+     "found_deep": 0.483,
+     "ap_deep": 0.3,
+     "median_deep": 0.651
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.166,
+     "lit": 0.002,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ee": {
+    "aef_gated": {
+     "sites": 8,
+     "moved_px": 69136,
+     "found": 0.675,
+     "lit": 0.268,
+     "ap": 0.573,
+     "median_moved": 0.64,
+     "found_deep": 0.678,
+     "ap_deep": 0.637,
+     "median_deep": 0.657
+    },
+    "aggregate": {
+     "sites": 8,
+     "moved_px": 69136,
+     "found": 0.679,
+     "lit": 0.234,
+     "ap": 0.574,
+     "median_moved": 0.77,
+     "found_deep": 0.745,
+     "ap_deep": 0.65,
+     "median_deep": 0.809
+    },
+    "tes": {
+     "sites": 8,
+     "moved_px": 69136,
+     "found": 0.733,
+     "lit": 0.198,
+     "ap": 0.575,
+     "median_moved": 0.898,
+     "found_deep": 0.858,
+     "ap_deep": 0.659,
+     "median_deep": 0.961
+    },
+    "aggregate+gate": {
+     "sites": 8,
+     "moved_px": 0,
+     "found": 0.675,
+     "lit": 0.234,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "fr": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 36354,
+     "found": 0.012,
+     "lit": 0.001,
+     "ap": 0.092,
+     "median_moved": 0.0,
+     "found_deep": 0.02,
+     "ap_deep": 0.059,
+     "median_deep": 0.001
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 36354,
+     "found": 0.012,
+     "lit": 0.0,
+     "ap": 0.132,
+     "median_moved": 0.001,
+     "found_deep": 0.022,
+     "ap_deep": 0.099,
+     "median_deep": 0.011
+    },
+    "tes": {
+     "sites": 9,
+     "moved_px": 36354,
+     "found": 0.178,
+     "lit": 0.009,
+     "ap": 0.16,
+     "median_moved": 0.272,
+     "found_deep": 0.249,
+     "ap_deep": 0.121,
+     "median_deep": 0.387
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.012,
+     "lit": 0.0,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "gb": {
+    "aef_gated": {
+     "sites": 32,
+     "moved_px": 120801,
+     "found": 0.164,
+     "lit": 0.003,
+     "ap": 0.28,
+     "median_moved": 0.126,
+     "found_deep": 0.262,
+     "ap_deep": 0.278,
+     "median_deep": 0.238
+    },
+    "aggregate": {
+     "sites": 32,
+     "moved_px": 120801,
+     "found": 0.266,
+     "lit": 0.009,
+     "ap": 0.308,
+     "median_moved": 0.359,
+     "found_deep": 0.405,
+     "ap_deep": 0.307,
+     "median_deep": 0.553
+    },
+    "tes": {
+     "sites": 32,
+     "moved_px": 120801,
+     "found": 0.351,
+     "lit": 0.022,
+     "ap": 0.326,
+     "median_moved": 0.536,
+     "found_deep": 0.519,
+     "ap_deep": 0.306,
+     "median_deep": 0.725
+    },
+    "aggregate+gate": {
+     "sites": 32,
+     "moved_px": 0,
+     "found": 0.266,
+     "lit": 0.009,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "jp": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 127958,
+     "found": 0.04,
+     "lit": 0.003,
+     "ap": 0.312,
+     "median_moved": 0.0,
+     "found_deep": 0.157,
+     "ap_deep": 0.316,
+     "median_deep": 0.097
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 127958,
+     "found": 0.058,
+     "lit": 0.003,
+     "ap": 0.33,
+     "median_moved": 0.002,
+     "found_deep": 0.235,
+     "ap_deep": 0.375,
+     "median_deep": 0.28
+    },
+    "tes": {
+     "sites": 9,
+     "moved_px": 127958,
+     "found": 0.085,
+     "lit": 0.008,
+     "ap": 0.346,
+     "median_moved": 0.064,
+     "found_deep": 0.319,
+     "ap_deep": 0.386,
+     "median_deep": 0.43
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.058,
+     "lit": 0.003,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nl": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 105041,
+     "found": 0.333,
+     "lit": 0.035,
+     "ap": 0.483,
+     "median_moved": 0.295,
+     "found_deep": 0.434,
+     "ap_deep": 0.442,
+     "median_deep": 0.474
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 105041,
+     "found": 0.4,
+     "lit": 0.036,
+     "ap": 0.548,
+     "median_moved": 0.534,
+     "found_deep": 0.5,
+     "ap_deep": 0.513,
+     "median_deep": 0.728
+    },
+    "tes": {
+     "sites": 13,
+     "moved_px": 105041,
+     "found": 0.541,
+     "lit": 0.06,
+     "ap": 0.529,
+     "median_moved": 0.758,
+     "found_deep": 0.671,
+     "ap_deep": 0.47,
+     "median_deep": 0.893
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.4,
+     "lit": 0.036,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "no": {
+    "aef_gated": {
+     "sites": 8,
+     "moved_px": 70116,
+     "found": 0.188,
+     "lit": 0.008,
+     "ap": 0.265,
+     "median_moved": 0.067,
+     "found_deep": 0.294,
+     "ap_deep": 0.215,
+     "median_deep": 0.231
+    },
+    "aggregate": {
+     "sites": 8,
+     "moved_px": 70116,
+     "found": 0.216,
+     "lit": 0.01,
+     "ap": 0.286,
+     "median_moved": 0.165,
+     "found_deep": 0.321,
+     "ap_deep": 0.23,
+     "median_deep": 0.403
+    },
+    "tes": {
+     "sites": 8,
+     "moved_px": 70116,
+     "found": 0.389,
+     "lit": 0.08,
+     "ap": 0.267,
+     "median_moved": 0.679,
+     "found_deep": 0.548,
+     "ap_deep": 0.209,
+     "median_deep": 0.82
+    },
+    "aggregate+gate": {
+     "sites": 8,
+     "moved_px": 0,
+     "found": 0.193,
+     "lit": 0.01,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nz": {
+    "aef_gated": {
+     "sites": 12,
+     "moved_px": 120142,
+     "found": 0.053,
+     "lit": 0.001,
+     "ap": 0.333,
+     "median_moved": 0.013,
+     "found_deep": 0.098,
+     "ap_deep": 0.38,
+     "median_deep": 0.073
+    },
+    "aggregate": {
+     "sites": 12,
+     "moved_px": 120142,
+     "found": 0.064,
+     "lit": 0.001,
+     "ap": 0.369,
+     "median_moved": 0.03,
+     "found_deep": 0.128,
+     "ap_deep": 0.422,
+     "median_deep": 0.119
+    },
+    "tes": {
+     "sites": 12,
+     "moved_px": 120142,
+     "found": 0.296,
+     "lit": 0.028,
+     "ap": 0.347,
+     "median_moved": 0.412,
+     "found_deep": 0.499,
+     "ap_deep": 0.416,
+     "median_deep": 0.659
+    },
+    "aggregate+gate": {
+     "sites": 12,
+     "moved_px": 0,
+     "found": 0.064,
+     "lit": 0.001,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nz storm": {
+    "aef_gated": {
+     "sites": 1,
+     "moved_px": 11580,
+     "found": 0.004,
+     "lit": 0.0,
+     "ap": 0.244,
+     "median_moved": 0.0,
+     "found_deep": 0.029,
+     "ap_deep": 0.11,
+     "median_deep": 0.001
+    },
+    "aggregate": {
+     "sites": 1,
+     "moved_px": 11580,
+     "found": 0.007,
+     "lit": 0.0,
+     "ap": 0.42,
+     "median_moved": 0.008,
+     "found_deep": 0.059,
+     "ap_deep": 0.224,
+     "median_deep": 0.028
+    },
+    "tes": {
+     "sites": 1,
+     "moved_px": 11580,
+     "found": 0.519,
+     "lit": 0.033,
+     "ap": 0.575,
+     "median_moved": 0.831,
+     "found_deep": 0.742,
+     "ap_deep": 0.403,
+     "median_deep": 0.979
+    },
+    "aggregate+gate": {
+     "sites": 1,
+     "moved_px": 0,
+     "found": 0.007,
+     "lit": 0.0,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "pl": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 296098,
+     "found": 0.277,
+     "lit": 0.006,
+     "ap": 0.408,
+     "median_moved": 0.145,
+     "found_deep": 0.406,
+     "ap_deep": 0.376,
+     "median_deep": 0.376
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 296098,
+     "found": 0.332,
+     "lit": 0.008,
+     "ap": 0.426,
+     "median_moved": 0.358,
+     "found_deep": 0.502,
+     "ap_deep": 0.424,
+     "median_deep": 0.567
+    },
+    "tes": {
+     "sites": 9,
+     "moved_px": 296098,
+     "found": 0.476,
+     "lit": 0.062,
+     "ap": 0.416,
+     "median_moved": 0.75,
+     "found_deep": 0.638,
+     "ap_deep": 0.373,
+     "median_deep": 0.833
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.331,
+     "lit": 0.007,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   }
+  }
+ },
+ "shipped_sites": {
+  "world-ahn-a16-terbregseplein": {
+   "moved": 9740,
+   "unchanged": 197360,
+   "aef_gated": {
+    "found": 0.481,
+    "lit": 0.002,
+    "ap": 0.771
+   },
+   "aggregate": {
+    "found": 0.533,
+    "lit": 0.002,
+    "ap": 0.812
+   },
+   "tes": {
+    "found": 0.717,
+    "lit": 0.005,
+    "ap": 0.836
+   }
+  },
+  "world-ahn-beemster": {
+   "moved": 231,
+   "unchanged": 249268,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.017,
+    "lit": 0.012,
+    "ap": 0.001
+   },
+   "tes": {
+    "found": 0.065,
+    "lit": 0.08,
+    "ap": 0.001
+   }
+  },
+  "world-ahn-blankenburg": {
+   "moved": 9167,
+   "unchanged": 174243,
+   "aef_gated": {
+    "found": 0.247,
+    "lit": 0.004,
+    "ap": 0.518
+   },
+   "aggregate": {
+    "found": 0.472,
+    "lit": 0.01,
+    "ap": 0.634
+   },
+   "tes": {
+    "found": 0.726,
+    "lit": 0.026,
+    "ap": 0.705
+   }
+  },
+  "world-ahn-den-oever": {
+   "moved": 2757,
+   "unchanged": 52892,
+   "aef_gated": {
+    "found": 0.545,
+    "lit": 0.011,
+    "ap": 0.652
+   },
+   "aggregate": {
+    "found": 0.539,
+    "lit": 0.009,
+    "ap": 0.687
+   },
+   "tes": {
+    "found": 0.251,
+    "lit": 0.014,
+    "ap": 0.453
+   }
+  },
+  "world-ahn-grensmaas-meers": {
+   "moved": 7415,
+   "unchanged": 55820,
+   "aef_gated": {
+    "found": 0.394,
+    "lit": 0.001,
+    "ap": 0.703
+   },
+   "aggregate": {
+    "found": 0.507,
+    "lit": 0.004,
+    "ap": 0.803
+   },
+   "tes": {
+    "found": 0.778,
+    "lit": 0.021,
+    "ap": 0.876
+   }
+  },
+  "world-ahn-groningen-meerstad": {
+   "moved": 11389,
+   "unchanged": 210969,
+   "aef_gated": {
+    "found": 0.618,
+    "lit": 0.012,
+    "ap": 0.669
+   },
+   "aggregate": {
+    "found": 0.578,
+    "lit": 0.012,
+    "ap": 0.676
+   },
+   "tes": {
+    "found": 0.67,
+    "lit": 0.021,
+    "ap": 0.693
+   }
+  },
+  "world-ahn-hedwigepolder": {
+   "moved": 9271,
+   "unchanged": 35428,
+   "aef_gated": {
+    "found": 0.862,
+    "lit": 0.408,
+    "ap": 0.542
+   },
+   "aggregate": {
+    "found": 0.866,
+    "lit": 0.39,
+    "ap": 0.674
+   },
+   "tes": {
+    "found": 0.856,
+    "lit": 0.41,
+    "ap": 0.621
+   }
+  },
+  "world-ahn-heuvelrug": {
+   "moved": 285,
+   "unchanged": 248430,
+   "aef_gated": {
+    "found": 0.235,
+    "lit": 0.0,
+    "ap": 0.172
+   },
+   "aggregate": {
+    "found": 0.277,
+    "lit": 0.0,
+    "ap": 0.203
+   },
+   "tes": {
+    "found": 0.298,
+    "lit": 0.001,
+    "ap": 0.243
+   }
+  },
+  "world-ahn-maasvlakte": {
+   "moved": 16756,
+   "unchanged": 146700,
+   "aef_gated": {
+    "found": 0.105,
+    "lit": 0.004,
+    "ap": 0.525
+   },
+   "aggregate": {
+    "found": 0.113,
+    "lit": 0.005,
+    "ap": 0.433
+   },
+   "tes": {
+    "found": 0.285,
+    "lit": 0.047,
+    "ap": 0.309
+   }
+  },
+  "world-ahn-moerdijk-logistics": {
+   "moved": 18924,
+   "unchanged": 193006,
+   "aef_gated": {
+    "found": 0.178,
+    "lit": 0.008,
+    "ap": 0.417
+   },
+   "aggregate": {
+    "found": 0.343,
+    "lit": 0.008,
+    "ap": 0.605
+   },
+   "tes": {
+    "found": 0.639,
+    "lit": 0.099,
+    "ap": 0.508
+   }
+  },
+  "world-ahn-rijnlandroute": {
+   "moved": 3239,
+   "unchanged": 221453,
+   "aef_gated": {
+    "found": 0.027,
+    "lit": 0.0,
+    "ap": 0.23
+   },
+   "aggregate": {
+    "found": 0.12,
+    "lit": 0.001,
+    "ap": 0.405
+   },
+   "tes": {
+    "found": 0.476,
+    "lit": 0.007,
+    "ap": 0.431
+   }
+  },
+  "world-ahn-valkenburg": {
+   "moved": 7896,
+   "unchanged": 202943,
+   "aef_gated": {
+    "found": 0.304,
+    "lit": 0.004,
+    "ap": 0.524
+   },
+   "aggregate": {
+    "found": 0.461,
+    "lit": 0.008,
+    "ap": 0.58
+   },
+   "tes": {
+    "found": 0.703,
+    "lit": 0.027,
+    "ap": 0.572
+   }
+  },
+  "world-ahn-venlo-logistics": {
+   "moved": 7971,
+   "unchanged": 197102,
+   "aef_gated": {
+    "found": 0.328,
+    "lit": 0.002,
+    "ap": 0.55
+   },
+   "aggregate": {
+    "found": 0.371,
+    "lit": 0.002,
+    "ap": 0.607
+   },
+   "tes": {
+    "found": 0.564,
+    "lit": 0.013,
+    "ap": 0.626
+   }
+  },
+  "world-canada-east-gwillimbury": {
+   "moved": 6792,
+   "unchanged": 166323,
+   "aef_gated": {
+    "found": 0.918,
+    "lit": 0.237,
+    "ap": 0.678
+   },
+   "aggregate": {
+    "found": 0.914,
+    "lit": 0.065,
+    "ap": 0.866
+   },
+   "tes": {
+    "found": 0.923,
+    "lit": 0.072,
+    "ap": 0.852
+   }
+  },
+  "world-canada-fort-mcmurray": {
+   "moved": 1,
+   "unchanged": 75008,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.0
+   },
+   "tes": {
+    "found": 0.0,
+    "lit": 0.005,
+    "ap": 0.0
+   }
+  },
+  "world-canada-halifax-bayers-lake": {
+   "moved": 4345,
+   "unchanged": 167596,
+   "aef_gated": {
+    "found": 0.726,
+    "lit": 0.021,
+    "ap": 0.483
+   },
+   "aggregate": {
+    "found": 0.766,
+    "lit": 0.021,
+    "ap": 0.423
+   },
+   "tes": {
+    "found": 0.771,
+    "lit": 0.051,
+    "ap": 0.391
+   }
+  },
+  "world-canada-milton": {
+   "moved": 7638,
+   "unchanged": 13489,
+   "aef_gated": {
+    "found": 0.974,
+    "lit": 0.334,
+    "ap": 0.937
+   },
+   "aggregate": {
+    "found": 0.972,
+    "lit": 0.24,
+    "ap": 0.937
+   },
+   "tes": {
+    "found": 0.969,
+    "lit": 0.151,
+    "ap": 0.926
+   }
+  },
+  "world-canada-montreal-north-pits": {
+   "moved": 34659,
+   "unchanged": 108109,
+   "aef_gated": {
+    "found": 0.674,
+    "lit": 0.087,
+    "ap": 0.762
+   },
+   "aggregate": {
+    "found": 0.649,
+    "lit": 0.032,
+    "ap": 0.836
+   },
+   "tes": {
+    "found": 0.68,
+    "lit": 0.045,
+    "ap": 0.831
+   }
+  },
+  "world-canada-montreal-south": {
+   "moved": 3507,
+   "unchanged": 131420,
+   "aef_gated": {
+    "found": 0.666,
+    "lit": 0.173,
+    "ap": 0.382
+   },
+   "aggregate": {
+    "found": 0.565,
+    "lit": 0.044,
+    "ap": 0.481
+   },
+   "tes": {
+    "found": 0.476,
+    "lit": 0.014,
+    "ap": 0.447
+   }
+  },
+  "world-canada-ottawa-south": {
+   "moved": 200,
+   "unchanged": 163914,
+   "aef_gated": {
+    "found": 0.5,
+    "lit": 0.049,
+    "ap": 0.034
+   },
+   "aggregate": {
+    "found": 0.345,
+    "lit": 0.002,
+    "ap": 0.108
+   },
+   "tes": {
+    "found": 0.46,
+    "lit": 0.007,
+    "ap": 0.178
+   }
+  },
+  "world-canada-pickering-seaton": {
+   "moved": 51297,
+   "unchanged": 190358,
+   "aef_gated": {
+    "found": 0.845,
+    "lit": 0.275,
+    "ap": 0.768
+   },
+   "aggregate": {
+    "found": 0.854,
+    "lit": 0.17,
+    "ap": 0.811
+   },
+   "tes": {
+    "found": 0.93,
+    "lit": 0.24,
+    "ap": 0.818
+   }
+  },
+  "world-canada-terrebonne-landfill": {
+   "moved": 23873,
+   "unchanged": 153293,
+   "aef_gated": {
+    "found": 0.695,
+    "lit": 0.064,
+    "ap": 0.698
+   },
+   "aggregate": {
+    "found": 0.555,
+    "lit": 0.023,
+    "ap": 0.77
+   },
+   "tes": {
+    "found": 0.456,
+    "lit": 0.007,
+    "ap": 0.755
+   }
+  },
+  "world-canada-timmins-dome": {
+   "moved": 49974,
+   "unchanged": 33302,
+   "aef_gated": {
+    "found": 0.035,
+    "lit": 0.002,
+    "ap": 0.783
+   },
+   "aggregate": {
+    "found": 0.043,
+    "lit": 0.005,
+    "ap": 0.831
+   },
+   "tes": {
+    "found": 0.341,
+    "lit": 0.058,
+    "ap": 0.886
+   }
+  },
+  "world-canada-toronto-portlands": {
+   "moved": 11726,
+   "unchanged": 62372,
+   "aef_gated": {
+    "found": 0.544,
+    "lit": 0.059,
+    "ap": 0.532
+   },
+   "aggregate": {
+    "found": 0.608,
+    "lit": 0.065,
+    "ap": 0.596
+   },
+   "tes": {
+    "found": 0.897,
+    "lit": 0.36,
+    "ap": 0.568
+   }
+  },
+  "world-canada-vaughan-427": {
+   "moved": 20165,
+   "unchanged": 133430,
+   "aef_gated": {
+    "found": 0.85,
+    "lit": 0.135,
+    "ap": 0.716
+   },
+   "aggregate": {
+    "found": 0.854,
+    "lit": 0.098,
+    "ap": 0.754
+   },
+   "tes": {
+    "found": 0.918,
+    "lit": 0.236,
+    "ap": 0.736
+   }
+  },
+  "world-canada-york-quiet": {
+   "moved": 5296,
+   "unchanged": 171232,
+   "aef_gated": {
+    "found": 0.164,
+    "lit": 0.182,
+    "ap": 0.033
+   },
+   "aggregate": {
+    "found": 0.13,
+    "lit": 0.064,
+    "ap": 0.045
+   },
+   "tes": {
+    "found": 0.387,
+    "lit": 0.086,
+    "ap": 0.178
+   }
+  },
+  "world-england-a14-huntingdon": {
+   "moved": 3524,
+   "unchanged": 214552,
+   "aef_gated": {
+    "found": 0.009,
+    "lit": 0.0,
+    "ap": 0.151
+   },
+   "aggregate": {
+    "found": 0.124,
+    "lit": 0.002,
+    "ap": 0.262
+   },
+   "tes": {
+    "found": 0.385,
+    "lit": 0.013,
+    "ap": 0.269
+   }
+  },
+  "world-england-bardon": {
+   "moved": 9992,
+   "unchanged": 118593,
+   "aef_gated": {
+    "found": 0.314,
+    "lit": 0.003,
+    "ap": 0.636
+   },
+   "aggregate": {
+    "found": 0.442,
+    "lit": 0.005,
+    "ap": 0.71
+   },
+   "tes": {
+    "found": 0.587,
+    "lit": 0.01,
+    "ap": 0.8
+   }
+  },
+  "world-england-black-cat": {
+   "moved": 4773,
+   "unchanged": 228027,
+   "aef_gated": {
+    "found": 0.043,
+    "lit": 0.0,
+    "ap": 0.191
+   },
+   "aggregate": {
+    "found": 0.108,
+    "lit": 0.005,
+    "ap": 0.136
+   },
+   "tes": {
+    "found": 0.318,
+    "lit": 0.101,
+    "ap": 0.055
+   }
+  },
+  "world-england-breedon": {
+   "moved": 2387,
+   "unchanged": 158831,
+   "aef_gated": {
+    "found": 0.09,
+    "lit": 0.002,
+    "ap": 0.117
+   },
+   "aggregate": {
+    "found": 0.091,
+    "lit": 0.001,
+    "ap": 0.217
+   },
+   "tes": {
+    "found": 0.243,
+    "lit": 0.002,
+    "ap": 0.358
+   }
+  },
+  "world-england-brent-cross": {
+   "moved": 112,
+   "unchanged": 10730,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.159
+   },
+   "aggregate": {
+    "found": 0.143,
+    "lit": 0.001,
+    "ap": 0.187
+   },
+   "tes": {
+    "found": 0.223,
+    "lit": 0.006,
+    "ap": 0.222
+   }
+  },
+  "world-england-colindale": {
+   "moved": 360,
+   "unchanged": 18851,
+   "aef_gated": {
+    "found": 0.017,
+    "lit": 0.001,
+    "ap": 0.168
+   },
+   "aggregate": {
+    "found": 0.131,
+    "lit": 0.003,
+    "ap": 0.19
+   },
+   "tes": {
+    "found": 0.264,
+    "lit": 0.006,
+    "ap": 0.216
+   }
+  },
+  "world-england-colne-valley": {
+   "moved": 1745,
+   "unchanged": 33423,
+   "aef_gated": {
+    "found": 0.84,
+    "lit": 0.009,
+    "ap": 0.84
+   },
+   "aggregate": {
+    "found": 0.92,
+    "lit": 0.014,
+    "ap": 0.857
+   },
+   "tes": {
+    "found": 0.915,
+    "lit": 0.014,
+    "ap": 0.859
+   }
+  },
+  "world-england-dene": {
+   "moved": 1074,
+   "unchanged": 126907,
+   "aef_gated": {
+    "found": 0.042,
+    "lit": 0.0,
+    "ap": 0.059
+   },
+   "aggregate": {
+    "found": 0.047,
+    "lit": 0.0,
+    "ap": 0.073
+   },
+   "tes": {
+    "found": 0.039,
+    "lit": 0.0,
+    "ap": 0.183
+   }
+  },
+  "world-england-earls-court": {
+   "moved": 205,
+   "unchanged": 11112,
+   "aef_gated": {
+    "found": 0.054,
+    "lit": 0.0,
+    "ap": 0.096
+   },
+   "aggregate": {
+    "found": 0.068,
+    "lit": 0.002,
+    "ap": 0.062
+   },
+   "tes": {
+    "found": 0.098,
+    "lit": 0.009,
+    "ap": 0.121
+   }
+  },
+  "world-england-east-midlands-gateway": {
+   "moved": 14732,
+   "unchanged": 115321,
+   "aef_gated": {
+    "found": 0.474,
+    "lit": 0.019,
+    "ap": 0.722
+   },
+   "aggregate": {
+    "found": 0.425,
+    "lit": 0.004,
+    "ap": 0.762
+   },
+   "tes": {
+    "found": 0.286,
+    "lit": 0.006,
+    "ap": 0.621
+   }
+  },
+  "world-england-leicestershire": {
+   "moved": 57,
+   "unchanged": 74625,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.059
+   },
+   "aggregate": {
+    "found": 0.035,
+    "lit": 0.0,
+    "ap": 0.036
+   },
+   "tes": {
+    "found": 0.035,
+    "lit": 0.005,
+    "ap": 0.006
+   }
+  },
+  "world-england-mountsorrel": {
+   "moved": 13827,
+   "unchanged": 146110,
+   "aef_gated": {
+    "found": 0.076,
+    "lit": 0.002,
+    "ap": 0.407
+   },
+   "aggregate": {
+    "found": 0.118,
+    "lit": 0.003,
+    "ap": 0.344
+   },
+   "tes": {
+    "found": 0.257,
+    "lit": 0.007,
+    "ap": 0.537
+   }
+  },
+  "world-england-northolt": {
+   "moved": 227,
+   "unchanged": 27038,
+   "aef_gated": {
+    "found": 0.291,
+    "lit": 0.001,
+    "ap": 0.382
+   },
+   "aggregate": {
+    "found": 0.529,
+    "lit": 0.003,
+    "ap": 0.456
+   },
+   "tes": {
+    "found": 0.731,
+    "lit": 0.007,
+    "ap": 0.405
+   }
+  },
+  "world-england-northstowe": {
+   "moved": 4404,
+   "unchanged": 225783,
+   "aef_gated": {
+    "found": 0.038,
+    "lit": 0.001,
+    "ap": 0.108
+   },
+   "aggregate": {
+    "found": 0.138,
+    "lit": 0.005,
+    "ap": 0.162
+   },
+   "tes": {
+    "found": 0.56,
+    "lit": 0.08,
+    "ap": 0.157
+   }
+  },
+  "world-england-old-oak": {
+   "moved": 217,
+   "unchanged": 14917,
+   "aef_gated": {
+    "found": 0.069,
+    "lit": 0.002,
+    "ap": 0.24
+   },
+   "aggregate": {
+    "found": 0.295,
+    "lit": 0.007,
+    "ap": 0.257
+   },
+   "tes": {
+    "found": 0.673,
+    "lit": 0.017,
+    "ap": 0.337
+   }
+  },
+  "world-england-richmond-park": {
+   "moved": 56,
+   "unchanged": 86012,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.001,
+    "ap": 0.001
+   },
+   "tes": {
+    "found": 0.0,
+    "lit": 0.003,
+    "ap": 0.002
+   }
+  },
+  "world-england-southall": {
+   "moved": 825,
+   "unchanged": 31424,
+   "aef_gated": {
+    "found": 0.038,
+    "lit": 0.002,
+    "ap": 0.162
+   },
+   "aggregate": {
+    "found": 0.126,
+    "lit": 0.004,
+    "ap": 0.19
+   },
+   "tes": {
+    "found": 0.258,
+    "lit": 0.009,
+    "ap": 0.234
+   }
+  },
+  "world-england-st-austell": {
+   "moved": 25695,
+   "unchanged": 109215,
+   "aef_gated": {
+    "found": 0.104,
+    "lit": 0.002,
+    "ap": 0.535
+   },
+   "aggregate": {
+    "found": 0.123,
+    "lit": 0.003,
+    "ap": 0.561
+   },
+   "tes": {
+    "found": 0.43,
+    "lit": 0.019,
+    "ap": 0.751
+   }
+  },
+  "world-england-tilbury2": {
+   "moved": 9374,
+   "unchanged": 148487,
+   "aef_gated": {
+    "found": 0.37,
+    "lit": 0.006,
+    "ap": 0.58
+   },
+   "aggregate": {
+    "found": 0.402,
+    "lit": 0.007,
+    "ap": 0.586
+   },
+   "tes": {
+    "found": 0.633,
+    "lit": 0.062,
+    "ap": 0.566
+   }
+  },
+  "world-england-waterbeach": {
+   "moved": 5827,
+   "unchanged": 209219,
+   "aef_gated": {
+    "found": 0.29,
+    "lit": 0.001,
+    "ap": 0.571
+   },
+   "aggregate": {
+    "found": 0.555,
+    "lit": 0.005,
+    "ap": 0.672
+   },
+   "tes": {
+    "found": 0.808,
+    "lit": 0.114,
+    "ap": 0.603
+   }
+  },
+  "world-england-wembley": {
+   "moved": 81,
+   "unchanged": 21323,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.007
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.021
+   },
+   "tes": {
+    "found": 0.086,
+    "lit": 0.003,
+    "ap": 0.034
+   }
+  },
+  "world-estonia-kivioli-north": {
+   "moved": 166,
+   "unchanged": 134996,
+   "aef_gated": {
+    "found": 0.843,
+    "lit": 0.651,
+    "ap": 0.002
+   },
+   "aggregate": {
+    "found": 0.663,
+    "lit": 0.532,
+    "ap": 0.002
+   },
+   "tes": {
+    "found": 0.241,
+    "lit": 0.147,
+    "ap": 0.002
+   }
+  },
+  "world-estonia-kivioli-west": {
+   "moved": 14210,
+   "unchanged": 48044,
+   "aef_gated": {
+    "found": 0.987,
+    "lit": 0.343,
+    "ap": 0.93
+   },
+   "aggregate": {
+    "found": 0.977,
+    "lit": 0.238,
+    "ap": 0.94
+   },
+   "tes": {
+    "found": 0.926,
+    "lit": 0.071,
+    "ap": 0.943
+   }
+  },
+  "world-estonia-lahemaa": {
+   "moved": 3,
+   "unchanged": 7543,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.001,
+    "ap": 0.0
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.009,
+    "ap": 0.0
+   },
+   "tes": {
+    "found": 0.0,
+    "lit": 0.025,
+    "ap": 0.001
+   }
+  },
+  "world-estonia-narva-pit-south": {
+   "moved": 1971,
+   "unchanged": 5320,
+   "aef_gated": {
+    "found": 0.962,
+    "lit": 0.43,
+    "ap": 0.941
+   },
+   "aggregate": {
+    "found": 0.952,
+    "lit": 0.423,
+    "ap": 0.946
+   },
+   "tes": {
+    "found": 0.873,
+    "lit": 0.064,
+    "ap": 0.935
+   }
+  },
+  "world-estonia-narva-pit-west": {
+   "moved": 11099,
+   "unchanged": 37045,
+   "aef_gated": {
+    "found": 0.981,
+    "lit": 0.662,
+    "ap": 0.937
+   },
+   "aggregate": {
+    "found": 0.975,
+    "lit": 0.542,
+    "ap": 0.915
+   },
+   "tes": {
+    "found": 0.981,
+    "lit": 0.554,
+    "ap": 0.838
+   }
+  },
+  "world-estonia-tartu": {
+   "moved": 2353,
+   "unchanged": 128275,
+   "aef_gated": {
+    "found": 0.361,
+    "lit": 0.014,
+    "ap": 0.306
+   },
+   "aggregate": {
+    "found": 0.482,
+    "lit": 0.037,
+    "ap": 0.289
+   },
+   "tes": {
+    "found": 0.669,
+    "lit": 0.175,
+    "ap": 0.266
+   }
+  },
+  "world-estonia-ulemiste": {
+   "moved": 3316,
+   "unchanged": 122303,
+   "aef_gated": {
+    "found": 0.154,
+    "lit": 0.004,
+    "ap": 0.184
+   },
+   "aggregate": {
+    "found": 0.186,
+    "lit": 0.009,
+    "ap": 0.212
+   },
+   "tes": {
+    "found": 0.478,
+    "lit": 0.186,
+    "ap": 0.227
+   }
+  },
+  "world-estonia-vao-quarry": {
+   "moved": 36018,
+   "unchanged": 109274,
+   "aef_gated": {
+    "found": 0.439,
+    "lit": 0.04,
+    "ap": 0.713
+   },
+   "aggregate": {
+    "found": 0.519,
+    "lit": 0.081,
+    "ap": 0.717
+   },
+   "tes": {
+    "found": 0.958,
+    "lit": 0.36,
+    "ap": 0.814
+   }
+  },
+  "world-kanagawa-hakone-forest": {
+   "moved": 3161,
+   "unchanged": 69818,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.046
+   },
+   "aggregate": {
+    "found": 0.002,
+    "lit": 0.0,
+    "ap": 0.067
+   },
+   "tes": {
+    "found": 0.005,
+    "lit": 0.001,
+    "ap": 0.053
+   }
+  },
+  "world-kanagawa-manazuru": {
+   "moved": 15487,
+   "unchanged": 33588,
+   "aef_gated": {
+    "found": 0.027,
+    "lit": 0.002,
+    "ap": 0.463
+   },
+   "aggregate": {
+    "found": 0.045,
+    "lit": 0.001,
+    "ap": 0.509
+   },
+   "tes": {
+    "found": 0.081,
+    "lit": 0.003,
+    "ap": 0.584
+   }
+  },
+  "world-kanagawa-nakai": {
+   "moved": 18552,
+   "unchanged": 40291,
+   "aef_gated": {
+    "found": 0.041,
+    "lit": 0.003,
+    "ap": 0.417
+   },
+   "aggregate": {
+    "found": 0.074,
+    "lit": 0.003,
+    "ap": 0.45
+   },
+   "tes": {
+    "found": 0.138,
+    "lit": 0.015,
+    "ap": 0.472
+   }
+  },
+  "world-kanagawa-sagamihara-aone": {
+   "moved": 10292,
+   "unchanged": 83805,
+   "aef_gated": {
+    "found": 0.008,
+    "lit": 0.001,
+    "ap": 0.146
+   },
+   "aggregate": {
+    "found": 0.024,
+    "lit": 0.001,
+    "ap": 0.172
+   },
+   "tes": {
+    "found": 0.044,
+    "lit": 0.003,
+    "ap": 0.197
+   }
+  },
+  "world-kanagawa-sagamihara-midori-forest": {
+   "moved": 2700,
+   "unchanged": 57364,
+   "aef_gated": {
+    "found": 0.012,
+    "lit": 0.0,
+    "ap": 0.156
+   },
+   "aggregate": {
+    "found": 0.017,
+    "lit": 0.001,
+    "ap": 0.135
+   },
+   "tes": {
+    "found": 0.041,
+    "lit": 0.002,
+    "ap": 0.139
+   }
+  },
+  "world-kanagawa-sagamihara-toya": {
+   "moved": 19044,
+   "unchanged": 31166,
+   "aef_gated": {
+    "found": 0.083,
+    "lit": 0.013,
+    "ap": 0.429
+   },
+   "aggregate": {
+    "found": 0.093,
+    "lit": 0.011,
+    "ap": 0.438
+   },
+   "tes": {
+    "found": 0.097,
+    "lit": 0.022,
+    "ap": 0.445
+   }
+  },
+  "world-kanagawa-shintomei-yamakita-matsuda": {
+   "moved": 17965,
+   "unchanged": 122751,
+   "aef_gated": {
+    "found": 0.077,
+    "lit": 0.001,
+    "ap": 0.271
+   },
+   "aggregate": {
+    "found": 0.105,
+    "lit": 0.001,
+    "ap": 0.282
+   },
+   "tes": {
+    "found": 0.111,
+    "lit": 0.003,
+    "ap": 0.271
+   }
+  },
+  "world-kanagawa-yamakita-west": {
+   "moved": 24325,
+   "unchanged": 52771,
+   "aef_gated": {
+    "found": 0.108,
+    "lit": 0.007,
+    "ap": 0.536
+   },
+   "aggregate": {
+    "found": 0.167,
+    "lit": 0.008,
+    "ap": 0.564
+   },
+   "tes": {
+    "found": 0.251,
+    "lit": 0.021,
+    "ap": 0.607
+   }
+  },
+  "world-kanagawa-yugawara-hills": {
+   "moved": 16432,
+   "unchanged": 30540,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.343
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.353
+   },
+   "tes": {
+    "found": 0.0,
+    "lit": 0.002,
+    "ap": 0.342
+   }
+  },
+  "world-lyon-carre-de-soie": {
+   "moved": 2944,
+   "unchanged": 191766,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.11
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.142
+   },
+   "tes": {
+    "found": 0.169,
+    "lit": 0.005,
+    "ap": 0.137
+   }
+  },
+  "world-lyon-confluence": {
+   "moved": 8335,
+   "unchanged": 173997,
+   "aef_gated": {
+    "found": 0.01,
+    "lit": 0.0,
+    "ap": 0.142
+   },
+   "aggregate": {
+    "found": 0.011,
+    "lit": 0.0,
+    "ap": 0.182
+   },
+   "tes": {
+    "found": 0.119,
+    "lit": 0.008,
+    "ap": 0.164
+   }
+  },
+  "world-lyon-corbas": {
+   "moved": 5024,
+   "unchanged": 191756,
+   "aef_gated": {
+    "found": 0.062,
+    "lit": 0.0,
+    "ap": 0.185
+   },
+   "aggregate": {
+    "found": 0.076,
+    "lit": 0.0,
+    "ap": 0.322
+   },
+   "tes": {
+    "found": 0.506,
+    "lit": 0.019,
+    "ap": 0.422
+   }
+  },
+  "world-lyon-meyzieu": {
+   "moved": 2929,
+   "unchanged": 148936,
+   "aef_gated": {
+    "found": 0.001,
+    "lit": 0.0,
+    "ap": 0.027
+   },
+   "aggregate": {
+    "found": 0.001,
+    "lit": 0.0,
+    "ap": 0.044
+   },
+   "tes": {
+    "found": 0.164,
+    "lit": 0.015,
+    "ap": 0.13
+   }
+  },
+  "world-lyon-oullins": {
+   "moved": 4175,
+   "unchanged": 189343,
+   "aef_gated": {
+    "found": 0.026,
+    "lit": 0.003,
+    "ap": 0.129
+   },
+   "aggregate": {
+    "found": 0.016,
+    "lit": 0.0,
+    "ap": 0.177
+   },
+   "tes": {
+    "found": 0.207,
+    "lit": 0.009,
+    "ap": 0.194
+   }
+  },
+  "world-lyon-part-dieu": {
+   "moved": 7212,
+   "unchanged": 178992,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.11
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.134
+   },
+   "tes": {
+    "found": 0.067,
+    "lit": 0.003,
+    "ap": 0.121
+   }
+  },
+  "world-lyon-saint-priest": {
+   "moved": 3029,
+   "unchanged": 195199,
+   "aef_gated": {
+    "found": 0.005,
+    "lit": 0.001,
+    "ap": 0.037
+   },
+   "aggregate": {
+    "found": 0.006,
+    "lit": 0.0,
+    "ap": 0.054
+   },
+   "tes": {
+    "found": 0.258,
+    "lit": 0.017,
+    "ap": 0.148
+   }
+  },
+  "world-lyon-tete-dor": {
+   "moved": 819,
+   "unchanged": 27942,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.029
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.035
+   },
+   "tes": {
+    "found": 0.007,
+    "lit": 0.004,
+    "ap": 0.033
+   }
+  },
+  "world-lyon-vernaison": {
+   "moved": 1887,
+   "unchanged": 190824,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.057
+   },
+   "aggregate": {
+    "found": 0.002,
+    "lit": 0.0,
+    "ap": 0.1
+   },
+   "tes": {
+    "found": 0.104,
+    "lit": 0.003,
+    "ap": 0.095
+   }
+  },
+  "world-norway-drammen": {
+   "moved": 3517,
+   "unchanged": 130171,
+   "aef_gated": {
+    "found": 0.117,
+    "lit": 0.006,
+    "ap": 0.132
+   },
+   "aggregate": {
+    "found": 0.111,
+    "lit": 0.008,
+    "ap": 0.144
+   },
+   "tes": {
+    "found": 0.429,
+    "lit": 0.116,
+    "ap": 0.119
+   }
+  },
+  "world-norway-fornebu": {
+   "moved": 9607,
+   "unchanged": 111423,
+   "aef_gated": {
+    "found": 0.354,
+    "lit": 0.017,
+    "ap": 0.466
+   },
+   "aggregate": {
+    "found": 0.413,
+    "lit": 0.023,
+    "ap": 0.497
+   },
+   "tes": {
+    "found": 0.475,
+    "lit": 0.039,
+    "ap": 0.502
+   }
+  },
+  "world-norway-oslo-bjorvika": {
+   "moved": 12288,
+   "unchanged": 192331,
+   "aef_gated": {
+    "found": 0.132,
+    "lit": 0.007,
+    "ap": 0.23
+   },
+   "aggregate": {
+    "found": 0.142,
+    "lit": 0.007,
+    "ap": 0.259
+   },
+   "tes": {
+    "found": 0.372,
+    "lit": 0.077,
+    "ap": 0.244
+   }
+  },
+  "world-norway-oslo-hovinbyen": {
+   "moved": 13473,
+   "unchanged": 238081,
+   "aef_gated": {
+    "found": 0.203,
+    "lit": 0.007,
+    "ap": 0.333
+   },
+   "aggregate": {
+    "found": 0.228,
+    "lit": 0.007,
+    "ap": 0.362
+   },
+   "tes": {
+    "found": 0.501,
+    "lit": 0.086,
+    "ap": 0.31
+   }
+  },
+  "world-norway-oslo-nordstrand": {
+   "moved": 3781,
+   "unchanged": 209269,
+   "aef_gated": {
+    "found": 0.092,
+    "lit": 0.012,
+    "ap": 0.044
+   },
+   "aggregate": {
+    "found": 0.118,
+    "lit": 0.009,
+    "ap": 0.067
+   },
+   "tes": {
+    "found": 0.179,
+    "lit": 0.037,
+    "ap": 0.078
+   }
+  },
+  "world-norway-stavanger-forus": {
+   "moved": 10509,
+   "unchanged": 137483,
+   "aef_gated": {
+    "found": 0.326,
+    "lit": 0.011,
+    "ap": 0.4
+   },
+   "aggregate": {
+    "found": 0.407,
+    "lit": 0.02,
+    "ap": 0.396
+   },
+   "tes": {
+    "found": 0.35,
+    "lit": 0.018,
+    "ap": 0.418
+   }
+  },
+  "world-norway-tromso": {
+   "moved": 9154,
+   "unchanged": 182707,
+   "aef_gated": {
+    "found": 0.179,
+    "lit": 0.003,
+    "ap": 0.318
+   },
+   "aggregate": {
+    "found": 0.183,
+    "lit": 0.004,
+    "ap": 0.33
+   },
+   "tes": {
+    "found": 0.447,
+    "lit": 0.139,
+    "ap": 0.258
+   }
+  },
+  "world-norway-trondheim": {
+   "moved": 7787,
+   "unchanged": 172841,
+   "aef_gated": {
+    "found": 0.102,
+    "lit": 0.002,
+    "ap": 0.2
+   },
+   "aggregate": {
+    "found": 0.122,
+    "lit": 0.003,
+    "ap": 0.233
+   },
+   "tes": {
+    "found": 0.356,
+    "lit": 0.127,
+    "ap": 0.208
+   }
+  },
+  "world-nz-christchurch-yaldhurst": {
+   "moved": 18676,
+   "unchanged": 428095,
+   "aef_gated": {
+    "found": 0.032,
+    "lit": 0.0,
+    "ap": 0.633
+   },
+   "aggregate": {
+    "found": 0.065,
+    "lit": 0.0,
+    "ap": 0.671
+   },
+   "tes": {
+    "found": 0.69,
+    "lit": 0.053,
+    "ap": 0.556
+   }
+  },
+  "world-nz-esk-valley": {
+   "moved": 11580,
+   "unchanged": 104907,
+   "aef_gated": {
+    "found": 0.004,
+    "lit": 0.0,
+    "ap": 0.244
+   },
+   "aggregate": {
+    "found": 0.007,
+    "lit": 0.0,
+    "ap": 0.42
+   },
+   "tes": {
+    "found": 0.519,
+    "lit": 0.033,
+    "ap": 0.575
+   }
+  },
+  "world-nz-hamilton-frankton": {
+   "moved": 909,
+   "unchanged": 91322,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.034
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.028
+   },
+   "tes": {
+    "found": 0.094,
+    "lit": 0.036,
+    "ap": 0.02
+   }
+  },
+  "world-nz-hamilton-northwest": {
+   "moved": 10310,
+   "unchanged": 128440,
+   "aef_gated": {
+    "found": 0.01,
+    "lit": 0.001,
+    "ap": 0.376
+   },
+   "aggregate": {
+    "found": 0.023,
+    "lit": 0.001,
+    "ap": 0.43
+   },
+   "tes": {
+    "found": 0.418,
+    "lit": 0.022,
+    "ap": 0.465
+   }
+  },
+  "world-nz-hamilton-ruakura": {
+   "moved": 17063,
+   "unchanged": 127889,
+   "aef_gated": {
+    "found": 0.115,
+    "lit": 0.003,
+    "ap": 0.691
+   },
+   "aggregate": {
+    "found": 0.16,
+    "lit": 0.004,
+    "ap": 0.714
+   },
+   "tes": {
+    "found": 0.662,
+    "lit": 0.027,
+    "ap": 0.705
+   }
+  },
+  "world-nz-hamilton-south": {
+   "moved": 11067,
+   "unchanged": 226905,
+   "aef_gated": {
+    "found": 0.047,
+    "lit": 0.001,
+    "ap": 0.251
+   },
+   "aggregate": {
+    "found": 0.084,
+    "lit": 0.001,
+    "ap": 0.333
+   },
+   "tes": {
+    "found": 0.305,
+    "lit": 0.012,
+    "ap": 0.329
+   }
+  },
+  "world-nz-lyttelton": {
+   "moved": 7327,
+   "unchanged": 99651,
+   "aef_gated": {
+    "found": 0.034,
+    "lit": 0.0,
+    "ap": 0.218
+   },
+   "aggregate": {
+    "found": 0.06,
+    "lit": 0.0,
+    "ap": 0.251
+   },
+   "tes": {
+    "found": 0.243,
+    "lit": 0.054,
+    "ap": 0.253
+   }
+  },
+  "world-nz-matata-quarry": {
+   "moved": 5641,
+   "unchanged": 22011,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.203
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.246
+   },
+   "tes": {
+    "found": 0.001,
+    "lit": 0.001,
+    "ap": 0.218
+   }
+  },
+  "world-nz-otago-roxburgh": {
+   "moved": 652,
+   "unchanged": 99841,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.006
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.008
+   },
+   "tes": {
+    "found": 0.0,
+    "lit": 0.005,
+    "ap": 0.009
+   }
+  },
+  "world-nz-palmerston-north": {
+   "moved": 3520,
+   "unchanged": 141055,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.131
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.183
+   },
+   "tes": {
+    "found": 0.163,
+    "lit": 0.046,
+    "ap": 0.069
+   }
+  },
+  "world-nz-papamoa-east": {
+   "moved": 7741,
+   "unchanged": 32758,
+   "aef_gated": {
+    "found": 0.022,
+    "lit": 0.0,
+    "ap": 0.486
+   },
+   "aggregate": {
+    "found": 0.025,
+    "lit": 0.0,
+    "ap": 0.542
+   },
+   "tes": {
+    "found": 0.269,
+    "lit": 0.013,
+    "ap": 0.56
+   }
+  },
+  "world-nz-tauranga-tauriko": {
+   "moved": 25826,
+   "unchanged": 77256,
+   "aef_gated": {
+    "found": 0.366,
+    "lit": 0.006,
+    "ap": 0.823
+   },
+   "aggregate": {
+    "found": 0.332,
+    "lit": 0.003,
+    "ap": 0.853
+   },
+   "tes": {
+    "found": 0.623,
+    "lit": 0.015,
+    "ap": 0.852
+   }
+  },
+  "world-nz-whangarei": {
+   "moved": 11410,
+   "unchanged": 114683,
+   "aef_gated": {
+    "found": 0.012,
+    "lit": 0.0,
+    "ap": 0.142
+   },
+   "aggregate": {
+    "found": 0.014,
+    "lit": 0.0,
+    "ap": 0.173
+   },
+   "tes": {
+    "found": 0.086,
+    "lit": 0.044,
+    "ap": 0.133
+   }
+  },
+  "world-poland-gdansk-baltic-hub": {
+   "moved": 14087,
+   "unchanged": 192828,
+   "aef_gated": {
+    "found": 0.429,
+    "lit": 0.003,
+    "ap": 0.575
+   },
+   "aggregate": {
+    "found": 0.463,
+    "lit": 0.007,
+    "ap": 0.555
+   },
+   "tes": {
+    "found": 0.559,
+    "lit": 0.083,
+    "ap": 0.509
+   }
+  },
+  "world-poland-gdynia-port": {
+   "moved": 13955,
+   "unchanged": 201534,
+   "aef_gated": {
+    "found": 0.343,
+    "lit": 0.008,
+    "ap": 0.542
+   },
+   "aggregate": {
+    "found": 0.533,
+    "lit": 0.015,
+    "ap": 0.614
+   },
+   "tes": {
+    "found": 0.739,
+    "lit": 0.111,
+    "ap": 0.525
+   }
+  },
+  "world-poland-krakow-modlnica": {
+   "moved": 6164,
+   "unchanged": 176585,
+   "aef_gated": {
+    "found": 0.159,
+    "lit": 0.007,
+    "ap": 0.2
+   },
+   "aggregate": {
+    "found": 0.22,
+    "lit": 0.003,
+    "ap": 0.261
+   },
+   "tes": {
+    "found": 0.505,
+    "lit": 0.028,
+    "ap": 0.414
+   }
+  },
+  "world-poland-poznan-east": {
+   "moved": 3464,
+   "unchanged": 205266,
+   "aef_gated": {
+    "found": 0.181,
+    "lit": 0.002,
+    "ap": 0.241
+   },
+   "aggregate": {
+    "found": 0.241,
+    "lit": 0.004,
+    "ap": 0.285
+   },
+   "tes": {
+    "found": 0.42,
+    "lit": 0.022,
+    "ap": 0.297
+   }
+  },
+  "world-poland-swinoujscie": {
+   "moved": 6497,
+   "unchanged": 120658,
+   "aef_gated": {
+    "found": 0.251,
+    "lit": 0.002,
+    "ap": 0.44
+   },
+   "aggregate": {
+    "found": 0.288,
+    "lit": 0.002,
+    "ap": 0.47
+   },
+   "tes": {
+    "found": 0.379,
+    "lit": 0.022,
+    "ap": 0.444
+   }
+  },
+  "world-poland-warsaw-s2-wilanow": {
+   "moved": 9790,
+   "unchanged": 168696,
+   "aef_gated": {
+    "found": 0.48,
+    "lit": 0.009,
+    "ap": 0.557
+   },
+   "aggregate": {
+    "found": 0.511,
+    "lit": 0.009,
+    "ap": 0.59
+   },
+   "tes": {
+    "found": 0.595,
+    "lit": 0.029,
+    "ap": 0.546
+   }
+  },
+  "world-poland-wroclaw-jagodno": {
+   "moved": 8242,
+   "unchanged": 191476,
+   "aef_gated": {
+    "found": 0.384,
+    "lit": 0.011,
+    "ap": 0.436
+   },
+   "aggregate": {
+    "found": 0.457,
+    "lit": 0.015,
+    "ap": 0.453
+   },
+   "tes": {
+    "found": 0.587,
+    "lit": 0.039,
+    "ap": 0.372
+   }
+  },
+  "world-poland-zelazny-most": {
+   "moved": 233610,
+   "unchanged": 215741,
+   "aef_gated": {
+    "found": 0.118,
+    "lit": 0.003,
+    "ap": 0.665
+   },
+   "aggregate": {
+    "found": 0.112,
+    "lit": 0.006,
+    "ap": 0.594
+   },
+   "tes": {
+    "found": 0.257,
+    "lit": 0.197,
+    "ap": 0.627
+   }
+  },
+  "world-poland-zulawy": {
+   "moved": 289,
+   "unchanged": 263791,
+   "aef_gated": {
+    "found": 0.145,
+    "lit": 0.012,
+    "ap": 0.014
+   },
+   "aggregate": {
+    "found": 0.166,
+    "lit": 0.006,
+    "ap": 0.014
+   },
+   "tes": {
+    "found": 0.235,
+    "lit": 0.03,
+    "ap": 0.012
+   }
+  },
+  "world-saopaulo-ctl-landfill": {
+   "moved": 90,
+   "unchanged": 29,
+   "aef_gated": {
+    "found": 0.8,
+    "lit": 0.034,
+    "ap": 0.966
+   },
+   "aggregate": {
+    "found": 0.811,
+    "lit": 0.034,
+    "ap": 0.978
+   },
+   "tes": {
+    "found": 0.689,
+    "lit": 0.034,
+    "ap": 0.985
+   }
+  },
+  "world-saopaulo-grajau": {
+   "moved": 555,
+   "unchanged": 2008,
+   "aef_gated": {
+    "found": 0.106,
+    "lit": 0.001,
+    "ap": 0.489
+   },
+   "aggregate": {
+    "found": 0.133,
+    "lit": 0.006,
+    "ap": 0.617
+   },
+   "tes": {
+    "found": 0.258,
+    "lit": 0.001,
+    "ap": 0.661
+   }
+  },
+  "world-saopaulo-ibirapuera": {
+   "moved": 9,
+   "unchanged": 614,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.506
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.068
+   },
+   "tes": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.106
+   }
+  },
+  "world-saopaulo-parelheiros": {
+   "moved": 1214,
+   "unchanged": 6881,
+   "aef_gated": {
+    "found": 0.011,
+    "lit": 0.021,
+    "ap": 0.148
+   },
+   "aggregate": {
+    "found": 0.008,
+    "lit": 0.019,
+    "ap": 0.167
+   },
+   "tes": {
+    "found": 0.007,
+    "lit": 0.008,
+    "ap": 0.181
+   }
+  },
+  "world-saopaulo-perus": {
+   "moved": 1442,
+   "unchanged": 3122,
+   "aef_gated": {
+    "found": 0.007,
+    "lit": 0.0,
+    "ap": 0.319
+   },
+   "aggregate": {
+    "found": 0.006,
+    "lit": 0.0,
+    "ap": 0.392
+   },
+   "tes": {
+    "found": 0.086,
+    "lit": 0.011,
+    "ap": 0.454
+   }
+  },
+  "world-scotland-avonbridge": {
+   "moved": 92,
+   "unchanged": 90528,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.018,
+    "ap": 0.002
+   },
+   "tes": {
+    "found": 0.0,
+    "lit": 0.01,
+    "ap": 0.003
+   }
+  },
+  "world-scotland-burntisland": {
+   "moved": 1834,
+   "unchanged": 175626,
+   "aef_gated": {
+    "found": 0.058,
+    "lit": 0.011,
+    "ap": 0.033
+   },
+   "aggregate": {
+    "found": 0.342,
+    "lit": 0.05,
+    "ap": 0.068
+   },
+   "tes": {
+    "found": 0.242,
+    "lit": 0.03,
+    "ap": 0.055
+   }
+  },
+  "world-scotland-calderwood": {
+   "moved": 3692,
+   "unchanged": 132165,
+   "aef_gated": {
+    "found": 0.435,
+    "lit": 0.004,
+    "ap": 0.495
+   },
+   "aggregate": {
+    "found": 0.56,
+    "lit": 0.008,
+    "ap": 0.511
+   },
+   "tes": {
+    "found": 0.502,
+    "lit": 0.01,
+    "ap": 0.49
+   }
+  },
+  "world-scotland-crossgates": {
+   "moved": 1656,
+   "unchanged": 156343,
+   "aef_gated": {
+    "found": 0.223,
+    "lit": 0.002,
+    "ap": 0.26
+   },
+   "aggregate": {
+    "found": 0.398,
+    "lit": 0.007,
+    "ap": 0.378
+   },
+   "tes": {
+    "found": 0.29,
+    "lit": 0.002,
+    "ap": 0.356
+   }
+  },
+  "world-scotland-dalry": {
+   "moved": 2384,
+   "unchanged": 152505,
+   "aef_gated": {
+    "found": 0.171,
+    "lit": 0.004,
+    "ap": 0.272
+   },
+   "aggregate": {
+    "found": 0.391,
+    "lit": 0.011,
+    "ap": 0.322
+   },
+   "tes": {
+    "found": 0.173,
+    "lit": 0.001,
+    "ap": 0.323
+   }
+  },
+  "world-scotland-kinglassie": {
+   "moved": 2673,
+   "unchanged": 114249,
+   "aef_gated": {
+    "found": 0.06,
+    "lit": 0.003,
+    "ap": 0.076
+   },
+   "aggregate": {
+    "found": 0.177,
+    "lit": 0.041,
+    "ap": 0.077
+   },
+   "tes": {
+    "found": 0.264,
+    "lit": 0.038,
+    "ap": 0.097
+   }
+  },
+  "world-scotland-kirknewton": {
+   "moved": 13,
+   "unchanged": 129164,
+   "aef_gated": {
+    "found": 0.077,
+    "lit": 0.001,
+    "ap": 0.005
+   },
+   "aggregate": {
+    "found": 0.154,
+    "lit": 0.004,
+    "ap": 0.003
+   },
+   "tes": {
+    "found": 0.077,
+    "lit": 0.001,
+    "ap": 0.005
+   }
+  },
+  "world-scotland-levenseat": {
+   "moved": 0,
+   "unchanged": 3634,
+   "aef_gated": {
+    "found": null,
+    "lit": 0.0,
+    "ap": null
+   },
+   "aggregate": {
+    "found": null,
+    "lit": 0.005,
+    "ap": null
+   },
+   "tes": {
+    "found": null,
+    "lit": 0.001,
+    "ap": null
+   }
+  },
+  "world-scotland-polmont": {
+   "moved": 1147,
+   "unchanged": 55681,
+   "aef_gated": {
+    "found": 0.077,
+    "lit": 0.007,
+    "ap": 0.107
+   },
+   "aggregate": {
+    "found": 0.136,
+    "lit": 0.029,
+    "ap": 0.079
+   },
+   "tes": {
+    "found": 0.092,
+    "lit": 0.012,
+    "ap": 0.081
+   }
+  },
+  "world-scotland-ratho": {
+   "moved": 2052,
+   "unchanged": 112858,
+   "aef_gated": {
+    "found": 0.12,
+    "lit": 0.001,
+    "ap": 0.146
+   },
+   "aggregate": {
+    "found": 0.323,
+    "lit": 0.012,
+    "ap": 0.253
+   },
+   "tes": {
+    "found": 0.296,
+    "lit": 0.021,
+    "ap": 0.243
+   }
+  },
+  "world-scotland-winchburgh": {
+   "moved": 5764,
+   "unchanged": 111789,
+   "aef_gated": {
+    "found": 0.625,
+    "lit": 0.003,
+    "ap": 0.815
+   },
+   "aggregate": {
+    "found": 0.844,
+    "lit": 0.032,
+    "ap": 0.82
+   },
+   "tes": {
+    "found": 0.844,
+    "lit": 0.074,
+    "ap": 0.784
+   }
+  },
+  "world-swiss-geneva-cherpines": {
+   "moved": 4937,
+   "unchanged": 195370,
+   "aef_gated": {
+    "found": 0.007,
+    "lit": 0.001,
+    "ap": 0.115
+   },
+   "aggregate": {
+    "found": 0.064,
+    "lit": 0.002,
+    "ap": 0.15
+   },
+   "tes": {
+    "found": 0.342,
+    "lit": 0.032,
+    "ap": 0.166
+   }
+  },
+  "world-swiss-geneva-satigny": {
+   "moved": 1402,
+   "unchanged": 209286,
+   "aef_gated": {
+    "found": 0.079,
+    "lit": 0.0,
+    "ap": 0.223
+   },
+   "aggregate": {
+    "found": 0.218,
+    "lit": 0.003,
+    "ap": 0.224
+   },
+   "tes": {
+    "found": 0.678,
+    "lit": 0.073,
+    "ap": 0.309
+   }
+  },
+  "world-swiss-geneva-vernets": {
+   "moved": 9360,
+   "unchanged": 176257,
+   "aef_gated": {
+    "found": 0.005,
+    "lit": 0.001,
+    "ap": 0.152
+   },
+   "aggregate": {
+    "found": 0.024,
+    "lit": 0.001,
+    "ap": 0.192
+   },
+   "tes": {
+    "found": 0.218,
+    "lit": 0.017,
+    "ap": 0.224
+   }
+  },
+  "world-swiss-huentwangen": {
+   "moved": 12708,
+   "unchanged": 199706,
+   "aef_gated": {
+    "found": 0.217,
+    "lit": 0.001,
+    "ap": 0.54
+   },
+   "aggregate": {
+    "found": 0.414,
+    "lit": 0.003,
+    "ap": 0.669
+   },
+   "tes": {
+    "found": 0.805,
+    "lit": 0.084,
+    "ap": 0.737
+   }
+  },
+  "world-swiss-uetliberg": {
+   "moved": 2058,
+   "unchanged": 203933,
+   "aef_gated": {
+    "found": 0.052,
+    "lit": 0.0,
+    "ap": 0.098
+   },
+   "aggregate": {
+    "found": 0.099,
+    "lit": 0.0,
+    "ap": 0.164
+   },
+   "tes": {
+    "found": 0.172,
+    "lit": 0.005,
+    "ap": 0.142
+   }
+  },
+  "world-swiss-weiach": {
+   "moved": 9514,
+   "unchanged": 182704,
+   "aef_gated": {
+    "found": 0.2,
+    "lit": 0.0,
+    "ap": 0.476
+   },
+   "aggregate": {
+    "found": 0.339,
+    "lit": 0.002,
+    "ap": 0.629
+   },
+   "tes": {
+    "found": 0.735,
+    "lit": 0.035,
+    "ap": 0.729
+   }
+  },
+  "world-swiss-weinland": {
+   "moved": 738,
+   "unchanged": 217933,
+   "aef_gated": {
+    "found": 0.011,
+    "lit": 0.001,
+    "ap": 0.006
+   },
+   "aggregate": {
+    "found": 0.037,
+    "lit": 0.002,
+    "ap": 0.021
+   },
+   "tes": {
+    "found": 0.107,
+    "lit": 0.06,
+    "ap": 0.006
+   }
+  },
+  "world-swiss-zurich-airport": {
+   "moved": 7261,
+   "unchanged": 177164,
+   "aef_gated": {
+    "found": 0.174,
+    "lit": 0.004,
+    "ap": 0.32
+   },
+   "aggregate": {
+    "found": 0.298,
+    "lit": 0.004,
+    "ap": 0.413
+   },
+   "tes": {
+    "found": 0.459,
+    "lit": 0.055,
+    "ap": 0.348
+   }
+  },
+  "world-swiss-zurich-city": {
+   "moved": 7756,
+   "unchanged": 139358,
+   "aef_gated": {
+    "found": 0.013,
+    "lit": 0.0,
+    "ap": 0.265
+   },
+   "aggregate": {
+    "found": 0.043,
+    "lit": 0.0,
+    "ap": 0.301
+   },
+   "tes": {
+    "found": 0.202,
+    "lit": 0.007,
+    "ap": 0.301
+   }
+  }
+ },
+ "cities": {
+  "abroad": {
+   "nyc-lower-east-side": {
+    "2018-2024": {
+     "aef_gated": 0.0203,
+     "aggregate": 0.0228
+    },
+    "2022-2025": {
+     "aef_gated": 0.025866666666666666,
+     "aggregate": 0.035833333333333335
+    },
+    "2019-2023": {
+     "aef_gated": 0.013344444444444445,
+     "aggregate": 0.017511111111111113
+    }
+   },
+   "nyc-midtown": {
+    "2018-2024": {
+     "aef_gated": 0.0011432193509683408,
+     "aggregate": 0.0019129115872638573
+    },
+    "2022-2025": {
+     "aef_gated": 0.002627128199346037,
+     "aggregate": 0.0033825684970120646
+    },
+    "2019-2023": {
+     "aef_gated": 0.00046153499786117925,
+     "aggregate": 0.0007654726793795168
+    }
+   },
+   "brooklyn-park-slope": {
+    "2018-2024": {
+     "aef_gated": 0.00815609929550859,
+     "aggregate": 0.009533968931262083
+    },
+    "2022-2025": {
+     "aef_gated": 0.01758888888888889,
+     "aggregate": 0.016022222222222222
+    },
+    "2019-2023": {
+     "aef_gated": 0.005844444444444445,
+     "aggregate": 0.006677777777777778
+    }
+   },
+   "chicago-loop": {
+    "2018-2024": {
+     "aef_gated": 0.02098840447617601,
+     "aggregate": 0.021861866423616386
+    },
+    "2022-2025": {
+     "aef_gated": 0.023803771327327743,
+     "aggregate": 0.008306584291121619
+    },
+    "2019-2023": {
+     "aef_gated": 0.044977367999904455,
+     "aggregate": 0.029140939437006606
+    }
+   },
+   "philadelphia-center": {
+    "2018-2024": {
+     "aef_gated": 0.00441369583191479,
+     "aggregate": 0.010724186566801226
+    },
+    "2022-2025": {
+     "aef_gated": 0.12346847850300735,
+     "aggregate": 0.013755847627533973
+    },
+    "2019-2023": {
+     "aef_gated": 0.005997156224199615,
+     "aggregate": 0.006226492982295202
+    }
+   },
+   "boston-back-bay": {
+    "2018-2024": {
+     "aef_gated": 0.022155555555555557,
+     "aggregate": 0.0176
+    },
+    "2022-2025": {
+     "aef_gated": 0.017722222222222223,
+     "aggregate": 0.009533333333333333
+    },
+    "2019-2023": {
+     "aef_gated": 0.020066666666666667,
+     "aggregate": 0.009711111111111111
+    }
+   },
+   "sf-mission": {
+    "2018-2024": {
+     "aef_gated": 0.00022232103156958648,
+     "aggregate": 0.0
+    },
+    "2022-2025": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    },
+    "2019-2023": {
+     "aef_gated": 0.00043335259344859774,
+     "aggregate": 0.0
+    }
+   },
+   "la-koreatown": {
+    "2018-2024": {
+     "aef_gated": 0.0006556866928941344,
+     "aggregate": 0.0
+    },
+    "2022-2025": {
+     "aef_gated": 0.0002888888888888889,
+     "aggregate": 0.0003444444444444444
+    },
+    "2019-2023": {
+     "aef_gated": 0.001111185190123786,
+     "aggregate": 0.00011111851901237861
+    }
+   },
+   "houston-montrose": {
+    "2018-2024": {
+     "aef_gated": 0.009677777777777778,
+     "aggregate": 0.005922222222222222
+    },
+    "2022-2025": {
+     "aef_gated": 0.0033666666666666667,
+     "aggregate": 0.0022444444444444443
+    },
+    "2019-2023": {
+     "aef_gated": 0.01361111111111111,
+     "aggregate": 0.011122222222222223
+    }
+   },
+   "dc-capitol-hill": {
+    "2018-2024": {
+     "aef_gated": 0.0006444730876927863,
+     "aggregate": 0.001688963953953509
+    },
+    "2022-2025": {
+     "aef_gated": 0.0012333333333333332,
+     "aggregate": 0.001911111111111111
+    },
+    "2019-2023": {
+     "aef_gated": 0.0028333333333333335,
+     "aggregate": 0.005344444444444444
+    }
+   },
+   "seattle-capitol-hill": {
+    "2018-2024": {
+     "aef_gated": 0.007456052625730604,
+     "aggregate": 0.007022690401582328
+    },
+    "2022-2025": {
+     "aef_gated": 0.00015555555555555556,
+     "aggregate": 0.0004888888888888889
+    },
+    "2019-2023": {
+     "aef_gated": 0.006611111111111111,
+     "aggregate": 0.005733333333333333
+    }
+   },
+   "atlanta-midtown": {
+    "2018-2024": {
+     "aef_gated": 0.02357317267976541,
+     "aggregate": 0.026471326532940827
+    },
+    "2022-2025": {
+     "aef_gated": 0.004688888888888889,
+     "aggregate": 0.007822222222222222
+    },
+    "2019-2023": {
+     "aef_gated": 0.011577843710263904,
+     "aggregate": 0.01707676177303857
+    }
+   },
+   "denver-downtown": {
+    "2018-2024": {
+     "aef_gated": 0.012866666666666667,
+     "aggregate": 0.012122222222222222
+    },
+    "2022-2025": {
+     "aef_gated": 0.010666666666666666,
+     "aggregate": 0.00931111111111111
+    },
+    "2019-2023": {
+     "aef_gated": 0.010344444444444444,
+     "aggregate": 0.012055555555555555
+    }
+   },
+   "phoenix-downtown": {
+    "2018-2024": {
+     "aef_gated": 0.027044444444444444,
+     "aggregate": 0.022377777777777778
+    },
+    "2022-2025": {
+     "aef_gated": 0.0221,
+     "aggregate": 0.010944444444444444
+    },
+    "2019-2023": {
+     "aef_gated": 0.03905555555555556,
+     "aggregate": 0.023144444444444443
+    }
+   },
+   "london-islington": {
+    "2018-2024": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    },
+    "2022-2025": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    },
+    "2019-2023": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    }
+   },
+   "paris-11e": {
+    "2018-2024": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    },
+    "2022-2025": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    },
+    "2019-2023": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    }
+   },
+   "berlin-kreuzberg": {
+    "2018-2024": {
+     "aef_gated": 0.0017335644752633685,
+     "aggregate": 0.0038116193270213805
+    },
+    "2022-2025": {
+     "aef_gated": 0.00024444444444444443,
+     "aggregate": 0.001011111111111111
+    },
+    "2019-2023": {
+     "aef_gated": 0.0007111111111111111,
+     "aggregate": 0.002688888888888889
+    }
+   },
+   "tokyo-shinjuku": {
+    "2018-2024": {
+     "aef_gated": 0.006619066226184979,
+     "aggregate": 0.003895657939919245
+    },
+    "2022-2025": {
+     "aef_gated": 0.00011111111111111112,
+     "aggregate": 0.00047777777777777776
+    },
+    "2019-2023": {
+     "aef_gated": 0.011844697789369384,
+     "aggregate": 0.0014578089586916164
+    }
+   },
+   "mexico-city-roma": {
+    "2018-2024": {
+     "aef_gated": 0.0018669985775248933,
+     "aggregate": 0.0006001066856330014
+    },
+    "2022-2025": {
+     "aef_gated": 0.0004667288971862915,
+     "aggregate": 7.778814953104859e-05
+    },
+    "2019-2023": {
+     "aef_gated": 0.00037784495021337127,
+     "aggregate": 6.667852062588905e-05
+    }
+   },
+   "sao-paulo-centro": {
+    "2018-2024": {
+     "aef_gated": 0.002460082237034781,
+     "aggregate": 0.0009840328948139123
+    },
+    "2022-2025": {
+     "aef_gated": 0.00046697279327559177,
+     "aggregate": 0.001067366384629924
+    },
+    "2019-2023": {
+     "aef_gated": 0.0020894925200613513,
+     "aggregate": 0.0022562073487896505
+    }
+   },
+   "lagos-surulere": {
+    "2018-2024": {
+     "aef_gated": 0.00035752118644067797,
+     "aggregate": 0.001496292372881356
+    },
+    "2022-2025": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    },
+    "2019-2023": {
+     "aef_gated": 0.0,
+     "aggregate": 0.0
+    }
+   },
+   "mumbai-dadar": {
+    "2018-2024": {
+     "aef_gated": 0.0012669059711278797,
+     "aggregate": 0.0006112265650178367
+    },
+    "2022-2025": {
+     "aef_gated": 0.0005444444444444444,
+     "aggregate": 0.00015555555555555556
+    },
+    "2019-2023": {
+     "aef_gated": 2.222370380247572e-05,
+     "aggregate": 0.00021112518612351934
+    }
+   }
+  },
+  "world": {
+   "nyc-lower-east-side": {
+    "2018-2024": {
+     "aef_gated": 0.02291111111111111,
+     "aggregate": 0.024255555555555555
+    },
+    "2022-2025": {
+     "aef_gated": 0.02668888888888889,
+     "aggregate": 0.03617777777777778
+    },
+    "2019-2023": {
+     "aef_gated": 0.015166666666666667,
+     "aggregate": 0.019311111111111112
+    }
+   },
+   "nyc-midtown": {
+    "2018-2024": {
+     "aef_gated": 0.008194958515852264,
+     "aggregate": 0.005965114831290253
+    },
+    "2022-2025": {
+     "aef_gated": 0.005288082083662194,
+     "aggregate": 0.006190100349532078
+    },
+    "2019-2023": {
+     "aef_gated": 0.0049980863183015515,
+     "aggregate": 0.0026228696219915797
+    }
+   },
+   "brooklyn-park-slope": {
+    "2018-2024": {
+     "aef_gated": 0.013956485987954752,
+     "aggregate": 0.012234148943262885
+    },
+    "2022-2025": {
+     "aef_gated": 0.023566666666666666,
+     "aggregate": 0.020188888888888888
+    },
+    "2019-2023": {
+     "aef_gated": 0.0089,
+     "aggregate": 0.008288888888888889
+    }
+   },
+   "chicago-loop": {
+    "2018-2024": {
+     "aef_gated": 0.021406147146690972,
+     "aggregate": 0.023937920907387715
+    },
+    "2022-2025": {
+     "aef_gated": 0.004475431148540595,
+     "aggregate": 0.004164797109952945
+    },
+    "2019-2023": {
+     "aef_gated": 0.025187803800265134,
+     "aggregate": 0.02005231037489102
+    }
+   },
+   "philadelphia-center": {
+    "2018-2024": {
+     "aef_gated": 0.021642916200573903,
+     "aggregate": 0.027771022810174604
+    },
+    "2022-2025": {
+     "aef_gated": 0.5622855869904211,
+     "aggregate": 0.11194029850746269
+    },
+    "2019-2023": {
+     "aef_gated": 0.012774057425924227,
+     "aggregate": 0.01160443995963673
+    }
+   },
+   "boston-back-bay": {
+    "2018-2024": {
+     "aef_gated": 0.04256666666666667,
+     "aggregate": 0.026822222222222223
+    },
+    "2022-2025": {
+     "aef_gated": 0.035366666666666664,
+     "aggregate": 0.010288888888888889
+    },
+    "2019-2023": {
+     "aef_gated": 0.03362222222222222,
+     "aggregate": 0.012766666666666667
+    }
+   },
+   "sf-mission": {
+    "2018-2024": {
+     "aef_gated": 0.01101600711427301,
+     "aggregate": 0.0063361493997332145
+    },
+    "2022-2025": {
+     "aef_gated": 0.0017444444444444445,
+     "aggregate": 0.0014666666666666667
+    },
+    "2019-2023": {
+     "aef_gated": 0.006922529890217343,
+     "aggregate": 0.003589048402151207
+    }
+   },
+   "la-koreatown": {
+    "2018-2024": {
+     "aef_gated": 0.01857038074281523,
+     "aggregate": 0.010313173745860283
+    },
+    "2022-2025": {
+     "aef_gated": 0.009711111111111111,
+     "aggregate": 0.00818888888888889
+    },
+    "2019-2023": {
+     "aef_gated": 0.01566771118074538,
+     "aggregate": 0.014278729693090651
+    }
+   },
+   "houston-montrose": {
+    "2018-2024": {
+     "aef_gated": 0.020755555555555555,
+     "aggregate": 0.011922222222222223
+    },
+    "2022-2025": {
+     "aef_gated": 0.006522222222222222,
+     "aggregate": 0.006366666666666666
+    },
+    "2019-2023": {
+     "aef_gated": 0.015811111111111113,
+     "aggregate": 0.014366666666666666
+    }
+   },
+   "dc-capitol-hill": {
+    "2018-2024": {
+     "aef_gated": 0.004833548157695898,
+     "aggregate": 0.010567136317169651
+    },
+    "2022-2025": {
+     "aef_gated": 0.002277777777777778,
+     "aggregate": 0.003322222222222222
+    },
+    "2019-2023": {
+     "aef_gated": 0.007388888888888889,
+     "aggregate": 0.007922222222222223
+    }
+   },
+   "seattle-capitol-hill": {
+    "2018-2024": {
+     "aef_gated": 0.027757406049292176,
+     "aggregate": 0.022868191212747517
+    },
+    "2022-2025": {
+     "aef_gated": 0.0020777777777777778,
+     "aggregate": 0.0030555555555555557
+    },
+    "2019-2023": {
+     "aef_gated": 0.022644444444444443,
+     "aggregate": 0.018233333333333334
+    }
+   },
+   "atlanta-midtown": {
+    "2018-2024": {
+     "aef_gated": 0.05686771182766254,
+     "aggregate": 0.047557107322973004
+    },
+    "2022-2025": {
+     "aef_gated": 0.016788888888888888,
+     "aggregate": 0.023688888888888888
+    },
+    "2019-2023": {
+     "aef_gated": 0.043645570749771344,
+     "aggregate": 0.04642291476119303
+    }
+   },
+   "denver-downtown": {
+    "2018-2024": {
+     "aef_gated": 0.04094444444444444,
+     "aggregate": 0.036366666666666665
+    },
+    "2022-2025": {
+     "aef_gated": 0.022866666666666667,
+     "aggregate": 0.022222222222222223
+    },
+    "2019-2023": {
+     "aef_gated": 0.024722222222222222,
+     "aggregate": 0.023444444444444445
+    }
+   },
+   "phoenix-downtown": {
+    "2018-2024": {
+     "aef_gated": 0.045177777777777775,
+     "aggregate": 0.03961111111111111
+    },
+    "2022-2025": {
+     "aef_gated": 0.028233333333333333,
+     "aggregate": 0.01778888888888889
+    },
+    "2019-2023": {
+     "aef_gated": 0.044055555555555556,
+     "aggregate": 0.04
+    }
+   },
+   "london-islington": {
+    "2018-2024": {
+     "aef_gated": 0.0011000977864699085,
+     "aggregate": 0.0010667614899102142
+    },
+    "2022-2025": {
+     "aef_gated": 0.00024444444444444443,
+     "aggregate": 0.0008111111111111111
+    },
+    "2019-2023": {
+     "aef_gated": 1.1111111111111112e-05,
+     "aggregate": 0.00011111111111111112
+    }
+   },
+   "paris-11e": {
+    "2018-2024": {
+     "aef_gated": 0.0011113333777866684,
+     "aggregate": 0.001200240048009602
+    },
+    "2022-2025": {
+     "aef_gated": 0.00047777777777777776,
+     "aggregate": 1.1111111111111112e-05
+    },
+    "2019-2023": {
+     "aef_gated": 0.0013333333333333333,
+     "aggregate": 0.0007555555555555555
+    }
+   },
+   "berlin-kreuzberg": {
+    "2018-2024": {
+     "aef_gated": 0.014157443214650843,
+     "aggregate": 0.01752455883006623
+    },
+    "2022-2025": {
+     "aef_gated": 0.004322222222222222,
+     "aggregate": 0.005344444444444444
+    },
+    "2019-2023": {
+     "aef_gated": 0.008088888888888889,
+     "aggregate": 0.0099
+    }
+   },
+   "tokyo-shinjuku": {
+    "2018-2024": {
+     "aef_gated": 0.045232259363196095,
+     "aggregate": 0.03720412537150841
+    },
+    "2022-2025": {
+     "aef_gated": 0.002788888888888889,
+     "aggregate": 0.002211111111111111
+    },
+    "2019-2023": {
+     "aef_gated": 0.05603453184970901,
+     "aggregate": 0.03208318622370534
+    }
+   },
+   "mexico-city-roma": {
+    "2018-2024": {
+     "aef_gated": 0.0048119665718349925,
+     "aggregate": 0.0009334992887624466
+    },
+    "2022-2025": {
+     "aef_gated": 0.0018335778103747166,
+     "aggregate": 0.0005111792683468907
+    },
+    "2019-2023": {
+     "aef_gated": 0.0008557076813655761,
+     "aggregate": 5.556543385490754e-05
+    }
+   },
+   "sao-paulo-centro": {
+    "2018-2024": {
+     "aef_gated": 0.009125733631667115,
+     "aggregate": 0.005154458020453827
+    },
+    "2022-2025": {
+     "aef_gated": 0.0033577567516483026,
+     "aggregate": 0.0032020991538897724
+    },
+    "2019-2023": {
+     "aef_gated": 0.005057016471425079,
+     "aggregate": 0.005657189854846956
+    }
+   },
+   "lagos-surulere": {
+    "2018-2024": {
+     "aef_gated": 0.0032971398305084746,
+     "aggregate": 0.003773834745762712
+    },
+    "2022-2025": {
+     "aef_gated": 0.0003126367785906334,
+     "aggregate": 0.0010942287250672168
+    },
+    "2019-2023": {
+     "aef_gated": 0.0001292824822236587,
+     "aggregate": 0.0
+    }
+   },
+   "mumbai-dadar": {
+    "2018-2024": {
+     "aef_gated": 0.007790360401409155,
+     "aggregate": 0.004067434959936877
+    },
+    "2022-2025": {
+     "aef_gated": 0.0036555555555555556,
+     "aggregate": 0.004422222222222222
+    },
+    "2019-2023": {
+     "aef_gated": 0.004166944462964198,
+     "aggregate": 0.0018890148232104363
+    }
+   }
+  }
+ },
+ "abroad": {
+  "cutoff": {
+   "aef_gated": 0.572,
+   "aggregate": 0.739
+  },
+  "groups": {
+   "br": {
+    "aef_gated": {
+     "sites": 5,
+     "moved_px": 3310,
+     "found": 0.235,
+     "lit": 0.006,
+     "ap": 0.322,
+     "median_moved": 0.249,
+     "found_deep": 0.442,
+     "ap_deep": 0.43,
+     "median_deep": 0.376
+    },
+    "aggregate": {
+     "sites": 5,
+     "moved_px": 3310,
+     "found": 0.246,
+     "lit": 0.006,
+     "ap": 0.396,
+     "median_moved": 0.251,
+     "found_deep": 0.469,
+     "ap_deep": 0.59,
+     "median_deep": 0.567
+    },
+    "aggregate+gate": {
+     "sites": 5,
+     "moved_px": 0,
+     "found": 0.246,
+     "lit": 0.006,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ca": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 219473,
+     "found": 0.644,
+     "lit": 0.135,
+     "ap": 0.567,
+     "median_moved": 0.76,
+     "found_deep": 0.757,
+     "ap_deep": 0.576,
+     "median_deep": 0.821
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 219473,
+     "found": 0.61,
+     "lit": 0.068,
+     "ap": 0.618,
+     "median_moved": 0.781,
+     "found_deep": 0.745,
+     "ap_deep": 0.634,
+     "median_deep": 0.846
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.609,
+     "lit": 0.068,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ch": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 55734,
+     "found": 0.076,
+     "lit": 0.001,
+     "ap": 0.232,
+     "median_moved": 0.019,
+     "found_deep": 0.111,
+     "ap_deep": 0.238,
+     "median_deep": 0.044
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 55734,
+     "found": 0.141,
+     "lit": 0.001,
+     "ap": 0.293,
+     "median_moved": 0.129,
+     "found_deep": 0.188,
+     "ap_deep": 0.287,
+     "median_deep": 0.202
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.139,
+     "lit": 0.001,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "crop (test)": {
+    "aef_gated": {
+     "sites": 27,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.228,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 27,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.044,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 27,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.044,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ee": {
+    "aef_gated": {
+     "sites": 8,
+     "moved_px": 69136,
+     "found": 0.681,
+     "lit": 0.295,
+     "ap": 0.57,
+     "median_moved": 0.645,
+     "found_deep": 0.682,
+     "ap_deep": 0.633,
+     "median_deep": 0.65
+    },
+    "aggregate": {
+     "sites": 8,
+     "moved_px": 69136,
+     "found": 0.709,
+     "lit": 0.242,
+     "ap": 0.575,
+     "median_moved": 0.768,
+     "found_deep": 0.754,
+     "ap_deep": 0.651,
+     "median_deep": 0.807
+    },
+    "aggregate+gate": {
+     "sites": 8,
+     "moved_px": 0,
+     "found": 0.704,
+     "lit": 0.242,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "fr": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 36354,
+     "found": 0.006,
+     "lit": 0.0,
+     "ap": 0.09,
+     "median_moved": 0.0,
+     "found_deep": 0.012,
+     "ap_deep": 0.058,
+     "median_deep": 0.001
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 36354,
+     "found": 0.008,
+     "lit": 0.0,
+     "ap": 0.128,
+     "median_moved": 0.0,
+     "found_deep": 0.016,
+     "ap_deep": 0.096,
+     "median_deep": 0.007
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.008,
+     "lit": 0.0,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "gb": {
+    "aef_gated": {
+     "sites": 32,
+     "moved_px": 120801,
+     "found": 0.184,
+     "lit": 0.005,
+     "ap": 0.275,
+     "median_moved": 0.147,
+     "found_deep": 0.282,
+     "ap_deep": 0.27,
+     "median_deep": 0.26
+    },
+    "aggregate": {
+     "sites": 32,
+     "moved_px": 120801,
+     "found": 0.295,
+     "lit": 0.017,
+     "ap": 0.302,
+     "median_moved": 0.395,
+     "found_deep": 0.446,
+     "ap_deep": 0.301,
+     "median_deep": 0.584
+    },
+    "aggregate+gate": {
+     "sites": 32,
+     "moved_px": 0,
+     "found": 0.294,
+     "lit": 0.017,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "hongkong (test)": {
+    "aef_gated": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.001,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.001,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.001,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "islands": {
+    "aef_gated": {
+     "sites": 12,
+     "moved_px": 24362,
+     "found": 0.455,
+     "lit": 0.009,
+     "ap": 0.361,
+     "median_moved": 0.495,
+     "found_deep": 0.455,
+     "ap_deep": 0.361,
+     "median_deep": 0.495
+    },
+    "aggregate": {
+     "sites": 12,
+     "moved_px": 24362,
+     "found": 0.534,
+     "lit": 0.01,
+     "ap": 0.403,
+     "median_moved": 0.74,
+     "found_deep": 0.534,
+     "ap_deep": 0.403,
+     "median_deep": 0.74
+    },
+    "aggregate+gate": {
+     "sites": 12,
+     "moved_px": 0,
+     "found": 0.533,
+     "lit": 0.01,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "jp": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 127958,
+     "found": 0.051,
+     "lit": 0.006,
+     "ap": 0.313,
+     "median_moved": 0.0,
+     "found_deep": 0.193,
+     "ap_deep": 0.324,
+     "median_deep": 0.154
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 127958,
+     "found": 0.065,
+     "lit": 0.004,
+     "ap": 0.333,
+     "median_moved": 0.003,
+     "found_deep": 0.258,
+     "ap_deep": 0.376,
+     "median_deep": 0.31
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.065,
+     "lit": 0.004,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nl": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 105041,
+     "found": 0.356,
+     "lit": 0.038,
+     "ap": 0.48,
+     "median_moved": 0.321,
+     "found_deep": 0.469,
+     "ap_deep": 0.439,
+     "median_deep": 0.511
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 105041,
+     "found": 0.416,
+     "lit": 0.037,
+     "ap": 0.543,
+     "median_moved": 0.534,
+     "found_deep": 0.528,
+     "ap_deep": 0.503,
+     "median_deep": 0.73
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.416,
+     "lit": 0.037,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "no": {
+    "aef_gated": {
+     "sites": 8,
+     "moved_px": 70116,
+     "found": 0.189,
+     "lit": 0.009,
+     "ap": 0.262,
+     "median_moved": 0.068,
+     "found_deep": 0.291,
+     "ap_deep": 0.209,
+     "median_deep": 0.226
+    },
+    "aggregate": {
+     "sites": 8,
+     "moved_px": 70116,
+     "found": 0.22,
+     "lit": 0.011,
+     "ap": 0.279,
+     "median_moved": 0.162,
+     "found_deep": 0.326,
+     "ap_deep": 0.22,
+     "median_deep": 0.391
+    },
+    "aggregate+gate": {
+     "sites": 8,
+     "moved_px": 0,
+     "found": 0.196,
+     "lit": 0.011,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "notruth (test)": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.07,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.073,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.072,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nz": {
+    "aef_gated": {
+     "sites": 12,
+     "moved_px": 120142,
+     "found": 0.051,
+     "lit": 0.001,
+     "ap": 0.332,
+     "median_moved": 0.016,
+     "found_deep": 0.089,
+     "ap_deep": 0.378,
+     "median_deep": 0.075
+    },
+    "aggregate": {
+     "sites": 12,
+     "moved_px": 120142,
+     "found": 0.065,
+     "lit": 0.001,
+     "ap": 0.372,
+     "median_moved": 0.03,
+     "found_deep": 0.132,
+     "ap_deep": 0.427,
+     "median_deep": 0.126
+    },
+    "aggregate+gate": {
+     "sites": 12,
+     "moved_px": 0,
+     "found": 0.065,
+     "lit": 0.001,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nz storm": {
+    "aef_gated": {
+     "sites": 1,
+     "moved_px": 11580,
+     "found": 0.004,
+     "lit": 0.0,
+     "ap": 0.265,
+     "median_moved": 0.001,
+     "found_deep": 0.029,
+     "ap_deep": 0.114,
+     "median_deep": 0.001
+    },
+    "aggregate": {
+     "sites": 1,
+     "moved_px": 11580,
+     "found": 0.008,
+     "lit": 0.0,
+     "ap": 0.373,
+     "median_moved": 0.008,
+     "found_deep": 0.066,
+     "ap_deep": 0.199,
+     "median_deep": 0.023
+    },
+    "aggregate+gate": {
+     "sites": 1,
+     "moved_px": 0,
+     "found": 0.008,
+     "lit": 0.0,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "pl": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 296098,
+     "found": 0.275,
+     "lit": 0.011,
+     "ap": 0.399,
+     "median_moved": 0.146,
+     "found_deep": 0.403,
+     "ap_deep": 0.369,
+     "median_deep": 0.367
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 296098,
+     "found": 0.321,
+     "lit": 0.008,
+     "ap": 0.419,
+     "median_moved": 0.322,
+     "found_deep": 0.488,
+     "ap_deep": 0.416,
+     "median_deep": 0.535
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.32,
+     "lit": 0.008,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "shizuoka (test)": {
+    "aef_gated": {
+     "sites": 36,
+     "moved_px": 8082,
+     "found": 0.052,
+     "lit": 0.003,
+     "ap": 0.099,
+     "median_moved": 0.013,
+     "found_deep": 0.051,
+     "ap_deep": 0.082,
+     "median_deep": 0.001
+    },
+    "aggregate": {
+     "sites": 36,
+     "moved_px": 8082,
+     "found": 0.05,
+     "lit": 0.002,
+     "ap": 0.115,
+     "median_moved": 0.013,
+     "found_deep": 0.06,
+     "ap_deep": 0.112,
+     "median_deep": 0.005
+    },
+    "aggregate+gate": {
+     "sites": 36,
+     "moved_px": 0,
+     "found": 0.05,
+     "lit": 0.002,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "space": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 1780,
+     "found": 0.374,
+     "lit": 0.039,
+     "ap": 0.526,
+     "median_moved": 0.435,
+     "found_deep": 0.374,
+     "ap_deep": 0.526,
+     "median_deep": 0.435
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 1780,
+     "found": 0.463,
+     "lit": 0.05,
+     "ap": 0.507,
+     "median_moved": 0.737,
+     "found_deep": 0.463,
+     "ap_deep": 0.507,
+     "median_deep": 0.737
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.463,
+     "lit": 0.05,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "tropic (test)": {
+    "aef_gated": {
+     "sites": 7,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.006,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 7,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.005,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 7,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.005,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us burn": {
+    "aef_gated": {
+     "sites": 2,
+     "moved_px": 2308,
+     "found": 0.448,
+     "lit": 0.515,
+     "ap": 0.003,
+     "median_moved": 0.477,
+     "found_deep": 0.828,
+     "ap_deep": 0.001,
+     "median_deep": 0.915
+    },
+    "aggregate": {
+     "sites": 2,
+     "moved_px": 2308,
+     "found": 0.351,
+     "lit": 0.178,
+     "ap": 0.021,
+     "median_moved": 0.457,
+     "found_deep": 0.66,
+     "ap_deep": 0.001,
+     "median_deep": 0.914
+    },
+    "aggregate+gate": {
+     "sites": 2,
+     "moved_px": 0,
+     "found": 0.351,
+     "lit": 0.178,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us dig": {
+    "aef_gated": {
+     "sites": 14,
+     "moved_px": 598033,
+     "found": 0.6,
+     "lit": 0.053,
+     "ap": 0.527,
+     "median_moved": 0.721,
+     "found_deep": 0.651,
+     "ap_deep": 0.34,
+     "median_deep": 0.774
+    },
+    "aggregate": {
+     "sites": 14,
+     "moved_px": 598033,
+     "found": 0.6,
+     "lit": 0.039,
+     "ap": 0.571,
+     "median_moved": 0.79,
+     "found_deep": 0.659,
+     "ap_deep": 0.403,
+     "median_deep": 0.839
+    },
+    "aggregate+gate": {
+     "sites": 14,
+     "moved_px": 0,
+     "found": 0.599,
+     "lit": 0.039,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us dunes": {
+    "aef_gated": {
+     "sites": 1,
+     "moved_px": 55783,
+     "found": 0.0,
+     "lit": 0.0,
+     "ap": 0.38,
+     "median_moved": 0.0,
+     "found_deep": 0.0,
+     "ap_deep": 0.019,
+     "median_deep": 0.0
+    },
+    "aggregate": {
+     "sites": 1,
+     "moved_px": 55783,
+     "found": 0.0,
+     "lit": 0.0,
+     "ap": 0.38,
+     "median_moved": 0.0,
+     "found_deep": 0.0,
+     "ap_deep": 0.019,
+     "median_deep": 0.0
+    },
+    "aggregate+gate": {
+     "sites": 1,
+     "moved_px": 0,
+     "found": 0.0,
+     "lit": 0.0,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us farm": {
+    "aef_gated": {
+     "sites": 6,
+     "moved_px": 14450,
+     "found": 0.287,
+     "lit": 0.082,
+     "ap": 0.098,
+     "median_moved": 0.321,
+     "found_deep": 0.536,
+     "ap_deep": 0.156,
+     "median_deep": 0.652
+    },
+    "aggregate": {
+     "sites": 6,
+     "moved_px": 14450,
+     "found": 0.273,
+     "lit": 0.011,
+     "ap": 0.171,
+     "median_moved": 0.358,
+     "found_deep": 0.556,
+     "ap_deep": 0.23,
+     "median_deep": 0.69
+    },
+    "aggregate+gate": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": 0.273,
+     "lit": 0.011,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us marsh": {
+    "aef_gated": {
+     "sites": 3,
+     "moved_px": 39320,
+     "found": 0.175,
+     "lit": 0.03,
+     "ap": 0.129,
+     "median_moved": 0.158,
+     "found_deep": 0.737,
+     "ap_deep": 0.495,
+     "median_deep": 0.97
+    },
+    "aggregate": {
+     "sites": 3,
+     "moved_px": 39320,
+     "found": 0.169,
+     "lit": 0.017,
+     "ap": 0.167,
+     "median_moved": 0.207,
+     "found_deep": 0.703,
+     "ap_deep": 0.548,
+     "median_deep": 0.968
+    },
+    "aggregate+gate": {
+     "sites": 3,
+     "moved_px": 0,
+     "found": 0.169,
+     "lit": 0.017,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us storm": {
+    "aef_gated": {
+     "sites": 1,
+     "moved_px": 7446,
+     "found": 0.3,
+     "lit": 0.136,
+     "ap": 0.028,
+     "median_moved": 0.288,
+     "found_deep": 0.677,
+     "ap_deep": 0.003,
+     "median_deep": 0.686
+    },
+    "aggregate": {
+     "sites": 1,
+     "moved_px": 7446,
+     "found": 0.372,
+     "lit": 0.124,
+     "ap": 0.052,
+     "median_moved": 0.562,
+     "found_deep": 0.722,
+     "ap_deep": 0.024,
+     "median_deep": 0.966
+    },
+    "aggregate+gate": {
+     "sites": 1,
+     "moved_px": 0,
+     "found": 0.371,
+     "lit": 0.124,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   }
+  }
+ },
+ "abroad_sites": {
+  "world-ahn-a16-terbregseplein": {
+   "moved": 9740,
+   "unchanged": 197360,
+   "aef_gated": {
+    "found": 0.504,
+    "lit": 0.002,
+    "ap": 0.776
+   },
+   "aggregate": {
+    "found": 0.555,
+    "lit": 0.003,
+    "ap": 0.811
+   }
+  },
+  "world-ahn-beemster": {
+   "moved": 231,
+   "unchanged": 249268,
+   "aef_gated": {
+    "found": 0.004,
+    "lit": 0.002,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.022,
+    "lit": 0.021,
+    "ap": 0.001
+   }
+  },
+  "world-ahn-blankenburg": {
+   "moved": 9167,
+   "unchanged": 174243,
+   "aef_gated": {
+    "found": 0.291,
+    "lit": 0.005,
+    "ap": 0.537
+   },
+   "aggregate": {
+    "found": 0.504,
+    "lit": 0.012,
+    "ap": 0.634
+   }
+  },
+  "world-ahn-den-oever": {
+   "moved": 2757,
+   "unchanged": 52892,
+   "aef_gated": {
+    "found": 0.565,
+    "lit": 0.012,
+    "ap": 0.637
+   },
+   "aggregate": {
+    "found": 0.532,
+    "lit": 0.01,
+    "ap": 0.665
+   }
+  },
+  "world-ahn-grensmaas-meers": {
+   "moved": 7415,
+   "unchanged": 55820,
+   "aef_gated": {
+    "found": 0.409,
+    "lit": 0.003,
+    "ap": 0.69
+   },
+   "aggregate": {
+    "found": 0.514,
+    "lit": 0.004,
+    "ap": 0.804
+   }
+  },
+  "world-ahn-groningen-meerstad": {
+   "moved": 11389,
+   "unchanged": 210969,
+   "aef_gated": {
+    "found": 0.702,
+    "lit": 0.033,
+    "ap": 0.653
+   },
+   "aggregate": {
+    "found": 0.653,
+    "lit": 0.018,
+    "ap": 0.681
+   }
+  },
+  "world-ahn-hedwigepolder": {
+   "moved": 9271,
+   "unchanged": 35428,
+   "aef_gated": {
+    "found": 0.875,
+    "lit": 0.41,
+    "ap": 0.525
+   },
+   "aggregate": {
+    "found": 0.871,
+    "lit": 0.375,
+    "ap": 0.663
+   }
+  },
+  "world-ahn-heuvelrug": {
+   "moved": 285,
+   "unchanged": 248430,
+   "aef_gated": {
+    "found": 0.235,
+    "lit": 0.0,
+    "ap": 0.18
+   },
+   "aggregate": {
+    "found": 0.27,
+    "lit": 0.0,
+    "ap": 0.2
+   }
+  },
+  "world-ahn-maasvlakte": {
+   "moved": 16756,
+   "unchanged": 146700,
+   "aef_gated": {
+    "found": 0.126,
+    "lit": 0.005,
+    "ap": 0.532
+   },
+   "aggregate": {
+    "found": 0.121,
+    "lit": 0.006,
+    "ap": 0.435
+   }
+  },
+  "world-ahn-moerdijk-logistics": {
+   "moved": 18924,
+   "unchanged": 193006,
+   "aef_gated": {
+    "found": 0.215,
+    "lit": 0.018,
+    "ap": 0.395
+   },
+   "aggregate": {
+    "found": 0.404,
+    "lit": 0.014,
+    "ap": 0.578
+   }
+  },
+  "world-ahn-rijnlandroute": {
+   "moved": 3239,
+   "unchanged": 221453,
+   "aef_gated": {
+    "found": 0.03,
+    "lit": 0.0,
+    "ap": 0.246
+   },
+   "aggregate": {
+    "found": 0.129,
+    "lit": 0.001,
+    "ap": 0.408
+   }
+  },
+  "world-ahn-valkenburg": {
+   "moved": 7896,
+   "unchanged": 202943,
+   "aef_gated": {
+    "found": 0.333,
+    "lit": 0.006,
+    "ap": 0.514
+   },
+   "aggregate": {
+    "found": 0.464,
+    "lit": 0.009,
+    "ap": 0.564
+   }
+  },
+  "world-ahn-venlo-logistics": {
+   "moved": 7971,
+   "unchanged": 197102,
+   "aef_gated": {
+    "found": 0.336,
+    "lit": 0.001,
+    "ap": 0.556
+   },
+   "aggregate": {
+    "found": 0.372,
+    "lit": 0.002,
+    "ap": 0.609
+   }
+  },
+  "world-canada-east-gwillimbury": {
+   "moved": 6792,
+   "unchanged": 166323,
+   "aef_gated": {
+    "found": 0.918,
+    "lit": 0.237,
+    "ap": 0.696
+   },
+   "aggregate": {
+    "found": 0.916,
+    "lit": 0.077,
+    "ap": 0.865
+   }
+  },
+  "world-canada-fort-mcmurray": {
+   "moved": 1,
+   "unchanged": 75008,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.0
+   }
+  },
+  "world-canada-halifax-bayers-lake": {
+   "moved": 4345,
+   "unchanged": 167596,
+   "aef_gated": {
+    "found": 0.729,
+    "lit": 0.021,
+    "ap": 0.462
+   },
+   "aggregate": {
+    "found": 0.769,
+    "lit": 0.022,
+    "ap": 0.413
+   }
+  },
+  "world-canada-milton": {
+   "moved": 7638,
+   "unchanged": 13489,
+   "aef_gated": {
+    "found": 0.974,
+    "lit": 0.335,
+    "ap": 0.938
+   },
+   "aggregate": {
+    "found": 0.972,
+    "lit": 0.238,
+    "ap": 0.943
+   }
+  },
+  "world-canada-montreal-north-pits": {
+   "moved": 34659,
+   "unchanged": 108109,
+   "aef_gated": {
+    "found": 0.695,
+    "lit": 0.099,
+    "ap": 0.756
+   },
+   "aggregate": {
+    "found": 0.674,
+    "lit": 0.041,
+    "ap": 0.833
+   }
+  },
+  "world-canada-montreal-south": {
+   "moved": 3507,
+   "unchanged": 131420,
+   "aef_gated": {
+    "found": 0.685,
+    "lit": 0.229,
+    "ap": 0.392
+   },
+   "aggregate": {
+    "found": 0.582,
+    "lit": 0.054,
+    "ap": 0.475
+   }
+  },
+  "world-canada-ottawa-south": {
+   "moved": 200,
+   "unchanged": 163914,
+   "aef_gated": {
+    "found": 0.52,
+    "lit": 0.056,
+    "ap": 0.024
+   },
+   "aggregate": {
+    "found": 0.345,
+    "lit": 0.003,
+    "ap": 0.089
+   }
+  },
+  "world-canada-pickering-seaton": {
+   "moved": 51297,
+   "unchanged": 190358,
+   "aef_gated": {
+    "found": 0.857,
+    "lit": 0.295,
+    "ap": 0.767
+   },
+   "aggregate": {
+    "found": 0.854,
+    "lit": 0.168,
+    "ap": 0.806
+   }
+  },
+  "world-canada-terrebonne-landfill": {
+   "moved": 23873,
+   "unchanged": 153293,
+   "aef_gated": {
+    "found": 0.73,
+    "lit": 0.076,
+    "ap": 0.698
+   },
+   "aggregate": {
+    "found": 0.564,
+    "lit": 0.028,
+    "ap": 0.758
+   }
+  },
+  "world-canada-timmins-dome": {
+   "moved": 49974,
+   "unchanged": 33302,
+   "aef_gated": {
+    "found": 0.032,
+    "lit": 0.002,
+    "ap": 0.78
+   },
+   "aggregate": {
+    "found": 0.032,
+    "lit": 0.005,
+    "ap": 0.83
+   }
+  },
+  "world-canada-toronto-portlands": {
+   "moved": 11726,
+   "unchanged": 62372,
+   "aef_gated": {
+    "found": 0.554,
+    "lit": 0.064,
+    "ap": 0.536
+   },
+   "aggregate": {
+    "found": 0.62,
+    "lit": 0.069,
+    "ap": 0.605
+   }
+  },
+  "world-canada-vaughan-427": {
+   "moved": 20165,
+   "unchanged": 133430,
+   "aef_gated": {
+    "found": 0.853,
+    "lit": 0.156,
+    "ap": 0.716
+   },
+   "aggregate": {
+    "found": 0.858,
+    "lit": 0.107,
+    "ap": 0.751
+   }
+  },
+  "world-canada-york-quiet": {
+   "moved": 5296,
+   "unchanged": 171232,
+   "aef_gated": {
+    "found": 0.184,
+    "lit": 0.188,
+    "ap": 0.034
+   },
+   "aggregate": {
+    "found": 0.131,
+    "lit": 0.069,
+    "ap": 0.044
+   }
+  },
+  "world-england-a14-huntingdon": {
+   "moved": 3524,
+   "unchanged": 214552,
+   "aef_gated": {
+    "found": 0.009,
+    "lit": 0.0,
+    "ap": 0.141
+   },
+   "aggregate": {
+    "found": 0.109,
+    "lit": 0.002,
+    "ap": 0.249
+   }
+  },
+  "world-england-bardon": {
+   "moved": 9992,
+   "unchanged": 118593,
+   "aef_gated": {
+    "found": 0.324,
+    "lit": 0.004,
+    "ap": 0.632
+   },
+   "aggregate": {
+    "found": 0.496,
+    "lit": 0.007,
+    "ap": 0.711
+   }
+  },
+  "world-england-black-cat": {
+   "moved": 4773,
+   "unchanged": 228027,
+   "aef_gated": {
+    "found": 0.051,
+    "lit": 0.0,
+    "ap": 0.182
+   },
+   "aggregate": {
+    "found": 0.132,
+    "lit": 0.008,
+    "ap": 0.132
+   }
+  },
+  "world-england-breedon": {
+   "moved": 2387,
+   "unchanged": 158831,
+   "aef_gated": {
+    "found": 0.109,
+    "lit": 0.004,
+    "ap": 0.102
+   },
+   "aggregate": {
+    "found": 0.142,
+    "lit": 0.003,
+    "ap": 0.18
+   }
+  },
+  "world-england-brent-cross": {
+   "moved": 112,
+   "unchanged": 10730,
+   "aef_gated": {
+    "found": 0.018,
+    "lit": 0.0,
+    "ap": 0.167
+   },
+   "aggregate": {
+    "found": 0.134,
+    "lit": 0.001,
+    "ap": 0.179
+   }
+  },
+  "world-england-colindale": {
+   "moved": 360,
+   "unchanged": 18851,
+   "aef_gated": {
+    "found": 0.025,
+    "lit": 0.001,
+    "ap": 0.17
+   },
+   "aggregate": {
+    "found": 0.1,
+    "lit": 0.003,
+    "ap": 0.179
+   }
+  },
+  "world-england-colne-valley": {
+   "moved": 1745,
+   "unchanged": 33423,
+   "aef_gated": {
+    "found": 0.858,
+    "lit": 0.009,
+    "ap": 0.835
+   },
+   "aggregate": {
+    "found": 0.934,
+    "lit": 0.017,
+    "ap": 0.865
+   }
+  },
+  "world-england-dene": {
+   "moved": 1074,
+   "unchanged": 126907,
+   "aef_gated": {
+    "found": 0.044,
+    "lit": 0.0,
+    "ap": 0.058
+   },
+   "aggregate": {
+    "found": 0.059,
+    "lit": 0.001,
+    "ap": 0.067
+   }
+  },
+  "world-england-earls-court": {
+   "moved": 205,
+   "unchanged": 11112,
+   "aef_gated": {
+    "found": 0.059,
+    "lit": 0.0,
+    "ap": 0.094
+   },
+   "aggregate": {
+    "found": 0.068,
+    "lit": 0.003,
+    "ap": 0.054
+   }
+  },
+  "world-england-east-midlands-gateway": {
+   "moved": 14732,
+   "unchanged": 115321,
+   "aef_gated": {
+    "found": 0.491,
+    "lit": 0.023,
+    "ap": 0.711
+   },
+   "aggregate": {
+    "found": 0.476,
+    "lit": 0.008,
+    "ap": 0.741
+   }
+  },
+  "world-england-leicestershire": {
+   "moved": 57,
+   "unchanged": 74625,
+   "aef_gated": {
+    "found": 0.035,
+    "lit": 0.0,
+    "ap": 0.046
+   },
+   "aggregate": {
+    "found": 0.053,
+    "lit": 0.0,
+    "ap": 0.034
+   }
+  },
+  "world-england-mountsorrel": {
+   "moved": 13827,
+   "unchanged": 146110,
+   "aef_gated": {
+    "found": 0.082,
+    "lit": 0.002,
+    "ap": 0.408
+   },
+   "aggregate": {
+    "found": 0.133,
+    "lit": 0.005,
+    "ap": 0.325
+   }
+  },
+  "world-england-northolt": {
+   "moved": 227,
+   "unchanged": 27038,
+   "aef_gated": {
+    "found": 0.256,
+    "lit": 0.001,
+    "ap": 0.389
+   },
+   "aggregate": {
+    "found": 0.559,
+    "lit": 0.004,
+    "ap": 0.459
+   }
+  },
+  "world-england-northstowe": {
+   "moved": 4404,
+   "unchanged": 225783,
+   "aef_gated": {
+    "found": 0.038,
+    "lit": 0.001,
+    "ap": 0.108
+   },
+   "aggregate": {
+    "found": 0.15,
+    "lit": 0.005,
+    "ap": 0.163
+   }
+  },
+  "world-england-old-oak": {
+   "moved": 217,
+   "unchanged": 14917,
+   "aef_gated": {
+    "found": 0.088,
+    "lit": 0.003,
+    "ap": 0.229
+   },
+   "aggregate": {
+    "found": 0.267,
+    "lit": 0.008,
+    "ap": 0.215
+   }
+  },
+  "world-england-richmond-park": {
+   "moved": 56,
+   "unchanged": 86012,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.001,
+    "ap": 0.001
+   }
+  },
+  "world-england-southall": {
+   "moved": 825,
+   "unchanged": 31424,
+   "aef_gated": {
+    "found": 0.04,
+    "lit": 0.002,
+    "ap": 0.158
+   },
+   "aggregate": {
+    "found": 0.124,
+    "lit": 0.005,
+    "ap": 0.159
+   }
+  },
+  "world-england-st-austell": {
+   "moved": 25695,
+   "unchanged": 109215,
+   "aef_gated": {
+    "found": 0.112,
+    "lit": 0.002,
+    "ap": 0.534
+   },
+   "aggregate": {
+    "found": 0.135,
+    "lit": 0.003,
+    "ap": 0.544
+   }
+  },
+  "world-england-tilbury2": {
+   "moved": 9374,
+   "unchanged": 148487,
+   "aef_gated": {
+    "found": 0.389,
+    "lit": 0.006,
+    "ap": 0.576
+   },
+   "aggregate": {
+    "found": 0.403,
+    "lit": 0.007,
+    "ap": 0.58
+   }
+  },
+  "world-england-waterbeach": {
+   "moved": 5827,
+   "unchanged": 209219,
+   "aef_gated": {
+    "found": 0.363,
+    "lit": 0.003,
+    "ap": 0.564
+   },
+   "aggregate": {
+    "found": 0.563,
+    "lit": 0.005,
+    "ap": 0.671
+   }
+  },
+  "world-england-wembley": {
+   "moved": 81,
+   "unchanged": 21323,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.008
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.015
+   }
+  },
+  "world-estonia-kivioli-north": {
+   "moved": 166,
+   "unchanged": 134996,
+   "aef_gated": {
+    "found": 0.861,
+    "lit": 0.732,
+    "ap": 0.002
+   },
+   "aggregate": {
+    "found": 0.819,
+    "lit": 0.565,
+    "ap": 0.002
+   }
+  },
+  "world-estonia-kivioli-west": {
+   "moved": 14210,
+   "unchanged": 48044,
+   "aef_gated": {
+    "found": 0.992,
+    "lit": 0.422,
+    "ap": 0.932
+   },
+   "aggregate": {
+    "found": 0.979,
+    "lit": 0.26,
+    "ap": 0.942
+   }
+  },
+  "world-estonia-lahemaa": {
+   "moved": 3,
+   "unchanged": 7543,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.003,
+    "ap": 0.0
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.009,
+    "ap": 0.0
+   }
+  },
+  "world-estonia-narva-pit-south": {
+   "moved": 1971,
+   "unchanged": 5320,
+   "aef_gated": {
+    "found": 0.965,
+    "lit": 0.459,
+    "ap": 0.941
+   },
+   "aggregate": {
+    "found": 0.967,
+    "lit": 0.439,
+    "ap": 0.953
+   }
+  },
+  "world-estonia-narva-pit-west": {
+   "moved": 11099,
+   "unchanged": 37045,
+   "aef_gated": {
+    "found": 0.982,
+    "lit": 0.677,
+    "ap": 0.932
+   },
+   "aggregate": {
+    "found": 0.977,
+    "lit": 0.526,
+    "ap": 0.916
+   }
+  },
+  "world-estonia-tartu": {
+   "moved": 2353,
+   "unchanged": 128275,
+   "aef_gated": {
+    "found": 0.358,
+    "lit": 0.014,
+    "ap": 0.299
+   },
+   "aggregate": {
+    "found": 0.493,
+    "lit": 0.043,
+    "ap": 0.284
+   }
+  },
+  "world-estonia-ulemiste": {
+   "moved": 3316,
+   "unchanged": 122303,
+   "aef_gated": {
+    "found": 0.156,
+    "lit": 0.005,
+    "ap": 0.183
+   },
+   "aggregate": {
+    "found": 0.191,
+    "lit": 0.009,
+    "ap": 0.212
+   }
+  },
+  "world-estonia-vao-quarry": {
+   "moved": 36018,
+   "unchanged": 109274,
+   "aef_gated": {
+    "found": 0.452,
+    "lit": 0.049,
+    "ap": 0.702
+   },
+   "aggregate": {
+    "found": 0.534,
+    "lit": 0.085,
+    "ap": 0.718
+   }
+  },
+  "world-kanagawa-hakone-forest": {
+   "moved": 3161,
+   "unchanged": 69818,
+   "aef_gated": {
+    "found": 0.001,
+    "lit": 0.0,
+    "ap": 0.048
+   },
+   "aggregate": {
+    "found": 0.003,
+    "lit": 0.0,
+    "ap": 0.072
+   }
+  },
+  "world-kanagawa-manazuru": {
+   "moved": 15487,
+   "unchanged": 33588,
+   "aef_gated": {
+    "found": 0.044,
+    "lit": 0.003,
+    "ap": 0.469
+   },
+   "aggregate": {
+    "found": 0.058,
+    "lit": 0.002,
+    "ap": 0.513
+   }
+  },
+  "world-kanagawa-nakai": {
+   "moved": 18552,
+   "unchanged": 40291,
+   "aef_gated": {
+    "found": 0.064,
+    "lit": 0.008,
+    "ap": 0.425
+   },
+   "aggregate": {
+    "found": 0.095,
+    "lit": 0.005,
+    "ap": 0.451
+   }
+  },
+  "world-kanagawa-sagamihara-aone": {
+   "moved": 10292,
+   "unchanged": 83805,
+   "aef_gated": {
+    "found": 0.011,
+    "lit": 0.001,
+    "ap": 0.144
+   },
+   "aggregate": {
+    "found": 0.026,
+    "lit": 0.001,
+    "ap": 0.172
+   }
+  },
+  "world-kanagawa-sagamihara-midori-forest": {
+   "moved": 2700,
+   "unchanged": 57364,
+   "aef_gated": {
+    "found": 0.016,
+    "lit": 0.0,
+    "ap": 0.155
+   },
+   "aggregate": {
+    "found": 0.017,
+    "lit": 0.001,
+    "ap": 0.136
+   }
+  },
+  "world-kanagawa-sagamihara-toya": {
+   "moved": 19044,
+   "unchanged": 31166,
+   "aef_gated": {
+    "found": 0.09,
+    "lit": 0.025,
+    "ap": 0.428
+   },
+   "aggregate": {
+    "found": 0.099,
+    "lit": 0.015,
+    "ap": 0.439
+   }
+  },
+  "world-kanagawa-shintomei-yamakita-matsuda": {
+   "moved": 17965,
+   "unchanged": 122751,
+   "aef_gated": {
+    "found": 0.088,
+    "lit": 0.002,
+    "ap": 0.271
+   },
+   "aggregate": {
+    "found": 0.109,
+    "lit": 0.002,
+    "ap": 0.285
+   }
+  },
+  "world-kanagawa-yamakita-west": {
+   "moved": 24325,
+   "unchanged": 52771,
+   "aef_gated": {
+    "found": 0.142,
+    "lit": 0.012,
+    "ap": 0.533
+   },
+   "aggregate": {
+    "found": 0.179,
+    "lit": 0.01,
+    "ap": 0.565
+   }
+  },
+  "world-kanagawa-yugawara-hills": {
+   "moved": 16432,
+   "unchanged": 30540,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.344
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.36
+   }
+  },
+  "world-lyon-carre-de-soie": {
+   "moved": 2944,
+   "unchanged": 191766,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.108
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.132
+   }
+  },
+  "world-lyon-confluence": {
+   "moved": 8335,
+   "unchanged": 173997,
+   "aef_gated": {
+    "found": 0.006,
+    "lit": 0.0,
+    "ap": 0.138
+   },
+   "aggregate": {
+    "found": 0.007,
+    "lit": 0.0,
+    "ap": 0.175
+   }
+  },
+  "world-lyon-corbas": {
+   "moved": 5024,
+   "unchanged": 191756,
+   "aef_gated": {
+    "found": 0.04,
+    "lit": 0.0,
+    "ap": 0.187
+   },
+   "aggregate": {
+    "found": 0.057,
+    "lit": 0.0,
+    "ap": 0.323
+   }
+  },
+  "world-lyon-meyzieu": {
+   "moved": 2929,
+   "unchanged": 148936,
+   "aef_gated": {
+    "found": 0.001,
+    "lit": 0.0,
+    "ap": 0.027
+   },
+   "aggregate": {
+    "found": 0.001,
+    "lit": 0.0,
+    "ap": 0.045
+   }
+  },
+  "world-lyon-oullins": {
+   "moved": 4175,
+   "unchanged": 189343,
+   "aef_gated": {
+    "found": 0.009,
+    "lit": 0.003,
+    "ap": 0.124
+   },
+   "aggregate": {
+    "found": 0.009,
+    "lit": 0.0,
+    "ap": 0.168
+   }
+  },
+  "world-lyon-part-dieu": {
+   "moved": 7212,
+   "unchanged": 178992,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.112
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.13
+   }
+  },
+  "world-lyon-saint-priest": {
+   "moved": 3029,
+   "unchanged": 195199,
+   "aef_gated": {
+    "found": 0.002,
+    "lit": 0.0,
+    "ap": 0.034
+   },
+   "aggregate": {
+    "found": 0.002,
+    "lit": 0.0,
+    "ap": 0.049
+   }
+  },
+  "world-lyon-tete-dor": {
+   "moved": 819,
+   "unchanged": 27942,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.029
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.035
+   }
+  },
+  "world-lyon-vernaison": {
+   "moved": 1887,
+   "unchanged": 190824,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.051
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.097
+   }
+  },
+  "world-norway-drammen": {
+   "moved": 3517,
+   "unchanged": 130171,
+   "aef_gated": {
+    "found": 0.118,
+    "lit": 0.006,
+    "ap": 0.133
+   },
+   "aggregate": {
+    "found": 0.115,
+    "lit": 0.008,
+    "ap": 0.143
+   }
+  },
+  "world-norway-fornebu": {
+   "moved": 9607,
+   "unchanged": 111423,
+   "aef_gated": {
+    "found": 0.367,
+    "lit": 0.019,
+    "ap": 0.458
+   },
+   "aggregate": {
+    "found": 0.422,
+    "lit": 0.025,
+    "ap": 0.49
+   }
+  },
+  "world-norway-oslo-bjorvika": {
+   "moved": 12288,
+   "unchanged": 192331,
+   "aef_gated": {
+    "found": 0.127,
+    "lit": 0.006,
+    "ap": 0.229
+   },
+   "aggregate": {
+    "found": 0.145,
+    "lit": 0.007,
+    "ap": 0.253
+   }
+  },
+  "world-norway-oslo-hovinbyen": {
+   "moved": 13473,
+   "unchanged": 238081,
+   "aef_gated": {
+    "found": 0.198,
+    "lit": 0.008,
+    "ap": 0.326
+   },
+   "aggregate": {
+    "found": 0.224,
+    "lit": 0.007,
+    "ap": 0.351
+   }
+  },
+  "world-norway-oslo-nordstrand": {
+   "moved": 3781,
+   "unchanged": 209269,
+   "aef_gated": {
+    "found": 0.089,
+    "lit": 0.012,
+    "ap": 0.042
+   },
+   "aggregate": {
+    "found": 0.118,
+    "lit": 0.01,
+    "ap": 0.064
+   }
+  },
+  "world-norway-stavanger-forus": {
+   "moved": 10509,
+   "unchanged": 137483,
+   "aef_gated": {
+    "found": 0.35,
+    "lit": 0.014,
+    "ap": 0.395
+   },
+   "aggregate": {
+    "found": 0.423,
+    "lit": 0.023,
+    "ap": 0.384
+   }
+  },
+  "world-norway-tromso": {
+   "moved": 9154,
+   "unchanged": 182707,
+   "aef_gated": {
+    "found": 0.161,
+    "lit": 0.003,
+    "ap": 0.314
+   },
+   "aggregate": {
+    "found": 0.178,
+    "lit": 0.004,
+    "ap": 0.318
+   }
+  },
+  "world-norway-trondheim": {
+   "moved": 7787,
+   "unchanged": 172841,
+   "aef_gated": {
+    "found": 0.103,
+    "lit": 0.002,
+    "ap": 0.199
+   },
+   "aggregate": {
+    "found": 0.131,
+    "lit": 0.003,
+    "ap": 0.232
+   }
+  },
+  "world-nz-christchurch-yaldhurst": {
+   "moved": 18676,
+   "unchanged": 428095,
+   "aef_gated": {
+    "found": 0.006,
+    "lit": 0.0,
+    "ap": 0.628
+   },
+   "aggregate": {
+    "found": 0.055,
+    "lit": 0.0,
+    "ap": 0.676
+   }
+  },
+  "world-nz-esk-valley": {
+   "moved": 11580,
+   "unchanged": 104907,
+   "aef_gated": {
+    "found": 0.004,
+    "lit": 0.0,
+    "ap": 0.265
+   },
+   "aggregate": {
+    "found": 0.008,
+    "lit": 0.0,
+    "ap": 0.373
+   }
+  },
+  "world-nz-hamilton-frankton": {
+   "moved": 909,
+   "unchanged": 91322,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.032
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.028
+   }
+  },
+  "world-nz-hamilton-northwest": {
+   "moved": 10310,
+   "unchanged": 128440,
+   "aef_gated": {
+    "found": 0.011,
+    "lit": 0.001,
+    "ap": 0.373
+   },
+   "aggregate": {
+    "found": 0.025,
+    "lit": 0.001,
+    "ap": 0.433
+   }
+  },
+  "world-nz-hamilton-ruakura": {
+   "moved": 17063,
+   "unchanged": 127889,
+   "aef_gated": {
+    "found": 0.113,
+    "lit": 0.003,
+    "ap": 0.685
+   },
+   "aggregate": {
+    "found": 0.166,
+    "lit": 0.004,
+    "ap": 0.715
+   }
+  },
+  "world-nz-hamilton-south": {
+   "moved": 11067,
+   "unchanged": 226905,
+   "aef_gated": {
+    "found": 0.046,
+    "lit": 0.001,
+    "ap": 0.254
+   },
+   "aggregate": {
+    "found": 0.082,
+    "lit": 0.001,
+    "ap": 0.336
+   }
+  },
+  "world-nz-lyttelton": {
+   "moved": 7327,
+   "unchanged": 99651,
+   "aef_gated": {
+    "found": 0.007,
+    "lit": 0.0,
+    "ap": 0.217
+   },
+   "aggregate": {
+    "found": 0.067,
+    "lit": 0.0,
+    "ap": 0.273
+   }
+  },
+  "world-nz-matata-quarry": {
+   "moved": 5641,
+   "unchanged": 22011,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.203
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.248
+   }
+  },
+  "world-nz-otago-roxburgh": {
+   "moved": 652,
+   "unchanged": 99841,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.006
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.008
+   }
+  },
+  "world-nz-palmerston-north": {
+   "moved": 3520,
+   "unchanged": 141055,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.129
+   },
+   "aggregate": {
+    "found": 0.001,
+    "lit": 0.0,
+    "ap": 0.179
+   }
+  },
+  "world-nz-papamoa-east": {
+   "moved": 7741,
+   "unchanged": 32758,
+   "aef_gated": {
+    "found": 0.039,
+    "lit": 0.0,
+    "ap": 0.485
+   },
+   "aggregate": {
+    "found": 0.038,
+    "lit": 0.0,
+    "ap": 0.549
+   }
+  },
+  "world-nz-tauranga-tauriko": {
+   "moved": 25826,
+   "unchanged": 77256,
+   "aef_gated": {
+    "found": 0.378,
+    "lit": 0.007,
+    "ap": 0.826
+   },
+   "aggregate": {
+    "found": 0.331,
+    "lit": 0.003,
+    "ap": 0.854
+   }
+  },
+  "world-nz-whangarei": {
+   "moved": 11410,
+   "unchanged": 114683,
+   "aef_gated": {
+    "found": 0.014,
+    "lit": 0.001,
+    "ap": 0.143
+   },
+   "aggregate": {
+    "found": 0.014,
+    "lit": 0.001,
+    "ap": 0.167
+   }
+  },
+  "world-poland-gdansk-baltic-hub": {
+   "moved": 14087,
+   "unchanged": 192828,
+   "aef_gated": {
+    "found": 0.42,
+    "lit": 0.002,
+    "ap": 0.576
+   },
+   "aggregate": {
+    "found": 0.457,
+    "lit": 0.006,
+    "ap": 0.558
+   }
+  },
+  "world-poland-gdynia-port": {
+   "moved": 13955,
+   "unchanged": 201534,
+   "aef_gated": {
+    "found": 0.353,
+    "lit": 0.008,
+    "ap": 0.551
+   },
+   "aggregate": {
+    "found": 0.517,
+    "lit": 0.015,
+    "ap": 0.608
+   }
+  },
+  "world-poland-krakow-modlnica": {
+   "moved": 6164,
+   "unchanged": 176585,
+   "aef_gated": {
+    "found": 0.156,
+    "lit": 0.009,
+    "ap": 0.192
+   },
+   "aggregate": {
+    "found": 0.208,
+    "lit": 0.003,
+    "ap": 0.261
+   }
+  },
+  "world-poland-poznan-east": {
+   "moved": 3464,
+   "unchanged": 205266,
+   "aef_gated": {
+    "found": 0.162,
+    "lit": 0.002,
+    "ap": 0.234
+   },
+   "aggregate": {
+    "found": 0.211,
+    "lit": 0.003,
+    "ap": 0.273
+   }
+  },
+  "world-poland-swinoujscie": {
+   "moved": 6497,
+   "unchanged": 120658,
+   "aef_gated": {
+    "found": 0.265,
+    "lit": 0.003,
+    "ap": 0.439
+   },
+   "aggregate": {
+    "found": 0.298,
+    "lit": 0.002,
+    "ap": 0.469
+   }
+  },
+  "world-poland-warsaw-s2-wilanow": {
+   "moved": 9790,
+   "unchanged": 168696,
+   "aef_gated": {
+    "found": 0.468,
+    "lit": 0.01,
+    "ap": 0.519
+   },
+   "aggregate": {
+    "found": 0.479,
+    "lit": 0.009,
+    "ap": 0.558
+   }
+  },
+  "world-poland-wroclaw-jagodno": {
+   "moved": 8242,
+   "unchanged": 191476,
+   "aef_gated": {
+    "found": 0.38,
+    "lit": 0.011,
+    "ap": 0.415
+   },
+   "aggregate": {
+    "found": 0.434,
+    "lit": 0.015,
+    "ap": 0.439
+   }
+  },
+  "world-poland-zelazny-most": {
+   "moved": 233610,
+   "unchanged": 215741,
+   "aef_gated": {
+    "found": 0.123,
+    "lit": 0.003,
+    "ap": 0.657
+   },
+   "aggregate": {
+    "found": 0.115,
+    "lit": 0.008,
+    "ap": 0.592
+   }
+  },
+  "world-poland-zulawy": {
+   "moved": 289,
+   "unchanged": 263791,
+   "aef_gated": {
+    "found": 0.149,
+    "lit": 0.046,
+    "ap": 0.012
+   },
+   "aggregate": {
+    "found": 0.173,
+    "lit": 0.013,
+    "ap": 0.012
+   }
+  },
+  "world-saopaulo-ctl-landfill": {
+   "moved": 90,
+   "unchanged": 29,
+   "aef_gated": {
+    "found": 0.811,
+    "lit": 0.034,
+    "ap": 0.966
+   },
+   "aggregate": {
+    "found": 0.811,
+    "lit": 0.034,
+    "ap": 0.976
+   }
+  },
+  "world-saopaulo-grajau": {
+   "moved": 555,
+   "unchanged": 2008,
+   "aef_gated": {
+    "found": 0.112,
+    "lit": 0.003,
+    "ap": 0.496
+   },
+   "aggregate": {
+    "found": 0.159,
+    "lit": 0.008,
+    "ap": 0.621
+   }
+  },
+  "world-saopaulo-ibirapuera": {
+   "moved": 9,
+   "unchanged": 614,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.506
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.081
+   }
+  },
+  "world-saopaulo-parelheiros": {
+   "moved": 1214,
+   "unchanged": 6881,
+   "aef_gated": {
+    "found": 0.01,
+    "lit": 0.021,
+    "ap": 0.148
+   },
+   "aggregate": {
+    "found": 0.006,
+    "lit": 0.017,
+    "ap": 0.169
+   }
+  },
+  "world-saopaulo-perus": {
+   "moved": 1442,
+   "unchanged": 3122,
+   "aef_gated": {
+    "found": 0.007,
+    "lit": 0.0,
+    "ap": 0.322
+   },
+   "aggregate": {
+    "found": 0.008,
+    "lit": 0.0,
+    "ap": 0.399
+   }
+  },
+  "world-scotland-avonbridge": {
+   "moved": 92,
+   "unchanged": 90528,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.022,
+    "lit": 0.033,
+    "ap": 0.002
+   }
+  },
+  "world-scotland-burntisland": {
+   "moved": 1834,
+   "unchanged": 175626,
+   "aef_gated": {
+    "found": 0.062,
+    "lit": 0.018,
+    "ap": 0.033
+   },
+   "aggregate": {
+    "found": 0.502,
+    "lit": 0.095,
+    "ap": 0.063
+   }
+  },
+  "world-scotland-calderwood": {
+   "moved": 3692,
+   "unchanged": 132165,
+   "aef_gated": {
+    "found": 0.485,
+    "lit": 0.006,
+    "ap": 0.486
+   },
+   "aggregate": {
+    "found": 0.63,
+    "lit": 0.019,
+    "ap": 0.511
+   }
+  },
+  "world-scotland-crossgates": {
+   "moved": 1656,
+   "unchanged": 156343,
+   "aef_gated": {
+    "found": 0.281,
+    "lit": 0.008,
+    "ap": 0.251
+   },
+   "aggregate": {
+    "found": 0.504,
+    "lit": 0.026,
+    "ap": 0.375
+   }
+  },
+  "world-scotland-dalry": {
+   "moved": 2384,
+   "unchanged": 152505,
+   "aef_gated": {
+    "found": 0.204,
+    "lit": 0.01,
+    "ap": 0.223
+   },
+   "aggregate": {
+    "found": 0.474,
+    "lit": 0.024,
+    "ap": 0.316
+   }
+  },
+  "world-scotland-kinglassie": {
+   "moved": 2673,
+   "unchanged": 114249,
+   "aef_gated": {
+    "found": 0.084,
+    "lit": 0.019,
+    "ap": 0.069
+   },
+   "aggregate": {
+    "found": 0.218,
+    "lit": 0.064,
+    "ap": 0.077
+   }
+  },
+  "world-scotland-kirknewton": {
+   "moved": 13,
+   "unchanged": 129164,
+   "aef_gated": {
+    "found": 0.077,
+    "lit": 0.001,
+    "ap": 0.009
+   },
+   "aggregate": {
+    "found": 0.308,
+    "lit": 0.006,
+    "ap": 0.004
+   }
+  },
+  "world-scotland-levenseat": {
+   "moved": 0,
+   "unchanged": 3634,
+   "aef_gated": {
+    "found": null,
+    "lit": 0.0,
+    "ap": null
+   },
+   "aggregate": {
+    "found": null,
+    "lit": 0.007,
+    "ap": null
+   }
+  },
+  "world-scotland-polmont": {
+   "moved": 1147,
+   "unchanged": 55681,
+   "aef_gated": {
+    "found": 0.102,
+    "lit": 0.015,
+    "ap": 0.109
+   },
+   "aggregate": {
+    "found": 0.18,
+    "lit": 0.048,
+    "ap": 0.081
+   }
+  },
+  "world-scotland-ratho": {
+   "moved": 2052,
+   "unchanged": 112858,
+   "aef_gated": {
+    "found": 0.164,
+    "lit": 0.003,
+    "ap": 0.151
+   },
+   "aggregate": {
+    "found": 0.409,
+    "lit": 0.038,
+    "ap": 0.282
+   }
+  },
+  "world-scotland-winchburgh": {
+   "moved": 5764,
+   "unchanged": 111789,
+   "aef_gated": {
+    "found": 0.748,
+    "lit": 0.004,
+    "ap": 0.809
+   },
+   "aggregate": {
+    "found": 0.858,
+    "lit": 0.078,
+    "ap": 0.819
+   }
+  },
+  "world-swiss-geneva-cherpines": {
+   "moved": 4937,
+   "unchanged": 195370,
+   "aef_gated": {
+    "found": 0.003,
+    "lit": 0.001,
+    "ap": 0.115
+   },
+   "aggregate": {
+    "found": 0.034,
+    "lit": 0.001,
+    "ap": 0.149
+   }
+  },
+  "world-swiss-geneva-satigny": {
+   "moved": 1402,
+   "unchanged": 209286,
+   "aef_gated": {
+    "found": 0.051,
+    "lit": 0.0,
+    "ap": 0.209
+   },
+   "aggregate": {
+    "found": 0.118,
+    "lit": 0.001,
+    "ap": 0.19
+   }
+  },
+  "world-swiss-geneva-vernets": {
+   "moved": 9360,
+   "unchanged": 176257,
+   "aef_gated": {
+    "found": 0.002,
+    "lit": 0.0,
+    "ap": 0.155
+   },
+   "aggregate": {
+    "found": 0.008,
+    "lit": 0.0,
+    "ap": 0.193
+   }
+  },
+  "world-swiss-huentwangen": {
+   "moved": 12708,
+   "unchanged": 199706,
+   "aef_gated": {
+    "found": 0.215,
+    "lit": 0.001,
+    "ap": 0.51
+   },
+   "aggregate": {
+    "found": 0.386,
+    "lit": 0.003,
+    "ap": 0.647
+   }
+  },
+  "world-swiss-uetliberg": {
+   "moved": 2058,
+   "unchanged": 203933,
+   "aef_gated": {
+    "found": 0.046,
+    "lit": 0.0,
+    "ap": 0.083
+   },
+   "aggregate": {
+    "found": 0.079,
+    "lit": 0.0,
+    "ap": 0.139
+   }
+  },
+  "world-swiss-weiach": {
+   "moved": 9514,
+   "unchanged": 182704,
+   "aef_gated": {
+    "found": 0.183,
+    "lit": 0.0,
+    "ap": 0.454
+   },
+   "aggregate": {
+    "found": 0.313,
+    "lit": 0.002,
+    "ap": 0.607
+   }
+  },
+  "world-swiss-weinland": {
+   "moved": 738,
+   "unchanged": 217933,
+   "aef_gated": {
+    "found": 0.011,
+    "lit": 0.001,
+    "ap": 0.006
+   },
+   "aggregate": {
+    "found": 0.035,
+    "lit": 0.002,
+    "ap": 0.022
+   }
+  },
+  "world-swiss-zurich-airport": {
+   "moved": 7261,
+   "unchanged": 177164,
+   "aef_gated": {
+    "found": 0.167,
+    "lit": 0.004,
+    "ap": 0.295
+   },
+   "aggregate": {
+    "found": 0.265,
+    "lit": 0.003,
+    "ap": 0.393
+   }
+  },
+  "world-swiss-zurich-city": {
+   "moved": 7756,
+   "unchanged": 139358,
+   "aef_gated": {
+    "found": 0.007,
+    "lit": 0.0,
+    "ap": 0.265
+   },
+   "aggregate": {
+    "found": 0.028,
+    "lit": 0.0,
+    "ap": 0.299
+   }
+  }
+ },
+ "world": {
+  "cutoff": {
+   "aef_gated": 0.604,
+   "aggregate": 0.809
+  },
+  "groups": {
+   "br": {
+    "aef_gated": {
+     "sites": 5,
+     "moved_px": 3310,
+     "found": 0.238,
+     "lit": 0.006,
+     "ap": 0.317,
+     "median_moved": 0.248,
+     "found_deep": 0.457,
+     "ap_deep": 0.4,
+     "median_deep": 0.365
+    },
+    "aggregate": {
+     "sites": 5,
+     "moved_px": 3310,
+     "found": 0.236,
+     "lit": 0.006,
+     "ap": 0.395,
+     "median_moved": 0.259,
+     "found_deep": 0.48,
+     "ap_deep": 0.554,
+     "median_deep": 0.589
+    },
+    "aggregate+gate": {
+     "sites": 5,
+     "moved_px": 0,
+     "found": 0.236,
+     "lit": 0.006,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ca": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 219473,
+     "found": 0.616,
+     "lit": 0.12,
+     "ap": 0.566,
+     "median_moved": 0.714,
+     "found_deep": 0.735,
+     "ap_deep": 0.593,
+     "median_deep": 0.816
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 219473,
+     "found": 0.52,
+     "lit": 0.028,
+     "ap": 0.645,
+     "median_moved": 0.688,
+     "found_deep": 0.677,
+     "ap_deep": 0.685,
+     "median_deep": 0.824
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.519,
+     "lit": 0.028,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ch": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 55734,
+     "found": 0.266,
+     "lit": 0.015,
+     "ap": 0.298,
+     "median_moved": 0.21,
+     "found_deep": 0.332,
+     "ap_deep": 0.289,
+     "median_deep": 0.344
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 55734,
+     "found": 0.294,
+     "lit": 0.006,
+     "ap": 0.359,
+     "median_moved": 0.343,
+     "found_deep": 0.366,
+     "ap_deep": 0.343,
+     "median_deep": 0.43
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.273,
+     "lit": 0.006,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "crop (test)": {
+    "aef_gated": {
+     "sites": 27,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.32,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 27,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.056,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 27,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.056,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "ee": {
+    "aef_gated": {
+     "sites": 8,
+     "moved_px": 69136,
+     "found": 0.561,
+     "lit": 0.101,
+     "ap": 0.58,
+     "median_moved": 0.538,
+     "found_deep": 0.659,
+     "ap_deep": 0.645,
+     "median_deep": 0.65
+    },
+    "aggregate": {
+     "sites": 8,
+     "moved_px": 69136,
+     "found": 0.541,
+     "lit": 0.054,
+     "ap": 0.593,
+     "median_moved": 0.668,
+     "found_deep": 0.689,
+     "ap_deep": 0.67,
+     "median_deep": 0.779
+    },
+    "aggregate+gate": {
+     "sites": 8,
+     "moved_px": 0,
+     "found": 0.536,
+     "lit": 0.053,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "fr": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 36354,
+     "found": 0.131,
+     "lit": 0.013,
+     "ap": 0.1,
+     "median_moved": 0.002,
+     "found_deep": 0.164,
+     "ap_deep": 0.062,
+     "median_deep": 0.06
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 36354,
+     "found": 0.137,
+     "lit": 0.005,
+     "ap": 0.141,
+     "median_moved": 0.022,
+     "found_deep": 0.187,
+     "ap_deep": 0.094,
+     "median_deep": 0.152
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.127,
+     "lit": 0.004,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "gb": {
+    "aef_gated": {
+     "sites": 32,
+     "moved_px": 120801,
+     "found": 0.275,
+     "lit": 0.012,
+     "ap": 0.28,
+     "median_moved": 0.248,
+     "found_deep": 0.367,
+     "ap_deep": 0.261,
+     "median_deep": 0.355
+    },
+    "aggregate": {
+     "sites": 32,
+     "moved_px": 120801,
+     "found": 0.347,
+     "lit": 0.012,
+     "ap": 0.34,
+     "median_moved": 0.481,
+     "found_deep": 0.503,
+     "ap_deep": 0.332,
+     "median_deep": 0.7
+    },
+    "aggregate+gate": {
+     "sites": 32,
+     "moved_px": 0,
+     "found": 0.341,
+     "lit": 0.012,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "hongkong (test)": {
+    "aef_gated": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.002,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.004,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.004,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "islands": {
+    "aef_gated": {
+     "sites": 12,
+     "moved_px": 24362,
+     "found": 0.456,
+     "lit": 0.015,
+     "ap": 0.307,
+     "median_moved": 0.501,
+     "found_deep": 0.456,
+     "ap_deep": 0.307,
+     "median_deep": 0.501
+    },
+    "aggregate": {
+     "sites": 12,
+     "moved_px": 24362,
+     "found": 0.508,
+     "lit": 0.013,
+     "ap": 0.331,
+     "median_moved": 0.739,
+     "found_deep": 0.508,
+     "ap_deep": 0.331,
+     "median_deep": 0.739
+    },
+    "aggregate+gate": {
+     "sites": 12,
+     "moved_px": 0,
+     "found": 0.508,
+     "lit": 0.013,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "jp": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 127958,
+     "found": 0.085,
+     "lit": 0.021,
+     "ap": 0.3,
+     "median_moved": 0.002,
+     "found_deep": 0.27,
+     "ap_deep": 0.29,
+     "median_deep": 0.268
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 127958,
+     "found": 0.084,
+     "lit": 0.013,
+     "ap": 0.318,
+     "median_moved": 0.008,
+     "found_deep": 0.298,
+     "ap_deep": 0.346,
+     "median_deep": 0.401
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.084,
+     "lit": 0.013,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nl": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 105041,
+     "found": 0.444,
+     "lit": 0.042,
+     "ap": 0.501,
+     "median_moved": 0.499,
+     "found_deep": 0.577,
+     "ap_deep": 0.447,
+     "median_deep": 0.713
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 105041,
+     "found": 0.469,
+     "lit": 0.04,
+     "ap": 0.571,
+     "median_moved": 0.666,
+     "found_deep": 0.607,
+     "ap_deep": 0.523,
+     "median_deep": 0.847
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.469,
+     "lit": 0.04,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "no": {
+    "aef_gated": {
+     "sites": 8,
+     "moved_px": 70116,
+     "found": 0.162,
+     "lit": 0.005,
+     "ap": 0.292,
+     "median_moved": 0.053,
+     "found_deep": 0.266,
+     "ap_deep": 0.255,
+     "median_deep": 0.203
+    },
+    "aggregate": {
+     "sites": 8,
+     "moved_px": 70116,
+     "found": 0.148,
+     "lit": 0.003,
+     "ap": 0.335,
+     "median_moved": 0.102,
+     "found_deep": 0.246,
+     "ap_deep": 0.311,
+     "median_deep": 0.318
+    },
+    "aggregate+gate": {
+     "sites": 8,
+     "moved_px": 0,
+     "found": 0.133,
+     "lit": 0.003,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "notruth (test)": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.052,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.063,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.061,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nz": {
+    "aef_gated": {
+     "sites": 12,
+     "moved_px": 120142,
+     "found": 0.066,
+     "lit": 0.002,
+     "ap": 0.33,
+     "median_moved": 0.014,
+     "found_deep": 0.117,
+     "ap_deep": 0.373,
+     "median_deep": 0.083
+    },
+    "aggregate": {
+     "sites": 12,
+     "moved_px": 120142,
+     "found": 0.147,
+     "lit": 0.004,
+     "ap": 0.371,
+     "median_moved": 0.137,
+     "found_deep": 0.282,
+     "ap_deep": 0.426,
+     "median_deep": 0.369
+    },
+    "aggregate+gate": {
+     "sites": 12,
+     "moved_px": 0,
+     "found": 0.147,
+     "lit": 0.004,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "nz storm": {
+    "aef_gated": {
+     "sites": 1,
+     "moved_px": 11580,
+     "found": 0.004,
+     "lit": 0.0,
+     "ap": 0.168,
+     "median_moved": 0.001,
+     "found_deep": 0.034,
+     "ap_deep": 0.077,
+     "median_deep": 0.001
+    },
+    "aggregate": {
+     "sites": 1,
+     "moved_px": 11580,
+     "found": 0.049,
+     "lit": 0.002,
+     "ap": 0.279,
+     "median_moved": 0.047,
+     "found_deep": 0.14,
+     "ap_deep": 0.157,
+     "median_deep": 0.194
+    },
+    "aggregate+gate": {
+     "sites": 1,
+     "moved_px": 0,
+     "found": 0.049,
+     "lit": 0.002,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "pl": {
+    "aef_gated": {
+     "sites": 9,
+     "moved_px": 296098,
+     "found": 0.389,
+     "lit": 0.025,
+     "ap": 0.405,
+     "median_moved": 0.37,
+     "found_deep": 0.545,
+     "ap_deep": 0.377,
+     "median_deep": 0.56
+    },
+    "aggregate": {
+     "sites": 9,
+     "moved_px": 296098,
+     "found": 0.39,
+     "lit": 0.013,
+     "ap": 0.436,
+     "median_moved": 0.46,
+     "found_deep": 0.565,
+     "ap_deep": 0.438,
+     "median_deep": 0.654
+    },
+    "aggregate+gate": {
+     "sites": 9,
+     "moved_px": 0,
+     "found": 0.385,
+     "lit": 0.013,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "shizuoka (test)": {
+    "aef_gated": {
+     "sites": 36,
+     "moved_px": 8082,
+     "found": 0.086,
+     "lit": 0.008,
+     "ap": 0.108,
+     "median_moved": 0.038,
+     "found_deep": 0.076,
+     "ap_deep": 0.098,
+     "median_deep": 0.019
+    },
+    "aggregate": {
+     "sites": 36,
+     "moved_px": 8082,
+     "found": 0.092,
+     "lit": 0.006,
+     "ap": 0.126,
+     "median_moved": 0.04,
+     "found_deep": 0.1,
+     "ap_deep": 0.125,
+     "median_deep": 0.049
+    },
+    "aggregate+gate": {
+     "sites": 36,
+     "moved_px": 0,
+     "found": 0.092,
+     "lit": 0.006,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "space": {
+    "aef_gated": {
+     "sites": 13,
+     "moved_px": 1780,
+     "found": 0.38,
+     "lit": 0.05,
+     "ap": 0.487,
+     "median_moved": 0.468,
+     "found_deep": 0.38,
+     "ap_deep": 0.487,
+     "median_deep": 0.468
+    },
+    "aggregate": {
+     "sites": 13,
+     "moved_px": 1780,
+     "found": 0.493,
+     "lit": 0.071,
+     "ap": 0.446,
+     "median_moved": 0.768,
+     "found_deep": 0.493,
+     "ap_deep": 0.446,
+     "median_deep": 0.768
+    },
+    "aggregate+gate": {
+     "sites": 13,
+     "moved_px": 0,
+     "found": 0.493,
+     "lit": 0.071,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "tropic (test)": {
+    "aef_gated": {
+     "sites": 7,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.03,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate": {
+     "sites": 7,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.028,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    },
+    "aggregate+gate": {
+     "sites": 7,
+     "moved_px": 0,
+     "found": null,
+     "lit": 0.028,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us burn": {
+    "aef_gated": {
+     "sites": 2,
+     "moved_px": 2308,
+     "found": 0.483,
+     "lit": 0.632,
+     "ap": 0.001,
+     "median_moved": 0.494,
+     "found_deep": 0.828,
+     "ap_deep": 0.0,
+     "median_deep": 0.964
+    },
+    "aggregate": {
+     "sites": 2,
+     "moved_px": 2308,
+     "found": 0.325,
+     "lit": 0.182,
+     "ap": 0.002,
+     "median_moved": 0.462,
+     "found_deep": 0.675,
+     "ap_deep": 0.0,
+     "median_deep": 0.912
+    },
+    "aggregate+gate": {
+     "sites": 2,
+     "moved_px": 0,
+     "found": 0.325,
+     "lit": 0.182,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us dig": {
+    "aef_gated": {
+     "sites": 14,
+     "moved_px": 598033,
+     "found": 0.6,
+     "lit": 0.07,
+     "ap": 0.522,
+     "median_moved": 0.729,
+     "found_deep": 0.653,
+     "ap_deep": 0.342,
+     "median_deep": 0.777
+    },
+    "aggregate": {
+     "sites": 14,
+     "moved_px": 598033,
+     "found": 0.6,
+     "lit": 0.043,
+     "ap": 0.557,
+     "median_moved": 0.824,
+     "found_deep": 0.671,
+     "ap_deep": 0.382,
+     "median_deep": 0.895
+    },
+    "aggregate+gate": {
+     "sites": 14,
+     "moved_px": 0,
+     "found": 0.599,
+     "lit": 0.043,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us dunes": {
+    "aef_gated": {
+     "sites": 1,
+     "moved_px": 55783,
+     "found": 0.0,
+     "lit": 0.0,
+     "ap": 0.38,
+     "median_moved": 0.0,
+     "found_deep": 0.0,
+     "ap_deep": 0.019,
+     "median_deep": 0.0
+    },
+    "aggregate": {
+     "sites": 1,
+     "moved_px": 55783,
+     "found": 0.0,
+     "lit": 0.0,
+     "ap": 0.38,
+     "median_moved": 0.0,
+     "found_deep": 0.0,
+     "ap_deep": 0.019,
+     "median_deep": 0.0
+    },
+    "aggregate+gate": {
+     "sites": 1,
+     "moved_px": 0,
+     "found": 0.0,
+     "lit": 0.0,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us farm": {
+    "aef_gated": {
+     "sites": 6,
+     "moved_px": 14450,
+     "found": 0.242,
+     "lit": 0.099,
+     "ap": 0.101,
+     "median_moved": 0.27,
+     "found_deep": 0.563,
+     "ap_deep": 0.183,
+     "median_deep": 0.675
+    },
+    "aggregate": {
+     "sites": 6,
+     "moved_px": 14450,
+     "found": 0.202,
+     "lit": 0.022,
+     "ap": 0.156,
+     "median_moved": 0.296,
+     "found_deep": 0.539,
+     "ap_deep": 0.236,
+     "median_deep": 0.729
+    },
+    "aggregate+gate": {
+     "sites": 6,
+     "moved_px": 0,
+     "found": 0.202,
+     "lit": 0.022,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us marsh": {
+    "aef_gated": {
+     "sites": 3,
+     "moved_px": 39320,
+     "found": 0.192,
+     "lit": 0.044,
+     "ap": 0.127,
+     "median_moved": 0.175,
+     "found_deep": 0.734,
+     "ap_deep": 0.431,
+     "median_deep": 0.987
+    },
+    "aggregate": {
+     "sites": 3,
+     "moved_px": 39320,
+     "found": 0.172,
+     "lit": 0.028,
+     "ap": 0.108,
+     "median_moved": 0.238,
+     "found_deep": 0.645,
+     "ap_deep": 0.283,
+     "median_deep": 0.975
+    },
+    "aggregate+gate": {
+     "sites": 3,
+     "moved_px": 0,
+     "found": 0.172,
+     "lit": 0.028,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   },
+   "us storm": {
+    "aef_gated": {
+     "sites": 1,
+     "moved_px": 7446,
+     "found": 0.206,
+     "lit": 0.064,
+     "ap": 0.038,
+     "median_moved": 0.116,
+     "found_deep": 0.449,
+     "ap_deep": 0.084,
+     "median_deep": 0.553
+    },
+    "aggregate": {
+     "sites": 1,
+     "moved_px": 7446,
+     "found": 0.207,
+     "lit": 0.031,
+     "ap": 0.052,
+     "median_moved": 0.269,
+     "found_deep": 0.367,
+     "ap_deep": 0.025,
+     "median_deep": 0.692
+    },
+    "aggregate+gate": {
+     "sites": 1,
+     "moved_px": 0,
+     "found": 0.207,
+     "lit": 0.031,
+     "ap": null,
+     "median_moved": null,
+     "found_deep": null,
+     "ap_deep": null,
+     "median_deep": null
+    }
+   }
+  }
+ },
+ "world_sites": {
+  "world-ahn-a16-terbregseplein": {
+   "moved": 9740,
+   "unchanged": 197360,
+   "aef_gated": {
+    "found": 0.66,
+    "lit": 0.004,
+    "ap": 0.813
+   },
+   "aggregate": {
+    "found": 0.693,
+    "lit": 0.003,
+    "ap": 0.872
+   }
+  },
+  "world-ahn-beemster": {
+   "moved": 231,
+   "unchanged": 249268,
+   "aef_gated": {
+    "found": 0.009,
+    "lit": 0.002,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.009,
+    "lit": 0.001,
+    "ap": 0.001
+   }
+  },
+  "world-ahn-blankenburg": {
+   "moved": 9167,
+   "unchanged": 174243,
+   "aef_gated": {
+    "found": 0.452,
+    "lit": 0.009,
+    "ap": 0.574
+   },
+   "aggregate": {
+    "found": 0.558,
+    "lit": 0.009,
+    "ap": 0.654
+   }
+  },
+  "world-ahn-den-oever": {
+   "moved": 2757,
+   "unchanged": 52892,
+   "aef_gated": {
+    "found": 0.593,
+    "lit": 0.021,
+    "ap": 0.569
+   },
+   "aggregate": {
+    "found": 0.601,
+    "lit": 0.017,
+    "ap": 0.638
+   }
+  },
+  "world-ahn-grensmaas-meers": {
+   "moved": 7415,
+   "unchanged": 55820,
+   "aef_gated": {
+    "found": 0.56,
+    "lit": 0.008,
+    "ap": 0.736
+   },
+   "aggregate": {
+    "found": 0.633,
+    "lit": 0.009,
+    "ap": 0.838
+   }
+  },
+  "world-ahn-groningen-meerstad": {
+   "moved": 11389,
+   "unchanged": 210969,
+   "aef_gated": {
+    "found": 0.763,
+    "lit": 0.019,
+    "ap": 0.752
+   },
+   "aggregate": {
+    "found": 0.604,
+    "lit": 0.005,
+    "ap": 0.775
+   }
+  },
+  "world-ahn-hedwigepolder": {
+   "moved": 9271,
+   "unchanged": 35428,
+   "aef_gated": {
+    "found": 0.854,
+    "lit": 0.407,
+    "ap": 0.511
+   },
+   "aggregate": {
+    "found": 0.856,
+    "lit": 0.417,
+    "ap": 0.604
+   }
+  },
+  "world-ahn-heuvelrug": {
+   "moved": 285,
+   "unchanged": 248430,
+   "aef_gated": {
+    "found": 0.27,
+    "lit": 0.001,
+    "ap": 0.221
+   },
+   "aggregate": {
+    "found": 0.26,
+    "lit": 0.0,
+    "ap": 0.265
+   }
+  },
+  "world-ahn-maasvlakte": {
+   "moved": 16756,
+   "unchanged": 146700,
+   "aef_gated": {
+    "found": 0.306,
+    "lit": 0.023,
+    "ap": 0.477
+   },
+   "aggregate": {
+    "found": 0.257,
+    "lit": 0.025,
+    "ap": 0.433
+   }
+  },
+  "world-ahn-moerdijk-logistics": {
+   "moved": 18924,
+   "unchanged": 193006,
+   "aef_gated": {
+    "found": 0.298,
+    "lit": 0.029,
+    "ap": 0.43
+   },
+   "aggregate": {
+    "found": 0.414,
+    "lit": 0.017,
+    "ap": 0.623
+   }
+  },
+  "world-ahn-rijnlandroute": {
+   "moved": 3239,
+   "unchanged": 221453,
+   "aef_gated": {
+    "found": 0.068,
+    "lit": 0.001,
+    "ap": 0.302
+   },
+   "aggregate": {
+    "found": 0.167,
+    "lit": 0.002,
+    "ap": 0.444
+   }
+  },
+  "world-ahn-valkenburg": {
+   "moved": 7896,
+   "unchanged": 202943,
+   "aef_gated": {
+    "found": 0.494,
+    "lit": 0.008,
+    "ap": 0.578
+   },
+   "aggregate": {
+    "found": 0.564,
+    "lit": 0.01,
+    "ap": 0.66
+   }
+  },
+  "world-ahn-venlo-logistics": {
+   "moved": 7971,
+   "unchanged": 197102,
+   "aef_gated": {
+    "found": 0.443,
+    "lit": 0.008,
+    "ap": 0.549
+   },
+   "aggregate": {
+    "found": 0.488,
+    "lit": 0.008,
+    "ap": 0.615
+   }
+  },
+  "world-canada-east-gwillimbury": {
+   "moved": 6792,
+   "unchanged": 166323,
+   "aef_gated": {
+    "found": 0.906,
+    "lit": 0.229,
+    "ap": 0.684
+   },
+   "aggregate": {
+    "found": 0.876,
+    "lit": 0.021,
+    "ap": 0.86
+   }
+  },
+  "world-canada-fort-mcmurray": {
+   "moved": 1,
+   "unchanged": 75008,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.0
+   }
+  },
+  "world-canada-halifax-bayers-lake": {
+   "moved": 4345,
+   "unchanged": 167596,
+   "aef_gated": {
+    "found": 0.714,
+    "lit": 0.019,
+    "ap": 0.528
+   },
+   "aggregate": {
+    "found": 0.751,
+    "lit": 0.019,
+    "ap": 0.552
+   }
+  },
+  "world-canada-milton": {
+   "moved": 7638,
+   "unchanged": 13489,
+   "aef_gated": {
+    "found": 0.978,
+    "lit": 0.239,
+    "ap": 0.952
+   },
+   "aggregate": {
+    "found": 0.96,
+    "lit": 0.075,
+    "ap": 0.952
+   }
+  },
+  "world-canada-montreal-north-pits": {
+   "moved": 34659,
+   "unchanged": 108109,
+   "aef_gated": {
+    "found": 0.59,
+    "lit": 0.041,
+    "ap": 0.799
+   },
+   "aggregate": {
+    "found": 0.449,
+    "lit": 0.008,
+    "ap": 0.847
+   }
+  },
+  "world-canada-montreal-south": {
+   "moved": 3507,
+   "unchanged": 131420,
+   "aef_gated": {
+    "found": 0.623,
+    "lit": 0.272,
+    "ap": 0.254
+   },
+   "aggregate": {
+    "found": 0.395,
+    "lit": 0.003,
+    "ap": 0.583
+   }
+  },
+  "world-canada-ottawa-south": {
+   "moved": 200,
+   "unchanged": 163914,
+   "aef_gated": {
+    "found": 0.415,
+    "lit": 0.1,
+    "ap": 0.013
+   },
+   "aggregate": {
+    "found": 0.085,
+    "lit": 0.001,
+    "ap": 0.107
+   }
+  },
+  "world-canada-pickering-seaton": {
+   "moved": 51297,
+   "unchanged": 190358,
+   "aef_gated": {
+    "found": 0.828,
+    "lit": 0.237,
+    "ap": 0.715
+   },
+   "aggregate": {
+    "found": 0.792,
+    "lit": 0.091,
+    "ap": 0.793
+   }
+  },
+  "world-canada-terrebonne-landfill": {
+   "moved": 23873,
+   "unchanged": 153293,
+   "aef_gated": {
+    "found": 0.637,
+    "lit": 0.038,
+    "ap": 0.769
+   },
+   "aggregate": {
+    "found": 0.383,
+    "lit": 0.004,
+    "ap": 0.76
+   }
+  },
+  "world-canada-timmins-dome": {
+   "moved": 49974,
+   "unchanged": 33302,
+   "aef_gated": {
+    "found": 0.023,
+    "lit": 0.0,
+    "ap": 0.799
+   },
+   "aggregate": {
+    "found": 0.011,
+    "lit": 0.0,
+    "ap": 0.85
+   }
+  },
+  "world-canada-toronto-portlands": {
+   "moved": 11726,
+   "unchanged": 62372,
+   "aef_gated": {
+    "found": 0.545,
+    "lit": 0.06,
+    "ap": 0.526
+   },
+   "aggregate": {
+    "found": 0.6,
+    "lit": 0.063,
+    "ap": 0.595
+   }
+  },
+  "world-canada-vaughan-427": {
+   "moved": 20165,
+   "unchanged": 133430,
+   "aef_gated": {
+    "found": 0.856,
+    "lit": 0.119,
+    "ap": 0.717
+   },
+   "aggregate": {
+    "found": 0.827,
+    "lit": 0.064,
+    "ap": 0.773
+   }
+  },
+  "world-canada-york-quiet": {
+   "moved": 5296,
+   "unchanged": 171232,
+   "aef_gated": {
+    "found": 0.28,
+    "lit": 0.203,
+    "ap": 0.035
+   },
+   "aggregate": {
+    "found": 0.105,
+    "lit": 0.019,
+    "ap": 0.069
+   }
+  },
+  "world-england-a14-huntingdon": {
+   "moved": 3524,
+   "unchanged": 214552,
+   "aef_gated": {
+    "found": 0.142,
+    "lit": 0.003,
+    "ap": 0.204
+   },
+   "aggregate": {
+    "found": 0.292,
+    "lit": 0.006,
+    "ap": 0.29
+   }
+  },
+  "world-england-bardon": {
+   "moved": 9992,
+   "unchanged": 118593,
+   "aef_gated": {
+    "found": 0.391,
+    "lit": 0.007,
+    "ap": 0.652
+   },
+   "aggregate": {
+    "found": 0.616,
+    "lit": 0.013,
+    "ap": 0.765
+   }
+  },
+  "world-england-black-cat": {
+   "moved": 4773,
+   "unchanged": 228027,
+   "aef_gated": {
+    "found": 0.15,
+    "lit": 0.037,
+    "ap": 0.072
+   },
+   "aggregate": {
+    "found": 0.241,
+    "lit": 0.022,
+    "ap": 0.118
+   }
+  },
+  "world-england-breedon": {
+   "moved": 2387,
+   "unchanged": 158831,
+   "aef_gated": {
+    "found": 0.166,
+    "lit": 0.02,
+    "ap": 0.082
+   },
+   "aggregate": {
+    "found": 0.208,
+    "lit": 0.009,
+    "ap": 0.186
+   }
+  },
+  "world-england-brent-cross": {
+   "moved": 112,
+   "unchanged": 10730,
+   "aef_gated": {
+    "found": 0.143,
+    "lit": 0.0,
+    "ap": 0.181
+   },
+   "aggregate": {
+    "found": 0.188,
+    "lit": 0.002,
+    "ap": 0.225
+   }
+  },
+  "world-england-colindale": {
+   "moved": 360,
+   "unchanged": 18851,
+   "aef_gated": {
+    "found": 0.253,
+    "lit": 0.005,
+    "ap": 0.218
+   },
+   "aggregate": {
+    "found": 0.322,
+    "lit": 0.006,
+    "ap": 0.249
+   }
+  },
+  "world-england-colne-valley": {
+   "moved": 1745,
+   "unchanged": 33423,
+   "aef_gated": {
+    "found": 0.91,
+    "lit": 0.014,
+    "ap": 0.818
+   },
+   "aggregate": {
+    "found": 0.927,
+    "lit": 0.015,
+    "ap": 0.894
+   }
+  },
+  "world-england-dene": {
+   "moved": 1074,
+   "unchanged": 126907,
+   "aef_gated": {
+    "found": 0.044,
+    "lit": 0.0,
+    "ap": 0.071
+   },
+   "aggregate": {
+    "found": 0.039,
+    "lit": 0.0,
+    "ap": 0.089
+   }
+  },
+  "world-england-earls-court": {
+   "moved": 205,
+   "unchanged": 11112,
+   "aef_gated": {
+    "found": 0.083,
+    "lit": 0.001,
+    "ap": 0.099
+   },
+   "aggregate": {
+    "found": 0.068,
+    "lit": 0.002,
+    "ap": 0.079
+   }
+  },
+  "world-england-east-midlands-gateway": {
+   "moved": 14732,
+   "unchanged": 115321,
+   "aef_gated": {
+    "found": 0.582,
+    "lit": 0.042,
+    "ap": 0.702
+   },
+   "aggregate": {
+    "found": 0.596,
+    "lit": 0.023,
+    "ap": 0.757
+   }
+  },
+  "world-england-leicestershire": {
+   "moved": 57,
+   "unchanged": 74625,
+   "aef_gated": {
+    "found": 0.07,
+    "lit": 0.025,
+    "ap": 0.002
+   },
+   "aggregate": {
+    "found": 0.053,
+    "lit": 0.002,
+    "ap": 0.014
+   }
+  },
+  "world-england-mountsorrel": {
+   "moved": 13827,
+   "unchanged": 146110,
+   "aef_gated": {
+    "found": 0.13,
+    "lit": 0.002,
+    "ap": 0.406
+   },
+   "aggregate": {
+    "found": 0.183,
+    "lit": 0.005,
+    "ap": 0.484
+   }
+  },
+  "world-england-northolt": {
+   "moved": 227,
+   "unchanged": 27038,
+   "aef_gated": {
+    "found": 0.573,
+    "lit": 0.003,
+    "ap": 0.388
+   },
+   "aggregate": {
+    "found": 0.749,
+    "lit": 0.006,
+    "ap": 0.452
+   }
+  },
+  "world-england-northstowe": {
+   "moved": 4404,
+   "unchanged": 225783,
+   "aef_gated": {
+    "found": 0.205,
+    "lit": 0.02,
+    "ap": 0.124
+   },
+   "aggregate": {
+    "found": 0.422,
+    "lit": 0.032,
+    "ap": 0.213
+   }
+  },
+  "world-england-old-oak": {
+   "moved": 217,
+   "unchanged": 14917,
+   "aef_gated": {
+    "found": 0.447,
+    "lit": 0.008,
+    "ap": 0.309
+   },
+   "aggregate": {
+    "found": 0.567,
+    "lit": 0.011,
+    "ap": 0.299
+   }
+  },
+  "world-england-richmond-park": {
+   "moved": 56,
+   "unchanged": 86012,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.002
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.001,
+    "ap": 0.001
+   }
+  },
+  "world-england-southall": {
+   "moved": 825,
+   "unchanged": 31424,
+   "aef_gated": {
+    "found": 0.286,
+    "lit": 0.007,
+    "ap": 0.234
+   },
+   "aggregate": {
+    "found": 0.296,
+    "lit": 0.007,
+    "ap": 0.269
+   }
+  },
+  "world-england-st-austell": {
+   "moved": 25695,
+   "unchanged": 109215,
+   "aef_gated": {
+    "found": 0.17,
+    "lit": 0.004,
+    "ap": 0.536
+   },
+   "aggregate": {
+    "found": 0.148,
+    "lit": 0.003,
+    "ap": 0.553
+   }
+  },
+  "world-england-tilbury2": {
+   "moved": 9374,
+   "unchanged": 148487,
+   "aef_gated": {
+    "found": 0.563,
+    "lit": 0.028,
+    "ap": 0.548
+   },
+   "aggregate": {
+    "found": 0.584,
+    "lit": 0.029,
+    "ap": 0.596
+   }
+  },
+  "world-england-waterbeach": {
+   "moved": 5827,
+   "unchanged": 209219,
+   "aef_gated": {
+    "found": 0.633,
+    "lit": 0.015,
+    "ap": 0.595
+   },
+   "aggregate": {
+    "found": 0.81,
+    "lit": 0.027,
+    "ap": 0.679
+   }
+  },
+  "world-england-wembley": {
+   "moved": 81,
+   "unchanged": 21323,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.043
+   },
+   "aggregate": {
+    "found": 0.049,
+    "lit": 0.0,
+    "ap": 0.079
+   }
+  },
+  "world-estonia-kivioli-north": {
+   "moved": 166,
+   "unchanged": 134996,
+   "aef_gated": {
+    "found": 0.259,
+    "lit": 0.213,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.036,
+    "lit": 0.043,
+    "ap": 0.002
+   }
+  },
+  "world-estonia-kivioli-west": {
+   "moved": 14210,
+   "unchanged": 48044,
+   "aef_gated": {
+    "found": 0.882,
+    "lit": 0.026,
+    "ap": 0.932
+   },
+   "aggregate": {
+    "found": 0.892,
+    "lit": 0.026,
+    "ap": 0.94
+   }
+  },
+  "world-estonia-lahemaa": {
+   "moved": 3,
+   "unchanged": 7543,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.0
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.0
+   }
+  },
+  "world-estonia-narva-pit-south": {
+   "moved": 1971,
+   "unchanged": 5320,
+   "aef_gated": {
+    "found": 0.878,
+    "lit": 0.018,
+    "ap": 0.954
+   },
+   "aggregate": {
+    "found": 0.847,
+    "lit": 0.019,
+    "ap": 0.947
+   }
+  },
+  "world-estonia-narva-pit-west": {
+   "moved": 11099,
+   "unchanged": 37045,
+   "aef_gated": {
+    "found": 0.966,
+    "lit": 0.505,
+    "ap": 0.954
+   },
+   "aggregate": {
+    "found": 0.961,
+    "lit": 0.294,
+    "ap": 0.949
+   }
+  },
+  "world-estonia-tartu": {
+   "moved": 2353,
+   "unchanged": 128275,
+   "aef_gated": {
+    "found": 0.366,
+    "lit": 0.012,
+    "ap": 0.311
+   },
+   "aggregate": {
+    "found": 0.409,
+    "lit": 0.016,
+    "ap": 0.32
+   }
+  },
+  "world-estonia-ulemiste": {
+   "moved": 3316,
+   "unchanged": 122303,
+   "aef_gated": {
+    "found": 0.149,
+    "lit": 0.005,
+    "ap": 0.172
+   },
+   "aggregate": {
+    "found": 0.163,
+    "lit": 0.004,
+    "ap": 0.214
+   }
+  },
+  "world-estonia-vao-quarry": {
+   "moved": 36018,
+   "unchanged": 109274,
+   "aef_gated": {
+    "found": 0.427,
+    "lit": 0.03,
+    "ap": 0.739
+   },
+   "aggregate": {
+    "found": 0.477,
+    "lit": 0.027,
+    "ap": 0.782
+   }
+  },
+  "world-kanagawa-hakone-forest": {
+   "moved": 3161,
+   "unchanged": 69818,
+   "aef_gated": {
+    "found": 0.034,
+    "lit": 0.019,
+    "ap": 0.053
+   },
+   "aggregate": {
+    "found": 0.019,
+    "lit": 0.003,
+    "ap": 0.084
+   }
+  },
+  "world-kanagawa-manazuru": {
+   "moved": 15487,
+   "unchanged": 33588,
+   "aef_gated": {
+    "found": 0.119,
+    "lit": 0.019,
+    "ap": 0.45
+   },
+   "aggregate": {
+    "found": 0.107,
+    "lit": 0.011,
+    "ap": 0.468
+   }
+  },
+  "world-kanagawa-nakai": {
+   "moved": 18552,
+   "unchanged": 40291,
+   "aef_gated": {
+    "found": 0.118,
+    "lit": 0.027,
+    "ap": 0.41
+   },
+   "aggregate": {
+    "found": 0.13,
+    "lit": 0.017,
+    "ap": 0.428
+   }
+  },
+  "world-kanagawa-sagamihara-aone": {
+   "moved": 10292,
+   "unchanged": 83805,
+   "aef_gated": {
+    "found": 0.027,
+    "lit": 0.01,
+    "ap": 0.131
+   },
+   "aggregate": {
+    "found": 0.031,
+    "lit": 0.005,
+    "ap": 0.152
+   }
+  },
+  "world-kanagawa-sagamihara-midori-forest": {
+   "moved": 2700,
+   "unchanged": 57364,
+   "aef_gated": {
+    "found": 0.043,
+    "lit": 0.005,
+    "ap": 0.113
+   },
+   "aggregate": {
+    "found": 0.034,
+    "lit": 0.004,
+    "ap": 0.11
+   }
+  },
+  "world-kanagawa-sagamihara-toya": {
+   "moved": 19044,
+   "unchanged": 31166,
+   "aef_gated": {
+    "found": 0.103,
+    "lit": 0.056,
+    "ap": 0.422
+   },
+   "aggregate": {
+    "found": 0.105,
+    "lit": 0.046,
+    "ap": 0.431
+   }
+  },
+  "world-kanagawa-shintomei-yamakita-matsuda": {
+   "moved": 17965,
+   "unchanged": 122751,
+   "aef_gated": {
+    "found": 0.118,
+    "lit": 0.016,
+    "ap": 0.255
+   },
+   "aggregate": {
+    "found": 0.124,
+    "lit": 0.008,
+    "ap": 0.277
+   }
+  },
+  "world-kanagawa-yamakita-west": {
+   "moved": 24325,
+   "unchanged": 52771,
+   "aef_gated": {
+    "found": 0.199,
+    "lit": 0.032,
+    "ap": 0.519
+   },
+   "aggregate": {
+    "found": 0.208,
+    "lit": 0.02,
+    "ap": 0.547
+   }
+  },
+  "world-kanagawa-yugawara-hills": {
+   "moved": 16432,
+   "unchanged": 30540,
+   "aef_gated": {
+    "found": 0.003,
+    "lit": 0.002,
+    "ap": 0.345
+   },
+   "aggregate": {
+    "found": 0.003,
+    "lit": 0.004,
+    "ap": 0.361
+   }
+  },
+  "world-lyon-carre-de-soie": {
+   "moved": 2944,
+   "unchanged": 191766,
+   "aef_gated": {
+    "found": 0.155,
+    "lit": 0.004,
+    "ap": 0.134
+   },
+   "aggregate": {
+    "found": 0.136,
+    "lit": 0.003,
+    "ap": 0.166
+   }
+  },
+  "world-lyon-confluence": {
+   "moved": 8335,
+   "unchanged": 173997,
+   "aef_gated": {
+    "found": 0.12,
+    "lit": 0.005,
+    "ap": 0.164
+   },
+   "aggregate": {
+    "found": 0.113,
+    "lit": 0.003,
+    "ap": 0.197
+   }
+  },
+  "world-lyon-corbas": {
+   "moved": 5024,
+   "unchanged": 191756,
+   "aef_gated": {
+    "found": 0.242,
+    "lit": 0.032,
+    "ap": 0.189
+   },
+   "aggregate": {
+    "found": 0.306,
+    "lit": 0.007,
+    "ap": 0.302
+   }
+  },
+  "world-lyon-meyzieu": {
+   "moved": 2929,
+   "unchanged": 148936,
+   "aef_gated": {
+    "found": 0.097,
+    "lit": 0.038,
+    "ap": 0.037
+   },
+   "aggregate": {
+    "found": 0.113,
+    "lit": 0.008,
+    "ap": 0.058
+   }
+  },
+  "world-lyon-oullins": {
+   "moved": 4175,
+   "unchanged": 189343,
+   "aef_gated": {
+    "found": 0.257,
+    "lit": 0.01,
+    "ap": 0.15
+   },
+   "aggregate": {
+    "found": 0.236,
+    "lit": 0.007,
+    "ap": 0.192
+   }
+  },
+  "world-lyon-part-dieu": {
+   "moved": 7212,
+   "unchanged": 178992,
+   "aef_gated": {
+    "found": 0.034,
+    "lit": 0.001,
+    "ap": 0.105
+   },
+   "aggregate": {
+    "found": 0.039,
+    "lit": 0.001,
+    "ap": 0.137
+   }
+  },
+  "world-lyon-saint-priest": {
+   "moved": 3029,
+   "unchanged": 195199,
+   "aef_gated": {
+    "found": 0.114,
+    "lit": 0.015,
+    "ap": 0.036
+   },
+   "aggregate": {
+    "found": 0.143,
+    "lit": 0.01,
+    "ap": 0.072
+   }
+  },
+  "world-lyon-tete-dor": {
+   "moved": 819,
+   "unchanged": 27942,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.001,
+    "ap": 0.028
+   },
+   "aggregate": {
+    "found": 0.002,
+    "lit": 0.0,
+    "ap": 0.031
+   }
+  },
+  "world-lyon-vernaison": {
+   "moved": 1887,
+   "unchanged": 190824,
+   "aef_gated": {
+    "found": 0.153,
+    "lit": 0.01,
+    "ap": 0.061
+   },
+   "aggregate": {
+    "found": 0.144,
+    "lit": 0.003,
+    "ap": 0.119
+   }
+  },
+  "world-norway-drammen": {
+   "moved": 3517,
+   "unchanged": 130171,
+   "aef_gated": {
+    "found": 0.093,
+    "lit": 0.004,
+    "ap": 0.136
+   },
+   "aggregate": {
+    "found": 0.086,
+    "lit": 0.002,
+    "ap": 0.163
+   }
+  },
+  "world-norway-fornebu": {
+   "moved": 9607,
+   "unchanged": 111423,
+   "aef_gated": {
+    "found": 0.327,
+    "lit": 0.013,
+    "ap": 0.481
+   },
+   "aggregate": {
+    "found": 0.325,
+    "lit": 0.007,
+    "ap": 0.57
+   }
+  },
+  "world-norway-oslo-bjorvika": {
+   "moved": 12288,
+   "unchanged": 192331,
+   "aef_gated": {
+    "found": 0.106,
+    "lit": 0.004,
+    "ap": 0.277
+   },
+   "aggregate": {
+    "found": 0.08,
+    "lit": 0.003,
+    "ap": 0.308
+   }
+  },
+  "world-norway-oslo-hovinbyen": {
+   "moved": 13473,
+   "unchanged": 238081,
+   "aef_gated": {
+    "found": 0.16,
+    "lit": 0.003,
+    "ap": 0.414
+   },
+   "aggregate": {
+    "found": 0.107,
+    "lit": 0.001,
+    "ap": 0.444
+   }
+  },
+  "world-norway-oslo-nordstrand": {
+   "moved": 3781,
+   "unchanged": 209269,
+   "aef_gated": {
+    "found": 0.035,
+    "lit": 0.003,
+    "ap": 0.056
+   },
+   "aggregate": {
+    "found": 0.038,
+    "lit": 0.001,
+    "ap": 0.09
+   }
+  },
+  "world-norway-stavanger-forus": {
+   "moved": 10509,
+   "unchanged": 137483,
+   "aef_gated": {
+    "found": 0.337,
+    "lit": 0.012,
+    "ap": 0.412
+   },
+   "aggregate": {
+    "found": 0.338,
+    "lit": 0.01,
+    "ap": 0.456
+   }
+  },
+  "world-norway-tromso": {
+   "moved": 9154,
+   "unchanged": 182707,
+   "aef_gated": {
+    "found": 0.161,
+    "lit": 0.002,
+    "ap": 0.348
+   },
+   "aggregate": {
+    "found": 0.128,
+    "lit": 0.001,
+    "ap": 0.385
+   }
+  },
+  "world-norway-trondheim": {
+   "moved": 7787,
+   "unchanged": 172841,
+   "aef_gated": {
+    "found": 0.08,
+    "lit": 0.001,
+    "ap": 0.21
+   },
+   "aggregate": {
+    "found": 0.081,
+    "lit": 0.001,
+    "ap": 0.264
+   }
+  },
+  "world-nz-christchurch-yaldhurst": {
+   "moved": 18676,
+   "unchanged": 428095,
+   "aef_gated": {
+    "found": 0.098,
+    "lit": 0.0,
+    "ap": 0.626
+   },
+   "aggregate": {
+    "found": 0.287,
+    "lit": 0.002,
+    "ap": 0.673
+   }
+  },
+  "world-nz-esk-valley": {
+   "moved": 11580,
+   "unchanged": 104907,
+   "aef_gated": {
+    "found": 0.004,
+    "lit": 0.0,
+    "ap": 0.168
+   },
+   "aggregate": {
+    "found": 0.049,
+    "lit": 0.002,
+    "ap": 0.279
+   }
+  },
+  "world-nz-hamilton-frankton": {
+   "moved": 909,
+   "unchanged": 91322,
+   "aef_gated": {
+    "found": 0.018,
+    "lit": 0.0,
+    "ap": 0.03
+   },
+   "aggregate": {
+    "found": 0.017,
+    "lit": 0.0,
+    "ap": 0.03
+   }
+  },
+  "world-nz-hamilton-northwest": {
+   "moved": 10310,
+   "unchanged": 128440,
+   "aef_gated": {
+    "found": 0.023,
+    "lit": 0.002,
+    "ap": 0.383
+   },
+   "aggregate": {
+    "found": 0.122,
+    "lit": 0.003,
+    "ap": 0.488
+   }
+  },
+  "world-nz-hamilton-ruakura": {
+   "moved": 17063,
+   "unchanged": 127889,
+   "aef_gated": {
+    "found": 0.122,
+    "lit": 0.004,
+    "ap": 0.699
+   },
+   "aggregate": {
+    "found": 0.298,
+    "lit": 0.006,
+    "ap": 0.739
+   }
+  },
+  "world-nz-hamilton-south": {
+   "moved": 11067,
+   "unchanged": 226905,
+   "aef_gated": {
+    "found": 0.07,
+    "lit": 0.001,
+    "ap": 0.293
+   },
+   "aggregate": {
+    "found": 0.143,
+    "lit": 0.003,
+    "ap": 0.335
+   }
+  },
+  "world-nz-lyttelton": {
+   "moved": 7327,
+   "unchanged": 99651,
+   "aef_gated": {
+    "found": 0.02,
+    "lit": 0.0,
+    "ap": 0.203
+   },
+   "aggregate": {
+    "found": 0.156,
+    "lit": 0.015,
+    "ap": 0.222
+   }
+  },
+  "world-nz-matata-quarry": {
+   "moved": 5641,
+   "unchanged": 22011,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.203
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.249
+   }
+  },
+  "world-nz-otago-roxburgh": {
+   "moved": 652,
+   "unchanged": 99841,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.006
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.007
+   }
+  },
+  "world-nz-palmerston-north": {
+   "moved": 3520,
+   "unchanged": 141055,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.092
+   },
+   "aggregate": {
+    "found": 0.029,
+    "lit": 0.0,
+    "ap": 0.134
+   }
+  },
+  "world-nz-papamoa-east": {
+   "moved": 7741,
+   "unchanged": 32758,
+   "aef_gated": {
+    "found": 0.045,
+    "lit": 0.0,
+    "ap": 0.48
+   },
+   "aggregate": {
+    "found": 0.14,
+    "lit": 0.001,
+    "ap": 0.55
+   }
+  },
+  "world-nz-tauranga-tauriko": {
+   "moved": 25826,
+   "unchanged": 77256,
+   "aef_gated": {
+    "found": 0.378,
+    "lit": 0.01,
+    "ap": 0.806
+   },
+   "aggregate": {
+    "found": 0.537,
+    "lit": 0.016,
+    "ap": 0.849
+   }
+  },
+  "world-nz-whangarei": {
+   "moved": 11410,
+   "unchanged": 114683,
+   "aef_gated": {
+    "found": 0.017,
+    "lit": 0.001,
+    "ap": 0.14
+   },
+   "aggregate": {
+    "found": 0.041,
+    "lit": 0.005,
+    "ap": 0.178
+   }
+  },
+  "world-poland-gdansk-baltic-hub": {
+   "moved": 14087,
+   "unchanged": 192828,
+   "aef_gated": {
+    "found": 0.509,
+    "lit": 0.013,
+    "ap": 0.57
+   },
+   "aggregate": {
+    "found": 0.516,
+    "lit": 0.016,
+    "ap": 0.563
+   }
+  },
+  "world-poland-gdynia-port": {
+   "moved": 13955,
+   "unchanged": 201534,
+   "aef_gated": {
+    "found": 0.494,
+    "lit": 0.022,
+    "ap": 0.519
+   },
+   "aggregate": {
+    "found": 0.585,
+    "lit": 0.025,
+    "ap": 0.588
+   }
+  },
+  "world-poland-krakow-modlnica": {
+   "moved": 6164,
+   "unchanged": 176585,
+   "aef_gated": {
+    "found": 0.199,
+    "lit": 0.014,
+    "ap": 0.207
+   },
+   "aggregate": {
+    "found": 0.215,
+    "lit": 0.003,
+    "ap": 0.263
+   }
+  },
+  "world-poland-poznan-east": {
+   "moved": 3464,
+   "unchanged": 205266,
+   "aef_gated": {
+    "found": 0.343,
+    "lit": 0.01,
+    "ap": 0.23
+   },
+   "aggregate": {
+    "found": 0.366,
+    "lit": 0.009,
+    "ap": 0.291
+   }
+  },
+  "world-poland-swinoujscie": {
+   "moved": 6497,
+   "unchanged": 120658,
+   "aef_gated": {
+    "found": 0.357,
+    "lit": 0.01,
+    "ap": 0.439
+   },
+   "aggregate": {
+    "found": 0.329,
+    "lit": 0.006,
+    "ap": 0.477
+   }
+  },
+  "world-poland-warsaw-s2-wilanow": {
+   "moved": 9790,
+   "unchanged": 168696,
+   "aef_gated": {
+    "found": 0.64,
+    "lit": 0.055,
+    "ap": 0.565
+   },
+   "aggregate": {
+    "found": 0.589,
+    "lit": 0.014,
+    "ap": 0.614
+   }
+  },
+  "world-poland-wroclaw-jagodno": {
+   "moved": 8242,
+   "unchanged": 191476,
+   "aef_gated": {
+    "found": 0.666,
+    "lit": 0.047,
+    "ap": 0.461
+   },
+   "aggregate": {
+    "found": 0.68,
+    "lit": 0.03,
+    "ap": 0.481
+   }
+  },
+  "world-poland-zelazny-most": {
+   "moved": 233610,
+   "unchanged": 215741,
+   "aef_gated": {
+    "found": 0.167,
+    "lit": 0.05,
+    "ap": 0.632
+   },
+   "aggregate": {
+    "found": 0.105,
+    "lit": 0.015,
+    "ap": 0.624
+   }
+  },
+  "world-poland-zulawy": {
+   "moved": 289,
+   "unchanged": 263791,
+   "aef_gated": {
+    "found": 0.128,
+    "lit": 0.003,
+    "ap": 0.023
+   },
+   "aggregate": {
+    "found": 0.121,
+    "lit": 0.002,
+    "ap": 0.026
+   }
+  },
+  "world-saopaulo-ctl-landfill": {
+   "moved": 90,
+   "unchanged": 29,
+   "aef_gated": {
+    "found": 0.8,
+    "lit": 0.034,
+    "ap": 0.965
+   },
+   "aggregate": {
+    "found": 0.722,
+    "lit": 0.034,
+    "ap": 0.967
+   }
+  },
+  "world-saopaulo-grajau": {
+   "moved": 555,
+   "unchanged": 2008,
+   "aef_gated": {
+    "found": 0.128,
+    "lit": 0.0,
+    "ap": 0.484
+   },
+   "aggregate": {
+    "found": 0.177,
+    "lit": 0.0,
+    "ap": 0.634
+   }
+  },
+  "world-saopaulo-ibirapuera": {
+   "moved": 9,
+   "unchanged": 614,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.476
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.0,
+    "ap": 0.082
+   }
+  },
+  "world-saopaulo-parelheiros": {
+   "moved": 1214,
+   "unchanged": 6881,
+   "aef_gated": {
+    "found": 0.016,
+    "lit": 0.022,
+    "ap": 0.15
+   },
+   "aggregate": {
+    "found": 0.024,
+    "lit": 0.019,
+    "ap": 0.178
+   }
+  },
+  "world-saopaulo-perus": {
+   "moved": 1442,
+   "unchanged": 3122,
+   "aef_gated": {
+    "found": 0.009,
+    "lit": 0.003,
+    "ap": 0.318
+   },
+   "aggregate": {
+    "found": 0.021,
+    "lit": 0.004,
+    "ap": 0.373
+   }
+  },
+  "world-scotland-avonbridge": {
+   "moved": 92,
+   "unchanged": 90528,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.003,
+    "ap": 0.001
+   },
+   "aggregate": {
+    "found": 0.0,
+    "lit": 0.001,
+    "ap": 0.002
+   }
+  },
+  "world-scotland-burntisland": {
+   "moved": 1834,
+   "unchanged": 175626,
+   "aef_gated": {
+    "found": 0.074,
+    "lit": 0.012,
+    "ap": 0.056
+   },
+   "aggregate": {
+    "found": 0.165,
+    "lit": 0.019,
+    "ap": 0.091
+   }
+  },
+  "world-scotland-calderwood": {
+   "moved": 3692,
+   "unchanged": 132165,
+   "aef_gated": {
+    "found": 0.534,
+    "lit": 0.015,
+    "ap": 0.467
+   },
+   "aggregate": {
+    "found": 0.626,
+    "lit": 0.012,
+    "ap": 0.561
+   }
+  },
+  "world-scotland-crossgates": {
+   "moved": 1656,
+   "unchanged": 156343,
+   "aef_gated": {
+    "found": 0.264,
+    "lit": 0.014,
+    "ap": 0.231
+   },
+   "aggregate": {
+    "found": 0.415,
+    "lit": 0.002,
+    "ap": 0.455
+   }
+  },
+  "world-scotland-dalry": {
+   "moved": 2384,
+   "unchanged": 152505,
+   "aef_gated": {
+    "found": 0.123,
+    "lit": 0.004,
+    "ap": 0.257
+   },
+   "aggregate": {
+    "found": 0.208,
+    "lit": 0.001,
+    "ap": 0.409
+   }
+  },
+  "world-scotland-kinglassie": {
+   "moved": 2673,
+   "unchanged": 114249,
+   "aef_gated": {
+    "found": 0.073,
+    "lit": 0.019,
+    "ap": 0.058
+   },
+   "aggregate": {
+    "found": 0.159,
+    "lit": 0.023,
+    "ap": 0.108
+   }
+  },
+  "world-scotland-kirknewton": {
+   "moved": 13,
+   "unchanged": 129164,
+   "aef_gated": {
+    "found": 0.0,
+    "lit": 0.001,
+    "ap": 0.003
+   },
+   "aggregate": {
+    "found": 0.154,
+    "lit": 0.0,
+    "ap": 0.021
+   }
+  },
+  "world-scotland-levenseat": {
+   "moved": 0,
+   "unchanged": 3634,
+   "aef_gated": {
+    "found": null,
+    "lit": 0.0,
+    "ap": null
+   },
+   "aggregate": {
+    "found": null,
+    "lit": 0.001,
+    "ap": null
+   }
+  },
+  "world-scotland-polmont": {
+   "moved": 1147,
+   "unchanged": 55681,
+   "aef_gated": {
+    "found": 0.229,
+    "lit": 0.019,
+    "ap": 0.147
+   },
+   "aggregate": {
+    "found": 0.23,
+    "lit": 0.016,
+    "ap": 0.16
+   }
+  },
+  "world-scotland-ratho": {
+   "moved": 2052,
+   "unchanged": 112858,
+   "aef_gated": {
+    "found": 0.208,
+    "lit": 0.044,
+    "ap": 0.124
+   },
+   "aggregate": {
+    "found": 0.393,
+    "lit": 0.02,
+    "ap": 0.298
+   }
+  },
+  "world-scotland-winchburgh": {
+   "moved": 5764,
+   "unchanged": 111789,
+   "aef_gated": {
+    "found": 0.801,
+    "lit": 0.026,
+    "ap": 0.785
+   },
+   "aggregate": {
+    "found": 0.862,
+    "lit": 0.056,
+    "ap": 0.829
+   }
+  },
+  "world-swiss-geneva-cherpines": {
+   "moved": 4937,
+   "unchanged": 195370,
+   "aef_gated": {
+    "found": 0.105,
+    "lit": 0.003,
+    "ap": 0.185
+   },
+   "aggregate": {
+    "found": 0.139,
+    "lit": 0.004,
+    "ap": 0.232
+   }
+  },
+  "world-swiss-geneva-satigny": {
+   "moved": 1402,
+   "unchanged": 209286,
+   "aef_gated": {
+    "found": 0.304,
+    "lit": 0.001,
+    "ap": 0.373
+   },
+   "aggregate": {
+    "found": 0.444,
+    "lit": 0.004,
+    "ap": 0.428
+   }
+  },
+  "world-swiss-geneva-vernets": {
+   "moved": 9360,
+   "unchanged": 176257,
+   "aef_gated": {
+    "found": 0.079,
+    "lit": 0.003,
+    "ap": 0.175
+   },
+   "aggregate": {
+    "found": 0.104,
+    "lit": 0.003,
+    "ap": 0.223
+   }
+  },
+  "world-swiss-huentwangen": {
+   "moved": 12708,
+   "unchanged": 199706,
+   "aef_gated": {
+    "found": 0.546,
+    "lit": 0.024,
+    "ap": 0.571
+   },
+   "aggregate": {
+    "found": 0.556,
+    "lit": 0.008,
+    "ap": 0.703
+   }
+  },
+  "world-swiss-uetliberg": {
+   "moved": 2058,
+   "unchanged": 203933,
+   "aef_gated": {
+    "found": 0.219,
+    "lit": 0.016,
+    "ap": 0.125
+   },
+   "aggregate": {
+    "found": 0.207,
+    "lit": 0.006,
+    "ap": 0.155
+   }
+  },
+  "world-swiss-weiach": {
+   "moved": 9514,
+   "unchanged": 182704,
+   "aef_gated": {
+    "found": 0.427,
+    "lit": 0.012,
+    "ap": 0.555
+   },
+   "aggregate": {
+    "found": 0.512,
+    "lit": 0.008,
+    "ap": 0.671
+   }
+  },
+  "world-swiss-weinland": {
+   "moved": 738,
+   "unchanged": 217933,
+   "aef_gated": {
+    "found": 0.115,
+    "lit": 0.043,
+    "ap": 0.013
+   },
+   "aggregate": {
+    "found": 0.07,
+    "lit": 0.004,
+    "ap": 0.017
+   }
+  },
+  "world-swiss-zurich-airport": {
+   "moved": 7261,
+   "unchanged": 177164,
+   "aef_gated": {
+    "found": 0.431,
+    "lit": 0.033,
+    "ap": 0.389
+   },
+   "aggregate": {
+    "found": 0.431,
+    "lit": 0.015,
+    "ap": 0.454
+   }
+  },
+  "world-swiss-zurich-city": {
+   "moved": 7756,
+   "unchanged": 139358,
+   "aef_gated": {
+    "found": 0.166,
+    "lit": 0.003,
+    "ap": 0.298
+   },
+   "aggregate": {
+    "found": 0.183,
+    "lit": 0.003,
+    "ap": 0.343
+   }
+  }
+ },
+ "calib": {
+  "pooled_score_at_chance": {
+   "0.3": 0.813,
+   "0.5": 0.918,
+   "0.7": 0.992
+  },
+  "regions": {
+   "br": {
+    "score_at_50": 0.358,
+    "pixels": 15964,
+    "moved_share": 0.291,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.039,
+      0.154,
+      13120
+     ],
+     [
+      0.074,
+      0.274,
+      1161
+     ],
+     [
+      0.096,
+      0.346,
+      505
+     ],
+     [
+      0.128,
+      0.548,
+      282
+     ],
+     [
+      0.148,
+      0.515,
+      182
+     ],
+     [
+      0.173,
+      0.567,
+      123
+     ],
+     [
+      0.229,
+      0.863,
+      92
+     ],
+     [
+      0.267,
+      0.764,
+      118
+     ],
+     [
+      0.428,
+      0.939,
+      151
+     ],
+     [
+      0.595,
+      0.96,
+      230
+     ]
+    ]
+   },
+   "ca": {
+    "score_at_50": 0.906,
+    "pixels": 1789319,
+    "moved_share": 0.151,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.039,
+      0.059,
+      1327066
+     ],
+     [
+      0.074,
+      0.184,
+      106386
+     ],
+     [
+      0.097,
+      0.181,
+      59543
+     ],
+     [
+      0.125,
+      0.177,
+      41054
+     ],
+     [
+      0.148,
+      0.183,
+      31498
+     ],
+     [
+      0.173,
+      0.206,
+      25874
+     ],
+     [
+      0.212,
+      0.246,
+      22904
+     ],
+     [
+      0.265,
+      0.295,
+      22222
+     ],
+     [
+      0.4,
+      0.407,
+      25599
+     ],
+     [
+      0.715,
+      0.816,
+      127173
+     ]
+    ]
+   },
+   "ch": {
+    "score_at_50": 0.917,
+    "pixels": 1757445,
+    "moved_share": 0.033,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.039,
+      0.016,
+      1525022
+     ],
+     [
+      0.074,
+      0.032,
+      92468
+     ],
+     [
+      0.097,
+      0.05,
+      40870
+     ],
+     [
+      0.124,
+      0.085,
+      23417
+     ],
+     [
+      0.148,
+      0.121,
+      15598
+     ],
+     [
+      0.173,
+      0.151,
+      12087
+     ],
+     [
+      0.212,
+      0.208,
+      9786
+     ],
+     [
+      0.265,
+      0.258,
+      8116
+     ],
+     [
+      0.398,
+      0.363,
+      8164
+     ],
+     [
+      0.669,
+      0.754,
+      21917
+     ]
+    ]
+   },
+   "ee": {
+    "score_at_50": 0.986,
+    "pixels": 661936,
+    "moved_share": 0.128,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.039,
+      0.017,
+      426450
+     ],
+     [
+      0.075,
+      0.048,
+      49050
+     ],
+     [
+      0.097,
+      0.074,
+      33043
+     ],
+     [
+      0.125,
+      0.09,
+      23554
+     ],
+     [
+      0.148,
+      0.109,
+      17435
+     ],
+     [
+      0.174,
+      0.115,
+      14678
+     ],
+     [
+      0.213,
+      0.125,
+      14447
+     ],
+     [
+      0.265,
+      0.121,
+      14608
+     ],
+     [
+      0.393,
+      0.144,
+      14103
+     ],
+     [
+      0.796,
+      0.791,
+      54568
+     ]
+    ]
+   },
+   "fr": {
+    "score_at_50": 0.996,
+    "pixels": 1525109,
+    "moved_share": 0.024,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.038,
+      0.018,
+      1447899
+     ],
+     [
+      0.074,
+      0.057,
+      23366
+     ],
+     [
+      0.097,
+      0.08,
+      12320
+     ],
+     [
+      0.125,
+      0.113,
+      8075
+     ],
+     [
+      0.148,
+      0.114,
+      6398
+     ],
+     [
+      0.173,
+      0.127,
+      5288
+     ],
+     [
+      0.212,
+      0.149,
+      4549
+     ],
+     [
+      0.265,
+      0.188,
+      3979
+     ],
+     [
+      0.398,
+      0.261,
+      4299
+     ],
+     [
+      0.631,
+      0.456,
+      8936
+     ]
+    ]
+   },
+   "gb": {
+    "score_at_50": 0.969,
+    "pixels": 3485843,
+    "moved_share": 0.03,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.04,
+      0.01,
+      2774131
+     ],
+     [
+      0.074,
+      0.022,
+      236952
+     ],
+     [
+      0.097,
+      0.037,
+      118030
+     ],
+     [
+      0.124,
+      0.054,
+      76732
+     ],
+     [
+      0.148,
+      0.078,
+      57155
+     ],
+     [
+      0.173,
+      0.098,
+      45482
+     ],
+     [
+      0.211,
+      0.118,
+      40150
+     ],
+     [
+      0.265,
+      0.157,
+      36280
+     ],
+     [
+      0.395,
+      0.235,
+      34525
+     ],
+     [
+      0.683,
+      0.653,
+      66406
+     ]
+    ]
+   },
+   "islands": {
+    "score_at_50": 0.994,
+    "pixels": 3385853,
+    "moved_share": 0.01,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.041,
+      0.001,
+      2441925
+     ],
+     [
+      0.074,
+      0.004,
+      363676
+     ],
+     [
+      0.097,
+      0.006,
+      187290
+     ],
+     [
+      0.124,
+      0.009,
+      115231
+     ],
+     [
+      0.148,
+      0.013,
+      77755
+     ],
+     [
+      0.173,
+      0.019,
+      55126
+     ],
+     [
+      0.211,
+      0.03,
+      40835
+     ],
+     [
+      0.264,
+      0.052,
+      31879
+     ],
+     [
+      0.394,
+      0.086,
+      27196
+     ],
+     [
+      0.694,
+      0.455,
+      44940
+     ]
+    ]
+   },
+   "jp": {
+    "score_at_50": 0.941,
+    "pixels": 650052,
+    "moved_share": 0.222,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.039,
+      0.199,
+      567403
+     ],
+     [
+      0.074,
+      0.219,
+      25755
+     ],
+     [
+      0.097,
+      0.235,
+      12712
+     ],
+     [
+      0.125,
+      0.258,
+      7820
+     ],
+     [
+      0.148,
+      0.314,
+      5690
+     ],
+     [
+      0.174,
+      0.369,
+      4238
+     ],
+     [
+      0.212,
+      0.39,
+      3577
+     ],
+     [
+      0.265,
+      0.434,
+      3234
+     ],
+     [
+      0.398,
+      0.504,
+      3483
+     ],
+     [
+      0.729,
+      0.755,
+      16140
+     ]
+    ]
+   },
+   "nl": {
+    "score_at_50": 0.999,
+    "pixels": 2290655,
+    "moved_share": 0.062,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.038,
+      0.009,
+      2055754
+     ],
+     [
+      0.074,
+      0.121,
+      56192
+     ],
+     [
+      0.097,
+      0.193,
+      28710
+     ],
+     [
+      0.125,
+      0.256,
+      18683
+     ],
+     [
+      0.148,
+      0.316,
+      14058
+     ],
+     [
+      0.174,
+      0.375,
+      11572
+     ],
+     [
+      0.212,
+      0.433,
+      10157
+     ],
+     [
+      0.265,
+      0.489,
+      10023
+     ],
+     [
+      0.404,
+      0.56,
+      12459
+     ],
+     [
+      0.737,
+      0.525,
+      73047
+     ]
+    ]
+   },
+   "no": {
+    "score_at_50": 0.623,
+    "pixels": 1444422,
+    "moved_share": 0.05,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.038,
+      0.028,
+      1372828
+     ],
+     [
+      0.074,
+      0.211,
+      20150
+     ],
+     [
+      0.097,
+      0.297,
+      10511
+     ],
+     [
+      0.125,
+      0.393,
+      7209
+     ],
+     [
+      0.148,
+      0.428,
+      5346
+     ],
+     [
+      0.173,
+      0.475,
+      4473
+     ],
+     [
+      0.212,
+      0.511,
+      4057
+     ],
+     [
+      0.265,
+      0.581,
+      4181
+     ],
+     [
+      0.402,
+      0.638,
+      4827
+     ],
+     [
+      0.637,
+      0.786,
+      10840
+     ]
+    ]
+   },
+   "nz": {
+    "score_at_50": 0.743,
+    "pixels": 1710048,
+    "moved_share": 0.094,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.038,
+      0.06,
+      1576756
+     ],
+     [
+      0.074,
+      0.214,
+      33463
+     ],
+     [
+      0.097,
+      0.228,
+      19529
+     ],
+     [
+      0.125,
+      0.283,
+      12834
+     ],
+     [
+      0.148,
+      0.336,
+      9516
+     ],
+     [
+      0.174,
+      0.414,
+      7826
+     ],
+     [
+      0.212,
+      0.458,
+      6816
+     ],
+     [
+      0.265,
+      0.515,
+      6836
+     ],
+     [
+      0.4,
+      0.652,
+      7823
+     ],
+     [
+      0.695,
+      0.89,
+      28649
+     ]
+    ]
+   },
+   "pl": {
+    "score_at_50": 0.916,
+    "pixels": 2032673,
+    "moved_share": 0.095,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.039,
+      0.057,
+      1720310
+     ],
+     [
+      0.074,
+      0.164,
+      83306
+     ],
+     [
+      0.097,
+      0.201,
+      45403
+     ],
+     [
+      0.125,
+      0.233,
+      31591
+     ],
+     [
+      0.148,
+      0.25,
+      23852
+     ],
+     [
+      0.173,
+      0.274,
+      18500
+     ],
+     [
+      0.212,
+      0.309,
+      15596
+     ],
+     [
+      0.265,
+      0.356,
+      13663
+     ],
+     [
+      0.402,
+      0.426,
+      16036
+     ],
+     [
+      0.687,
+      0.723,
+      64416
+     ]
+    ]
+   },
+   "us": {
+    "score_at_50": 0.963,
+    "pixels": 8389706,
+    "moved_share": 0.07,
+    "bins (pooled chance, observed, n)": [
+     [
+      0.04,
+      0.011,
+      5987180
+     ],
+     [
+      0.074,
+      0.043,
+      525953
+     ],
+     [
+      0.097,
+      0.075,
+      286047
+     ],
+     [
+      0.125,
+      0.103,
+      199294
+     ],
+     [
+      0.148,
+      0.126,
+      163209
+     ],
+     [
+      0.174,
+      0.141,
+      151398
+     ],
+     [
+      0.212,
+      0.159,
+      150024
+     ],
+     [
+      0.265,
+      0.193,
+      153813
+     ],
+     [
+      0.398,
+      0.277,
+      169634
+     ],
+     [
+      0.698,
+      0.586,
+      603154
+     ]
+    ]
+   }
+  }
+ }
+}
