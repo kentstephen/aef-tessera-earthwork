@@ -891,7 +891,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     let p = s2Tiffs.get(url);
     if (!p) {
       const near = opts && opts.getPriority;
-      const getPriority = () => [year === yearOf() ? 0 : 1, fill ? 1 : 0, near ? near() : 0];
+      // the year shown first, then the years nearest it
+      const getPriority = () => [Math.abs(year - yearOf()), fill ? 1 : 0, near ? near() : 0];
       p = GeoTIFF.fromUrl(url, {concurrencyLimiter: s2Limiter, getPriority});
       s2Tiffs.set(url, p);
       p.catch(() => { if (s2Tiffs.get(url) === p) s2Tiffs.delete(url); });  // a failed read is asked again next time
@@ -923,14 +924,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
           if (look !== lookOf(year)) return;
           let e = s2Src.get(year);
           if (!e) { e = {ids: new Set(), batches: []}; s2Src.set(year, e); }
-          const bt = {key: k.replace(/\//g, "-"), yearly: [], fill: [], base: [], bbox: [180, 90, -180, -90]};
+          const bt = {key: k.replace(/\//g, "-"), yearly: [], bbox: [180, 90, -180, -90]};
           for (const it of items) {
             if (!it.bbox || e.ids.has(it.id)) continue;
             e.ids.add(it.id);
-            bt[it.base ? "base" : it.fill ? "fill" : "yearly"].push({id: it.id, url: it.url, bbox: it.bbox, bands: it.bands || {}, scl: it.scl});
+            bt.yearly.push({id: it.id, url: it.url, bbox: it.bbox, bands: it.bands || {}, scl: it.scl, under: it.under || []});
             bt.bbox = [Math.min(bt.bbox[0], it.bbox[0]), Math.min(bt.bbox[1], it.bbox[1]), Math.max(bt.bbox[2], it.bbox[2]), Math.max(bt.bbox[3], it.bbox[3])];
           }
-          if (bt.yearly.length || bt.fill.length || bt.base.length) { e.batches.push(bt); update(); }
+          if (bt.yearly.length) { e.batches.push(bt); update(); }
         }, () => { s2Asked.delete(k); });
       }
   }
@@ -1019,15 +1020,63 @@ export function render({model, el, earthwork, s2Items, credits}) {
     for (const [ok, ov] of s2Cache) { if (s2CacheBytes <= S2_CACHE) break; s2Cache.delete(ok); s2CacheBytes -= ov.data.byteLength; }
   }
   const s2Texture = (device, v) => ({texture: device.createTexture({...v, sampler: {magFilter: "linear", minFilter: "linear"}}), width: v.width, height: v.height});
-  // src: the footprint, its clouds cut out (cut) by its SCL; the base is drawn uncut
-  async function s2TileData(image, {device, x, y, signal, pool}, key, src = null, cut = false) {
-    const ck = src && s2CacheKey(src.url, image, x, y, cut), hit = s2CacheGet(ck);
+  // the scenes under a footprint (src.under: its fill and base, s2.ts) lie on its MGRS tile and so on its grid: each
+  // one's level matching image, so a tile of it is the same x, y. Each read (read(im, scene, cut)) gives its pixels
+  // with alpha 0 at nodata and clouds, and the tile is the footprint's pixels with every hole filled from the first
+  // scene under it that has the ground there. All in one texture, so a tile comes in whole: no hole drawn first and
+  // filled when the next layer's tile arrives
+  const s2Same = (a, b) => a.width === b.width && a.height === b.height && a.tileWidth === b.tileWidth && a.tileHeight === b.tileHeight
+    && a.transform[0] === b.transform[0] && a.transform[2] === b.transform[2] && a.transform[5] === b.transform[5];
+  async function s2Stack(src, image, urlOf, read, year, signal) {
+    const under = await Promise.all(((src && src.under) || []).map(async (u) => {
+      const url = urlOf(u), g = url ? await s2Tiff(url, null, year, false).catch(() => null) : null;
+      const im = g && [g, ...g.overviews].find((q) => s2Same(q, image));
+      return im ? [im, u] : null;
+    }));
+    // the footprint's own read fails the tile; one under it failing only leaves its share to the next
+    const outs = await Promise.all([read(image, src, true), ...under.filter(Boolean).map(([im, u]) => read(im, u, !u.base).catch((e) => { if (signal && signal.aborted) throw e; return null; }))]);
+    const [top, ...rest] = outs, d = top.data, px = top.width * top.height;
+    let holes = [];
+    for (let i = 0; i < px; i++) if (!d[4 * i + 3]) holes.push(i);
+    for (const r of rest) {
+      if (!holes.length) break;
+      if (!r || r.width !== top.width || r.height !== top.height || r.format !== top.format) continue;
+      const left = [];
+      for (const i of holes) {
+        const o = 4 * i;
+        if (r.data[o + 3]) { d[o] = r.data[o]; d[o + 1] = r.data[o + 1]; d[o + 2] = r.data[o + 2]; d[o + 3] = r.data[o + 3]; } else left.push(i);
+      }
+      holes = left;
+    }
+    return top;
+  }
+  // a footprint's tile, its scenes stacked (s2Stack), kept in s2Cache
+  async function s2TileData(image, {device, x, y, signal, pool}, key, src = null) {
+    const ck = src && s2CacheKey(src.url, image, x, y, true), hit = s2CacheGet(ck);
     if (hit) return s2Texture(device, hit);
     const sy = s2Stat.years[key] || (s2Stat.years[key] = {tiles: 0, pending: 0, last: 0});
     s2Stat.pending++; sy.pending++;
     try {
+      const year = Number(String(key).slice(0, 4));
+      const out = await s2Stack(src, image, (u) => u.url, (im, u, cut) => s2TciPixels(im, x, y, pool, signal, u, cut, year), year, signal);
+      s2Stat.tiles++; sy.tiles++;
+      s2CachePut(ck, out);
+      return s2Texture(device, out);
+    } catch (e) {
+      if (!(signal && signal.aborted)) s2Stat.failed++;
+      throw e;
+    } finally {
+      s2Stat.pending--; sy.pending--;
+      s2Stat.last = sy.last = Date.now();
+      // the year shown is in: mount the others
+      s2WarmUp(key);
+    }
+  }
+  // one scene's TCI tile, its clouds cut out (cut) by its SCL; the base is uncut
+  async function s2TciPixels(image, x, y, pool, signal, src, cut, year) {
+    {
       const [{array}, cloud] = await Promise.all([image.fetchTile(x, y, {boundless: false, pool, signal}),
-        cut ? s2Clouds(src, image, x, y, pool, Number(String(key).slice(0, 4))) : null]);
+        cut ? s2Clouds(src, image, x, y, pool, year) : null]);
       const {width, height, data} = array, px = width * height;
       // TCI's black (0, 0, 0) is nodata: alpha 0 there, so the linear filter's blend of an edge
       // pixel with its nodata neighbor carries a falling alpha the shader can undo (a black
@@ -1042,18 +1091,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
       }
       // a cloud is nodata too (black at alpha 0, so the edge's blend divides back out the same way)
       if (cloud && rgba.length === 4 * px && cloud.length === px) for (let i = 0; i < px; i++) if (cloud[i]) rgba[4 * i] = rgba[4 * i + 1] = rgba[4 * i + 2] = rgba[4 * i + 3] = 0;
-      s2Stat.tiles++; sy.tiles++;
-      const out = {data: rgba, format: "rgba8unorm", width, height};
-      s2CachePut(ck, out);
-      return s2Texture(device, out);
-    } catch (e) {
-      if (!(signal && signal.aborted)) s2Stat.failed++;
-      throw e;
-    } finally {
-      s2Stat.pending--; sy.pending--;
-      s2Stat.last = sy.last = Date.now();
-      // the year shown is in: mount the others
-      s2WarmUp(key);
+      return {data: rgba, format: "rgba8unorm", width, height};
     }
   }
   // nodata (alpha 0) is dropped; at a footprint edge the filtered color is the edge pixel's
@@ -1170,12 +1208,30 @@ export function render({model, el, earthwork, s2Items, credits}) {
     }
     return p;
   }
-  async function s2BandTileData(image, {device, x, y, signal, pool}, key, geotiff, src, comp, year, fill, cut = false) {
-    const ck = s2CacheKey(comp + ":" + src.url, image, x, y, cut), hit = s2CacheGet(ck);
+  // a footprint's tile in the false colors, its scenes stacked as in s2TileData
+  async function s2BandTileData(image, {device, x, y, signal, pool}, key, src, comp, year) {
+    const ck = s2CacheKey(comp + ":" + src.url, image, x, y, true), hit = s2CacheGet(ck);
     if (hit) return s2Texture(device, hit);
     const sy = s2Stat.years[key] || (s2Stat.years[key] = {tiles: 0, pending: 0, last: 0});
     s2Stat.pending++; sy.pending++;
     try {
+      const out = await s2Stack(src, image, (u) => u.bands[s2Prim(comp)], (im, u, cut) => s2BandPixels(im, {x, y, signal, pool}, u, comp, year, cut), year, signal);
+      s2Stat.tiles++; sy.tiles++;
+      s2CachePut(ck, out);
+      return s2Texture(device, out);
+    } catch (e) {
+      if (!(signal && signal.aborted)) s2Stat.failed++;
+      throw e;
+    } finally {
+      s2Stat.pending--; sy.pending--;
+      s2Stat.last = sy.last = Date.now();
+      s2WarmUp(key);
+    }
+  }
+  // one scene's tile in the false colors, from its raw bands, its clouds cut out (cut) by its SCL
+  async function s2BandPixels(image, {x, y, signal, pool}, src, comp, year, cut = false) {
+    const fill = false;
+    {
       const spec = S2_FALSE[comp], bands = s2BandsOf(comp), prim = s2Prim(comp);
       const tp = image.transform, tw = image.tileWidth, th = image.tileHeight;
       const X0 = tp[2] + x * tw * tp[0], Y0 = tp[5] + y * th * tp[4];  // the tile's corner, in meters
@@ -1232,10 +1288,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
             px[o] = s2Half(q[0]); px[o + 1] = s2Half(q[1]); px[o + 2] = s2Half(q[2]); px[o + 3] = S2_HALF_ONE;
           }
         }
-        s2Stat.tiles++; sy.tiles++;
-        const out = {data: px, format: "rgba16float", width, height};
-        s2CachePut(ck, out);
-        return s2Texture(device, out);
+        return {data: px, format: "rgba16float", width, height};
       }
       const rgba = new Uint8Array(4 * width * height);
       if (chans.every(Boolean)) {
@@ -1268,17 +1321,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
           if (ok) rgba[4 * i + 3] = 255; else rgba[4 * i] = rgba[4 * i + 1] = rgba[4 * i + 2] = 0;
         }
       }
-      s2Stat.tiles++; sy.tiles++;
-      const out = {data: rgba, format: "rgba8unorm", width, height};
-      s2CachePut(ck, out);
-      return s2Texture(device, out);
-    } catch (e) {
-      if (!(signal && signal.aborted)) s2Stat.failed++;
-      throw e;
-    } finally {
-      s2Stat.pending--; sy.pending--;
-      s2Stat.last = sy.last = Date.now();
-      s2WarmUp(key);
+      return {data: rgba, format: "rgba8unorm", width, height};
     }
   }
   // as S2Look, then back from sqrt to reflectance and each band over its stretch (the
@@ -1425,22 +1468,21 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const look = !spec ? null : spec.rgb ? {module: S2Stretch, props: {gamma, scale}} : {module: S2Index, props: {lo, hi, kind: spec.kind}};
     const [W_, S_, E_, N_] = s2View();
     const live = e.batches.filter((bt) => bt.bbox[0] < E_ && bt.bbox[2] > W_ && bt.bbox[1] < N_ && bt.bbox[3] > S_);
-    // every batch's base under its fill under every batch's yearly footprints; all but the base with their clouds cut
-    const parts = ["base", "fill", "yearly"].flatMap((pt) => live.filter((bt) => bt[pt] && bt[pt].length).map((bt) => [bt, pt]));
-    return parts.map(([bt, part]) => new MosaicLayer({
-      id: pre + bt.key + "-" + part, sources: bt[part], maxCacheSize: 0, minZoom: cfg.s2_min_z || 7, visible: visible && stretched, beforeId: slot(left ? map2 : map),
+    // every batch's footprints, each tile with its fill and base stacked in (s2Stack)
+    return live.filter((bt) => bt.yearly.length).map((bt) => new MosaicLayer({
+      id: pre + bt.key, sources: bt.yearly, maxCacheSize: 0, minZoom: cfg.s2_min_z || 7, visible: visible && stretched, beforeId: slot(left ? map2 : map),
       // a footprint that cannot be read (the STAC lists it but the bucket lacks it, or its header
       // failed) is nothing there: a rejection here leaves MosaicLayer a tile with no content,
       // which it then cannot draw ("Cannot destructure property 'source' ... null")
-      getSource: (src, o) => s2Tiff(comp === "tci" ? src.url : src.bands[s2Prim(comp)], o, year, part !== "yearly").catch(() => null),
+      getSource: (src, o) => s2Tiff(comp === "tci" ? src.url : src.bands[s2Prim(comp)], o, year, false).catch(() => null),
       renderSource: (src, {data, signal}) => !data ? null : comp === "tci" ? new COGLayer({
-        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "yearly" ? "" : " " + part), src, part !== "base"), pool: s2Pool, signal, ...paint(),
+        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, String(year), src), pool: s2Pool, signal, ...paint(),
         refinementStrategy: "best-available", maxRequests: 16,
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, {module: S2Look, props: {gamma}}]}),
         updateTriggers: {renderTile: [gamma]},
       }) : new COGLayer({
         id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16, ...paint(),
-        getTileData: (img, o) => s2BandTileData(img, o, comp + " " + year + (part === "yearly" ? "" : " " + part), data, src, comp, year, part !== "yearly", part !== "base"),
+        getTileData: (img, o) => s2BandTileData(img, o, comp + " " + year, src, comp, year),
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, look]}),
         updateTriggers: {renderTile: [gamma, ...(scale || []), ...lo, ...hi]},
       }),
@@ -1449,17 +1491,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the years mounted. Painting (not holding), the paint's year and the ones it was stepped to (a blink
   // between two years keeps just those two); holding, the plain imagery's year shown, the rest once it has
   // loaded, with the paint's years still mounted under it, so letting go is instant
-  const IMG_SEEN = Number(cfg.s2_seen) || 4;
-  let imgSeen = [];
   const s2Years = (left = false) => {
     // painting, the paint's year first and, once it is in, every other year too, so stepping waits for nothing
     const pys = s2Warm ? [st.paintYear, ...PY.filter((v) => v !== st.paintYear)] : [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)];
     if (!left && st.paint && !st.holding) return pys;
-    // once in, the years either side of it and the two ends (B) too, not all nine: each mounted year reads its tiles.
-    // And the last few years shown (imgSeen), wherever they are, so a blink between two years far apart is instant
+    // once in, every other year too, hidden, so each loads in the background (the nearest first, s2Tiff's priority)
+    // and a step or a blink to any of them, once it is in, draws at once: for looking at one place over the years
     const y = yearOf(left);
-    imgSeen = [...imgSeen.filter((v) => v !== y), y].slice(-IMG_SEEN);
-    const ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y && (Math.abs(v - y) <= 2 || v === S2Y[0] || v === S2Y[S2Y.length - 1] || imgSeen.includes(v)))] : [y];
+    const ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y).sort((a, b) => Math.abs(a - y) - Math.abs(b - y))] : [y];
     return !left && st.paint ? [...ys, ...pys.filter((v) => !ys.includes(v))] : ys;
   };
   // every imagery year stays mounted once the view is close enough, the

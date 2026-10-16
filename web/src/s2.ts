@@ -5,9 +5,10 @@
  * is the yearly, and the next two clearest are the fill under its clouds and
  * edges; the year still in progress weighs age too, so it shows the ground as it
  * is now. The map reads and draws each footprint's TCI COG itself (ui.js,
- * s2CogLayers), with its clouds and their shadows cut out by the scene's SCL; a
- * fourth scene lies under them uncut, the base, so ground the SCL takes for cloud
- * in every scene (bright fresh soil and concrete can be) is never a hole. A new
+ * s2CogLayers), with its clouds and their shadows cut out by the scene's SCL and
+ * the holes filled, tile by tile, from the scenes under it (s2Stack): the fill,
+ * then a fourth scene uncut, the base, so ground the SCL takes for cloud in every
+ * scene (bright fresh soil and concrete can be) is never a hole. A new
  * look (N on the map) moves each tile down its list: the next scene as the
  * yearly, with its own fill and base.
  */
@@ -27,6 +28,8 @@ export type S2Item = {
   scl?: string;
   /** the scene under every other, drawn uncut */
   base?: boolean;
+  /** the scenes under a yearly footprint, on its MGRS tile: its fill, then its base */
+  under?: S2Item[];
 };
 
 type EsFeature = {
@@ -98,24 +101,23 @@ function sceneLists(year: number, bbox: number[]): Promise<EsFeature[][]> {
 function sceneItems(year: number, bbox: number[], look = 0): Promise<S2Item[]> {
   return sceneLists(year, bbox).then((lists) => {
     const yearly: S2Item[] = [];
-    const fill: S2Item[] = [];
     for (const l of lists) {
       const n = Math.min(4, l.length);
+      const its: S2Item[] = [];
       for (let i = 0; i < n; i++) {
         const f = l[(look + i) % l.length];
         const bands = Object.fromEntries(Object.entries(ES_BANDS).filter(([a]) => f.assets[a]).map(([a, b]) => [b, f.assets[a].href]));
         const epsg = Number(f.properties["proj:epsg"]) || undefined;
         const scl = f.assets.scl?.href;
-        const it: S2Item = { id: i ? `${f.id}#fill` : f.id, url: f.assets.visual.href, bbox: f.bbox, bands, epsg, scl };
-        if (i) fill.push({ ...it, fill: true, base: i === 3 });
-        else yearly.push(it);
+        its.push({ id: i ? `${f.id}#fill` : f.id, url: f.assets.visual.href, bbox: f.bbox, bands, epsg, scl, ...(i ? { fill: true, base: i === 3 } : {}) });
       }
+      if (its.length) yearly.push({ ...its[0], under: its.slice(1) });
     }
-    return [...yearly, ...fill];
+    return yearly;
   });
 }
 
-/** The year's footprints under one web mercator tile, in the look asked for: yearly first, the fill after them. */
+/** The year's footprints under one web mercator tile, in the look asked for, each with its fill and base under it. */
 export async function s2Items(year: number, { z, x, y }: { z: number; x: number; y: number }, look = 0): Promise<S2Item[]> {
   const n = 2 ** z;
   const lon = (i: number) => (i / n) * 360 - 180;
