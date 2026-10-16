@@ -1575,8 +1575,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (st.yearMap) out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else if (st.paint) out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ, year: st.paintYear, years: PY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
-    // the flare over the imagery while space is held (the pair's left has its own, layers2)
-    if (st.holding) out.push(flareLayer(map));
+    // the flare over the imagery while space is held (the pair's left has its own, layers2); paired, the year map here
+    // flares with the left, the same patches lit (or the rest dimmed) on both sides
+    if (st.holding || (st.pair && st.left === "s2" && st.yearMap)) out.push(flareLayer(map));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);
     // gold on the dark basemap (was near-black on the light one)
@@ -1624,7 +1625,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const up = flareHeld || now < flareUntil;
     flareK = up ? Math.min(1, flareK + dt / FLARE_UP) : Math.max(0, flareK - dt / FLARE_DOWN);
     if (ov2 && st.pair && st.left === "s2") ov2.setProps({layers: layers2()});
-    if (ov && st.holding) ov.setProps({layers: layers()});
+    if (ov && (st.holding || (st.pair && st.left === "s2" && st.yearMap))) ov.setProps({layers: layers()});
     flareRaf = up || flareK > 0 ? requestAnimationFrame(flareStep) : 0;
     if (!flareRaf) flareLast = 0;
   }
