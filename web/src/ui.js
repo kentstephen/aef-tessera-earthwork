@@ -950,9 +950,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const MASK_MOD = MaskExtension.prototype.getShaders.call({getAttributeManager: () => ({attributes: {}}), props: {}, state: {}}).modules[0];
   const {"fs:#main-start": _maskDiscard, ...maskInject} = MASK_MOD.inject;
   // outside: gray (a print, PAINT_BLACK below), dimmed toward the dark basemap so the lit ground stands out (the
-  // settings' gray brightness), and see-through to the basemap by the settings' gray alpha. The fill lies under the
-  // yearly mosaic, so while the gray is see-through the fill draws only the lit ground (its alpha would stack on the
-  // yearly's). The lit ground keeps its colors, fully opaque
+  // settings' gray brightness), and see-through to the basemap by the settings' gray alpha (stacked where footprints
+  // overlap). The lit ground keeps its colors, fully opaque
   // Shift held fills it in: one uniform skips the gray, so the mask layer and every tile stay as they are and
   // each way is one redraw
   // the paint waits for the earthwork: the imagery in its own colors until the view's chunks are in (onViewportLoad),
@@ -974,9 +973,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     float l = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
     if (!mask_isInBounds(mask_texCoords)) {
       float g = clamp((l - ${f3(PAINT_BLACK)}) / ${f3(PAINT_WHITE - PAINT_BLACK)}, 0.0, 1.0);
-      // see-through, the fill under the yearly mosaic draws nothing here: two footprints laid over each other would
-      // stack their alphas. The gray, its brightness from the settings, over the basemap by the settings' alpha
-      if (paintFill.under > 0.5 && paintFill.alpha < 0.999) discard;
+      // the gray, its brightness from the settings, over the basemap by the settings' alpha (where the fill lies under
+      // the yearly mosaic the two stack, so less of the basemap shows there; the fill is what covers the yearly's holes)
       fragColor = vec4(vec3(mix(g, g * g * (3.0 - 2.0 * g), ${f3(PAINT_CURVE)})) * paintFill.dim, paintFill.alpha);
     } else {
       vec3 c = mix(vec3(l), fragColor.rgb, ${f3(PAINT_SAT)});
