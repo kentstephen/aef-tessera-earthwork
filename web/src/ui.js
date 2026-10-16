@@ -518,9 +518,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   function setConf(on) {
     st.conf = on; swConf.sty(); styleKey(); update();
     if (!on) return;
-    note(st.paint ? "Confidence shows on the year map (Y) and the earthwork layer (I)"
-      : st.model === "aef" ? `Confidence${st.yearMap ? ", each year's call its own" : ""}: white weak, blue strong. Weak where the ground went back to what it was before; the aggregate (M) also asks TESSERA`
-      : `Confidence${st.yearMap ? ", each year's call its own" : ""}: white weak, blue strong. Weak where only one embedding calls it moved, or the ground went back to what it was before`, 4000);
+    note(st.paint ? "Confidence: on Y or I" : "Confidence: white weak, blue strong", 4000);
   }
   more.appendChild(el_("hr"));
   const bAbout = el_("button", "at-chip", "About this map <kbd>?</kbd>"); bAbout.title = "about this map (?)"; bAbout.style.margin = "4px 10px 6px";
