@@ -135,6 +135,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the paint's own year ([ ] and B while painting; imgYear is the plain imagery's), and Shift held: the
     // gray off, the imagery in its own colors everywhere
     paintYear: cfg.paint_year || PY[PY.length - 1], filled: false,
+    // each year's look (N, Shift+N): 0 its clearest scenes, 1 the next one down, and so on (s2.ts)
+    looks: {},
     fit: !!cfg.fit, holding: false,
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
@@ -474,7 +476,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -752,16 +754,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const ends = `${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`;
     if (st.yearMap && !st.holding) {
       const dEnds = `${String(YM[0]).slice(2)}/${String(YM[YM.length - 1]).slice(2)}`;
-      const img = (st.pair ? `<span>Sentinel-2 ${st.imgYear}, ${st.imgYear >= new Date().getFullYear() ? "its latest clear day" : "one clear day"}</span>` : `<span><kbd>P</kbd> or <kbd>Space</kbd> imagery</span>`)
+      const lk = lookOf(st.imgYear);
+      const img = (st.pair ? `<span>Sentinel-2 ${st.imgYear}, ${lk ? `look ${lk + 1}` : st.imgYear >= new Date().getFullYear() ? "its latest clear day" : "one clear day"}</span><span><kbd>N</kbd> new look</span>` : `<span><kbd>P</kbd> or <kbd>Space</kbd> imagery</span>`)
         + (st.mapYear > AY_LAST ? `<span>found to ${AY_LAST}</span>` : "");
       s2c.innerHTML = `<div class="ew-s2hd"><b>${st.mapYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
         + `<div class="ew-keys"><span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${dEnds}</span>${img}<span><kbd>Y</kbd> year map</span></div>`;
       s2c.className = "at-yc at-s2c at-glass ew-showing";
     } else {
     s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
-      + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span>`
+      + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span><span><kbd>N</kbd> ${lookOf(yearOf()) ? `look ${lookOf(yearOf()) + 1}` : "new look"}</span>`
         : showImg
-        ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span>`
+        ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>N</kbd> ${lookOf(yearOf()) ? `look ${lookOf(yearOf()) + 1}` : "new look"}</span>`
         : `<span><kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
     s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
     }
@@ -881,9 +884,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the rest queued in order: the year shown first, yearly footprints before the fill ones,
   // then the nearest the center of the view
   const s2Limiter = new PerOriginSemaphore({maxRequests: 16});
-  const s2Asked = new Set();  // "year/z/x/y" asked of the kernel
+  const s2Asked = new Set();  // "year/look/z/x/y" asked of Earth Search
   // years: per year ("2025", "2025 fill", "2025 base") {tiles, pending, last}; cut: the pixels cut out as cloud. For the tests
-  const s2Stat = {tiles: 0, pending: 0, failed: 0, last: 0, cut: 0, years: {}};
+  const s2Stat = {tiles: 0, pending: 0, failed: 0, last: 0, cut: 0, hits: 0, years: {}};
   const s2Tiff = (url, opts, year, fill) => {
     let p = s2Tiffs.get(url);
     if (!p) {
@@ -913,10 +916,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const y0_ = yearOf();
     for (const year of [y0_, ...S2Y.filter((y) => y !== y0_)])
       for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
-        const k = `${year}/${z}/${x}/${y}`;
+        const look = lookOf(year), k = `${year}/${look}/${z}/${x}/${y}`;
         if (s2Asked.has(k)) continue;
         s2Asked.add(k);
-        s2Items(year, {z, x, y}).then((items) => {
+        s2Items(year, {z, x, y}, look).then((items) => {
+          if (look !== lookOf(year)) return;
           let e = s2Src.get(year);
           if (!e) { e = {ids: new Set(), batches: []}; s2Src.set(year, e); }
           const bt = {key: k.replace(/\//g, "-"), yearly: [], fill: [], base: [], bbox: [180, 90, -180, -90]};
@@ -929,6 +933,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
           if (bt.yearly.length || bt.fill.length || bt.base.length) { e.batches.push(bt); update(); }
         }, () => { s2Asked.delete(k); });
       }
+  }
+  // a new look for a year (N): its footprints found again a scene down (s2.ts), its layers let go and the new ones
+  // mounted. The tiles already read stay in s2Cache, so stepping back (Shift+N) to a look seen is quick
+  const lookOf = (year) => st.looks[year] || 0;
+  function setLook(year, d) {
+    const n = Math.max(0, lookOf(year) + d);
+    if (n === lookOf(year)) return false;
+    if (n) st.looks[year] = n; else delete st.looks[year];
+    for (const k of [...s2Asked]) if (k.startsWith(year + "/")) s2Asked.delete(k);
+    s2Src.delete(year);
+    renderYear(); update();
+    return true;
   }
   // the other years mount once a tile of the year shown, in the colors shown, has settled with
   // nothing pending (a new color's first reads wait on its headers and stretch: the last tile of
@@ -985,8 +1001,28 @@ export function render({model, el, earthwork, s2Items, credits}) {
     }
     return any ? out : null;
   }
+  // every tile read and made, kept in memory (its pixels, ready for a texture) by its file, level, place and cut, the
+  // least recently drawn let go past the budget (cfg.s2_cache_mb, 1.5 GB): a year or a look stepped back to, a
+  // pan back, a layer mounted again, makes its textures from here with nothing to fetch or decode
+  const S2_CACHE = (Number(cfg.s2_cache_mb) || 1536) * 2 ** 20;
+  const s2Cache = new Map();
+  let s2CacheBytes = 0;
+  const s2CacheKey = (url, image, x, y, cut) => `${url}|${image.width}|${x}|${y}|${cut ? 1 : 0}`;
+  function s2CacheGet(k) {
+    const v = k && s2Cache.get(k);
+    if (v) { s2Cache.delete(k); s2Cache.set(k, v); s2Stat.hits++; }
+    return v;
+  }
+  function s2CachePut(k, v) {
+    if (!k || s2Cache.has(k)) return;
+    s2Cache.set(k, v); s2CacheBytes += v.data.byteLength;
+    for (const [ok, ov] of s2Cache) { if (s2CacheBytes <= S2_CACHE) break; s2Cache.delete(ok); s2CacheBytes -= ov.data.byteLength; }
+  }
+  const s2Texture = (device, v) => ({texture: device.createTexture({...v, sampler: {magFilter: "linear", minFilter: "linear"}}), width: v.width, height: v.height});
   // src: the footprint, its clouds cut out (cut) by its SCL; the base is drawn uncut
   async function s2TileData(image, {device, x, y, signal, pool}, key, src = null, cut = false) {
+    const ck = src && s2CacheKey(src.url, image, x, y, cut), hit = s2CacheGet(ck);
+    if (hit) return s2Texture(device, hit);
     const sy = s2Stat.years[key] || (s2Stat.years[key] = {tiles: 0, pending: 0, last: 0});
     s2Stat.pending++; sy.pending++;
     try {
@@ -1007,7 +1043,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
       // a cloud is nodata too (black at alpha 0, so the edge's blend divides back out the same way)
       if (cloud && rgba.length === 4 * px && cloud.length === px) for (let i = 0; i < px; i++) if (cloud[i]) rgba[4 * i] = rgba[4 * i + 1] = rgba[4 * i + 2] = rgba[4 * i + 3] = 0;
       s2Stat.tiles++; sy.tiles++;
-      return {texture: device.createTexture({data: rgba, format: "rgba8unorm", width, height, sampler: {magFilter: "linear", minFilter: "linear"}}), width, height};
+      const out = {data: rgba, format: "rgba8unorm", width, height};
+      s2CachePut(ck, out);
+      return s2Texture(device, out);
     } catch (e) {
       if (!(signal && signal.aborted)) s2Stat.failed++;
       throw e;
@@ -1133,6 +1171,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     return p;
   }
   async function s2BandTileData(image, {device, x, y, signal, pool}, key, geotiff, src, comp, year, fill, cut = false) {
+    const ck = s2CacheKey(comp + ":" + src.url, image, x, y, cut), hit = s2CacheGet(ck);
+    if (hit) return s2Texture(device, hit);
     const sy = s2Stat.years[key] || (s2Stat.years[key] = {tiles: 0, pending: 0, last: 0});
     s2Stat.pending++; sy.pending++;
     try {
@@ -1193,7 +1233,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
           }
         }
         s2Stat.tiles++; sy.tiles++;
-        return {texture: device.createTexture({data: px, format: "rgba16float", width, height, sampler: {magFilter: "linear", minFilter: "linear"}}), width, height};
+        const out = {data: px, format: "rgba16float", width, height};
+        s2CachePut(ck, out);
+        return s2Texture(device, out);
       }
       const rgba = new Uint8Array(4 * width * height);
       if (chans.every(Boolean)) {
@@ -1227,7 +1269,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
         }
       }
       s2Stat.tiles++; sy.tiles++;
-      return {texture: device.createTexture({data: rgba, format: "rgba8unorm", width, height, sampler: {magFilter: "linear", minFilter: "linear"}}), width, height};
+      const out = {data: rgba, format: "rgba8unorm", width, height};
+      s2CachePut(ck, out);
+      return s2Texture(device, out);
     } catch (e) {
       if (!(signal && signal.aborted)) s2Stat.failed++;
       throw e;
@@ -1319,7 +1363,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     let got = null;
     for (const year of [...S2Y].reverse()) {
       if (gen !== s2StretchGen) return;
-      const lists = await Promise.all(tiles.slice(0, 16).map((t) => s2Items(year, t).catch(() => [])));
+      const lists = await Promise.all(tiles.slice(0, 16).map((t) => s2Items(year, t, lookOf(year)).catch(() => [])));
       const seen = new Set(), items = [];
       for (const it of lists.flat())
         if (!it.fill && it.bbox && !seen.has(it.id) && it.bbox[0] < box[2] && it.bbox[2] > box[0] && it.bbox[1] < box[3] && it.bbox[3] > box[1]) { seen.add(it.id); items.push(it); }
@@ -1405,12 +1449,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the years mounted. Painting (not holding), the paint's year and the ones it was stepped to (a blink
   // between two years keeps just those two); holding, the plain imagery's year shown, the rest once it has
   // loaded, with the paint's years still mounted under it, so letting go is instant
+  const IMG_SEEN = Number(cfg.s2_seen) || 4;
+  let imgSeen = [];
   const s2Years = (left = false) => {
     // painting, the paint's year first and, once it is in, every other year too, so stepping waits for nothing
     const pys = s2Warm ? [st.paintYear, ...PY.filter((v) => v !== st.paintYear)] : [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)];
     if (!left && st.paint && !st.holding) return pys;
-    // once in, the years either side of it and the two ends (B) too, not all nine: each mounted year reads its tiles
-    const y = yearOf(left), ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y && (Math.abs(v - y) <= 2 || v === S2Y[0] || v === S2Y[S2Y.length - 1]))] : [y];
+    // once in, the years either side of it and the two ends (B) too, not all nine: each mounted year reads its tiles.
+    // And the last few years shown (imgSeen), wherever they are, so a blink between two years far apart is instant
+    const y = yearOf(left);
+    imgSeen = [...imgSeen.filter((v) => v !== y), y].slice(-IMG_SEEN);
+    const ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y && (Math.abs(v - y) <= 2 || v === S2Y[0] || v === S2Y[S2Y.length - 1] || imgSeen.includes(v)))] : [y];
     return !left && st.paint ? [...ys, ...pys.filter((v) => !ys.includes(v))] : ys;
   };
   // every imagery year stays mounted once the view is close enough, the
@@ -1912,6 +1961,13 @@ export function render({model, el, earthwork, s2Items, credits}) {
       if (!(st.yearMap || st.paint || st.holding || (st.pair && st.left === "s2"))) return;
       const ys = yearsOn(), a = ys[0], b = ys[ys.length - 1];
       setYear(curYear() === b ? a : b);
+    }
+    // N: a new look for the imagery's year shown (each tile's next scene down, with its own fill), Shift+N back
+    else if (k === "n" || k === "N") {
+      if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return;
+      const y = onPaint() ? st.paintYear : st.imgYear, back = e.shiftKey;
+      if (setLook(y, back ? -1 : 1)) note(lookOf(y) ? `Sentinel-2 ${y}, look ${lookOf(y) + 1}: each tile's next clearest scene down (N another, Shift+N back)` : `Sentinel-2 ${y}, its clearest scenes again`, 2500);
+      else note(`Sentinel-2 ${y} is on its clearest scenes (N for another look)`, 2000);
     }
     else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }
     else if (k === "l" || k === "L") { const i = NAMES.findIndex(([m]) => m === st.labels); setNames(NAMES[(i + 1) % NAMES.length][0]); }
