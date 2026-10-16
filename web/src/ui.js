@@ -271,16 +271,6 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the window drawn: painting, each year its own change (the year before it to the year shown, so the color matches
   // the imagery under it, and a year with no digging is all gray), on AlphaEarth's layer alone (fast enough to step
   // through); otherwise the years set here and the layer chosen
-  // the paint's years: the imagery's years inside the range set here (each still its own change from the year before);
-  // a range wholly before the imagery keeps its first year
-  function paintYears() { const ys = S2Y.filter((y) => y >= st.y0 && y <= st.y1); return ys.length ? ys : [st.y1 < S2Y[0] ? S2Y[0] : S2Y[S2Y.length - 1]]; }
-  // the paint's year moved into the range when the range changes
-  function fitPaintYear() {
-    const ys = paintYears();
-    if (ys.includes(st.paintYear)) return;
-    st.paintYear = ys.reduce((a, y) => (Math.abs(y - st.paintYear) < Math.abs(a - st.paintYear) ? y : a), ys[0]);
-    paintSeen.add(st.paintYear);
-  }
   function winOf() { return st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
   // the chunks drawn: the paint's scores (the layer chosen, scored ahead a year at a time), or the layer's own
   function kindOf() { return st.paint ? `paint-${st.model}` : st.model; }
@@ -300,7 +290,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     st.y0 = aefYears[a]; st.y1 = aefYears[b]; styleWin();
   };
   let winSent = [st.y0, st.y1];
-  const winRelease = () => { if (st.y0 !== winSent[0] || st.y1 !== winSent[1]) { winSent = [st.y0, st.y1]; fitPaintYear(); send("aef"); update(); } };
+  const winRelease = () => { if (st.y0 !== winSent[0] || st.y1 !== winSent[1]) { winSent = [st.y0, st.y1]; send("aef"); update(); } };
   rFrom.addEventListener("input", () => onDrag("from")); rTo.addEventListener("input", () => onDrag("to"));
   rFrom.addEventListener("change", winRelease); rTo.addEventListener("change", winRelease);
   try { new ResizeObserver(styleWin).observe(win); } catch (e) {}
@@ -713,8 +703,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // a small card, the search's width: the year (what the imagery shows), what it is, its keys
     const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
     const stepping = st.holding || (st.pair && st.left === "s2");
-    const eys = st.paint && !st.holding ? paintYears() : S2Y;
-    const ends = `${String(eys[0]).slice(2)}/${String(eys[eys.length - 1]).slice(2)}`;
+    const ends = `${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`;
     s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
       + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span>`
         : showImg
@@ -1361,7 +1350,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // painting, one mask per year stepped to (each the year before it to the year, from scores the worker has read
     // ahead for every year), kept mounted so a step back to one is instant; only the year shown's is the mask
     if (st.paint) for (const y of [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)])
-      out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ && y === st.paintYear, year: y, years: paintYears(), model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
+      out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ && y === st.paintYear, year: y, years: S2Y, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);
@@ -1503,9 +1492,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (onPaint()) { st.paintYear = y; paintSeen.add(y); styleWin(); refreshScores(); } else st.imgYear = y;
     renderYear(); update();
   };
-  // the years stepped through: painting, those inside the range set on the slider; the plain imagery, all of them
-  const stepYears = () => (onPaint() ? paintYears() : S2Y);
-  const stepImg = (d) => { const ys = stepYears(), i = ys.indexOf(curYear()); setYear(ys[Math.max(0, Math.min(ys.length - 1, (i < 0 ? ys.length - 1 : i) + d))]); };
+  const stepImg = (d) => { const i = S2Y.indexOf(curYear()); setYear(S2Y[Math.max(0, Math.min(S2Y.length - 1, (i < 0 ? S2Y.length - 1 : i) + d))]); };
   // Shift held: the paint filled in (PAINT_FILL), the layers untouched, so only a redraw
   const setFilled = (on) => { if (st.filled === on) return; st.filled = on; if (map) map.triggerRepaint(); };
   function beginHold(x, y, by) {
@@ -1773,7 +1760,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // imagery shows: painting, holding space, or on the pair's left side
     else if (k === "b" || k === "B") {
       if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return;
-      const ys = stepYears(), a = ys[0], b = ys[ys.length - 1];
+      const a = S2Y[0], b = S2Y[S2Y.length - 1];
       setYear(curYear() === b ? a : b);
     }
     else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }
