@@ -433,14 +433,14 @@ export type EarthworkFlareProps = {
   yearTex: Texture;
   /** The index of the latest year counted (the year shown). */
   shown: number;
-  /** How far the imagery under it is lifted toward white, 0 none to 1 all the way. */
+  /** How much the imagery's brightness under it is scaled up: by 1 + strength (0 none, 1 doubled). */
   strength: number;
 };
 
 /**
- * The flare: the year map's pixels (any year up to the one shown) as a gray of the flare's strength, for a screen
- * blend over the imagery (the layer's parameters), which lifts the ground there, its darks most, and keeps its own
- * colors. Pixels never over the cutoff are discarded, so the rest of the imagery is untouched.
+ * The flare: the year map's pixels (any year up to the one shown) as a gray of the flare's strength, for a blend
+ * over the imagery (the layer's parameters) that multiplies it by 1 + strength: the ground there brighter, its
+ * texture and colors as they were. Pixels never over the cutoff are discarded, so the rest of the imagery is untouched.
  */
 export const EarthworkFlare = {
   name: "earthworkFlare",

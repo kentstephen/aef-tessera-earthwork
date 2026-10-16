@@ -276,8 +276,8 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * over its cutoff (each year from the year before it). Every year (`years`, up to eight) read at once in the
    * worker into one byte a pixel, a bit a year, so a step between years reads nothing and loads nothing.
    *
-   * With `flare` (its strength, 0 to 1) it is the flare instead: the same pixels lifting the imagery under them by a
-   * screen blend (EarthworkFlare), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
+   * With `flare` (its strength, 0 to 1) it is the flare instead: the same pixels scaling up the brightness of the
+   * imagery under them by 1 + flare (EarthworkFlare and the layer's blend), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
    * chunks kept for the card), which are the year map's, and its chunks' scores come from the worker's, read once
    */
   function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; onTile?: () => void; onViewportLoad?: () => void }) {
@@ -344,8 +344,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         t.yearTex?.destroy();
       },
       onViewportLoad: () => flare == null && onViewportLoad && onViewportLoad(),
-      // the flare's screen blend: out = src (1 - dst) + dst, the imagery lifted toward white by src, its alpha kept
-      ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: "one-minus-dst", blendColorDstFactor: "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
+      // the flare's blend: out = src dst + dst = dst (1 + src), the imagery's brightness scaled up by 1 + src (its
+      // texture, contrast and colors kept), its alpha kept
+      ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: "dst", blendColorDstFactor: "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
       updateTriggers: { renderTile: [shown, !!g, flare ?? -1] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
