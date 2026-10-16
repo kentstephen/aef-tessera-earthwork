@@ -313,44 +313,44 @@ uniform highp usampler2D tesFlags;
   }),
 } as const satisfies ShaderModule<EarthworkAggregateProps>;
 
-// the confidence's colors: white at none to a full blue at all, the blue (0.13, 0.42, 1.0) bright enough for the dark
+// the cross-check's colors: white at none to a full blue at all, the blue (0.13, 0.42, 1.0) bright enough for the dark
 // basemap and far from every year's color
-const CONF_RAMP = "earthworkConfRamp";
-const CONF_GLSL = /* glsl */ `
-vec3 ${CONF_RAMP}(float c) {
+const CHECK_RAMP = "earthworkCheckRamp";
+const CHECK_GLSL = /* glsl */ `
+vec3 ${CHECK_RAMP}(float c) {
   return mix(vec3(1.0), vec3(0.13, 0.42, 1.0), clamp(c, 0.0, 1.0));
 }
 `;
 
-/** Props for {@link EarthworkConfAlpha}. */
-export type EarthworkConfAlphaProps = {
-  /** r8unorm: the chunk's confidence (confidenceChunk), 0 to 1. */
-  confTex: Texture;
+/** Props for {@link EarthworkCheckAlpha}. */
+export type EarthworkCheckAlphaProps = {
+  /** r8unorm: the chunk's cross-check (crossCheckChunk), 0 to 1. */
+  checkTex: Texture;
 };
 
 /**
- * After the colormap, in place of {@link EarthworkAlpha}: the calls colored by their confidence, white (weak) to
- * blue (strong), as the year map's (CONF_RAMP); quiet ground is not a call, so it keeps the score's colors. The
+ * After the colormap, in place of {@link EarthworkAlpha}: the calls colored by their cross-check, white (weak) to
+ * blue (strong), as the year map's (CHECK_RAMP); quiet ground is not a call, so it keeps the score's colors. The
  * score's alpha as before.
  */
-export const EarthworkConfAlpha = {
-  name: "earthworkConfAlpha",
+export const EarthworkCheckAlpha = {
+  name: "earthworkCheckAlpha",
   inject: {
     "fs:#decl": `
-uniform highp sampler2D confTex;
-${CONF_GLSL}
+uniform highp sampler2D checkTex;
+${CHECK_GLSL}
 `,
     "fs:DECKGL_FILTER_COLOR": /* glsl */ `
-      ivec2 csize = textureSize(confTex, 0);
+      ivec2 csize = textureSize(checkTex, 0);
       ivec2 cpx = clamp(ivec2(geometry.uv * vec2(csize)), ivec2(0), csize - 1);
-      float conf = texelFetch(confTex, cpx, 0).r;
-      // only a call is doubted: quiet ground (under 0.2) keeps its colors, the confidence's come in by 0.5
+      float check = texelFetch(checkTex, cpx, 0).r;
+      // only a call is doubted: quiet ground (under 0.2) keeps its colors, the cross-check's come in by 0.5
       float sv = clamp(earthworkScore_v, 0.0, 1.0);
-      color = vec4(mix(color.rgb, ${CONF_RAMP}(conf), smoothstep(0.2, 0.5, sv)), mix(70.0 / 255.0, 235.0 / 255.0, sv));
+      color = vec4(mix(color.rgb, ${CHECK_RAMP}(check), smoothstep(0.2, 0.5, sv)), mix(70.0 / 255.0, 235.0 / 255.0, sv));
     `,
   },
-  getUniforms: (props: Partial<EarthworkConfAlphaProps>) => ({ confTex: props.confTex }),
-} as const satisfies ShaderModule<EarthworkConfAlphaProps>;
+  getUniforms: (props: Partial<EarthworkCheckAlphaProps>) => ({ checkTex: props.checkTex }),
+} as const satisfies ShaderModule<EarthworkCheckAlphaProps>;
 
 /**
  * The paint's mask: after a score module, drops the fragments under the
@@ -444,7 +444,7 @@ uniform earthworkYearTexUniforms {
     "fs:#decl": `
 precision highp sampler2D;
 uniform highp sampler2D yearTex;
-// the year drawn, and the pixel, kept for the confidence after it (EarthworkYearConf)
+// the year drawn, and the pixel, kept for the cross-check after it (EarthworkYearCheck)
 int earthworkYear_latest;
 ivec2 earthworkYear_px;
 `,
@@ -469,39 +469,39 @@ ivec2 earthworkYear_px;
   getUniforms: (props: Partial<EarthworkYearTexProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, n: props.n ?? 1 }),
 } as const satisfies ShaderModule<EarthworkYearTexProps>;
 
-/** Props for {@link EarthworkYearConf}. */
-export type EarthworkYearConfProps = {
-  /** r8unorm, the chunk's width by its height x the years: each year's confidence (confidenceChunk), a plane a year. */
-  confTex: Texture;
+/** Props for {@link EarthworkYearCheck}. */
+export type EarthworkYearCheckProps = {
+  /** r8unorm, the chunk's width by its height x the years: each year's cross-check (crossCheckChunk), a plane a year. */
+  checkTex: Texture;
   /** The chunk's height, the plane's. */
   h: number;
 };
 
 /**
- * After the year map's colormap, in its place: its pixel colored by the confidence of the year it is drawn in, white
- * (weak) to blue (strong), opaque (CONF_RAMP).
+ * After the year map's colormap, in its place: its pixel colored by the cross-check of the year it is drawn in, white
+ * (weak) to blue (strong), opaque (CHECK_RAMP).
  */
-export const EarthworkYearConf = {
-  name: "earthworkYearConf",
+export const EarthworkYearCheck = {
+  name: "earthworkYearCheck",
   fs: `\
-uniform earthworkYearConfUniforms {
+uniform earthworkYearCheckUniforms {
   float h;
-} earthworkYearConf;
+} earthworkYearCheck;
 `,
   inject: {
     "fs:#decl": `
-uniform highp sampler2D confTex;
-${CONF_GLSL}
+uniform highp sampler2D checkTex;
+${CHECK_GLSL}
 `,
     "fs:DECKGL_FILTER_COLOR": /* glsl */ `
-      int ch = int(earthworkYearConf.h + 0.5);
-      float conf = texelFetch(confTex, ivec2(earthworkYear_px.x, earthworkYear_px.y + earthworkYear_latest * ch), 0).r;
-      color = vec4(${CONF_RAMP}(conf), 1.0);
+      int ch = int(earthworkYearCheck.h + 0.5);
+      float check = texelFetch(checkTex, ivec2(earthworkYear_px.x, earthworkYear_px.y + earthworkYear_latest * ch), 0).r;
+      color = vec4(${CHECK_RAMP}(check), 1.0);
     `,
   },
   uniformTypes: { h: "f32" },
-  getUniforms: (props: Partial<EarthworkYearConfProps>) => ({ confTex: props.confTex, h: props.h ?? 1 }),
-} as const satisfies ShaderModule<EarthworkYearConfProps>;
+  getUniforms: (props: Partial<EarthworkYearCheckProps>) => ({ checkTex: props.checkTex, h: props.h ?? 1 }),
+} as const satisfies ShaderModule<EarthworkYearCheckProps>;
 
 /**
  * Props for the {@link EarthworkFlare} shader module.

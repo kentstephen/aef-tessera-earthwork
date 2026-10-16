@@ -141,7 +141,7 @@ export function aefScores(first: Int8Array, last: Int8Array, plane: number, m: W
  *   before the first). Its nearest earlier year, as 1 - cos, over the first year's: a field cycling through its crops lands
  *   near a year it has been before (low), ground dug or built on lands somewhere it never was (near 1).
  */
-export function confidenceChunk(
+export function crossCheckChunk(
   aefFirst: Int8Array,
   aefLast: Int8Array,
   earlier: Int8Array[],

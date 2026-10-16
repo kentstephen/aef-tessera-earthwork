@@ -1,7 +1,7 @@
 import * as zarr from "zarrita";
 
 import { type AefArray, NUM_BANDS, openMosaic } from "./aef";
-import { aefScores, confidenceChunk, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
+import { aefScores, crossCheckChunk, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
 import { tesseraOnChunk } from "./tessera";
 
 /**
@@ -10,12 +10,12 @@ import { tesseraOnChunk } from "./tessera";
  * hold up the map, the imagery or the keys; the page only makes the textures.
  */
 type Read = { type: "read"; id: number; px0: number; py0: number; w: number; h: number; firstIdx: number; lastIdx: number; aefOnly?: boolean };
-/** The paint: a layer's score for one chunk, for every year in `allIdx` (each from the year before it); with `conf`
- * (the year map), each year's confidence too, a plane a year. */
-type Score = { type: "score"; id: number; kind: LayerKind; px0: number; py0: number; w: number; h: number; allIdx: number[]; conf?: boolean };
-/** The confidence of a window's chunk (confidenceChunk): AlphaEarth's three years before the first read too, and TESSERA unless `aefOnly`. */
-type Conf = { type: "conf"; id: number; px0: number; py0: number; w: number; h: number; firstIdx: number; lastIdx: number; aefOnly?: boolean };
-type Msg = { type: "init"; model: WorldModel } | Read | Score | Conf | { type: "abort"; id: number };
+/** The paint: a layer's score for one chunk, for every year in `allIdx` (each from the year before it); with `check`
+ * (the year map), each year's cross-check too, a plane a year. */
+type Score = { type: "score"; id: number; kind: LayerKind; px0: number; py0: number; w: number; h: number; allIdx: number[]; check?: boolean };
+/** The cross-check of a window's chunk (crossCheckChunk): AlphaEarth's three years before the first read too, and TESSERA unless `aefOnly`. */
+type Check = { type: "check"; id: number; px0: number; py0: number; w: number; h: number; firstIdx: number; lastIdx: number; aefOnly?: boolean };
+type Msg = { type: "init"; model: WorldModel } | Read | Score | Check | { type: "abort"; id: number };
 
 let model: WorldModel | null = null;
 let mosaic: Promise<AefArray> | null = null;
@@ -68,7 +68,7 @@ function aefChunk(arr: AefArray, idx: number, py0: number, px0: number, h: numbe
 // a year is missing), 64 KB a chunk and year where its two years are 8 MB. Kept by "kind:lastIdx:py0:px0:h:w", the
 // last used last, so a layer switched back to draws from here
 const SCORE_KEEP = 1500;
-// the confidence's years before a pair's first: crops rotate within two or three, and each year is 4 MB a chunk to read
+// the cross-check's years before a pair's first: crops rotate within two or three, and each year is 4 MB a chunk to read
 const EARLIER = 3;
 const scoreKept = new Map<string, Promise<Uint8Array>>();
 const scoreKey = (kind: LayerKind, lastIdx: number, m: { py0: number; px0: number; h: number; w: number }) => `${kind}:${lastIdx}:${m.py0}:${m.px0}:${m.h}:${m.w}`;
@@ -77,9 +77,9 @@ function encodeScores(sc: Float32Array): Uint8Array {
   for (let i = 0; i < sc.length; i++) out[i] = sc[i] < 0 ? 0 : 1 + Math.round(254 * Math.min(1, sc[i]));
   return out;
 }
-// the year map's confidence a year, by scoreKey: made with the pair's score, from the same years in hand (and the
+// the year map's cross-check a year, by scoreKey: made with the pair's score, from the same years in hand (and the
 // three before, which the year map reads anyway), for the pixels it draws only
-const yearConfKept = new Map<string, Promise<Uint8Array>>();
+const yearCheckKept = new Map<string, Promise<Uint8Array>>();
 const kept_ = <T,>(m: Map<string, T>, k: string) => {
   const v = m.get(k);
   if (v !== undefined) {
@@ -93,10 +93,10 @@ const keepIn = <T,>(m: Map<string, Promise<T>>, k: string, p: Promise<T>) => {
   p.catch(() => m.get(k) === p && m.delete(k));
   while (m.size > SCORE_KEEP) m.delete(m.keys().next().value as string);
 };
-async function pairScore(kind: LayerKind, lastIdx: number, g: { py0: number; px0: number; h: number; w: number }, signal: AbortSignal, wantConf = false): Promise<Uint8Array> {
+async function pairScore(kind: LayerKind, lastIdx: number, g: { py0: number; px0: number; h: number; w: number }, signal: AbortSignal, wantCheck = false): Promise<Uint8Array> {
   const k = scoreKey(kind, lastIdx, g);
   const kept = kept_(scoreKept, k);
-  if (kept && (!wantConf || yearConfKept.has(k))) return kept;
+  if (kept && (!wantCheck || yearCheckKept.has(k))) return kept;
   if (!mosaic) mosaic = openMosaic().then((o) => o.arr);
   mosaic.catch(() => (mosaic = null));
   const arr = await mosaic;
@@ -117,17 +117,17 @@ async function pairScore(kind: LayerKind, lastIdx: number, g: { py0: number; px0
       }
       sc = out;
     }
-    let conf: Uint8Array | null = null;
-    if (wantConf) {
+    let check: Uint8Array | null = null;
+    if (wantCheck) {
       const before = Array.from({ length: lastIdx - 1 }, (_, i) => i).slice(-EARLIER);
       const earlier = (await Promise.all(before.map((i) => aefChunk(arr, i, g.py0, g.px0, g.h, g.w, signal)))).map((c) => c.data as Int8Array);
-      conf = confidenceChunk(aefFirst, aefLast, earlier, t, aef, plane, g.w, model!, { score: sc, cut: model!.cut[kind] });
+      check = crossCheckChunk(aefFirst, aefLast, earlier, t, aef, plane, g.w, model!, { score: sc, cut: model!.cut[kind] });
     }
-    return { score: encodeScores(sc), conf };
+    return { score: encodeScores(sc), check };
   });
   const p = both.then((r) => r.score);
   keepIn(scoreKept, k, p);
-  if (wantConf) keepIn(yearConfKept, k, both.then((r) => r.conf as Uint8Array));
+  if (wantCheck) keepIn(yearCheckKept, k, both.then((r) => r.check as Uint8Array));
   return p;
 }
 // every year of a chunk at once, packed one year per channel (RGBA: up to four years), so a step between years
@@ -137,21 +137,21 @@ async function score(m: Score) {
   running.set(m.id, ac);
   try {
     const plane = m.w * m.h, n = Math.min(8, m.allIdx.length), stride = n <= 4 ? 4 : 8, ys = m.allIdx.slice(0, n);
-    const each = await Promise.all(ys.map((y) => pairScore(m.kind, y, m, ac.signal, !!m.conf)));
+    const each = await Promise.all(ys.map((y) => pairScore(m.kind, y, m, ac.signal, !!m.check)));
     const out = new Uint8Array(stride * plane);
     for (let c = 0; c < n; c++) {
       const sc = each[c];
       for (let i = 0; i < plane; i++) out[stride * i + c] = sc[i];
     }
-    if (!m.conf) {
+    if (!m.check) {
       postMessage({ id: m.id, score: out }, { transfer: [out.buffer] as ArrayBuffer[] });
       return;
     }
-    // the confidence a plane a year, one after another
-    const cs = await Promise.all(ys.map((y) => yearConfKept.get(scoreKey(m.kind, y, m)) as Promise<Uint8Array>));
-    const conf = new Uint8Array(plane * n);
-    cs.forEach((c, i) => conf.set(c, i * plane));
-    postMessage({ id: m.id, score: out, conf }, { transfer: [out.buffer, conf.buffer] as ArrayBuffer[] });
+    // the cross-check a plane a year, one after another
+    const cs = await Promise.all(ys.map((y) => yearCheckKept.get(scoreKey(m.kind, y, m)) as Promise<Uint8Array>));
+    const check = new Uint8Array(plane * n);
+    cs.forEach((c, i) => check.set(c, i * plane));
+    postMessage({ id: m.id, score: out, check }, { transfer: [out.buffer, check.buffer] as ArrayBuffer[] });
   } catch (e) {
     const err = e as { name?: string; message?: string };
     postMessage({ id: m.id, error: { name: err?.name || "Error", message: err?.message || String(e) } });
@@ -195,15 +195,15 @@ async function read(m: Read) {
   }
 }
 
-// a pair's confidence for a chunk, kept like the scores (64 KB each). The pair's two years come from the chunks kept
+// a pair's cross-check for a chunk, kept like the scores (64 KB each). The pair's two years come from the chunks kept
 // (the map has just read them), TESSERA from its kept ranges
-const confKept = new Map<string, Promise<Uint8Array>>();
-async function pairConf(firstIdx: number, lastIdx: number, aefOnly: boolean, g: { py0: number; px0: number; h: number; w: number }, signal: AbortSignal) {
+const checkKept = new Map<string, Promise<Uint8Array>>();
+async function pairCheck(firstIdx: number, lastIdx: number, aefOnly: boolean, g: { py0: number; px0: number; h: number; w: number }, signal: AbortSignal) {
   const k = `${aefOnly ? "a" : "t"}:${firstIdx}:${lastIdx}:${g.py0}:${g.px0}:${g.h}:${g.w}`;
-  const kept = confKept.get(k);
+  const kept = checkKept.get(k);
   if (kept) {
-    confKept.delete(k);
-    confKept.set(k, kept);
+    checkKept.delete(k);
+    checkKept.set(k, kept);
     return kept;
   }
   if (!mosaic) mosaic = openMosaic().then((o) => o.arr);
@@ -214,20 +214,20 @@ async function pairConf(firstIdx: number, lastIdx: number, aefOnly: boolean, g: 
     const [aefFirst, aefLast, ...earlier] = cs.map((c) => c.data as Int8Array);
     const plane = g.w * g.h, aef = aefScores(aefFirst, aefLast, plane, model!);
     const t = aefOnly ? null : await tesseraOnChunk(g.px0, g.py0, g.w, g.h, firstIdx, lastIdx, signal, aef);
-    return confidenceChunk(aefFirst, aefLast, earlier, t, aef, plane, g.w, model!);
+    return crossCheckChunk(aefFirst, aefLast, earlier, t, aef, plane, g.w, model!);
   });
-  confKept.set(k, p);
-  p.catch(() => confKept.get(k) === p && confKept.delete(k));
-  while (confKept.size > SCORE_KEEP) confKept.delete(confKept.keys().next().value as string);
+  checkKept.set(k, p);
+  p.catch(() => checkKept.get(k) === p && checkKept.delete(k));
+  while (checkKept.size > SCORE_KEEP) checkKept.delete(checkKept.keys().next().value as string);
   return p;
 }
 
-async function conf(m: Conf) {
+async function check(m: Check) {
   const ac = new AbortController();
   running.set(m.id, ac);
   const signal = ac.signal;
   try {
-    const out = (await pairConf(m.firstIdx, m.lastIdx, !!m.aefOnly, m, signal)).slice();
+    const out = (await pairCheck(m.firstIdx, m.lastIdx, !!m.aefOnly, m, signal)).slice();
     postMessage({ id: m.id, score: out }, { transfer: [out.buffer] as ArrayBuffer[] });
   } catch (e) {
     const err = e as { name?: string; message?: string };
@@ -242,6 +242,6 @@ self.onmessage = (ev: MessageEvent<Msg>) => {
   if (m.type === "init") model = m.model;
   else if (m.type === "abort") running.get(m.id)?.abort();
   else if (m.type === "score") void score(m);
-  else if (m.type === "conf") void conf(m);
+  else if (m.type === "check") void check(m);
   else void read(m);
 };
