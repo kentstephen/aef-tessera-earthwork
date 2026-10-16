@@ -1561,9 +1561,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // step between years only changes the channel
     // the year map: every year read at once, a bit a year; a step between years only changes which bits count
     if (st.yearMap) out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
-    if (st.holding) out.push(flareLayer(map));
     else if (st.paint) out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ, year: st.paintYear, years: PY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
+    // the flare over the imagery while space is held (the pair's left has its own, layers2)
+    if (st.holding) out.push(flareLayer(map));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);
     // gold on the dark basemap (was near-black on the light one)
