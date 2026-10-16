@@ -313,6 +313,35 @@ uniform highp usampler2D tesFlags;
   }),
 } as const satisfies ShaderModule<EarthworkAggregateProps>;
 
+/** Props for {@link EarthworkConfAlpha}. */
+export type EarthworkConfAlphaProps = {
+  /** r8unorm: the chunk's confidence (confidenceChunk), 0 to 1. */
+  confTex: Texture;
+};
+
+/**
+ * After the colormap, in place of {@link EarthworkAlpha}: the score's alpha scaled by the confidence, from 15% at
+ * none to all of it at full, so a likely call made weakly is faint in its color and a strong one solid. Quiet ground
+ * is not a call, so it keeps the score's alpha.
+ */
+export const EarthworkConfAlpha = {
+  name: "earthworkConfAlpha",
+  inject: {
+    "fs:#decl": `
+uniform highp sampler2D confTex;
+`,
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      ivec2 csize = textureSize(confTex, 0);
+      ivec2 cpx = clamp(ivec2(geometry.uv * vec2(csize)), ivec2(0), csize - 1);
+      float conf = texelFetch(confTex, cpx, 0).r;
+      // only a call is doubted: quiet ground (under 0.2) keeps its own faint alpha, the fade comes in by 0.5
+      float sv = clamp(earthworkScore_v, 0.0, 1.0);
+      color.a = mix(70.0 / 255.0, 235.0 / 255.0, sv) * mix(1.0, mix(0.15, 1.0, conf), smoothstep(0.2, 0.5, sv));
+    `,
+  },
+  getUniforms: (props: Partial<EarthworkConfAlphaProps>) => ({ confTex: props.confTex }),
+} as const satisfies ShaderModule<EarthworkConfAlphaProps>;
+
 /**
  * The paint's mask: after a score module, drops the fragments under the
  * layer's cutoff, so a mask drawn with it is exactly the lit pixels.

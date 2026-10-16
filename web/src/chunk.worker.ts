@@ -1,7 +1,7 @@
 import * as zarr from "zarrita";
 
 import { type AefArray, NUM_BANDS, openMosaic } from "./aef";
-import { aefScores, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
+import { aefScores, confidenceChunk, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
 import { tesseraOnChunk } from "./tessera";
 
 /**
@@ -12,7 +12,9 @@ import { tesseraOnChunk } from "./tessera";
 type Read = { type: "read"; id: number; px0: number; py0: number; w: number; h: number; firstIdx: number; lastIdx: number; aefOnly?: boolean };
 /** The paint: a layer's score for one chunk, for every year in `allIdx` (each from the year before it). */
 type Score = { type: "score"; id: number; kind: LayerKind; px0: number; py0: number; w: number; h: number; allIdx: number[] };
-type Msg = { type: "init"; model: WorldModel } | Read | Score | { type: "abort"; id: number };
+/** The confidence of a window's chunk (confidenceChunk): AlphaEarth's three years before the first read too, and TESSERA unless `aefOnly`. */
+type Conf = { type: "conf"; id: number; px0: number; py0: number; w: number; h: number; firstIdx: number; lastIdx: number; aefOnly?: boolean };
+type Msg = { type: "init"; model: WorldModel } | Read | Score | Conf | { type: "abort"; id: number };
 
 let model: WorldModel | null = null;
 let mosaic: Promise<AefArray> | null = null;
@@ -161,10 +163,38 @@ async function read(m: Read) {
   }
 }
 
+const EARLIER = 3;
+// the window's two years come from the chunks kept (the map has just read them), TESSERA from its kept ranges
+async function conf(m: Conf) {
+  const ac = new AbortController();
+  running.set(m.id, ac);
+  const signal = ac.signal;
+  try {
+    if (!mosaic) mosaic = openMosaic().then((o) => o.arr);
+    mosaic.catch(() => (mosaic = null));
+    const arr = await mosaic;
+    // the three years before the first: crops rotate within two or three, and each year is 4 MB a chunk to read
+    const before = Array.from({ length: m.firstIdx }, (_, i) => i).slice(-EARLIER);
+    const idx = [m.firstIdx, m.lastIdx, ...before];
+    const cs = await Promise.all(idx.map((i) => aefChunk(arr, i, m.py0, m.px0, m.h, m.w, signal)));
+    const [aefFirst, aefLast, ...earlier] = cs.map((c) => c.data as Int8Array);
+    const plane = m.w * m.h, aef = aefScores(aefFirst, aefLast, plane, model!);
+    const t = m.aefOnly ? null : await tesseraOnChunk(m.px0, m.py0, m.w, m.h, m.firstIdx, m.lastIdx, signal, aef);
+    const out = confidenceChunk(aefFirst, aefLast, earlier, t, aef, plane, model!);
+    postMessage({ id: m.id, score: out }, { transfer: [out.buffer] as ArrayBuffer[] });
+  } catch (e) {
+    const err = e as { name?: string; message?: string };
+    postMessage({ id: m.id, error: { name: err?.name || "Error", message: err?.message || String(e) } });
+  } finally {
+    running.delete(m.id);
+  }
+}
+
 self.onmessage = (ev: MessageEvent<Msg>) => {
   const m = ev.data;
   if (m.type === "init") model = m.model;
   else if (m.type === "abort") running.get(m.id)?.abort();
   else if (m.type === "score") void score(m);
+  else if (m.type === "conf") void conf(m);
   else void read(m);
 };

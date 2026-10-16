@@ -127,3 +127,46 @@ export function aefScores(first: Int8Array, last: Int8Array, plane: number, m: W
   }
   return out;
 }
+
+/**
+ * How far a chunk's lit ground can be trusted, 0 to 255 a pixel (255 where there is nothing to doubt: TESSERA not
+ * read, where the aggregate scores none; for AlphaEarth's layer alone, ground it scores under 0.05). The product of
+ * two parts:
+ *
+ * - agreement: AlphaEarth's own model and TESSERA's own both call it moved, each against its own cutoff (the lower of
+ *   the two, score over cutoff, up to 1). They are fooled on different ground (AlphaEarth by crop switches TESSERA
+ *   is quiet on), so a call only one of them makes is a weak one. Without TESSERA (AlphaEarth's layer alone,
+ *   `tes` null), 1.
+ * - somewhere new: the last year's ground is not one AlphaEarth saw in the earlier years (`earlier`, the few years
+ *   before the first). Its nearest earlier year, as 1 - cos, over the first year's: a field cycling through its crops lands
+ *   near a year it has been before (low), ground dug or built on lands somewhere it never was (near 1).
+ */
+export function confidenceChunk(
+  aefFirst: Int8Array,
+  aefLast: Int8Array,
+  earlier: Int8Array[],
+  tes: { first: Int8Array; last: Int8Array; flags: Uint8Array } | null,
+  aef: Float32Array,
+  plane: number,
+  m: WorldModel,
+): Uint8Array {
+  const out = new Uint8Array(plane).fill(255);
+  const e = new Float64Array(NUM_BANDS);
+  for (let at = 0; at < plane; at++) {
+    if (tes ? !(tes.flags[at] & TES_OK) || aef[at] < 0 : aef[at] < 0.05) continue;
+    if (!unitAef(aefFirst, plane, at, bA) || !unitAef(aefLast, plane, at, aA)) continue;
+    let agree = 1;
+    if (tes) {
+      unitTes(tes.first, plane, at, bT);
+      unitTes(tes.last, plane, at, aT);
+      const sT = sig(half(bT, aT, m.tessera.w, 0, TES_BANDS) + m.tessera.b);
+      agree = clip01(Math.min(aef[at] / m.cut.aef, sT / m.cut.tessera));
+    }
+    const moved = 1 - cosine(bA, aA, NUM_BANDS);
+    let near = moved;
+    for (const y of earlier) if (unitAef(y, plane, at, e)) near = Math.min(near, 1 - cosine(e, aA, NUM_BANDS));
+    const fresh = moved > 1e-3 ? clip01((near / moved - 0.2) / 0.5) : 1;
+    out[at] = Math.round(255 * agree * fresh);
+  }
+  return out;
+}

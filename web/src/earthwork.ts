@@ -12,7 +12,7 @@ import * as zarr from "zarrita";
 import { type AefArray, bandTexture, CHUNK, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
 import ChunkWorker from "./chunk.worker.ts?worker";
 import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
-import { EarthworkAggregate, EarthworkAlpha, EarthworkCut, EarthworkFlare, EarthworkScore, EarthworkScoreTex, EarthworkTessera, EarthworkYearTex } from "./earthwork-score";
+import { EarthworkAggregate, EarthworkAlpha, EarthworkConfAlpha, EarthworkCut, EarthworkFlare, EarthworkScore, EarthworkScoreTex, EarthworkTessera, EarthworkYearTex } from "./earthwork-score";
 import { TES_BANDS } from "./tessera";
 
 export type { LayerKind, WorldModel };
@@ -29,6 +29,13 @@ type YearTile = { width: number; height: number; byteLength: number; key: string
 type TileData = PairTileData & {
   /** The chunk's key (keyOf), for the chunks loaded in view. */
   key: string;
+  /** The chunk's place and the GPU it is on, for its confidence (asked for only while it is shown). */
+  px0: number;
+  py0: number;
+  device: Device;
+  confTex?: Texture;
+  confAsk?: AbortController;
+  gone?: boolean;
   tesFirstTex?: Texture;
   tesLastTex?: Texture;
   tesFlagsTex?: Texture;
@@ -93,6 +100,25 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       });
     }).then((r) => r.score);
   }
+
+  /** A window's chunk's confidence (confidenceChunk), 0 to 255 a pixel. */
+  function confChunk(px0: number, py0: number, w: number, h: number, firstIdx: number, lastIdx: number, aefOnly: boolean, signal: AbortSignal): Promise<Uint8Array> {
+    if (signal.aborted) return Promise.reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+    const id = ++askId;
+    return new Promise<{ score: Uint8Array }>((resolve, reject) => {
+      asked.set(id, { resolve, reject });
+      worker.postMessage({ type: "conf", id, px0, py0, w, h, firstIdx, lastIdx, aefOnly });
+      signal.addEventListener("abort", () => {
+        if (!asked.has(id)) return;
+        asked.delete(id);
+        worker.postMessage({ type: "abort", id });
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+      });
+    }).then((r) => r.score);
+  }
+  // a confidence come in: the layer drawn again (confN in its updateTriggers), told by whenConf
+  let confN = 0,
+    onConf: () => void = () => {};
 
   let gpu: { weights: Record<LayerKind, Texture>; colormap: Texture } | null = null;
   let gpuPending = false;
@@ -164,7 +190,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
     });
 
-  function renderPipeline(kind: LayerKind, data: TileData, cut: number | null) {
+  function renderPipeline(kind: LayerKind, data: TileData, cut: number | null, conf = false) {
     const g = gpu;
     if (!g) return [];
     const score =
@@ -201,7 +227,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     return [
       score,
       { module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.viridis } },
-      { module: EarthworkAlpha },
+      conf && data.confTex ? { module: EarthworkConfAlpha, props: { confTex: data.confTex } } : { module: EarthworkAlpha },
     ];
   }
 
@@ -362,10 +388,35 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * drawn, only its lit pixels (over the layer's cutoff) marked; the same layer either way, so
    * the chunks read for one serve the other.
    */
-  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; mask?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
+  function layer(opts: { visible: boolean; first: number; last: number; model: LayerKind; minZoom: number; mask?: boolean; conf?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
     const { visible, first, last, minZoom, onTile, onViewportLoad } = opts;
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aggregate";
     const cut = opts.mask ? model.cut[kind] : null;
+    // the confidence: AlphaEarth's own layer and the aggregate (TESSERA's alone has no AlphaEarth to set it against)
+    const conf = !!opts.conf && !opts.mask && kind !== "tessera";
+    // a shown chunk's confidence, asked for once; it comes in as its own texture and the layer is drawn again
+    const askConf = (d: TileData) => {
+      if (d.confTex || d.confAsk || d.gone) return;
+      const ac = new AbortController();
+      d.confAsk = ac;
+      confChunk(d.px0, d.py0, d.width, d.height, firstIdx, lastIdx, kind === "aef", ac.signal)
+        .then((bytes) => {
+          if (d.gone) return;
+          d.confTex = d.device.createTexture({
+            format: "r8unorm",
+            width: d.width,
+            height: d.height,
+            mipLevels: 1,
+            data: bytes,
+            sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
+          });
+          confN++;
+          onConf();
+        })
+        .catch(() => {
+          d.confAsk = undefined;
+        });
+    };
     const firstIdx = first - YEAR_ORIGIN;
     const lastIdx = last - YEAR_ORIGIN;
     return new ZarrLayer<zarr.Readable, "int8", TileData>({
@@ -409,6 +460,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           first: NONE,
           last: NONE,
           key,
+          px0,
+          py0,
+          device,
           tesFirstTex: aefOnly ? undefined : bandTexture(device, t.first, width, height, TES_BANDS),
           tesLastTex: aefOnly ? undefined : bandTexture(device, t.last, width, height, TES_BANDS),
           tesFlagsTex: aefOnly ? undefined : flagsTexture(device, t.flags, width, height),
@@ -418,7 +472,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           byteLength: (d.byteLength ?? 0) + t.first.byteLength + t.last.byteLength + t.flags.byteLength,
         };
       },
-      renderTile: (data: TileData) => ({ renderPipeline: renderPipeline(kind, data, cut) }),
+      renderTile: (data: TileData) => {
+        if (conf) askConf(data);
+        return { renderPipeline: renderPipeline(kind, data, cut, conf) };
+      },
       visible,
       minZoom,
       // source.coop answers over HTTP/2, so more than the browser's 6 per host
@@ -432,10 +489,12 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         const t = tile.content;
         if (!t) return;
         loaded.delete(t.key);
-        for (const tex of [t.firstTex, t.lastTex, t.tesFirstTex, t.tesLastTex, t.tesFlagsTex]) tex?.destroy();
+        t.gone = true;
+        t.confAsk?.abort();
+        for (const tex of [t.firstTex, t.lastTex, t.tesFirstTex, t.tesLastTex, t.tesFlagsTex, t.confTex]) tex?.destroy();
       },
       onViewportLoad: () => onViewportLoad && onViewportLoad(),
-      updateTriggers: { renderTile: [kind, !!gpu, cut] },
+      updateTriggers: { renderTile: [kind, !!gpu, cut, conf, conf ? confN : 0] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
@@ -555,6 +614,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     tilesRead: () => tilesRead,
     whenReady: (f: () => void) => {
       onReady = f;
+    },
+    whenConf: (f: () => void) => {
+      onConf = f;
     },
   };
 }
