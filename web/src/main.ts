@@ -65,9 +65,10 @@ const cfg = {
   aef_from: 2023,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-  // each year's clearest scene from the official bucket, and the year in progress its latest clear one (s2.ts): 2026
-  // has no AlphaEarth yet, so it is the imagery to check 2025's year map against
-  s2_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+  // each year's clearest scene from the official bucket (s2.ts). 2026 (the year in progress, its latest clear scene)
+  // is left out for now: it has no AlphaEarth yet, so ground dug in 2026 shows in the imagery with nothing on the
+  // year map, which reads as a miss
+  s2_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 /* , 2026 */],
   // the paint's years: one texture holds four
   paint_years: [2022, 2023, 2024, 2025],
   s2_min_z: 7,

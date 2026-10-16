@@ -459,6 +459,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
   styleNames();
   item("Place names", "<kbd>L</kbd> steps them", namesBox);
+  // the flare (G): brighten the finds, or dim the rest (white ground stands out too). Kept in this browser
+  st.flareDim = (() => { try { return localStorage.getItem("aef-lc-flare") === "dim"; } catch (e) { return false; } })();
+  const flareBox = el_("div");
+  const styleFlare = segOf(flareBox, [["bright", "Brighten", "the finds brighter", ""], ["dim", "Dim the rest", "everything but the finds darker: white ground stands out too", ""]],
+    (k) => (k === "dim") === st.flareDim, (k) => setFlareDim(k === "dim"));
+  function setFlareDim(on) {
+    st.flareDim = on;
+    try { localStorage.setItem("aef-lc-flare", on ? "dim" : "bright"); } catch (e) {}
+    styleFlare();
+  }
+  styleFlare();
+  item("Flare", "<kbd>G</kbd> flashes it, <kbd>Shift</kbd>+<kbd>G</kbd> switches", flareBox);
   // picking: the tooltip and the click's card, off to look at the map (or shoot it) clean
   const rPick = rowOf("Picking");
   // picking off also lets go of the pixel or hexagon picked (with clicks off, it could not be clicked away)
@@ -476,7 +488,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; G flares the year map's finds on the imagery (a tap flashes them, held they stay lit); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; G flares the year map's finds on the imagery (a tap flashes them, held they stay lit; Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -1599,13 +1611,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // brightness scaled by 1 + FLARE: no color laid over it, the ground itself brighter there), on the map showing Sentinel-2 (the pair's left,
   // or the main map while space is held). A tap rises, holds a moment and fades; held, it stays lit until let go.
   // Its layer stays mounted at strength 0 (not drawn), so its chunks are in before the first tap
+  // Two ways (settings, Flare; Shift+G switches): brighten the finds (by 1 + FLARE), or dim the rest (by 1 - FLARE_DIM),
+  // for white ground, which cannot brighten and only clips
   const FLARE = Math.max(0.05, Math.min(1, Number(cfg.flare) || 0.4)), FLARE_UP = 90, FLARE_HOLD = 220, FLARE_DOWN = 650;
+  const FLARE_DIM = Math.max(0.05, Math.min(0.9, Number(cfg.flare_dim) || 0.4));
   let flareK = 0, flareHeld = false, flareUntil = 0, flareRaf = 0, flareLast = 0;
-  const flareLayer = (m) => earthwork.yearLayer({visible: flareK > 0.002 && m.getZoom() >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, flare: flareK});
+  // flareK runs 0 to 1, the strength of the way chosen
+  const flareLayer = (m) => earthwork.yearLayer({visible: flareK > 0.002 && m.getZoom() >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ,
+    flare: flareK * (st.flareDim ? FLARE_DIM : FLARE), flareDim: st.flareDim});
   function flareStep(now) {
     const dt = Math.min(50, now - (flareLast || now)); flareLast = now;
     const up = flareHeld || now < flareUntil;
-    flareK = up ? Math.min(FLARE, flareK + FLARE * dt / FLARE_UP) : Math.max(0, flareK - FLARE * dt / FLARE_DOWN);
+    flareK = up ? Math.min(1, flareK + dt / FLARE_UP) : Math.max(0, flareK - dt / FLARE_DOWN);
     if (ov2 && st.pair && st.left === "s2") ov2.setProps({layers: layers2()});
     if (ov && st.holding) ov.setProps({layers: layers()});
     flareRaf = up || flareK > 0 ? requestAnimationFrame(flareStep) : 0;
@@ -2029,6 +2046,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
       setYear(curYear() === b ? a : b);
     }
     // G: the flare, while held (a tap flashes it)
+    // Shift+G: the other way to flare (brighten the finds, dim the rest), shown at once
+    else if ((k === "g" || k === "G") && e.shiftKey) { if (e.repeat) return; setFlareDim(!st.flareDim); note(st.flareDim ? "Flare: the rest dimmed (Shift+G to brighten the finds instead)" : "Flare: the finds brightened (Shift+G to dim the rest instead)", 2000); flare(true); setTimeout(() => flare(false), 0); }
     else if (k === "g" || k === "G") { if (!e.repeat) flare(true); }
     // N: a new look for the imagery's year shown (each tile's next scene down, with its own fill), Shift+N back
     else if (k === "n" || k === "N") {

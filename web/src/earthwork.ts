@@ -280,9 +280,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * imagery under them by 1 + flare (EarthworkFlare and the layer's blend), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
    * chunks kept for the card), which are the year map's, and its chunks' scores come from the worker's, read once
    */
-  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; onTile?: () => void; onViewportLoad?: () => void }) {
+  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
     const { visible, year, minZoom, onTile, onViewportLoad } = opts;
-    const flare = opts.flare;
+    const flare = opts.flare, dim = opts.flareDim ? 1 : 0;
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aef", ck: ChunkKind = `years-${kind}`;
     const years = opts.years.slice(0, 8), allIdx = years.map((y) => y - YEAR_ORIGIN), lastIdx = allIdx[allIdx.length - 1];
     const shown = years.filter((y) => y <= year).length - 1;
@@ -325,7 +325,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         return { width, height, byteLength: plane, key, yearTex };
       },
       renderTile: (d: YearTile) => ({
-        renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare } }] : [
+        renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare, dim } }] : [
           { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
           ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.cividis } }] : []),
         ],
@@ -344,11 +344,14 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         t.yearTex?.destroy();
       },
       onViewportLoad: () => flare == null && onViewportLoad && onViewportLoad(),
+      // the flare's blend works on what is under it, so a tile drawn over its parent (refining) would flare twice
+      // there: no overlap
+      ...(flare != null ? { refinementStrategy: "no-overlap" as const } : {}),
       // the flare's blend: out = src dst + dst = dst (1 + src), the imagery's brightness scaled up by 1 + src (its
-      // texture, contrast and colors kept), its alpha kept
-      ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: "dst", blendColorDstFactor: "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
+      // texture, contrast and colors kept); dimming, out = dst src, scaled down. Its alpha kept
+      ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
-      updateTriggers: { renderTile: [shown, !!g, flare ?? -1] },
+      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
