@@ -476,9 +476,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
 
   // the controls' effects (the kernel's, in the notebook): the years and the model are the earthwork
   // layer's own props, the brightness the imagery shader's
+  // the clicked spot's card and the tooltip under a still pointer, again for the year, layer or years now shown
+  function refreshScores() {
+    if (cardData && cardData.kind === "spot") { rescoreSpot(); if (cardData.score == null) readSpot(); }
+    if (lastPt && !st.holding && tip.style.display === "block") showHexTip(lastPt);
+  }
   const send = (act) => {
     if (act === "s2comp") s2TakeStretch();
-    if (act === "aef" || act === "model") { if (cardData && cardData.kind === "spot") { rescoreSpot(); if (cardData.score == null) readSpot(); } styleKey(); renderYear(); }
+    if (act === "aef" || act === "model") { refreshScores(); styleKey(); renderYear(); }
     update();
   };
 
@@ -1495,7 +1500,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const curYear = () => (onPaint() ? st.paintYear : st.imgYear);
   const setYear = (y) => {
     if (y === curYear()) return;
-    if (onPaint()) { st.paintYear = y; paintSeen.add(y); styleWin(); } else st.imgYear = y;
+    if (onPaint()) { st.paintYear = y; paintSeen.add(y); styleWin(); refreshScores(); } else st.imgYear = y;
     renderYear(); update();
   };
   // the years stepped through: painting, those inside the range set on the slider; the plain imagery, all of them
@@ -1580,7 +1585,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
       return;
     }
     const p = pane.getBoundingClientRect();
-    tip.innerHTML = `<b>${Math.round(100 * v)}%</b> earthwork, ${w0} to ${w1}`;
+    // painting, the color is the change into the year shown
+    tip.innerHTML = st.paint ? `<b>${Math.round(100 * v)}%</b> earthwork in ${w1} (since ${w0})` : `<b>${Math.round(100 * v)}%</b> earthwork, ${w0} to ${w1}`;
     tip.style.display = "block";
     tip.style.left = (pt.x - p.left + 14) + "px";
     tip.style.top = (pt.y - p.top + 14) + "px";
@@ -1683,7 +1689,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const ext = (f.properties || {}).extent;
     let zoom = 12;
     if (ext && ext.length === 4) { const span = Math.max(Math.abs(ext[2] - ext[0]), Math.abs(ext[1] - ext[3]) * 2, 0.01); zoom = Math.log2(360 * ((mapEl.clientWidth || 1200) / 512) / span) - 0.3; }
-    zoom = Math.max(HEXZ, Math.min(16, zoom));
+    // never out past the earthwork's first zoom: a whole city's extent lands near zoom 9, where nothing is read
+    zoom = Math.max(EWZ, Math.min(16, zoom));
     gc.value = hitName(f); gcHits = []; gcHide(); gc.blur();
     if (map) map.flyTo({center: [lon, lat], zoom, duration: 2200, essential: true});
   };
