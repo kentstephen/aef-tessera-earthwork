@@ -43,8 +43,8 @@ SourceHttp.fetch = async (url, init) => {
 };
 
 // dark basemap, trying it; light was
-// https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
-const STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+// CARTO's basemaps: Dark Matter, or Positron (D switches them, kept in this browser)
+const BASES = {dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json", light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"};
 // the maps never tilt: no pitch by drag, touch or keys (a turn still works), flat from any old link's pitch
 const FLAT = {maxPitch: 0, pitchWithRotate: false, touchPitch: false};
 const FONTS = "https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap";
@@ -140,6 +140,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // each year's look (N, Shift+N): 0 its clearest scenes, 1 the next one down, and so on (s2.ts)
     looks: {},
     fit: !!cfg.fit, holding: false, stuck: false, conf: false,
+    base: (() => { try { return localStorage.getItem("aef-lc-base") === "light" ? "light" : "dark"; } catch (e) { return "dark"; } })(),
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
   };
@@ -465,6 +466,23 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
   styleNames();
   item("Place names", "<kbd>L</kbd> steps them", namesBox);
+  // the basemap (D): CARTO's Dark Matter or Positron, kept in this browser
+  const baseBox = el_("div");
+  const styleBase = segOf(baseBox, [["dark", "Dark", "CARTO Dark Matter", ""], ["light", "Light", "CARTO Positron", ""]], (k) => k === st.base, (k) => setBase(k));
+  item("Basemap", "<kbd>D</kbd> switches", baseBox);
+  // a new style drops what was added to the old one: the overlays put themselves back (deck.gl on the style's change),
+  // the divisions and the place names' choice are put back here
+  function setBase(b) {
+    if (b === st.base || !BASES[b]) return;
+    st.base = b;
+    try { localStorage.setItem("aef-lc-base", b); } catch (e) {}
+    styleBase();
+    for (const m of [map, map2]) {
+      if (!m) continue;
+      m.once("style.load", () => { if (m === map) addDivisions(); labels(st.labels); update(); });
+      m.setStyle(BASES[b], {diff: false});
+    }
+  }
   // the flare (a year clicked in the year map's key): brighten the finds, or dim the rest (white ground stands out too). Kept in this browser
   st.flareDim = (() => { try { return localStorage.getItem("aef-lc-flare") === "dim"; } catch (e) { return false; } })();
   const flareBox = el_("div");
@@ -508,7 +526,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; A the confidence (faint where only one embedding calls it moved, or the ground went back to what it was in the three years before; on the year map each year's call its own), read when turned on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; D the basemap, dark or light (Positron); A the confidence (faint where only one embedding calls it moved, or the ground went back to what it was in the three years before; on the year map each year's call its own), read when turned on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -1726,6 +1744,15 @@ export function render({model, el, earthwork, s2Items, credits}) {
     }
   }
 
+  // the divisions under the map, for the card's place (not drawn); put back after a new basemap
+  function addDivisions() {
+    if (!map || !cfg.div_pm || map.getSource("ov-div")) return;
+    try {
+      map.addSource("ov-div", {type: "vector", url: "pmtiles://" + cfg.div_pm});
+      map.addLayer({id: "ov-div-all", type: "fill", source: "ov-div", "source-layer": "division_area", filter: ["==", ["get", "class"], "land"], paint: {"fill-opacity": 0}}, slot());
+    } catch (e) { console.error("divisions", e); }
+  }
+
   // ---- the pair (P) ---------------------------------------------------------------
   // a second map on the left, made the first time the pair opens; either map moves the
   // other. The right is the map as it was (its layer, card and clicks); the left shows
@@ -1733,7 +1760,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   let syncing = false;
   function boot2() {
     if (map2) return;
-    map2 = new maplibregl.Map({container: mapEl2, style: STYLE, center: map.getCenter(), zoom: map.getZoom(), attributionControl: false, ...FLAT});
+    map2 = new maplibregl.Map({container: mapEl2, style: BASES[st.base], center: map.getCenter(), zoom: map.getZoom(), attributionControl: false, ...FLAT});
     map2.keyboard.disable();
     if (root._otf) { root._otf.map2 = map2; root._otf.layers2 = () => layers2().map((l) => l.id); }
     ov2 = new MapboxOverlay({interleaved: true, layers: [], onError: (e) => say("deck, left: " + (e && e.message ? e.message : e))});
@@ -2078,6 +2105,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     else if (k === "w" || k === "W") { if (st.gmode !== "kinds") return; st.focus = "built"; recolorHex(); styleKey(); update(); }
     else if (k === "p" || k === "P") setPair(!st.pair);
     else if (k === "a" || k === "A") setConf(!st.conf);
+    else if (k === "d" || k === "D") { setBase(st.base === "dark" ? "light" : "dark"); note(st.base === "light" ? "Positron, the light basemap (D for dark)" : "Dark Matter, the dark basemap (D for light)", 2000); }
     // I: the paint (Sentinel-2 gray, the lit ground in its colors) or the earthwork layer over the basemap
     // Y: the year map, or back to the earthwork layer over the basemap
     else if (k === "y" || k === "Y") {
@@ -2163,7 +2191,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   };
   function boot() {
     const home = cfg.home || {longitude: 3.6, latitude: 6.46, zoom: 11};
-    map = new maplibregl.Map({container: mapEl, style: STYLE, center: [home.longitude, home.latitude], zoom: home.zoom, attributionControl: false, hash: true, ...FLAT});
+    map = new maplibregl.Map({container: mapEl, style: BASES[st.base], center: [home.longitude, home.latitude], zoom: home.zoom, attributionControl: false, hash: true, ...FLAT});
     map.keyboard.disable();
     map.doubleClickZoom.enable();
     root._otf = {map, st, cfg: () => cfg, hmeta: () => hmeta, hexShown: () => (hexData && hcol ? hmeta.seq : 0), tiles: () => tlog, s2: () => ({...s2Stat, warm: s2Warm, sources: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.ids.size])), batches: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.batches.length]))})};  // for headless tests
@@ -2172,12 +2200,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     map.addControl(ov);
     map.on("load", () => {
       labels(st.labels);
-      if (cfg.div_pm && !map.getSource("ov-div")) {
-        try {
-          map.addSource("ov-div", {type: "vector", url: "pmtiles://" + cfg.div_pm});
-          map.addLayer({id: "ov-div-all", type: "fill", source: "ov-div", "source-layer": "division_area", filter: ["==", ["get", "class"], "land"], paint: {"fill-opacity": 0}}, slot());
-        } catch (e) { console.error("divisions", e); }
-      }
+      addDivisions();
       update(); sendView(); renderYear();
       // the paint's false colors need the stretch of this view
       if (st.paint) send("s2comp");
