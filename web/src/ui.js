@@ -15,6 +15,7 @@ import GeoTiffWorker from "@developmentseed/geotiff/pool/worker?worker";
 import {SourceHttp} from "@chunkd/source-http";
 import {latLngToCell, getResolution, cellToBoundary, cellToLatLng, isValidCell} from "h3-js";
 import {Protocol as PMProtocol} from "pmtiles";
+import {toUtm} from "./utm";
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 maplibregl.addProtocol("pmtiles", new PMProtocol().tile);
 // every COG read (the Sentinel-2 headers and blocks) tries again when the bucket is busy: under a
@@ -105,10 +106,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
 
   const S2Y = cfg.s2_years || [2022, 2023, 2024, 2025];
-  // Earth Genome's mosaics start here; the years before are each year's clearest scene (s2.ts)
-  const MOSAIC_FIRST = cfg.s2_mosaic_first || 2022;
   // the year map's years: each AlphaEarth year after the first, its change from the year before
   const AY = cfg.aef_years || [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], DY = AY.slice(1);
+  // the year map steps on past AlphaEarth's last year into the imagery's years after it: the map stays at what was
+  // found up to AlphaEarth's last, and the pair's imagery shows the ground since, to check the finds against it
+  const AY_LAST = AY[AY.length - 1], YM = [...AY, ...S2Y.filter((y) => y > AY_LAST)];
+  function detYear() { return Math.min(st.mapYear, AY_LAST); }
   // the paint's years (one texture holds four)
   const PY = cfg.paint_years || S2Y.slice(-4);
   // cividis from 15% (its darkest navy is lost on the dark basemap), a stop a year, as the year map's shader draws it
@@ -122,7 +125,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const HEXZ = cfg.hex_zoom || 9, HOLD_MS = cfg.hold_ms || 200, SLOP = cfg.hold_slop || 5;
   const st = {
     gmode: "earth", want: "earth", noPick: false, hideKinds: new Set(), focus: "all", y0: cfg.aef_from || 2022, y1: cfg.aef_to || 2025,
-    imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: "cities", s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
+    imgYear: cfg.s2_year || S2Y.filter((y) => y <= AY_LAST).pop() || S2Y[S2Y.length - 1], labels: "cities", s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
     // the paint (I): Sentinel-2 is the map, gray but where the layer is lit, which keeps its colors; and its own
     // imagery colors (C while painting), apart from the plain imagery's (space, the pair's left)
     paint: cfg.year_map === false && cfg.paint !== false, paintComp: cfg.paint_comp || "tci",
@@ -283,7 +286,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the window drawn: painting, each year its own change (the year before it to the year shown, so the color matches
   // the imagery under it, and a year with no digging is all gray), on AlphaEarth's layer alone (fast enough to step
   // through); otherwise the years set here and the layer chosen
-  function winOf() { return st.yearMap ? [st.mapYear - 1, st.mapYear] : st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
+  function winOf() { return st.yearMap ? [detYear() - 1, detYear()] : st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
   // the chunks drawn: the paint's scores (the layer chosen, scored ahead a year at a time), or the layer's own
   function kindOf() { return st.yearMap ? `years-${st.model}` : st.paint ? `paint-${st.model}` : st.model; }
   function styleWin() {
@@ -293,7 +296,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const usable = (win.clientWidth || 170) - 16;
     wSpn.style.left = (8 + usable * i0 / n) + "px"; wSpn.style.width = (usable * (i1 - i0) / n) + "px";
     wTxt.textContent = `${st.y0} to ${st.y1}`;
-    panelYears.textContent = `${st.y0} to ${st.y1}`;
+    panelYears.textContent = st.yearMap && st.gmode === "earth" ? `${DY[0]} to ${detYear()}` : `${st.y0} to ${st.y1}`;
   }
   const onDrag = (which) => {
     let a = Number(rFrom.value), b = Number(rTo.value);
@@ -318,7 +321,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     rKey.style.display = st.gmode === "earth" && !ym ? "none" : "";
     panelRamp.style.display = ym ? "none" : "";
     rWin.style.display = ym ? "none" : "";
-    panelYears.textContent = ym ? `${DY[0]} to ${st.mapYear}` : `${st.y0} to ${st.y1}`;
+    panelYears.textContent = ym ? `${DY[0]} to ${detYear()}` : `${st.y0} to ${st.y1}`;
     if (out_) {
       keyEl.innerHTML = `<span class="why">Zoom in to ${EWZ} for earthwork. AlphaEarth is read at 10 m with no coarser levels, so a wider view would read too much.</span>`;
       return;
@@ -339,7 +342,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     }
     if (st.gmode === "earth" && st.yearMap) {
       keyEl.innerHTML = `<span class="ew-yk">${DY.map((y) => `<span class="${y > st.mapYear ? "later" : ""}"><i style="background:${civOf(y)}"></i>’${String(y).slice(-2)}</span>`).join("")}</span>`;
-      keyEl.title = `Where the ground was likely dug, filled or graded, in the color of the latest year it was, ${DY[0]} to ${st.mapYear}`;
+      keyEl.title = `Where the ground was likely dug, filled or graded, in the color of the latest year it was, ${DY[0]} to ${detYear()}`;
       return;
     }
     if (st.gmode === "earth") { keyEl.innerHTML = `<span>unlikely</span><i class="at-ramp" style="background:linear-gradient(90deg,${virCss(8)})"></i><span>likely</span>`; keyEl.title = `The chance the ground itself was dug, filled or graded, ${y0} to ${y1}`; return; }
@@ -409,7 +412,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   item("Gray alpha", "0 the basemap, 1 all gray", grayRange("gray-alpha", "grayAlpha", 0, 1, 0.05, 1, "how much the gray covers the basemap under it; double-click for 1"));
   // the imagery colors (S2_COMPOSITES in the kernel): false colors from the raw bands,
   // stretched for the view, where the true color image clips bright ground
-  const COMPS = [["tci", "True color", "Earth Genome's true color image"],
+  const COMPS = [["tci", "True color", "Sentinel-2's true color image (TCI)"],
                  ["urban", "Urban", "B12 B11 B4 from the raw bands, each stretched to the view: built ground and bare soil apart by hue"],
                  ["blueyellow", "Blue-yellow", "B11 B11 B2 from the raw bands, each stretched to the view: sand yellow, concrete blue"]];
   // what the hold card calls each, always shown while the imagery is up
@@ -470,9 +473,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <h2>Earthwork</h2>
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
-    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome's yearly mosaics from 2022; before them, each year's clearest Sentinel-2 day from Earth Search) in full color; scroll while holding to step through the years. The gray map has its own year, ${S2Y[S2Y.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
+    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
     <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
-    <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
+    <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
   about.querySelector("button").onclick = () => { about.style.display = "none"; };
@@ -695,7 +698,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
         const d = c.det;
         h += d.length
           ? `<p><b>${d[d.length - 1]}</b>: the latest year the ground here was likely dug, filled or graded (each year from the year before)${d.length > 1 ? `, and before it ${d.slice(0, -1).join(", ")}` : ""}.</p>`
-          : `<p>No digging found here from ${DY[0]} to ${st.mapYear}.</p>`;
+          : `<p>No digging found here from ${DY[0]} to ${detYear()}.</p>`;
       } else
       h += c.score == null && c.reading
         ? `<p>Reading AlphaEarth here\u2026</p>`
@@ -748,8 +751,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const stepping = st.holding || (st.pair && st.left === "s2");
     const ends = `${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`;
     if (st.yearMap && !st.holding) {
-      const dEnds = `${String(AY[0]).slice(2)}/${String(AY[AY.length - 1]).slice(2)}`;
-      const img = st.pair ? `<span>Sentinel-2 ${st.imgYear}${st.imgYear > st.mapYear ? ", its first year" : st.imgYear < MOSAIC_FIRST ? ", one clear day" : ""}</span>` : `<span><kbd>P</kbd> or <kbd>Space</kbd> imagery</span>`;
+      const dEnds = `${String(YM[0]).slice(2)}/${String(YM[YM.length - 1]).slice(2)}`;
+      const img = (st.pair ? `<span>Sentinel-2 ${st.imgYear}, ${st.imgYear >= new Date().getFullYear() ? "its latest clear day" : "one clear day"}</span>` : `<span><kbd>P</kbd> or <kbd>Space</kbd> imagery</span>`)
+        + (st.mapYear > AY_LAST ? `<span>found to ${AY_LAST}</span>` : "");
       s2c.innerHTML = `<div class="ew-s2hd"><b>${st.mapYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
         + `<div class="ew-keys"><span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${dEnds}</span>${img}<span><kbd>Y</kbd> year map</span></div>`;
       s2c.className = "at-yc at-s2c at-glass ew-showing";
@@ -819,7 +823,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!cardData || cardData.kind !== "spot") return;
     [cardData.y0, cardData.y1] = winOf();
     cardData.score = earthwork.scoreAt(cardData.plon, cardData.plat, cardData.y0, cardData.y1, kindOf());
-    cardData.det = st.yearMap ? earthwork.detectedAt(cardData.plon, cardData.plat, st.mapYear, st.model) : null;
+    cardData.det = st.yearMap ? earthwork.detectedAt(cardData.plon, cardData.plat, detYear(), st.model) : null;
   }
   // a pick: the same cell again clears it
   function pickCell(cell, ll, pt, onImagery) {
@@ -1230,8 +1234,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     createWorker: () => new GeoTiffWorker()}));
   // ---- the false colors' stretch (the kernel's _comp_scale, taken here): each band's 98th
   // percentile over the view, from the latest year with yearly footprints there (up to six of them),
-  // read from the overview nearest 512 pixels across the view. The mosaics are EPSG:3857, so the
-  // view's web mercator meters index them directly. One stretch for every year so the years compare;
+  // read from the overview nearest 512 pixels across the view. Each scene is in its UTM zone, so the
+  // view is taken into that zone's meters to index it. One stretch for every year so the years compare;
   // taken again when the colors change or a hold starts outside the box it was taken for
   let s2StretchGen = 0;
   async function s2TakeStretch(force = false) {
@@ -1241,8 +1245,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const sx = cfg.s2_stretch;
     if (!force && sx && sx.comp === comp && sx.box[0] <= box[0] && sx.box[1] <= box[1] && sx.box[2] >= box[2] && sx.box[3] >= box[3]) return;
     const gen = ++s2StretchGen;
-    const mx = (lon) => 6378137 * lon * Math.PI / 180, my = (lat) => 6378137 * Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
-    const x0 = mx(box[0]), x1 = mx(box[2]), y0 = my(box[1]), y1 = my(box[3]), tpx = Math.max(x1 - x0, y1 - y0) / 512;
+    // the view's box in a scene's CRS (326zz, 327zz: UTM north, south), from a grid of points along and across it
+    const boxIn = (epsg) => {
+      const zone = epsg % 100, south = Math.floor(epsg / 100) === 327, o = [0, 0];
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let i = 0; i <= 4; i++) for (let j = 0; j <= 4; j++) {
+        toUtm(box[0] + (box[2] - box[0]) * i / 4, box[1] + (box[3] - box[1]) * j / 4, zone, o);
+        const y = south ? o[1] + 1e7 : o[1];
+        x0 = Math.min(x0, o[0]); x1 = Math.max(x1, o[0]); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      }
+      return [x0, y0, x1, y1];
+    };
     const bands = [...new Set(spec.rgb)];
     // the footprints under the view, asked per web mercator tile as s2Discover does
     const z = Math.max(cfg.s2_min_z || 7, Math.min(9, Math.floor(map.getZoom()))), n = 2 ** z;
@@ -1261,7 +1274,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
       const hist = Object.fromEntries(bands.map((bd) => [bd, new Uint32Array(65536)]));
       await Promise.all(items.slice(0, 6).flatMap((it) => bands.map(async (bd) => {
         const url = it.bands[bd];
-        if (!url) return;
+        if (!url || !it.epsg) return;
+        const [x0, y0, x1, y1] = boxIn(it.epsg), tpx = Math.max(x1 - x0, y1 - y0) / 512;
         let g = null;
         try { g = await s2Tiff(url, null, year, false); } catch (e) { return; }
         // the coarsest level whose pixel is no coarser than tpx
@@ -1405,7 +1419,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // painting, one mask for every year at once (each year its own change from the year before, a channel each): a
     // step between years only changes the channel
     // the year map: every year read at once, a bit a year; a step between years only changes which bits count
-    if (st.yearMap) out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ, year: st.mapYear, years: DY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
+    if (st.yearMap) out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else if (st.paint) out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ, year: st.paintYear, years: PY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
@@ -1547,7 +1561,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const onYears = () => st.yearMap && !st.holding;
   const curYear = () => (onYears() ? st.mapYear : onPaint() ? st.paintYear : st.imgYear);
   // the year map steps from AlphaEarth's first year (nothing found yet: the ground before) to its last
-  const yearsOn = () => (onYears() ? AY : onPaint() ? PY : S2Y);
+  const yearsOn = () => (onYears() ? YM : onPaint() ? PY : S2Y);
   const setYear = (y) => {
     if (y === curYear()) return;
     if (onYears()) { st.mapYear = y; const s = S2Y.filter((v) => v <= y); st.imgYear = s.length ? s[s.length - 1] : S2Y[0]; styleKey(); rescoreSpot(); }
@@ -1629,14 +1643,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const [w0, w1] = winOf(), kind = kindOf();
     if (st.yearMap) {
       if (st.mapYear < DY[0]) { tip.style.display = "none"; return; }
-      const d = earthwork.detectedAt(ll.lng, ll.lat, st.mapYear, st.model);
+      const d = earthwork.detectedAt(ll.lng, ll.lat, detYear(), st.model);
       if (d == null) {
         tip.style.display = "none";
-        earthwork.readAt(ll.lng, ll.lat, w0, w1, kind).then(() => { if (lastPt && lastPt.x === pt.x && lastPt.y === pt.y && earthwork.detectedAt(ll.lng, ll.lat, st.mapYear, st.model) != null) showHexTip(pt); });
+        earthwork.readAt(ll.lng, ll.lat, w0, w1, kind).then(() => { if (lastPt && lastPt.x === pt.x && lastPt.y === pt.y && earthwork.detectedAt(ll.lng, ll.lat, detYear(), st.model) != null) showHexTip(pt); });
         return;
       }
       const p = pane.getBoundingClientRect();
-      tip.innerHTML = d.length ? `Likely dug in <b>${d[d.length - 1]}</b>${d.length > 1 ? ` (before that in ${d.slice(0, -1).join(", ")})` : ""}` : `None found, ${DY[0]} to ${st.mapYear}`;
+      tip.innerHTML = d.length ? `Likely dug in <b>${d[d.length - 1]}</b>${d.length > 1 ? ` (before that in ${d.slice(0, -1).join(", ")})` : ""}` : `None found, ${DY[0]} to ${detYear()}`;
       tip.style.display = "block";
       tip.style.left = (pt.x - p.left + 14) + "px";
       tip.style.top = (pt.y - p.top + 14) + "px";
