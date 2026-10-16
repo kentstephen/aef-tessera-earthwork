@@ -116,9 +116,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   function detYear() { return Math.min(st.mapYear, AY_LAST); }
   // the paint's years (one texture holds four)
   const PY = cfg.paint_years || S2Y.slice(-4);
-  // cividis from 15% (its darkest navy is lost on the dark basemap), a stop a year, as the year map's shader draws it
-  const CIV = "243c6e48526c6568707f7e789d9576bdae6cdec958fee838".match(/.{6}/g);
-  const civOf = (y) => "#" + CIV[Math.round((CIV.length - 1) * Math.max(0, DY.indexOf(y)) / Math.max(1, DY.length - 1))];
+  // plasma from 15% (its darkest blue is lost on the dark basemap), a stop a year, as the year map's shader draws it
+  const YEAR_RAMP = "5601a48606a6ae2892ce4b75e76f5af9973ffdc527f0f921".match(/.{6}/g);
+  const yearColor = (y) => "#" + YEAR_RAMP[Math.round((YEAR_RAMP.length - 1) * Math.max(0, DY.indexOf(y)) / Math.max(1, DY.length - 1))];
   const VIR = (cfg.viridis || "440154fde725").match(/.{6}/g).map((h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)));
   const vir = (t) => { t = Math.max(0, Math.min(1, t)) * (VIR.length - 1); const i = Math.min(VIR.length - 2, Math.floor(t)), f = t - i; return VIR[i].map((v, j) => Math.round(v + (VIR[i + 1][j] - v) * f)); };
   const virCss = (n) => Array.from({length: n}, (_, i) => `rgb(${vir(i / (n - 1)).join(",")})`).join(",");
@@ -348,7 +348,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (st.gmode === "earth" && st.yearMap) {
       // a year clicked lights its finds (dug that year) on the imagery and the year map until it is clicked again,
       // the year shown kept
-      keyEl.innerHTML = `<span class="ew-yk">${DY.map((y) => `<button data-year="${y}" class="${[y > st.mapYear ? "later" : "", y === litYear ? "on" : ""].join(" ").trim()}" title="${y === litYear ? `${y}'s finds off` : `light ${y}'s finds`}"><i style="background:${civOf(y)}"></i>’${String(y).slice(-2)}</button>`).join("")}</span>`;
+      keyEl.innerHTML = `<span class="ew-yk">${DY.map((y) => `<button data-year="${y}" class="${[y > st.mapYear ? "later" : "", y === litYear ? "on" : ""].join(" ").trim()}" title="${y === litYear ? `${y}'s finds off` : `light ${y}'s finds`}"><i style="background:${yearColor(y)}"></i>’${String(y).slice(-2)}</button>`).join("")}</span>`;
       keyEl.title = `Where the ground was likely dug, filled or graded, in the color of the latest year it was, ${DY[0]} to ${detYear()}. Click a year to light its finds, again to turn them off`;
       keyEl.querySelectorAll("[data-year]").forEach((b) => { b.onclick = (e) => { e.stopPropagation(); lightYear(+b.dataset.year); }; });
       return;

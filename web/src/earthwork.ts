@@ -371,7 +371,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         return {
           renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare, dim } }] : [
             { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
-            ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.cividis } }] : []),
+            ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.plasma } }] : []),
             ...(conf && d.confTex ? [{ module: EarthworkYearConf, props: { confTex: d.confTex, h: d.height } }] : []),
           ],
         };
