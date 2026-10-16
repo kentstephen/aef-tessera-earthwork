@@ -279,11 +279,13 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * With `flare` (its strength, 0 to 1) it is the flare instead: the same pixels scaling up the brightness of the
    * imagery under them by 1 + flare (EarthworkFlare and the layer's blend), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
    * chunks kept for the card), which are the year map's, and its chunks' scores come from the worker's, read once.
-   * With `only` (a year) it lights that year's color on the year map instead of the year shown's finds
+   * With `only` (a year) it lights that year's color on the year map instead of the year shown's finds; with `fill`
+   * (a color, 0 to 1) it fills them in that color, its alpha the flare's strength, instead of brightening or dimming
    */
-  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; only?: number; onTile?: () => void; onViewportLoad?: () => void }) {
+  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; only?: number; fill?: [number, number, number]; onTile?: () => void; onViewportLoad?: () => void }) {
     const { visible, year, minZoom, onTile, onViewportLoad } = opts;
-    const flare = opts.flare, dim = opts.flareDim ? 1 : 0;
+    const flare = opts.flare, fill = opts.fill, dim = !fill && opts.flareDim ? 1 : 0;
+    const fillProps = fill ? { fill: 1, fr: fill[0], fg: fill[1], fb: fill[2] } : { fill: 0 };
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aef", ck: ChunkKind = `years-${kind}`;
     const years = opts.years.slice(0, 8), allIdx = years.map((y) => y - YEAR_ORIGIN), lastIdx = allIdx[allIdx.length - 1];
     const shown = years.filter((y) => y <= year).length - 1, only = opts.only == null ? -1 : years.indexOf(opts.only);
@@ -326,7 +328,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         return { width, height, byteLength: plane, key, yearTex, ...(flare != null ? { device } : {}) };
       },
       renderTile: (d: YearTile) => ({
-        renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { only, ...flareTex(d, shown), strength: flare, dim } }] : [
+        renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { only, ...flareTex(d, shown), strength: flare, dim, ...fillProps } }] : [
           { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
           ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.cividis } }] : []),
         ],
@@ -351,9 +353,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       ...(flare != null ? { refinementStrategy: "no-overlap" as const } : {}),
       // the flare's blend: out = src dst + dst = dst (1 + src), the imagery's brightness scaled up by 1 + src (its
       // texture, contrast and colors kept); dimming, out = dst src, scaled down. Its alpha kept
-      ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
+      ...(flare != null && !fill ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
-      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, patch ? patch.id : 0, only] },
+      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, patch ? patch.id : 0, only, fill ? fill.join() : ""] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
