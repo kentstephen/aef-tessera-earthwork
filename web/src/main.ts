@@ -57,9 +57,10 @@ const cfg = {
   home: { longitude: -81.989804, latitude: 28.751057, zoom: 12.5 },
   fit: true,
   ew_zoom: 12,
-  // the world recipe's three layers; the aggregate (AlphaEarth and TESSERA together) to start
+  // the world recipe's three layers
   ew_models: ["aggregate", "aef", "tessera"],
-  model: "aggregate",
+  // AlphaEarth's own to start: the paint's years load quickly; M for the aggregate and TESSERA (both read TESSERA, slower)
+  model: "aef",
   aef_from: 2023,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],

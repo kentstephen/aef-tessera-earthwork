@@ -214,7 +214,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   };
   st.model = cfg.model || "aggregate";
   const rModel = rowOf("Layer");
-  const styleModelSeg = segOf(rModel, MODELS.map((k) => [k, (MODEL_INFO[k] || [k])[0], (MODEL_INFO[k] || [k, ""])[1], ""]), (k) => k === (st.paint ? "aef" : st.model), (k) => setModel(k));
+  const styleModelSeg = segOf(rModel, MODELS.map((k) => [k, (MODEL_INFO[k] || [k])[0], (MODEL_INFO[k] || [k, ""])[1], ""]), (k) => k === st.model, (k) => setModel(k));
   rModel.querySelector(".seg-s").classList.remove("col");
   const modelKey = el_("kbd", "at-mkey", "M");
   modelKey.title = "M switches the layer";
@@ -223,7 +223,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   rModel.appendChild(modelWhy);
   const styleModel = () => { styleModelSeg(); modelWhy.textContent = (MODEL_INFO[st.model] || ["", ""])[1]; };
   styleModel();
-  function setModel(k) { if (st.paint) { note("The paint shows AEF alone, a year at a time (I for the layers on the basemap)", 2500); return; } if (k === st.model) return; st.model = k; send("model", {model: k}); styleModel(); note(`Layer: ${(MODEL_INFO[k] || [k])[0]}`, 2500); }
+  function setModel(k) { if (k === st.model) return; st.model = k; send("model", {model: k}); styleModel(); note(`Layer: ${(MODEL_INFO[k] || [k])[0]}`, 2500); }
   if (MODELS.length < 2) rModel.style.display = "none";
   // while Kinds of change waits: its button grayed, and a line under it with the zoom it
   // appears at and the zoom now
@@ -272,8 +272,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the imagery under it, and a year with no digging is all gray), on AlphaEarth's layer alone (fast enough to step
   // through); otherwise the years set here and the layer chosen
   function winOf() { return st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
-  // the chunks drawn: the paint's scores (AlphaEarth's own, scored ahead a year at a time), or the layer chosen
-  function kindOf() { return st.paint ? "paint" : st.model; }
+  // the chunks drawn: the paint's scores (the layer chosen, scored ahead a year at a time), or the layer's own
+  function kindOf() { return st.paint ? `paint-${st.model}` : st.model; }
   function styleWin() {
     const i0 = Math.max(0, aefYears.indexOf(st.y0)), i1 = Math.max(0, aefYears.indexOf(st.y1)), n = Math.max(1, aefYears.length - 1);
     rFrom.value = i0; rTo.value = i1;
@@ -1346,7 +1346,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // painting, one mask per year stepped to (each the year before it to the year, from scores the worker has read
     // ahead for every year), kept mounted so a step back to one is instant; only the year shown's is the mask
     if (st.paint) for (const y of [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)])
-      out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ && y === st.paintYear, year: y, years: S2Y, minZoom: EWZ, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
+      out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ && y === st.paintYear, year: y, years: S2Y, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);

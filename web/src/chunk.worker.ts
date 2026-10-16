@@ -1,7 +1,7 @@
 import * as zarr from "zarrita";
 
 import { type AefArray, NUM_BANDS, openMosaic } from "./aef";
-import { aefScores, type WorldModel } from "./earthwork-cpu";
+import { aefScores, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
 import { tesseraOnChunk } from "./tessera";
 
 /**
@@ -10,8 +10,8 @@ import { tesseraOnChunk } from "./tessera";
  * hold up the map, the imagery or the keys; the page only makes the textures.
  */
 type Read = { type: "read"; id: number; px0: number; py0: number; w: number; h: number; firstIdx: number; lastIdx: number; aefOnly?: boolean };
-/** The paint: AlphaEarth's own score for one chunk, the year before `lastIdx` to it; `allIdx` the paint's other years. */
-type Score = { type: "score"; id: number; px0: number; py0: number; w: number; h: number; lastIdx: number; allIdx: number[] };
+/** The paint: a layer's score for one chunk, the year before `lastIdx` to it; `allIdx` the paint's other years. */
+type Score = { type: "score"; id: number; kind: LayerKind; px0: number; py0: number; w: number; h: number; lastIdx: number; allIdx: number[] };
 type Msg = { type: "init"; model: WorldModel } | Read | Score | { type: "abort"; id: number };
 
 let model: WorldModel | null = null;
@@ -61,20 +61,21 @@ function aefChunk(arr: AefArray, idx: number, py0: number, px0: number, h: numbe
   });
 }
 
-// ---- the paint's scores: per chunk and year, AlphaEarth's own score from the year before, as 1 + 254 x score (0 where
+// ---- the paint's scores: per layer, chunk and year, the layer's score from the year before (TESSERA read for the
+// aggregate and TESSERA's own, where AlphaEarth points, as for the map), as 1 + 254 x score (0 where
 // a year is missing), 64 KB a chunk where its two years are 8 MB. Kept by "lastIdx:py0:px0:h:w", the last used last.
 // Once a chunk's year is in, its other years are scored in the background (nearest year first, newest chunks first,
 // only while nothing in view is waiting), so a step to another year draws from here with nothing to download
 const SCORE_KEEP = 1500;
 const scoreKept = new Map<string, Promise<Uint8Array>>();
-const scoreKey = (lastIdx: number, m: { py0: number; px0: number; h: number; w: number }) => `${lastIdx}:${m.py0}:${m.px0}:${m.h}:${m.w}`;
+const scoreKey = (kind: LayerKind, lastIdx: number, m: { py0: number; px0: number; h: number; w: number }) => `${kind}:${lastIdx}:${m.py0}:${m.px0}:${m.h}:${m.w}`;
 function encodeScores(sc: Float32Array): Uint8Array {
   const out = new Uint8Array(sc.length);
   for (let i = 0; i < sc.length; i++) out[i] = sc[i] < 0 ? 0 : 1 + Math.round(254 * Math.min(1, sc[i]));
   return out;
 }
-async function pairScore(lastIdx: number, g: { py0: number; px0: number; h: number; w: number }, signal: AbortSignal): Promise<Uint8Array> {
-  const k = scoreKey(lastIdx, g);
+async function pairScore(kind: LayerKind, lastIdx: number, g: { py0: number; px0: number; h: number; w: number }, signal: AbortSignal): Promise<Uint8Array> {
+  const k = scoreKey(kind, lastIdx, g);
   const kept = scoreKept.get(k);
   if (kept) {
     scoreKept.delete(k);
@@ -87,7 +88,19 @@ async function pairScore(lastIdx: number, g: { py0: number; px0: number; h: numb
   const p = Promise.all([
     aefChunk(arr, lastIdx - 1, g.py0, g.px0, g.h, g.w, signal),
     aefChunk(arr, lastIdx, g.py0, g.px0, g.h, g.w, signal),
-  ]).then(([f, l]) => encodeScores(aefScores(f.data as Int8Array, l.data as Int8Array, g.w * g.h, model!)));
+  ]).then(async ([f, l]) => {
+    const aefFirst = f.data as Int8Array, aefLast = l.data as Int8Array, plane = g.w * g.h;
+    const aef = aefScores(aefFirst, aefLast, plane, model!);
+    if (kind === "aef") return encodeScores(aef);
+    const t = await tesseraOnChunk(g.px0, g.py0, g.w, g.h, lastIdx - 1, lastIdx, signal, aef);
+    const out = new Float32Array(plane), px = { aefFirst, aefLast, tesFirst: t.first, tesLast: t.last, tesFlags: t.flags, plane, at: 0 };
+    for (let at = 0; at < plane; at++) {
+      px.at = at;
+      const v = scorePixel(kind, model!, px);
+      out[at] = v == null ? -1 : v;
+    }
+    return encodeScores(out);
+  });
   scoreKept.set(k, p);
   p.catch(() => scoreKept.get(k) === p && scoreKept.delete(k));
   while (scoreKept.size > SCORE_KEEP) scoreKept.delete(scoreKept.keys().next().value as string);
@@ -95,7 +108,7 @@ async function pairScore(lastIdx: number, g: { py0: number; px0: number; h: numb
 }
 // the background: one job per chunk and year, taken nearest year first (the next step's for the whole view before the
 // one after it), then the newest chunk first; only while nothing in view is waiting
-type Ahead = { g: { py0: number; px0: number; h: number; w: number }; y: number; dist: number; seq: number };
+type Ahead = { kind: LayerKind; g: { py0: number; px0: number; h: number; w: number }; y: number; dist: number; seq: number };
 const ahead: Ahead[] = [];
 const AHEAD_MAX = 600, AHEAD_RUN = 6;
 let fgWaiting = 0, aheadRunning = 0, aheadSeq = 0;
@@ -112,9 +125,9 @@ function pumpAhead() {
   while (fgWaiting === 0 && aheadRunning < AHEAD_RUN) {
     const job = nextAhead();
     if (!job) return;
-    if (scoreKept.has(scoreKey(job.y, job.g))) continue;
+    if (scoreKept.has(scoreKey(job.kind, job.y, job.g))) continue;
     aheadRunning++;
-    pairScore(job.y, job.g, never)
+    pairScore(job.kind, job.y, job.g, never)
       .catch(() => {})  // a year that cannot be read: left for a step to it
       .finally(() => { aheadRunning--; pumpAhead(); });
   }
@@ -124,13 +137,13 @@ async function score(m: Score) {
   running.set(m.id, ac);
   fgWaiting++;
   try {
-    const sc = await pairScore(m.lastIdx, m, ac.signal);
+    const sc = await pairScore(m.kind, m.lastIdx, m, ac.signal);
     const out = sc.slice();
     postMessage({ id: m.id, score: out }, { transfer: [out.buffer] as ArrayBuffer[] });
     // the chunk's other years, nearest first
-    const rest = m.allIdx.filter((y) => y !== m.lastIdx && !scoreKept.has(scoreKey(y, m)));
+    const rest = m.allIdx.filter((y) => y !== m.lastIdx && !scoreKept.has(scoreKey(m.kind, y, m)));
     const seq = ++aheadSeq, g = { py0: m.py0, px0: m.px0, h: m.h, w: m.w };
-    for (const y of rest) ahead.push({ g, y, dist: Math.abs(y - m.lastIdx), seq });
+    for (const y of rest) ahead.push({ kind: m.kind, g, y, dist: Math.abs(y - m.lastIdx), seq });
     // the oldest chunks' jobs go first when there are too many (a long pan)
     if (ahead.length > AHEAD_MAX) { ahead.sort((p, q) => p.seq - q.seq); ahead.splice(0, ahead.length - AHEAD_MAX); }
   } catch (e) {
