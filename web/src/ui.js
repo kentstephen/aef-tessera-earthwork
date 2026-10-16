@@ -1599,7 +1599,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // brightness scaled by 1 + FLARE: no color laid over it, the ground itself brighter there), on the map showing Sentinel-2 (the pair's left,
   // or the main map while space is held). A tap rises, holds a moment and fades; held, it stays lit until let go.
   // Its layer stays mounted at strength 0 (not drawn), so its chunks are in before the first tap
-  const FLARE = Math.max(0.05, Math.min(1, Number(cfg.flare) || 0.25)), FLARE_UP = 90, FLARE_HOLD = 220, FLARE_DOWN = 650;
+  const FLARE = Math.max(0.05, Math.min(1, Number(cfg.flare) || 0.4)), FLARE_UP = 90, FLARE_HOLD = 220, FLARE_DOWN = 650;
   let flareK = 0, flareHeld = false, flareUntil = 0, flareRaf = 0, flareLast = 0;
   const flareLayer = (m) => earthwork.yearLayer({visible: flareK > 0.002 && m.getZoom() >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, flare: flareK});
   function flareStep(now) {
