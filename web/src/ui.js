@@ -1386,6 +1386,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     let r = {loaded: 0, wanted: 0};
     if (z >= EWZ && !st.holding) { const b = map.getBounds(); r = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); }
     const on = r.wanted > 0 && r.loaded < r.wanted;
+    // every chunk in view in: the paint's gray on (the layer's own onViewportLoad does not come for a year whose
+    // tiles were already in, so the bar and the gray go by the same count)
+    if (r.wanted > 0 && !on && !ewIn) { ewIn = true; map.triggerRepaint(); }
     ewBar.classList.toggle("on", on); ewTag.classList.toggle("on", on);
     if (!on) return;
     ewBar.firstChild.style.width = (100 * r.loaded / r.wanted).toFixed(1) + "%";
@@ -1868,7 +1871,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     window.__cmState = () => ({st: Object.assign({}, st), hex: N, res, hmeta, tiles: tstat, s2: s2Stat, s2stretch: cfg.s2_stretch, card: cardData, status: model.get("status"),
       lc: hattrs ? Array.from({length: N}, (_, i) => hattrs[HB * i + 7]).reduce((c, v) => (c[v]++, c), [0, 0, 0, 0]) : null});
     window.__cmTiles = () => ({log: tlog, frames: flog});
-    window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); return {inHand: r.inHand, wanted: r.wanted, read: earthwork.tilesRead()}; };
+    window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); const l = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); return {inHand: r.inHand, wanted: r.wanted, read: earthwork.tilesRead(), loaded: l.loaded, ewIn, bar: ewBar.classList.contains("on")}; };
     // for tests: the center of the first hexagon whose biggest step is year y and that moved a fair amount
     window.__cmHexAt = (y) => { const b = map.getBounds(); for (let i = 0; i < N; i++) if (hattrs && hattrs[HB * i] === y - 2000 && hattrs[HB * i + 1] >= FAIR) { const r = cellToBoundary(hexes[i], true); const c = r.slice(0, -1).reduce((a, p) => [a[0] + p[0] / (r.length - 1), a[1] + p[1] / (r.length - 1)], [0, 0]); if (b.contains(c) && map.project(c).x < mapEl.clientWidth - 420 && map.project(c).y > 200) return c; } return null; };
   }
