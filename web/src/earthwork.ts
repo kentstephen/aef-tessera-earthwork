@@ -23,7 +23,7 @@ const paintOf = (kind: ChunkKind): LayerKind | null => (kind.startsWith("paint-"
 /** One chunk of the paint: every year's score on the GPU (rgba8unorm, a year per channel, 1 + 254 x score, 0 where a year is missing). */
 type PaintTile = { width: number; height: number; byteLength: number; key: string; scoreTex: Texture };
 /** One chunk of the year map: the years each pixel was over the layer's cutoff, a bit a year (r8unorm). */
-type YearTile = { width: number; height: number; byteLength: number; key: string; yearTex: Texture };
+type YearTile = { width: number; height: number; byteLength: number; key: string; yearTex: Texture; device?: Device; patchId?: number; patchTex?: Texture };
 
 /** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags (none of TESSERA's for AlphaEarth's layer alone). */
 type TileData = PairTileData & {
@@ -322,10 +322,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           data: bits,
           sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
         });
-        return { width, height, byteLength: plane, key, yearTex };
+        return { width, height, byteLength: plane, key, yearTex, ...(flare != null ? { device } : {}) };
       },
       renderTile: (d: YearTile) => ({
-        renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare, dim } }] : [
+        renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { ...flareTex(d, shown), strength: flare, dim } }] : [
           { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
           ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.cividis } }] : []),
         ],
@@ -342,6 +342,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         if (!t) return;
         if (flare == null) loaded.delete(t.key);
         t.yearTex?.destroy();
+        t.patchTex?.destroy();
       },
       onViewportLoad: () => flare == null && onViewportLoad && onViewportLoad(),
       // the flare's blend works on what is under it, so a tile drawn over its parent (refining) would flare twice
@@ -351,7 +352,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // texture, contrast and colors kept); dimming, out = dst src, scaled down. Its alpha kept
       ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
-      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim] },
+      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, patch ? patch.id : 0] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
@@ -487,6 +488,98 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     return any ? out : null;
   }
 
+  // the patch lit (lightPatch): the connected pixels of one color on the year map, its mask a chunk by key
+  let patch: { id: number; year: number; ck: ChunkKind; masks: Map<string, { m: Uint8Array; w: number }> } | null = null,
+    patchN = 0;
+  const PATCH_MAX = 4_000_000;
+
+  /**
+   * The patch under a point lit by the flare instead of the year's finds: the pixels joined to it (the eight around
+   * each) in the same color on the year map, the latest year up to `upTo` the layer had them over its cutoff. Only
+   * the chunks in hand are walked, so a patch ends at the edge of what is loaded. Null (and nothing lit) where the
+   * point has no find or its chunk is not in hand.
+   */
+  function lightPatch(lon: number, lat: number, upTo: number, model_: LayerKind): { year: number; n: number } | null {
+    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef", ck: ChunkKind = `years-${kind}`;
+    const over = 1 + 254 * model.cut[kind];
+    // a chunk's latest year a pixel (0 none) and its mask, made when the walk first reaches it
+    type Walk = { w: number; h: number; latest: Uint16Array; mask: Uint8Array; n: number };
+    const walked = new Map<string, Walk | null>();
+    const walkOf = (r: number, c: number): Walk | null => {
+      const k = keyOf(0, 0, ck, r, c);
+      let wk = walked.get(k);
+      if (wk !== undefined) return wk;
+      const p = paintScores.get(k);
+      if (!p) wk = null;
+      else {
+        const plane = p.w * p.h, latest = new Uint16Array(plane);
+        for (let i = 0; i < plane; i++) {
+          const at = p.stride * i;
+          for (let ch = 0; ch < p.years.length; ch++) if (p.years[ch] <= upTo && p.s[at + ch] >= over) latest[i] = p.years[ch];
+        }
+        wk = { w: p.w, h: p.h, latest, mask: new Uint8Array(plane), n: 0 };
+      }
+      walked.set(k, wk);
+      return wk;
+    };
+    // a pixel of the walk's color not yet in it: taken in, true
+    let year = 0, n = 0;
+    const take = (px: number, py: number) => {
+      const r = Math.floor(py / CHUNK), c = Math.floor(px / CHUNK), wk = walkOf(r, c);
+      if (!wk) return false;
+      const ix = px - c * CHUNK, iy = py - r * CHUNK;
+      if (ix < 0 || iy < 0 || ix >= wk.w || iy >= wk.h) return false;
+      const i = iy * wk.w + ix;
+      if (wk.mask[i] || wk.latest[i] !== year) return false;
+      wk.mask[i] = 1; wk.n++; n++;
+      return true;
+    };
+    const { px, py, r, c } = chunkAt(lon, lat), wk0 = walkOf(r, c);
+    if (!wk0) return null;
+    const ix0 = px - c * CHUNK, iy0 = py - r * CHUNK;
+    if (ix0 < 0 || iy0 < 0 || ix0 >= wk0.w || iy0 >= wk0.h) return null;
+    year = wk0.latest[iy0 * wk0.w + ix0];
+    if (!year) return null;
+    take(px, py);
+    const stack = [px, py];
+    while (stack.length && n < PATCH_MAX) {
+      const y = stack.pop() as number, x = stack.pop() as number;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((dx || dy) && take(x + dx, y + dy)) stack.push(x + dx, y + dy);
+    }
+    const masks = new Map<string, { m: Uint8Array; w: number }>();
+    walked.forEach((wk, k) => { if (wk && wk.n) masks.set(k, { m: wk.mask, w: wk.w }); });
+    patch = { id: ++patchN, year, ck, masks };
+    return { year, n };
+  }
+  /** Whether a point is in the patch lit. */
+  function inPatch(lon: number, lat: number) {
+    if (!patch) return false;
+    const { px, py, r, c } = chunkAt(lon, lat), k = patch.masks.get(keyOf(0, 0, patch.ck, r, c));
+    const ix = px - c * CHUNK, iy = py - r * CHUNK;
+    return !!k && ix >= 0 && iy >= 0 && ix < k.w && k.m[iy * k.w + ix] === 1;
+  }
+  /** The flare back on the year's finds. */
+  function clearPatch() { patch = null; }
+  // the flare's bits for a tile: the patch's (one bit, its mask; none in a tile it does not reach) while one is
+  // lit, the year's finds otherwise
+  function flareTex(d: YearTile, shown: number) {
+    if (!patch || !d.device) return { yearTex: d.yearTex, shown };
+    if (d.patchId !== patch.id) {
+      d.patchTex?.destroy();
+      const m = patch.masks.get(d.key)?.m, plane = d.width * d.height;
+      d.patchTex = d.device.createTexture({
+        format: "r8unorm",
+        width: d.width,
+        height: d.height,
+        mipLevels: 1,
+        data: m && m.length === plane ? m : new Uint8Array(plane),
+        sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
+      });
+      d.patchId = patch.id;
+    }
+    return { yearTex: d.patchTex as Texture, shown: 0 };
+  }
+
   /**
    * Read the chunk under a point for this window if it is not in hand (a view holds more chunks
    * than are kept); resolves once scoreAt can answer there, or with nothing where it cannot.
@@ -549,6 +642,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     scoreAt,
     detectedAt,
     readAt,
+    lightPatch,
+    inPatch,
+    clearPatch,
     chunksIn,
     loadedIn,
     model,
