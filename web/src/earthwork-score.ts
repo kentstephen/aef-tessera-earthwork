@@ -441,7 +441,7 @@ export type EarthworkFlareProps = {
 };
 
 /**
- * The flare: the year map's pixels (any year up to the one shown) as a gray of the flare's strength, for a blend
+ * The flare: the pixels found in the year shown (its own bit: dug that year, from the year before) as a gray of the flare's strength, for a blend
  * over the imagery (the layer's parameters) that multiplies it by 1 + strength: the ground there brighter, its
  * texture and colors as they were. Pixels never over the cutoff are discarded, so the rest of the imagery is untouched.
  * Dimming (dim 1), the other way round: the pixels kept as they are and the rest multiplied by 1 - strength, so white
@@ -466,7 +466,7 @@ uniform highp sampler2D yearTex;
       ivec2 ypx = clamp(ivec2(geometry.uv * vec2(ysize)), ivec2(0), ysize - 1);
       int bits = int(texelFetch(yearTex, ypx, 0).r * 255.0 + 0.5);
       int top = int(floor(earthworkFlare.shown + 0.5));
-      bool on = top >= 0 && (bits & ((2 << top) - 1)) != 0;
+      bool on = top >= 0 && ((bits >> top) & 1) == 1;
       bool dim = earthworkFlare.dim > 0.5;
       if (on == dim) discard;
       color = vec4(vec3(dim ? 1.0 - earthworkFlare.strength : earthworkFlare.strength), 1.0);
