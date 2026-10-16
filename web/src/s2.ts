@@ -7,7 +7,7 @@
  * is now. The map reads and draws each footprint's TCI COG itself (ui.js,
  * s2CogLayers), with its clouds and their shadows cut out by the scene's SCL and
  * the holes filled, tile by tile, from the scenes under it (s2Stack): the fill,
- * then a fourth scene uncut, the base, so ground the SCL takes for cloud in every
+ * then the last of up to four scenes uncut, the base, so ground the SCL takes for cloud in every
  * scene (bright fresh soil and concrete can be) is never a hole. A new
  * look (N on the map) moves each tile down its list: the next scene as the
  * yearly, with its own fill and base.
@@ -97,6 +97,8 @@ function sceneLists(year: number, bbox: number[]): Promise<EsFeature[][]> {
 /**
  * The look: for each MGRS tile, its look-th scene as the yearly (0 the best), the next two as the fill and the
  * fourth as the base, wrapping around the tile's list, so a new look (N) is the next scene down with its own fill.
+ * A tile with fewer than four (2017 has three in many places) has its last as the base, so the holes every scene
+ * cuts (the 2017 SCL takes bright roofs for cloud) are filled all the same; a scene alone is drawn uncut.
  */
 function sceneItems(year: number, bbox: number[], look = 0): Promise<S2Item[]> {
   return sceneLists(year, bbox).then((lists) => {
@@ -108,8 +110,8 @@ function sceneItems(year: number, bbox: number[], look = 0): Promise<S2Item[]> {
         const f = l[(look + i) % l.length];
         const bands = Object.fromEntries(Object.entries(ES_BANDS).filter(([a]) => f.assets[a]).map(([a, b]) => [b, f.assets[a].href]));
         const epsg = Number(f.properties["proj:epsg"]) || undefined;
-        const scl = f.assets.scl?.href;
-        its.push({ id: i ? `${f.id}#fill` : f.id, url: f.assets.visual.href, bbox: f.bbox, bands, epsg, scl, ...(i ? { fill: true, base: i === 3 } : {}) });
+        const scl = n > 1 ? f.assets.scl?.href : undefined;
+        its.push({ id: i ? `${f.id}#fill` : f.id, url: f.assets.visual.href, bbox: f.bbox, bands, epsg, scl, ...(i ? { fill: true, base: i === n - 1 } : {}) });
       }
       if (its.length) yearly.push({ ...its[0], under: its.slice(1) });
     }
