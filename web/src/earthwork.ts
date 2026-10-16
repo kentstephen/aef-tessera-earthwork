@@ -17,13 +17,13 @@ import { TES_BANDS } from "./tessera";
 
 export type { LayerKind, WorldModel };
 
-/** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags. */
+/** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags (none of TESSERA's for AlphaEarth's layer alone). */
 type TileData = PairTileData & {
   /** The chunk's key (keyOf), for the chunks loaded in view. */
   key: string;
-  tesFirstTex: Texture;
-  tesLastTex: Texture;
-  tesFlagsTex: Texture;
+  tesFirstTex?: Texture;
+  tesLastTex?: Texture;
+  tesFlagsTex?: Texture;
   tesFirst: Int8Array;
   tesLast: Int8Array;
   tesFlags: Uint8Array;
@@ -54,12 +54,12 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     if (error) a.reject(Object.assign(new Error(error.message), { name: error.name }));
     else a.resolve(r);
   };
-  function readChunk(px0: number, py0: number, w: number, h: number, firstIdx: number, lastIdx: number, signal?: AbortSignal): Promise<Read> {
+  function readChunk(px0: number, py0: number, w: number, h: number, firstIdx: number, lastIdx: number, aefOnly: boolean, signal?: AbortSignal): Promise<Read> {
     if (signal?.aborted) return Promise.reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
     const id = ++askId;
     return new Promise<Read>((resolve, reject) => {
       asked.set(id, { resolve, reject });
-      worker.postMessage({ type: "read", id, px0, py0, w, h, firstIdx, lastIdx });
+      worker.postMessage({ type: "read", id, px0, py0, w, h, firstIdx, lastIdx, aefOnly });
       signal?.addEventListener("abort", () => {
         if (!asked.has(id)) return;
         asked.delete(id);
@@ -95,13 +95,15 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       });
   }
 
-  // the raw chunks by "first-last:row-col", the last used last. A view holds more chunks than are
+  // the raw chunks by "first-last:row-col" ("first-last-aef:..." for AlphaEarth's layer alone, read without TESSERA),
+  // the last used last. A view holds more chunks than are
   // kept (about 70 at zoom 12.7 in a laptop window; each is 24 MB with TESSERA), so a point whose
   // chunk was let go reads it again (readAt)
   type Chunk = { aefFirst: Int8Array; aefLast: Int8Array; tesFirst: Int8Array; tesLast: Int8Array; tesFlags: Uint8Array; w: number; h: number };
   const chunks = new Map<string, Chunk>();
   const KEEP = 16;
-  const keyOf = (first: number, last: number, r: number, c: number) => `${first}-${last}:${r}-${c}`;
+  const tag = (kind: LayerKind) => (kind === "aef" ? "-aef" : "");
+  const keyOf = (first: number, last: number, kind: LayerKind, r: number, c: number) => `${first}-${last}${tag(kind)}:${r}-${c}`;
   const keepChunk = (k: string, ch: Chunk) => {
     chunks.delete(k);
     chunks.set(k, ch);
@@ -165,8 +167,8 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     ];
   }
 
-  /** The layer's id for the window: the paint's maskId while it is the mask. */
-  const layerId = (first: number, last: number) => `earthwork-${first}-${last}`;
+  /** The layer's id for the window and the layer chosen: the paint's maskId while it is the mask. */
+  const layerId = (first: number, last: number, kind: LayerKind) => `earthwork-${first}-${last}${tag(kind)}`;
 
   /**
    * The layer for the window and the layer chosen. As the paint's mask (mask: true) it is not
@@ -180,7 +182,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     const firstIdx = first - YEAR_ORIGIN;
     const lastIdx = last - YEAR_ORIGIN;
     return new ZarrLayer<zarr.Readable, "int8", TileData>({
-      id: layerId(first, last),
+      id: layerId(first, last, kind),
       operation: opts.mask ? "mask" : "draw",
       node: arr as AefArray,
       metadata: attrs,
@@ -190,7 +192,8 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         const py0 = ys.start ?? 0, px0 = xs.start ?? 0;
         const { device, width, height } = o;
         onDevice(device);
-        const r = await readChunk(px0, py0, width, height, firstIdx, lastIdx, o.signal);
+        const aefOnly = kind === "aef";
+        const r = await readChunk(px0, py0, width, height, firstIdx, lastIdx, aefOnly, o.signal);
         const d = {
           firstTex: bandTexture(device, r.aefFirst, width, height),
           lastTex: bandTexture(device, r.aefLast, width, height),
@@ -201,7 +204,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           byteLength: r.aefFirst.byteLength + r.aefLast.byteLength,
         };
         const t = { first: r.tesFirst, last: r.tesLast, flags: r.tesFlags };
-        const key = keyOf(first, last, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
+        const key = keyOf(first, last, kind, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
         keepChunk(key, {
           aefFirst: d.first,
           aefLast: d.last,
@@ -219,9 +222,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           first: NONE,
           last: NONE,
           key,
-          tesFirstTex: bandTexture(device, t.first, width, height, TES_BANDS),
-          tesLastTex: bandTexture(device, t.last, width, height, TES_BANDS),
-          tesFlagsTex: flagsTexture(device, t.flags, width, height),
+          tesFirstTex: aefOnly ? undefined : bandTexture(device, t.first, width, height, TES_BANDS),
+          tesLastTex: aefOnly ? undefined : bandTexture(device, t.last, width, height, TES_BANDS),
+          tesFlagsTex: aefOnly ? undefined : flagsTexture(device, t.flags, width, height),
           tesFirst: NONE,
           tesLast: NONE,
           tesFlags: NONE_U8,
@@ -262,7 +265,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    */
   function scoreAt(lon: number, lat: number, first: number, last: number, kind: LayerKind): number | null {
     const { px, py, r, c } = chunkAt(lon, lat);
-    const k = keyOf(first, last, r, c), ch = chunks.get(k);
+    const k = keyOf(first, last, kind, r, c), ch = chunks.get(k);
     if (!ch) return null;
     keepChunk(k, ch);
     const ix = px - c * CHUNK, iy = py - r * CHUNK;
@@ -274,16 +277,16 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * Read the chunk under a point for this window if it is not in hand (a view holds more chunks
    * than are kept); resolves once scoreAt can answer there, or with nothing where it cannot.
    */
-  function readAt(lon: number, lat: number, first: number, last: number): Promise<void> {
+  function readAt(lon: number, lat: number, first: number, last: number, kind: LayerKind): Promise<void> {
     const { px, py, r, c } = chunkAt(lon, lat);
-    const k = keyOf(first, last, r, c);
+    const k = keyOf(first, last, kind, r, c);
     if (chunks.has(k)) return Promise.resolve();
     let p = reading.get(k);
     if (!p) {
       const [, , H, W] = arr.shape;
       if (px < 0 || py < 0 || px >= W || py >= H) return Promise.resolve();
       const y0 = r * CHUNK, x0 = c * CHUNK, h = Math.min(CHUNK, H - y0), w = Math.min(CHUNK, W - x0);
-      p = readChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN)
+      p = readChunk(x0, y0, w, h, first - YEAR_ORIGIN, last - YEAR_ORIGIN, kind === "aef")
         .then((r) => keepChunk(k, { ...r, w, h }))
         .catch(() => {})
         .finally(() => reading.delete(k));
@@ -293,22 +296,22 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   }
 
   /** How many of the chunks under a box are loaded on the GPU for this window. */
-  function loadedIn(bbox: [number, number, number, number], first: number, last: number) {
+  function loadedIn(bbox: [number, number, number, number], first: number, last: number, kind: LayerKind) {
     const [W, S, E, N] = bbox;
     const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
     const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
     let n = 0;
-    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (loaded.has(keyOf(first, last, r, c))) n++;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (loaded.has(keyOf(first, last, kind, r, c))) n++;
     return { loaded: n, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
   }
 
   /** How many of the chunks under a box are in hand for this window. */
-  function chunksIn(bbox: [number, number, number, number], first: number, last: number) {
+  function chunksIn(bbox: [number, number, number, number], first: number, last: number, kind: LayerKind) {
     const [W, S, E, N] = bbox;
     const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
     const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
     let inHand = 0;
-    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (chunks.has(keyOf(first, last, r, c))) inHand++;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (chunks.has(keyOf(first, last, kind, r, c))) inHand++;
     return { inHand, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
   }
 

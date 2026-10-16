@@ -214,7 +214,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   };
   st.model = cfg.model || "aggregate";
   const rModel = rowOf("Layer");
-  const styleModelSeg = segOf(rModel, MODELS.map((k) => [k, (MODEL_INFO[k] || [k])[0], (MODEL_INFO[k] || [k, ""])[1], ""]), (k) => k === st.model, (k) => setModel(k));
+  const styleModelSeg = segOf(rModel, MODELS.map((k) => [k, (MODEL_INFO[k] || [k])[0], (MODEL_INFO[k] || [k, ""])[1], ""]), (k) => k === kindOf(), (k) => setModel(k));
   rModel.querySelector(".seg-s").classList.remove("col");
   const modelKey = el_("kbd", "at-mkey", "M");
   modelKey.title = "M switches the layer";
@@ -223,7 +223,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   rModel.appendChild(modelWhy);
   const styleModel = () => { styleModelSeg(); modelWhy.textContent = (MODEL_INFO[st.model] || ["", ""])[1]; };
   styleModel();
-  function setModel(k) { if (k === st.model) return; st.model = k; send("model", {model: k}); styleModel(); note(`Layer: ${(MODEL_INFO[k] || [k])[0]}`, 2500); }
+  function setModel(k) { if (st.paint) { note("The paint shows AEF alone, a year at a time (I for the layers on the basemap)", 2500); return; } if (k === st.model) return; st.model = k; send("model", {model: k}); styleModel(); note(`Layer: ${(MODEL_INFO[k] || [k])[0]}`, 2500); }
   if (MODELS.length < 2) rModel.style.display = "none";
   // while Kinds of change waits: its button grayed, and a line under it with the zoom it
   // appears at and the zoom now
@@ -268,6 +268,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const wTxt = el_("span", "at-wtxt");
   win.append(wTrk, wSpn, wTks, rFrom, rTo);
   rWin.append(win, wTxt);
+  // the window drawn: painting, each year its own change (the year before it to the year shown, so the color matches
+  // the imagery under it, and a year with no digging is all gray), on AlphaEarth's layer alone (fast enough to step
+  // through); otherwise the years set here and the layer chosen
+  function winOf() { return st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
+  function kindOf() { return st.paint ? "aef" : st.model; }
   function styleWin() {
     const i0 = Math.max(0, aefYears.indexOf(st.y0)), i1 = Math.max(0, aefYears.indexOf(st.y1)), n = Math.max(1, aefYears.length - 1);
     rFrom.value = i0; rTo.value = i1;
@@ -275,7 +280,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const usable = (win.clientWidth || 170) - 16;
     wSpn.style.left = (8 + usable * i0 / n) + "px"; wSpn.style.width = (usable * (i1 - i0) / n) + "px";
     wTxt.textContent = `${st.y0} to ${st.y1}`;
-    panelYears.textContent = `${st.y0} to ${st.y1}`;
+    const [w0, w1] = winOf();
+    panelYears.textContent = `${w0} to ${w1}`;
   }
   const onDrag = (which) => {
     let a = Number(rFrom.value), b = Number(rTo.value);
@@ -755,8 +761,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   function closeCard() { cardData = null; picked = null; imgPick = null; spot = null; renderYear(); update(); }
   function rescoreSpot() {
     if (!cardData || cardData.kind !== "spot") return;
-    cardData.score = earthwork.scoreAt(cardData.plon, cardData.plat, st.y0, st.y1, st.model);
-    cardData.y0 = st.y0; cardData.y1 = st.y1;
+    [cardData.y0, cardData.y1] = winOf();
+    cardData.score = earthwork.scoreAt(cardData.plon, cardData.plat, cardData.y0, cardData.y1, kindOf());
   }
   // a pick: the same cell again clears it
   function pickCell(cell, ll, pt, onImagery) {
@@ -785,7 +791,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const c = cardData;
     if (!c || c.kind !== "spot" || !map || map.getZoom() < EWZ) return;
     c.reading = true; renderYear();
-    earthwork.readAt(c.plon, c.plat, st.y0, st.y1).then(() => {
+    earthwork.readAt(c.plon, c.plat, ...winOf(), kindOf()).then(() => {
       if (cardData !== c) return;
       c.reading = false; rescoreSpot(); renderYear();
     });
@@ -965,7 +971,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   PaintExtension.extensionName = "PaintExtension";
   const PAINT = new PaintExtension();
   // the mask is the earthwork layer itself (its id changes with the years)
-  const paintProps = () => ({extensions: [PAINT], maskId: earthwork.layerId(st.y0, st.y1), maskByInstance: false});
+  const paintProps = () => ({extensions: [PAINT], maskId: earthwork.layerId(...winOf(), kindOf()), maskByInstance: false});
   // ---- the false colors (S2_COMPOSITES in the kernel): R, G, B from the raw bands (uint16
   // reflectance x 10,000). The layer walks the first 20 m band's tiles; each other band is read
   // at the level of the same pixel size and placed by its own geotransform (the yearly
@@ -1336,7 +1342,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // kept in the stack while hidden (holding, zoomed out) so its shapes stay built
     // painting, it is the paint's mask (not drawn; in the imagery's slot, since an interleaved overlay draws
     // the mask with the layers of its own slot)
-    out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, mask: st.paint, onTile: tileIn, onViewportLoad: ewLoaded}));
+    // painting, one mask per year stepped to (each the year before it to the year), kept mounted so a step back to one
+    // is instant; only the year shown's is the mask
+    if (st.paint) for (const y of [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)])
+      out.push(earthwork.layer({visible: !st.holding && z >= EWZ && y === st.paintYear, first: y - 1, last: y, model: "aef", minZoom: EWZ, mask: true, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
+    else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);
     // gold on the dark basemap (was near-black on the light one)
@@ -1373,7 +1383,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!map) return;
     const z = map.getZoom();
     let r = {loaded: 0, wanted: 0};
-    if (z >= EWZ && !st.holding) { const b = map.getBounds(); r = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1); }
+    if (z >= EWZ && !st.holding) { const b = map.getBounds(); r = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); }
     const on = r.wanted > 0 && r.loaded < r.wanted;
     ewBar.classList.toggle("on", on); ewTag.classList.toggle("on", on);
     if (!on) return;
@@ -1385,7 +1395,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // less than half the view's chunks in (a jump, a search, other years): the imagery in color again until they are
   function ewCheck() {
     if (!map || !ewIn || map.getZoom() < EWZ) return;
-    const b = map.getBounds(), r = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1);
+    const b = map.getBounds(), r = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf());
     if (r.loaded < r.wanted / 2) { ewIn = false; map.triggerRepaint(); }
   }
   function update() {
@@ -1471,7 +1481,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const curYear = () => (onPaint() ? st.paintYear : st.imgYear);
   const setYear = (y) => {
     if (y === curYear()) return;
-    if (onPaint()) { st.paintYear = y; paintSeen.add(y); } else st.imgYear = y;
+    if (onPaint()) { st.paintYear = y; paintSeen.add(y); styleWin(); } else st.imgYear = y;
     renderYear(); update();
   };
   const stepImg = (d) => { const i = S2Y.indexOf(curYear()); setYear(S2Y[Math.max(0, Math.min(S2Y.length - 1, (i < 0 ? S2Y.length - 1 : i) + d))]); };
@@ -1546,14 +1556,15 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const under = document.elementFromPoint(pt.x, pt.y);
     if (!under || !mapEl.contains(under)) { tip.style.display = "none"; return; }
     const ll = map.unproject([pt.x - r.left, pt.y - r.top]);
-    const v = earthwork.scoreAt(ll.lng, ll.lat, st.y0, st.y1, st.model);
+    const [w0, w1] = winOf(), kind = kindOf();
+    const v = earthwork.scoreAt(ll.lng, ll.lat, w0, w1, kind);
     if (v == null) {
       tip.style.display = "none";
-      earthwork.readAt(ll.lng, ll.lat, st.y0, st.y1).then(() => { if (lastPt && lastPt.x === pt.x && lastPt.y === pt.y && earthwork.scoreAt(ll.lng, ll.lat, st.y0, st.y1, st.model) != null) showHexTip(pt); });
+      earthwork.readAt(ll.lng, ll.lat, w0, w1, kind).then(() => { if (lastPt && lastPt.x === pt.x && lastPt.y === pt.y && earthwork.scoreAt(ll.lng, ll.lat, w0, w1, kind) != null) showHexTip(pt); });
       return;
     }
     const p = pane.getBoundingClientRect();
-    tip.innerHTML = `<b>${Math.round(100 * v)}%</b> earthwork, ${st.y0} to ${st.y1}`;
+    tip.innerHTML = `<b>${Math.round(100 * v)}%</b> earthwork, ${w0} to ${w1}`;
     tip.style.display = "block";
     tip.style.left = (pt.x - p.left + 14) + "px";
     tip.style.top = (pt.y - p.top + 14) + "px";
@@ -1727,7 +1738,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     else if (k === "p" || k === "P") setPair(!st.pair);
     // I: the paint (Sentinel-2 gray, the lit ground in its colors) or the earthwork layer over the basemap
     else if (k === "i" || k === "I") {
-      st.paint = !st.paint; root.classList.toggle("ew-paint", st.paint); if (st.paint) send("s2comp"); styleComp(); renderYear(); update();
+      st.paint = !st.paint; root.classList.toggle("ew-paint", st.paint); if (st.paint) send("s2comp"); styleComp(); styleModel(); styleWin(); renderYear(); update();
       note(st.paint ? "Sentinel-2, gray but where the ground was likely dug (I for the earthwork layer on the basemap)" : "The earthwork layer on the basemap (I for Sentinel-2 in gray, the lit ground in color)", 3000);
     }
     // Shift held while painting: the gray off, the imagery in its own colors everywhere, until it is let go
@@ -1856,7 +1867,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     window.__cmState = () => ({st: Object.assign({}, st), hex: N, res, hmeta, tiles: tstat, s2: s2Stat, s2stretch: cfg.s2_stretch, card: cardData, status: model.get("status"),
       lc: hattrs ? Array.from({length: N}, (_, i) => hattrs[HB * i + 7]).reduce((c, v) => (c[v]++, c), [0, 0, 0, 0]) : null});
     window.__cmTiles = () => ({log: tlog, frames: flog});
-    window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], st.y0, st.y1); return {inHand: r.inHand, wanted: r.wanted, read: earthwork.tilesRead()}; };
+    window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); return {inHand: r.inHand, wanted: r.wanted, read: earthwork.tilesRead()}; };
     // for tests: the center of the first hexagon whose biggest step is year y and that moved a fair amount
     window.__cmHexAt = (y) => { const b = map.getBounds(); for (let i = 0; i < N; i++) if (hattrs && hattrs[HB * i] === y - 2000 && hattrs[HB * i + 1] >= FAIR) { const r = cellToBoundary(hexes[i], true); const c = r.slice(0, -1).reduce((a, p) => [a[0] + p[0] / (r.length - 1), a[1] + p[1] / (r.length - 1)], [0, 0]); if (b.contains(c) && map.project(c).x < mapEl.clientWidth - 420 && map.project(c).y > 200) return c; } return null; };
   }
