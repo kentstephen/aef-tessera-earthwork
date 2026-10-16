@@ -148,10 +148,12 @@ export function confidenceChunk(
   tes: { first: Int8Array; last: Int8Array; flags: Uint8Array } | null,
   aef: Float32Array,
   plane: number,
+  w: number,
   m: WorldModel,
   drawn?: { score: Float32Array; cut: number },
 ): Uint8Array {
   const out = new Uint8Array(plane).fill(255);
+  const read = new Uint8Array(plane);
   const e = new Float64Array(NUM_BANDS);
   for (let at = 0; at < plane; at++) {
     // only the pixels drawn (the year map's, over its layer's cutoff), when given
@@ -170,6 +172,29 @@ export function confidenceChunk(
     for (const y of earlier) if (unitAef(y, plane, at, e)) near = Math.min(near, 1 - cosine(e, aA, NUM_BANDS));
     const fresh = moved > 1e-3 ? clip01((near / moved - 0.2) / 0.5) : 1;
     out[at] = Math.round(255 * agree * fresh);
+    read[at] = 1;
   }
+  return smoothed(out, read, w, plane / w, 2);
+}
+
+// each pixel read, the mean of the pixels read within r of it (a (2r + 1) square): a patch reads as one call, not
+// speckle. Summed tables, so a chunk is two passes
+function smoothed(v: Uint8Array, read: Uint8Array, w: number, h: number, r: number): Uint8Array {
+  const W = w + 1, sum = new Float64Array(W * (h + 1)), cnt = new Float64Array(W * (h + 1));
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x, k = (y + 1) * W + x + 1, on = read[i];
+      sum[k] = (on ? v[i] : 0) + sum[k - 1] + sum[k - W] - sum[k - W - 1];
+      cnt[k] = on + cnt[k - 1] + cnt[k - W] - cnt[k - W - 1];
+    }
+  const out = v.slice();
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x;
+      if (!read[i]) continue;
+      const x0 = Math.max(0, x - r), x1 = Math.min(w, x + r + 1), y0 = Math.max(0, y - r), y1 = Math.min(h, y + r + 1);
+      const a = y1 * W + x1, b = y0 * W + x1, c = y1 * W + x0, d = y0 * W + x0;
+      out[i] = Math.round((sum[a] - sum[b] - sum[c] + sum[d]) / (cnt[a] - cnt[b] - cnt[c] + cnt[d]));
+    }
   return out;
 }

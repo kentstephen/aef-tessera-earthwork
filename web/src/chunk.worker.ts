@@ -121,7 +121,7 @@ async function pairScore(kind: LayerKind, lastIdx: number, g: { py0: number; px0
     if (wantConf) {
       const before = Array.from({ length: lastIdx - 1 }, (_, i) => i).slice(-EARLIER);
       const earlier = (await Promise.all(before.map((i) => aefChunk(arr, i, g.py0, g.px0, g.h, g.w, signal)))).map((c) => c.data as Int8Array);
-      conf = confidenceChunk(aefFirst, aefLast, earlier, t, aef, plane, model!, { score: sc, cut: model!.cut[kind] });
+      conf = confidenceChunk(aefFirst, aefLast, earlier, t, aef, plane, g.w, model!, { score: sc, cut: model!.cut[kind] });
     }
     return { score: encodeScores(sc), conf };
   });
@@ -214,7 +214,7 @@ async function pairConf(firstIdx: number, lastIdx: number, aefOnly: boolean, g: 
     const [aefFirst, aefLast, ...earlier] = cs.map((c) => c.data as Int8Array);
     const plane = g.w * g.h, aef = aefScores(aefFirst, aefLast, plane, model!);
     const t = aefOnly ? null : await tesseraOnChunk(g.px0, g.py0, g.w, g.h, firstIdx, lastIdx, signal, aef);
-    return confidenceChunk(aefFirst, aefLast, earlier, t, aef, plane, model!);
+    return confidenceChunk(aefFirst, aefLast, earlier, t, aef, plane, g.w, model!);
   });
   confKept.set(k, p);
   p.catch(() => confKept.get(k) === p && confKept.delete(k));

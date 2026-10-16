@@ -161,7 +161,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   // the paint's chunks hold every year, so their key has none
   const keyOf = (first: number, last: number, kind: ChunkKind, r: number, c: number) => (paintOf(kind) ? `${kind}:${r}-${c}` : `${first}-${last}${tag(kind)}:${r}-${c}`);
   // the paint's scores by keyOf, the last used last (256 KB each, every year): the tooltip's and the card's
-  type PaintChunk = { s: Uint8Array; w: number; h: number; years: number[]; stride: number };
+  type PaintChunk = { s: Uint8Array; w: number; h: number; years: number[]; stride: number; conf?: Uint8Array };
   const paintScores = new Map<string, PaintChunk>();
   // the paint's years and the year map's, as their last layers asked for them (for a point read on its own, readAt)
   const yearsFor: { paint: number[]; years: number[] } = { paint: [], years: [] };
@@ -337,7 +337,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         const { score: s, conf: cb } = await scoreConfChunk(kind, px0, py0, width, height, allIdx, flare == null, o.signal);
         const key = keyOf(0, 0, ck, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
         if (flare == null) {
-          keepPaint(key, { s, w: width, h: height, years, stride });
+          keepPaint(key, { s, w: width, h: height, years, stride, conf: cb });
           tilesRead++;
           loaded.add(key);
         }
@@ -551,6 +551,22 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * The year map at a point: the years, up to `upTo`, the layer had it over its cutoff, from the chunk in hand;
    * null where that chunk is not in hand or AlphaEarth has none there.
    */
+  /** The year map's confidence at a point for its latest year up to `upTo` (the one it is drawn in), 0 to 1; null where
+   * nothing is drawn there or its chunk is not in hand. */
+  function confAt(lon: number, lat: number, upTo: number, model_: LayerKind): number | null {
+    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
+    const { px, py, r, c } = chunkAt(lon, lat);
+    const p = paintScores.get(keyOf(0, 0, `years-${kind}`, r, c));
+    const ix = px - c * CHUNK, iy = py - r * CHUNK;
+    if (!p || !p.conf || ix < 0 || iy < 0 || ix >= p.w || iy >= p.h) return null;
+    const over = 1 + 254 * model.cut[kind], i = iy * p.w + ix, plane = p.w * p.h;
+    let latest = -1;
+    p.years.forEach((y, ch) => {
+      if (y <= upTo && p.s[p.stride * i + ch] >= over) latest = ch;
+    });
+    return latest < 0 ? null : p.conf[latest * plane + i] / 255;
+  }
+
   function detectedAt(lon: number, lat: number, upTo: number, model_: LayerKind): number[] | null {
     const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
     const { px, py, r, c } = chunkAt(lon, lat);
@@ -628,6 +644,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     layerId,
     scoreAt,
     detectedAt,
+    confAt,
     readAt,
     chunksIn,
     loadedIn,

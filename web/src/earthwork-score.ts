@@ -313,6 +313,15 @@ uniform highp usampler2D tesFlags;
   }),
 } as const satisfies ShaderModule<EarthworkAggregateProps>;
 
+// the confidence's colors: white at none to a full blue at all, the blue (0.13, 0.42, 1.0) bright enough for the dark
+// basemap and far from every year's color
+const CONF_RAMP = "earthworkConfRamp";
+const CONF_GLSL = /* glsl */ `
+vec3 ${CONF_RAMP}(float c) {
+  return mix(vec3(1.0), vec3(0.13, 0.42, 1.0), clamp(c, 0.0, 1.0));
+}
+`;
+
 /** Props for {@link EarthworkConfAlpha}. */
 export type EarthworkConfAlphaProps = {
   /** r8unorm: the chunk's confidence (confidenceChunk), 0 to 1. */
@@ -320,23 +329,24 @@ export type EarthworkConfAlphaProps = {
 };
 
 /**
- * After the colormap, in place of {@link EarthworkAlpha}: the score's alpha scaled by the confidence, from 3% at
- * a quarter or less to all of it from three quarters (few pixels left half see-through, where colors go muddy), so a likely call made weakly is faint in its color and a strong one solid. Quiet ground
- * is not a call, so it keeps the score's alpha.
+ * After the colormap, in place of {@link EarthworkAlpha}: the calls colored by their confidence, white (weak) to
+ * blue (strong), as the year map's (CONF_RAMP); quiet ground is not a call, so it keeps the score's colors. The
+ * score's alpha as before.
  */
 export const EarthworkConfAlpha = {
   name: "earthworkConfAlpha",
   inject: {
     "fs:#decl": `
 uniform highp sampler2D confTex;
+${CONF_GLSL}
 `,
     "fs:DECKGL_FILTER_COLOR": /* glsl */ `
       ivec2 csize = textureSize(confTex, 0);
       ivec2 cpx = clamp(ivec2(geometry.uv * vec2(csize)), ivec2(0), csize - 1);
       float conf = texelFetch(confTex, cpx, 0).r;
-      // only a call is doubted: quiet ground (under 0.2) keeps its own faint alpha, the fade comes in by 0.5
+      // only a call is doubted: quiet ground (under 0.2) keeps its colors, the confidence's come in by 0.5
       float sv = clamp(earthworkScore_v, 0.0, 1.0);
-      color.a = mix(70.0 / 255.0, 235.0 / 255.0, sv) * mix(1.0, mix(0.03, 1.0, smoothstep(0.25, 0.75, conf)), smoothstep(0.2, 0.5, sv));
+      color = vec4(mix(color.rgb, ${CONF_RAMP}(conf), smoothstep(0.2, 0.5, sv)), mix(70.0 / 255.0, 235.0 / 255.0, sv));
     `,
   },
   getUniforms: (props: Partial<EarthworkConfAlphaProps>) => ({ confTex: props.confTex }),
@@ -468,9 +478,8 @@ export type EarthworkYearConfProps = {
 };
 
 /**
- * After the year map's colormap: its pixel as opaque as the confidence of the year it is drawn in, from 3% at a
- * quarter or less to solid from three quarters (few pixels left half see-through, where colors go muddy), so a year
- * called weakly all but disappears and a strong one is solid.
+ * After the year map's colormap, in its place: its pixel colored by the confidence of the year it is drawn in, white
+ * (weak) to blue (strong), opaque (CONF_RAMP).
  */
 export const EarthworkYearConf = {
   name: "earthworkYearConf",
@@ -482,11 +491,12 @@ uniform earthworkYearConfUniforms {
   inject: {
     "fs:#decl": `
 uniform highp sampler2D confTex;
+${CONF_GLSL}
 `,
     "fs:DECKGL_FILTER_COLOR": /* glsl */ `
       int ch = int(earthworkYearConf.h + 0.5);
       float conf = texelFetch(confTex, ivec2(earthworkYear_px.x, earthworkYear_px.y + earthworkYear_latest * ch), 0).r;
-      color.a *= mix(0.03, 1.0, smoothstep(0.25, 0.75, conf));
+      color = vec4(${CONF_RAMP}(conf), 1.0);
     `,
   },
   uniformTypes: { h: "f32" },
