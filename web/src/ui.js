@@ -300,7 +300,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const usable = (win.clientWidth || 170) - 16;
     wSpn.style.left = (8 + usable * i0 / n) + "px"; wSpn.style.width = (usable * (i1 - i0) / n) + "px";
     wTxt.textContent = `${st.y0} to ${st.y1}`;
-    panelYears.textContent = st.yearMap && st.gmode === "earth" ? `${DY[0]} to ${detYear()}` : `${st.y0} to ${st.y1}`;
+    // the year map names no years in the head: its key has them, and the card on the left the year shown
+    panelYears.textContent = st.yearMap && st.gmode === "earth" ? "" : `${st.y0} to ${st.y1}`;
   }
   const onDrag = (which) => {
     let a = Number(rFrom.value), b = Number(rTo.value);
@@ -325,7 +326,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     rKey.style.display = st.gmode === "earth" && !ym ? "none" : "";
     panelRamp.style.display = ym ? "none" : "";
     rWin.style.display = ym ? "none" : "";
-    panelYears.textContent = ym ? `${DY[0]} to ${detYear()}` : `${st.y0} to ${st.y1}`;
+    panelYears.textContent = ym ? "" : `${st.y0} to ${st.y1}`;
     if (out_) {
       keyEl.innerHTML = `<span class="why">Zoom in to ${EWZ} for earthwork. AlphaEarth is read at 10 m with no coarser levels, so a wider view would read too much.</span>`;
       return;
