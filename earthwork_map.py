@@ -190,8 +190,10 @@ def _(mo):
     | `space` (hold) | the Sentinel-2 imagery instead of the hexagons; the map still drags |
     | `P` | the pair: Sentinel-2 on the left, the map on the right, one camera |
     | scroll, space held | the imagery year |
-    | `[` `]` | the imagery year, back and forward |
-    | `B` | the imagery's first year (2022) or its latest (2025), back and forth |
+    | `I` | the paint: Sentinel-2 gray but for the lit hexagons, or the hexagons over the basemap |
+    | `Shift` (hold) | the paint filled in: the imagery in its own colors everywhere |
+    | `[` `]` | the year shown (the paint's, or the plain imagery's while space is held), back and forward |
+    | `B` | that year's first (2022) or latest (2025), back and forth |
     | `;` `'` | the imagery darker, brighter |
     | `-` `=` | the window's first year, earlier, later |
     | `_` `+` | the window's last year, earlier, later |
@@ -2220,7 +2222,11 @@ def _(anywidget, asyncio, time, traitlets):
             imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: (() => { try { return ["all", "cities", "major", "off"].includes(localStorage.getItem("ew-names")) ? localStorage.getItem("ew-names") : "cities"; } catch (e) { return "cities"; } })(),
             s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
             // the paint's own imagery colors (C while painting); s2comp is the plain imagery's (space, the pair's left)
-            paintComp: cfg.paint_comp || "blueyellow",
+            paintComp: cfg.paint_comp || "tci",
+            // the paint's own year ([ ] and B while painting); imgYear is the plain imagery's
+            paintYear: cfg.paint_year || S2Y[0],
+            // Shift held while painting: the imagery in its own colors everywhere, the gray off
+            filled: false,
             fit: !!cfg.fit, holding: false,
             // the paint (I): Sentinel-2 is the map, gray but for the lit hexagons, which keep its colors
             paint: cfg.paint !== false,
@@ -2523,10 +2529,9 @@ def _(anywidget, asyncio, time, traitlets):
           // the colors drawn on a map: the paint's on the main map while painting (not holding space), the plain
           // imagery's otherwise and on the pair's left
           const compOf = (left = false) => (!left && st.paint && !st.holding ? st.paintComp : st.s2comp);
-          // the paint shows one year only, the imagery's first (one year to load, so it comes in quickly); the
-          // years step on the plain imagery (space, the pair's left), loaded when it is asked for
-          const PAINT_YEAR = S2Y[0];
-          const yearOf = (left = false) => (!left && st.paint && !st.holding ? PAINT_YEAR : st.imgYear);
+          // the paint has its own year, the imagery's first to start, stepped with [ ] and B while painting; the
+          // plain imagery (space, the pair's left) keeps its own
+          const yearOf = (left = false) => (!left && st.paint && !st.holding ? st.paintYear : st.imgYear);
           const styleComp = segOf(compBox, COMPS.map(([k, l, t]) => [k, l, t, ""]), (k) => k === compOf(), (k) => setComp(k));
           // the false colors wait for the kernel's stretch of their view: asked when the colors shown have none.
           // (the kernel holds one stretch, so true color asks for none and never takes the paint's away)
@@ -2575,7 +2580,7 @@ def _(anywidget, asyncio, time, traitlets):
             <p><b>Earthwork</b> (E) is the chance the ground itself was dug, filled or graded between the first and last year read, taught where 3DEP lidar flew the same ground twice. Three layers (M switches them): <b>Aggregate</b>, one model on AlphaEarth and TESSERA joined pixel by pixel; <b>AEF</b>, AlphaEarth's own; <b>TESSERA</b>, TESSERA's own. TESSERA is read at 10 m only (it has no coarser product), so it and the aggregate come in from zoom 10.4; zoomed out past it the map moves to AEF and the other two gray out, and zoomed back in the layer you had comes back. Each hexagon shows its highest-scoring finer cell, so a single dig stands out. Pair (P) with Sentinel-2 to see what it is.</p>
             <p>Earthwork is drawn in H3 hexagons from zoom ${HEXZ}. <b>Click</b> a hexagon for its account.</p>
             <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) instead of the hexagons; scroll while holding to step through the years.</p>
-            <p><small>Keys: hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest, C its colors; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the Earthwork card and the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); X fill the window; Esc close.</small></p>
+            <p><small>Keys: I the paint (Sentinel-2 gray but for the lit hexagons), [ and ] its year, B its first year or its latest, hold Shift to fill it in; hold space for the plain imagery, scroll or [ and ] for its year, C its colors; P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the Earthwork card and the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names; / search (a place, or paste an H3 string); X fill the window; Esc close.</small></p>
             <p><small>AlphaEarth Foundations Satellite Embedding dataset by Google and Google DeepMind (CC BY 4.0), via Source Cooperative (tge-labs/aef). TESSERA v1.1 embeddings by the University of Cambridge with dClimate, via Source Cooperative (tessera/tessera). Sentinel-2 mosaics by Earth Genome (CC BY 4.0), contains modified Copernicus Sentinel data. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap &copy;&nbsp;CARTO, &copy;&nbsp;OpenStreetMap contributors.</small></p>
             <p><small>The models were taught on USGS 3DEP lidar DEMs (public domain), AlphaEarth and TESSERA, and also on IGN France RGE ALTI and LiDAR HD (Licence Ouverte / Etalab 2.0), VIRTUAL SHIZUOKA (CC BY 4.0, ODbL), Hong Kong CEDD airborne lidar, NASA ICESat-2 (ATL03, ATL08) and GEDI (L2A), and the Copernicus DEM GLO-30 (&copy;&nbsp;DLR e.V. 2010-2014 and &copy;&nbsp;Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA). Details in the <a href="https://github.com/kentstephen/aef-tessera-earthwork#data-and-credits" target="_blank" rel="noopener">README</a>.</small></p>
             <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
@@ -2824,10 +2829,10 @@ def _(anywidget, asyncio, time, traitlets):
             const showImg = st.holding || st.paint || (st.pair && st.left === "s2");
             // a small card, the search's width: the year (what the imagery shows), what it is, its keys
             const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
-            const stepping = st.holding || (st.pair && st.left === "s2");
             const ends = `${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`;
             s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
-              + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>Space</kbd> the years</span>`
+              + `<div class="ew-keys">${st.paint && !st.holding
+                ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span>`
                 : showImg
                 ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span>`
                 : `<span><kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
@@ -3296,12 +3301,11 @@ def _(anywidget, asyncio, time, traitlets):
             }));
           };
           // the years mounted: the one shown, the rest once it has loaded
-          // painting (not holding), the paint's year alone; holding, the paint's year stays mounted under the
-          // plain imagery's, so letting go is instant
+          // painting, the paint's year first and its other years once it has loaded; holding, the paint's year
+          // stays mounted under the plain imagery's, so letting go is instant
           const s2Years = (left = false) => {
-            if (!left && st.paint && !st.holding) return [PAINT_YEAR];
             const y = yearOf(left), ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y)] : [y];
-            return !left && st.paint && !ys.includes(PAINT_YEAR) ? [...ys, PAINT_YEAR] : ys;
+            return !left && st.paint && !ys.includes(st.paintYear) ? [...ys, st.paintYear] : ys;
           };
           // every imagery year stays mounted once the view is close enough, the
           // ones not shown at opacity 0, so their tiles load ahead and a scroll
@@ -3328,8 +3332,10 @@ def _(anywidget, asyncio, time, traitlets):
             filled: true, stroked: false, extruded: false, highPrecision: true, pickable: false,
             beforeId: slot(),
           });
+          // hidden (Shift held) it stays built and deck.gl's MaskEffect leaves it out: no mask, the imagery in its own
+          // colors everywhere, and letting go draws the gray again with nothing to rebuild
           const paintMask = () => new H3HexagonLayer({
-            id: "paint-mask", operation: "mask", data: lit,
+            id: "paint-mask", operation: "mask", data: lit, visible: !st.filled,
             getHexagon: (i) => hexes[i], updateTriggers: {getHexagon: [hexSeq]},
             filled: true, stroked: false, extruded: false, highPrecision: true, pickable: false,
             beforeId: slot(),
@@ -3456,7 +3462,11 @@ def _(anywidget, asyncio, time, traitlets):
           // steps the imagery year instead of zooming; letting go of whichever
           // started it ends it
           let holdT = null, holdAt = null, holdBy = null, wheelAcc = 0, lastStep = 0, suppressClick = false, lastPt = null;
-          const stepImg = (d) => { const i = S2Y.indexOf(st.imgYear); const n = S2Y[Math.max(0, Math.min(S2Y.length - 1, (i < 0 ? S2Y.length - 1 : i) + d))]; if (n !== st.imgYear) { st.imgYear = n; renderYear(); update(); } };
+          // the year shown: the paint's while painting (not holding space), the plain imagery's otherwise
+          const setYear = (y) => { if (y === yearOf()) return; if (st.paint && !st.holding) st.paintYear = y; else st.imgYear = y; renderYear(); update(); };
+          const stepImg = (d) => { const c = yearOf(), i = S2Y.indexOf(c); setYear(S2Y[Math.max(0, Math.min(S2Y.length - 1, (i < 0 ? S2Y.length - 1 : i) + d))]); };
+          // Shift held: the paint filled in (the mask hidden, see paintMask)
+          const setFilled = (on) => { if (st.filled === on) return; st.filled = on; update(); };
           function beginHold(x, y, by) {
             holdT = null;
             if (!map || st.holding) return;
@@ -3491,7 +3501,8 @@ def _(anywidget, asyncio, time, traitlets):
             lastPt = {x: e.clientX, y: e.clientY};
             if (holdT && holdAt && Math.hypot(e.clientX - holdAt.x, e.clientY - holdAt.y) > SLOP) { clearTimeout(holdT); holdT = null; holdAt = null; }
           }, true);
-          const endMouse = () => endHold("mouse"), endAny = () => endHold(null);
+          // a lost window (Cmd-Tab with Shift or space held) gets no keyup: both let go
+          const endMouse = () => endHold("mouse"), endAny = () => { endHold(null); setFilled(false); };
           window.addEventListener("pointerup", endMouse, true);
           window.addEventListener("pointercancel", endMouse, true);
           window.addEventListener("blur", endAny);
@@ -3507,6 +3518,7 @@ def _(anywidget, asyncio, time, traitlets):
           }
           const onKeyUp = (e) => {
             if (e.key === " ") endHold("key");
+            else if (e.key === "Shift") setFilled(false);
           };
           window.addEventListener("keyup", onKeyUp);
           root.addEventListener("wheel", (e) => {
@@ -3694,13 +3706,16 @@ def _(anywidget, asyncio, time, traitlets):
               st.paint = !st.paint; root.classList.toggle("ew-paint", st.paint); if (st.paint) stretchFor(compOf()); labels(st.labels); styleComp(); renderYear(); update();
               note(st.paint ? "Sentinel-2, gray but for the lit hexagons (I for the hexagons on the basemap)" : "Hexagons on the basemap (I for Sentinel-2 in gray, the lit hexagons in color)", 3000);
             }
-            else if (k === "[" || k === "]") { if (st.paint && !st.holding && !(st.pair && st.left === "s2")) { note(`The paint shows ${PAINT_YEAR}: hold space for the years`, 2500); return; } stepImg(k === "]" ? 1 : -1); }
-            // B: the imagery's first year and its latest, back and forth (from any other year, the
-            // latest), while it shows: holding space, or on the pair's left side
+            // Shift held while painting: the gray off, the imagery in its own colors everywhere, until it is let go
+            else if (k === "Shift") { if (!e.repeat) setFilled(true); return; }
+            // [ ]: the year shown, the paint's while painting (not holding space), the plain imagery's otherwise
+            else if (k === "[" || k === "]") stepImg(k === "]" ? 1 : -1);
+            // B: the first year and the latest, back and forth (from any other year, the latest), while the
+            // imagery shows: painting, holding space, or on the pair's left side
             else if (k === "b" || k === "B") {
-              if (!(st.holding || (st.pair && st.left === "s2"))) { if (st.paint) note(`The paint shows ${PAINT_YEAR}: hold space for the years`, 2500); return; }
-              const a = S2Y[0], b = S2Y[S2Y.length - 1];
-              st.imgYear = st.imgYear === b ? a : b; renderYear(); update();
+              if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return;
+              const a = S2Y[0], b = S2Y[S2Y.length - 1], y = yearOf();
+              setYear(y === b ? a : b);
             }
             else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }
             else if (k === "l" || k === "L") setNames(NAMES[(NAMES.findIndex(([m]) => m === st.labels) + 1) % NAMES.length][0]);
