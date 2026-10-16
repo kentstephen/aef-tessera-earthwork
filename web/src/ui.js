@@ -372,6 +372,19 @@ export function render({model, el, earthwork, s2Items, credits}) {
   gam.oninput = () => { st.s2scale = Number(gam.value); clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); };
   gam.ondblclick = () => { gam.value = 1; gam.oninput(); };
   item("Imagery brightness", "<kbd>;</kbd> <kbd>'</kbd> step it", gam);
+  // the paint's gray outside the lit ground: how bright, and how much it covers the imagery's own colors (1 all gray,
+  // 0 the colors). Kept in this browser; double-click for the default
+  const numKept = (k, d) => { try { const v = Number(localStorage.getItem("aef-lc-" + k)); return localStorage.getItem("aef-lc-" + k) != null && isFinite(v) ? v : d; } catch (e) { return d; } };
+  const GRAY_LUM = cfg.paint_dim != null ? Number(cfg.paint_dim) : 0.78;
+  st.grayLum = numKept("gray-lum", GRAY_LUM); st.grayAlpha = numKept("gray-alpha", 1);
+  const grayRange = (key, k, min, max, step, d, title) => {
+    const r = el_("input"); r.type = "range"; r.min = min; r.max = max; r.step = step; r.value = st[k]; r.title = title;
+    r.oninput = () => { st[k] = Number(r.value); try { localStorage.setItem("aef-lc-" + key, String(st[k])); } catch (e) {} if (map) map.triggerRepaint(); };
+    r.ondblclick = () => { r.value = d; r.oninput(); };
+    return r;
+  };
+  item("Gray brightness", "the paint outside the lit ground", grayRange("gray-lum", "grayLum", 0.2, 1.5, 0.02, GRAY_LUM, "the gray's brightness; double-click for the default"));
+  item("Gray alpha", "0 the imagery's colors, 1 all gray", grayRange("gray-alpha", "grayAlpha", 0, 1, 0.05, 1, "how much the gray covers the imagery's colors; double-click for 1"));
   // the imagery colors (S2_COMPOSITES in the kernel): false colors from the raw bands,
   // stretched for the view, where the true color image clips bright ground
   const COMPS = [["tci", "True color", "Earth Genome's true color image"],
@@ -936,16 +949,16 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the earthwork) is the imagery as it is
   const MASK_MOD = MaskExtension.prototype.getShaders.call({getAttributeManager: () => ({attributes: {}}), props: {}, state: {}}).modules[0];
   const {"fs:#main-start": _maskDiscard, ...maskInject} = MASK_MOD.inject;
-  // outside: gray (a print, PAINT_BLACK below), and dimmed a little toward the dark basemap (PAINT_DIM) so the lit ground stands out. Dimmed,
-  // not see-through: footprints overlap and the fill lies under the yearly mosaic, so an alpha would stack
-  // into stripes and patches where they do
-  const PAINT_DIM = cfg.paint_dim != null ? Number(cfg.paint_dim) : 0.78;
+  // outside: gray (a print, PAINT_BLACK below), dimmed toward the dark basemap so the lit ground stands out (the
+  // settings' gray brightness), and laid over the imagery's own colors by the settings' gray alpha. Mixed with the
+  // colors, not see-through to the basemap: footprints overlap and the fill lies under the yearly mosaic, so a real
+  // alpha would stack into stripes and patches where they do. The lit ground keeps its colors, fully opaque
   // Shift held fills it in: one uniform skips the gray, so the mask layer and every tile stay as they are and
   // each way is one redraw
   // the paint waits for the earthwork: the imagery in its own colors until the view's chunks are in (onViewportLoad),
   // then gray but for the lit ground; back to color when the view moves somewhere mostly not read yet (ewCheck)
   let ewIn = false;
-  const PAINT_FILL = {name: "paintFill", fs: "layout(std140) uniform paintFillUniforms {\n  float full;\n} paintFill;\n", uniformTypes: {full: "f32"}};
+  const PAINT_FILL = {name: "paintFill", fs: "layout(std140) uniform paintFillUniforms {\n  float full;\n  float dim;\n  float alpha;\n} paintFill;\n", uniformTypes: {full: "f32", dim: "f32", alpha: "f32"}};
   // outside, the gray as a print: brightness levels set from PAINT_BLACK to PAINT_WHITE (the imagery is mostly
   // dark, so a curve around the middle would crush it), then an S-curve for real blacks and bright roofs and sand.
   // Inside, the lit ground lifted: saturation and contrast up, so it stands out by more than keeping its colors
@@ -961,7 +974,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     float l = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
     if (!mask_isInBounds(mask_texCoords)) {
       float g = clamp((l - ${f3(PAINT_BLACK)}) / ${f3(PAINT_WHITE - PAINT_BLACK)}, 0.0, 1.0);
-      fragColor.rgb = vec3(mix(g, g * g * (3.0 - 2.0 * g), ${f3(PAINT_CURVE)})) * ${f3(PAINT_DIM)};
+      // the gray (its brightness from the settings) over the imagery's colors by the settings' alpha
+      fragColor.rgb = mix(fragColor.rgb, vec3(mix(g, g * g * (3.0 - 2.0 * g), ${f3(PAINT_CURVE)})) * paintFill.dim, paintFill.alpha);
     } else {
       vec3 c = mix(vec3(l), fragColor.rgb, ${f3(PAINT_SAT)});
       fragColor.rgb = clamp((c - l) + (l - 0.35) * ${f3(PAINT_CON)} + 0.35, 0.0, 1.0);
@@ -971,7 +985,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   class PaintExtension extends MaskExtension {
     // the raster is one mesh drawn as one instance: placed by its geometry, never by the instance
     getShaders() { this.state.maskByInstance = false; return {modules: [PAINT_MOD, PAINT_FILL]}; }
-    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({paintFill: {full: st.filled || !ewIn ? 1 : 0}}); }
+    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({paintFill: {full: st.filled || !ewIn ? 1 : 0, dim: st.grayLum, alpha: st.grayAlpha}}); }
   }
   PaintExtension.extensionName = "PaintExtension";
   const PAINT = new PaintExtension();
