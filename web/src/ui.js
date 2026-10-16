@@ -105,6 +105,15 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
 
   const S2Y = cfg.s2_years || [2022, 2023, 2024, 2025];
+  // Earth Genome's mosaics start here; the years before are each year's clearest scene (s2.ts)
+  const MOSAIC_FIRST = cfg.s2_mosaic_first || 2022;
+  // the year map's years: each AlphaEarth year after the first, its change from the year before
+  const AY = cfg.aef_years || [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], DY = AY.slice(1);
+  // the paint's years (one texture holds four)
+  const PY = cfg.paint_years || S2Y.slice(-4);
+  // cividis from 15% (its darkest navy is lost on the dark basemap), a stop a year, as the year map's shader draws it
+  const CIV = "243c6e48526c6568707f7e789d9576bdae6cdec958fee838".match(/.{6}/g);
+  const civOf = (y) => "#" + CIV[Math.round((CIV.length - 1) * Math.max(0, DY.indexOf(y)) / Math.max(1, DY.length - 1))];
   const VIR = (cfg.viridis || "440154fde725").match(/.{6}/g).map((h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)));
   const vir = (t) => { t = Math.max(0, Math.min(1, t)) * (VIR.length - 1); const i = Math.min(VIR.length - 2, Math.floor(t)), f = t - i; return VIR[i].map((v, j) => Math.round(v + (VIR[i + 1][j] - v) * f)); };
   const virCss = (n) => Array.from({length: n}, (_, i) => `rgb(${vir(i / (n - 1)).join(",")})`).join(",");
@@ -116,10 +125,13 @@ export function render({model, el, earthwork, s2Items, credits}) {
     imgYear: cfg.s2_year || S2Y[S2Y.length - 1], labels: "cities", s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
     // the paint (I): Sentinel-2 is the map, gray but where the layer is lit, which keeps its colors; and its own
     // imagery colors (C while painting), apart from the plain imagery's (space, the pair's left)
-    paint: cfg.paint !== false, paintComp: cfg.paint_comp || "tci",
+    paint: cfg.year_map === false && cfg.paint !== false, paintComp: cfg.paint_comp || "tci",
+    // the year map (Y): where the layer found digging, in the color of the latest year it did, up to the year shown
+    // ([ ] and B, every AlphaEarth year); the pair's imagery follows it where Sentinel-2 has that year
+    yearMap: cfg.year_map !== false, mapYear: AY[AY.length - 1],
     // the paint's own year ([ ] and B while painting; imgYear is the plain imagery's), and Shift held: the
     // gray off, the imagery in its own colors everywhere
-    paintYear: cfg.paint_year || S2Y[S2Y.length - 1], filled: false,
+    paintYear: cfg.paint_year || PY[PY.length - 1], filled: false,
     fit: !!cfg.fit, holding: false,
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
@@ -271,9 +283,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the window drawn: painting, each year its own change (the year before it to the year shown, so the color matches
   // the imagery under it, and a year with no digging is all gray), on AlphaEarth's layer alone (fast enough to step
   // through); otherwise the years set here and the layer chosen
-  function winOf() { return st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
+  function winOf() { return st.yearMap ? [st.mapYear - 1, st.mapYear] : st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
   // the chunks drawn: the paint's scores (the layer chosen, scored ahead a year at a time), or the layer's own
-  function kindOf() { return st.paint ? `paint-${st.model}` : st.model; }
+  function kindOf() { return st.yearMap ? `years-${st.model}` : st.paint ? `paint-${st.model}` : st.model; }
   function styleWin() {
     const i0 = Math.max(0, aefYears.indexOf(st.y0)), i1 = Math.max(0, aefYears.indexOf(st.y1)), n = Math.max(1, aefYears.length - 1);
     rFrom.value = i0; rTo.value = i1;
@@ -301,7 +313,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
     panelHd.querySelector(".t").textContent = {earth: "Earthwork", kinds: "Kinds of change", much: "AEF Change"}[st.gmode] || "AEF Change";
     styleSoon();
     // earthwork's ramp is in the head, open or folded: not again in a row of its own
-    rKey.style.display = st.gmode === "earth" ? "none" : "";
+    // the year map's key is its own row (a swatch a year), with no ramp in the head and no window to set (it reads every year)
+    const ym = st.yearMap && st.gmode === "earth";
+    rKey.style.display = st.gmode === "earth" && !ym ? "none" : "";
+    panelRamp.style.display = ym ? "none" : "";
+    rWin.style.display = ym ? "none" : "";
+    panelYears.textContent = ym ? `${DY[0]} to ${st.mapYear}` : `${st.y0} to ${st.y1}`;
     if (out_) {
       keyEl.innerHTML = `<span class="why">Zoom in to ${EWZ} for earthwork. AlphaEarth is read at 10 m with no coarser levels, so a wider view would read too much.</span>`;
       return;
@@ -318,6 +335,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
       keyEl.innerHTML = h;
       keyEl.querySelectorAll("[data-focus]").forEach((b) => { b.onclick = (e) => { e.stopPropagation(); st.focus = b.dataset.focus; recolorHex(); styleKey(); update(); }; });
       keyEl.querySelectorAll("[data-kind]").forEach((b) => { b.onclick = (e) => { e.stopPropagation(); const k = +b.dataset.kind; st.hideKinds.has(k) ? st.hideKinds.delete(k) : st.hideKinds.add(k); recolorHex(); renderYear(); styleKey(); update(); }; });
+      return;
+    }
+    if (st.gmode === "earth" && st.yearMap) {
+      keyEl.innerHTML = `<span class="ew-yk">${DY.map((y) => `<span class="${y > st.mapYear ? "later" : ""}"><i style="background:${civOf(y)}"></i>’${String(y).slice(-2)}</span>`).join("")}</span>`;
+      keyEl.title = `Where the ground was likely dug, filled or graded, in the color of the latest year it was, ${DY[0]} to ${st.mapYear}`;
       return;
     }
     if (st.gmode === "earth") { keyEl.innerHTML = `<span>unlikely</span><i class="at-ramp" style="background:linear-gradient(90deg,${virCss(8)})"></i><span>likely</span>`; keyEl.title = `The chance the ground itself was dug, filled or graded, ${y0} to ${y1}`; return; }
@@ -434,7 +456,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   item("Place names", "<kbd>L</kbd> steps them", namesBox);
   // picking: the tooltip and the click's card, off to look at the map (or shoot it) clean
   const rPick = rowOf("Picking");
-  const swPick = sw(() => !st.noPick, (v) => { st.noPick = !v; tip.style.display = "none"; hover = null; update(); });
+  // picking off also lets go of the pixel or hexagon picked (with clicks off, it could not be clicked away)
+  const swPick = sw(() => !st.noPick, (v) => { st.noPick = !v; tip.style.display = "none"; hover = null; if (st.noPick && cardData) closeCard(); update(); });
   swPick.title = "the tooltip and the card on a click (Q)";
   rPick.append(swPick, el_("span", "at-pick", "<span>Tooltip and click</span><kbd>Q</kbd>"));
   more.appendChild(el_("hr"));
@@ -447,8 +470,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <h2>Earthwork</h2>
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
-    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome, 2022 to 2025) in full color; scroll while holding to step through the years. The gray map has its own year, ${S2Y[S2Y.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (Earth Genome's yearly mosaics from 2022; before them, each year's clearest Sentinel-2 day from Earth Search) in full color; scroll while holding to step through the years. The gray map has its own year, ${S2Y[S2Y.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + arrows turn and tilt the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 mosaics by Earth Genome (CC BY 4.0). Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -667,6 +690,13 @@ export function render({model, el, earthwork, s2Items, credits}) {
       const lat_lon = `${c.plat.toFixed(6)}, ${c.plon.toFixed(6)}`;
       h += `<div class="coords"><code title="H3 string, res 13">${esc(c.cell)}</code><button data-copy="${esc(c.cell)}">copy</button>`;
       h += `<code title="lat, long of the pixel's center">${lat_lon}</code><button data-copy="${lat_lon}">copy</button></div><h4>Earthwork</h4>`;
+      if (st.yearMap && st.mapYear < DY[0]) h += `<p>${st.mapYear}: the ground before the first change read (${DY[0]}, from ${st.mapYear}). Step on with <kbd>]</kbd>.</p>`;
+      else if (st.yearMap && !c.reading && c.det != null) {
+        const d = c.det;
+        h += d.length
+          ? `<p><b>${d[d.length - 1]}</b>: the latest year the ground here was likely dug, filled or graded (each year from the year before)${d.length > 1 ? `, and before it ${d.slice(0, -1).join(", ")}` : ""}.</p>`
+          : `<p>No digging found here from ${DY[0]} to ${st.mapYear}.</p>`;
+      } else
       h += c.score == null && c.reading
         ? `<p>Reading AlphaEarth here\u2026</p>`
         : c.score == null
@@ -717,12 +747,20 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const cs = compOf(), stretching = cs !== "tci" && !(cfg.s2_stretch && cfg.s2_stretch.comp === cs);
     const stepping = st.holding || (st.pair && st.left === "s2");
     const ends = `${String(S2Y[0]).slice(2)}/${String(S2Y[S2Y.length - 1]).slice(2)}`;
+    if (st.yearMap && !st.holding) {
+      const dEnds = `${String(AY[0]).slice(2)}/${String(AY[AY.length - 1]).slice(2)}`;
+      const img = st.pair ? `<span>Sentinel-2 ${st.imgYear}${st.imgYear > st.mapYear ? ", its first year" : st.imgYear < MOSAIC_FIRST ? ", one clear day" : ""}</span>` : `<span><kbd>P</kbd> or <kbd>Space</kbd> imagery</span>`;
+      s2c.innerHTML = `<div class="ew-s2hd"><b>${st.mapYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
+        + `<div class="ew-keys"><span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${dEnds}</span>${img}<span><kbd>Y</kbd> year map</span></div>`;
+      s2c.className = "at-yc at-s2c at-glass ew-showing";
+    } else {
     s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
       + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span>`
         : showImg
         ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span>`
         : `<span><kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
     s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
+    }
     // the readout: the clicked hexagon's account, nothing until a click
     const h = cardData && cardData.kind === "spot" ? hexSection(cardData) : "";
     yc.innerHTML = h;
@@ -781,6 +819,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!cardData || cardData.kind !== "spot") return;
     [cardData.y0, cardData.y1] = winOf();
     cardData.score = earthwork.scoreAt(cardData.plon, cardData.plat, cardData.y0, cardData.y1, kindOf());
+    cardData.det = st.yearMap ? earthwork.detectedAt(cardData.plon, cardData.plat, st.mapYear, st.model) : null;
   }
   // a pick: the same cell again clears it
   function pickCell(cell, ll, pt, onImagery) {
@@ -1301,9 +1340,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // loaded, with the paint's years still mounted under it, so letting go is instant
   const s2Years = (left = false) => {
     // painting, the paint's year first and, once it is in, every other year too, so stepping waits for nothing
-    const pys = s2Warm ? [st.paintYear, ...S2Y.filter((v) => v !== st.paintYear)] : [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)];
+    const pys = s2Warm ? [st.paintYear, ...PY.filter((v) => v !== st.paintYear)] : [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)];
     if (!left && st.paint && !st.holding) return pys;
-    const y = yearOf(left), ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y)] : [y];
+    // once in, the years either side of it and the two ends (B) too, not all nine: each mounted year reads its tiles
+    const y = yearOf(left), ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y && (Math.abs(v - y) <= 2 || v === S2Y[0] || v === S2Y[S2Y.length - 1]))] : [y];
     return !left && st.paint ? [...ys, ...pys.filter((v) => !ys.includes(v))] : ys;
   };
   // every imagery year stays mounted once the view is close enough, the
@@ -1364,7 +1404,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the mask with the layers of its own slot)
     // painting, one mask for every year at once (each year its own change from the year before, a channel each): a
     // step between years only changes the channel
-    if (st.paint) out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ, year: st.paintYear, years: S2Y, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
+    // the year map: every year read at once, a bit a year; a step between years only changes which bits count
+    if (st.yearMap) out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ, year: st.mapYear, years: DY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
+    else if (st.paint) out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ, year: st.paintYear, years: PY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);
@@ -1500,13 +1542,19 @@ export function render({model, el, earthwork, s2Items, credits}) {
   let holdT = null, holdAt = null, holdBy = null, wheelAcc = 0, lastStep = 0, suppressClick = false, lastPt = null;
   // the year shown: the paint's while painting (not holding space), the plain imagery's otherwise
   const onPaint = () => st.paint && !st.holding && !(st.pair && st.left === "s2");
-  const curYear = () => (onPaint() ? st.paintYear : st.imgYear);
+  // the year map's year (not holding space): every AlphaEarth year, the pair's imagery on the latest Sentinel-2 year
+  // up to it (its first year before that)
+  const onYears = () => st.yearMap && !st.holding;
+  const curYear = () => (onYears() ? st.mapYear : onPaint() ? st.paintYear : st.imgYear);
+  // the year map steps from AlphaEarth's first year (nothing found yet: the ground before) to its last
+  const yearsOn = () => (onYears() ? AY : onPaint() ? PY : S2Y);
   const setYear = (y) => {
     if (y === curYear()) return;
-    if (onPaint()) { st.paintYear = y; paintSeen.add(y); styleWin(); refreshScores(); } else st.imgYear = y;
+    if (onYears()) { st.mapYear = y; const s = S2Y.filter((v) => v <= y); st.imgYear = s.length ? s[s.length - 1] : S2Y[0]; styleKey(); rescoreSpot(); }
+    else if (onPaint()) { st.paintYear = y; paintSeen.add(y); styleWin(); refreshScores(); } else st.imgYear = y;
     renderYear(); update();
   };
-  const stepImg = (d) => { const i = S2Y.indexOf(curYear()); setYear(S2Y[Math.max(0, Math.min(S2Y.length - 1, (i < 0 ? S2Y.length - 1 : i) + d))]); };
+  const stepImg = (d) => { const ys = yearsOn(), i = ys.indexOf(curYear()); setYear(ys[Math.max(0, Math.min(ys.length - 1, (i < 0 ? ys.length - 1 : i) + d))]); };
   // Shift held: the paint filled in (PAINT_FILL), the layers untouched, so only a redraw
   const setFilled = (on) => { if (st.filled === on) return; st.filled = on; if (map) map.triggerRepaint(); };
   function beginHold(x, y, by) {
@@ -1579,6 +1627,21 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!under || !mapEl.contains(under)) { tip.style.display = "none"; return; }
     const ll = map.unproject([pt.x - r.left, pt.y - r.top]);
     const [w0, w1] = winOf(), kind = kindOf();
+    if (st.yearMap) {
+      if (st.mapYear < DY[0]) { tip.style.display = "none"; return; }
+      const d = earthwork.detectedAt(ll.lng, ll.lat, st.mapYear, st.model);
+      if (d == null) {
+        tip.style.display = "none";
+        earthwork.readAt(ll.lng, ll.lat, w0, w1, kind).then(() => { if (lastPt && lastPt.x === pt.x && lastPt.y === pt.y && earthwork.detectedAt(ll.lng, ll.lat, st.mapYear, st.model) != null) showHexTip(pt); });
+        return;
+      }
+      const p = pane.getBoundingClientRect();
+      tip.innerHTML = d.length ? `Likely dug in <b>${d[d.length - 1]}</b>${d.length > 1 ? ` (before that in ${d.slice(0, -1).join(", ")})` : ""}` : `None found, ${DY[0]} to ${st.mapYear}`;
+      tip.style.display = "block";
+      tip.style.left = (pt.x - p.left + 14) + "px";
+      tip.style.top = (pt.y - p.top + 14) + "px";
+      return;
+    }
     const v = earthwork.scoreAt(ll.lng, ll.lat, w0, w1, kind);
     if (v == null) {
       tip.style.display = "none";
@@ -1756,12 +1819,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // Color by: E Earthwork
     else if (/^[eE]$/.test(k)) { st.want = "earth"; const m = drawnMode(); if (m !== st.gmode) { st.gmode = m; recolorHex(); renderYear(); update(); } styleRows(); }
     // Q: the tooltip and picking off and back on
-    else if (k === "q" || k === "Q") { st.noPick = !st.noPick; swPick.sty(); tip.style.display = "none"; hover = null; update(); note(st.noPick ? "No tooltip or picking (Q to turn them back on)" : "Tooltip and picking on", 2500); }
+    else if (k === "q" || k === "Q") { st.noPick = !st.noPick; swPick.sty(); tip.style.display = "none"; hover = null; if (st.noPick && cardData) closeCard(); update(); note(st.noPick ? "No tooltip or picking (Q to turn them back on)" : "Tooltip and picking on", 2500); }
     // the kinds key's Built (W)
     else if (k === "w" || k === "W") { if (st.gmode !== "kinds") return; st.focus = "built"; recolorHex(); styleKey(); update(); }
     else if (k === "p" || k === "P") setPair(!st.pair);
     // I: the paint (Sentinel-2 gray, the lit ground in its colors) or the earthwork layer over the basemap
+    // Y: the year map, or back to the earthwork layer over the basemap
+    else if (k === "y" || k === "Y") {
+      st.yearMap = !st.yearMap; if (st.yearMap) st.paint = false; root.classList.toggle("ew-paint", st.paint); styleComp(); styleModel(); styleWin(); styleKey(); rescoreSpot(); renderYear(); update();
+      note(st.yearMap ? "The year map: where the ground was likely dug, in the color of the latest year it was ([ ] steps the years)" : "The earthwork layer on the basemap (Y for the year map)", 3000);
+    }
     else if (k === "i" || k === "I") {
+      if (st.yearMap) { st.yearMap = false; st.paint = false; styleKey(); }
       st.paint = !st.paint; root.classList.toggle("ew-paint", st.paint); if (st.paint) send("s2comp"); styleComp(); styleModel(); styleWin(); renderYear(); update();
       note(st.paint ? "Sentinel-2, gray but where the ground was likely dug (I for the earthwork layer on the basemap)" : "The earthwork layer on the basemap (I for Sentinel-2 in gray, the lit ground in color)", 3000);
     }
@@ -1769,12 +1838,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
     else if (k === "Shift") { if (!e.repeat) setFilled(true); return; }
     // [ ]: the year shown, the paint's while painting (not holding space), the plain imagery's otherwise
     // by the key itself, so they still step while Shift fills the paint (Shift makes them { and })
-    else if (e.code === "BracketLeft" || e.code === "BracketRight") { if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return; stepImg(e.code === "BracketRight" ? 1 : -1); }
+    else if (e.code === "BracketLeft" || e.code === "BracketRight") { if (!(st.yearMap || st.paint || st.holding || (st.pair && st.left === "s2"))) return; stepImg(e.code === "BracketRight" ? 1 : -1); }
     // B: the first year and the latest, back and forth (from any other year, the latest), while the
     // imagery shows: painting, holding space, or on the pair's left side
     else if (k === "b" || k === "B") {
-      if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return;
-      const a = S2Y[0], b = S2Y[S2Y.length - 1];
+      if (!(st.yearMap || st.paint || st.holding || (st.pair && st.left === "s2"))) return;
+      const ys = yearsOn(), a = ys[0], b = ys[ys.length - 1];
       setYear(curYear() === b ? a : b);
     }
     else if (k === ";" || k === "'") { st.s2scale = Math.round(10 * Math.max(0.3, Math.min(2.5, st.s2scale + (k === "'" ? 0.1 : -0.1)))) / 10; gam.value = st.s2scale; clearTimeout(gamT); gamT = setTimeout(() => send("s2scale"), 250); }

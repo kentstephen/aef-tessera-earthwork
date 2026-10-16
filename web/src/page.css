@@ -559,3 +559,9 @@ body {
   margin-left: 6px;
   color: var(--muted);
 }
+
+/* the year map's key: a swatch a year, the years after the one shown faded */
+.at .ew-yk { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; }
+.at .ew-yk > span { display: inline-flex; align-items: center; gap: 3px; }
+.at .ew-yk i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+.at .ew-yk .later { opacity: 0.3; }

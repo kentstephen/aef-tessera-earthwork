@@ -105,17 +105,17 @@ async function pairScore(kind: LayerKind, lastIdx: number, g: { py0: number; px0
   return p;
 }
 // every year of a chunk at once, packed one year per channel (RGBA: up to four years), so a step between years
-// only reads another channel on the GPU
+// only reads another channel on the GPU; five to eight years (the year map's) packed eight to a pixel
 async function score(m: Score) {
   const ac = new AbortController();
   running.set(m.id, ac);
   try {
-    const plane = m.w * m.h, n = m.allIdx.length;
-    const each = await Promise.all(m.allIdx.map((y) => pairScore(m.kind, y, m, ac.signal)));
-    const out = new Uint8Array(4 * plane);
-    for (let c = 0; c < n && c < 4; c++) {
+    const plane = m.w * m.h, n = Math.min(8, m.allIdx.length), stride = n <= 4 ? 4 : 8;
+    const each = await Promise.all(m.allIdx.slice(0, n).map((y) => pairScore(m.kind, y, m, ac.signal)));
+    const out = new Uint8Array(stride * plane);
+    for (let c = 0; c < n; c++) {
       const sc = each[c];
-      for (let i = 0; i < plane; i++) out[4 * i + c] = sc[i];
+      for (let i = 0; i < plane; i++) out[stride * i + c] = sc[i];
     }
     postMessage({ id: m.id, score: out }, { transfer: [out.buffer] as ArrayBuffer[] });
   } catch (e) {

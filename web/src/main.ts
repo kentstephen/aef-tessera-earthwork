@@ -1,4 +1,5 @@
 import "./ui.css";
+import "./mesh-sampler";
 import "./page.css";
 
 import { createEarthwork } from "./earthwork";
@@ -41,6 +42,7 @@ const CREDITS = [
   "AlphaEarth &copy; Google, Google DeepMind",
   "TESSERA v1.1 (University of Cambridge), via Source Cooperative",
   'Sentinel-2 &copy; Earth Genome (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), via <a href="https://source.coop" target="_blank" rel="noopener">Source Cooperative</a>',
+  "Sentinel-2 before 2022: Copernicus Sentinel data, via Element 84 Earth Search",
   "Places: Overture Maps (ODbL)",
   "Search: Photon, Nominatim",
   '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
@@ -64,7 +66,10 @@ const cfg = {
   aef_from: 2023,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-  s2_years: [2022, 2023, 2024, 2025],
+  // 2022 on: Earth Genome's yearly mosaics; before them, Earth Search's clearest scene of each year (s2.ts)
+  s2_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+  // the paint's years: one texture holds four
+  paint_years: [2022, 2023, 2024, 2025],
   s2_min_z: 7,
   viridis: VIRIDIS,
   div_pm: divPm,

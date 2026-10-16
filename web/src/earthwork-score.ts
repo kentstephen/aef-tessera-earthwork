@@ -375,3 +375,52 @@ float earthworkScore_v;
   uniformTypes: { channel: "f32" },
   getUniforms: (props: Partial<EarthworkScoreTexProps>) => ({ scoreTex: props.scoreTex, channel: props.channel ?? 0 }),
 } as const satisfies ShaderModule<EarthworkScoreTexProps>;
+
+/**
+ * Props for the {@link EarthworkYearTex} shader module.
+ */
+export type EarthworkYearTexProps = {
+  /** r8unorm: the years each pixel was over the layer's cutoff, bit k for the year map's k-th year. */
+  yearTex: Texture;
+  /** The index of the latest year counted (the year shown); later years' bits are left out. */
+  shown: number;
+  /** How many years the bits hold (up to eight). */
+  n: number;
+};
+
+/**
+ * The year map: the latest year counted that a pixel was over the cutoff, as 0 (the first year) to 1 (the last) in
+ * the red channel for a colormap after it, the colormap's dark end left out so the first years still show on a dark
+ * basemap. Pixels never over it up to the year shown are discarded.
+ */
+export const EarthworkYearTex = {
+  name: "earthworkYearTex",
+  fs: `\
+uniform earthworkYearTexUniforms {
+  float shown;
+  float n;
+} earthworkYearTex;
+`,
+  inject: {
+    "fs:#decl": `
+precision highp sampler2D;
+uniform highp sampler2D yearTex;
+`,
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      ivec2 ysize = textureSize(yearTex, 0);
+      ivec2 ypx = clamp(ivec2(geometry.uv * vec2(ysize)), ivec2(0), ysize - 1);
+      int bits = int(texelFetch(yearTex, ypx, 0).r * 255.0 + 0.5);
+      int top = int(floor(earthworkYearTex.shown + 0.5));
+      int latest = -1;
+      for (int k = 7; k >= 0; k--) {
+        if (latest < 0 && k <= top && ((bits >> k) & 1) == 1) latest = k;
+      }
+      if (latest < 0) discard;
+      float t = earthworkYearTex.n > 1.5 ? float(latest) / (earthworkYearTex.n - 1.0) : 1.0;
+      t = 0.15 + 0.85 * t;
+      color = vec4(t, t, t, 1.0);
+    `,
+  },
+  uniformTypes: { shown: "f32", n: "f32" },
+  getUniforms: (props: Partial<EarthworkYearTexProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, n: props.n ?? 1 }),
+} as const satisfies ShaderModule<EarthworkYearTexProps>;
