@@ -3,9 +3,11 @@
  * official bucket (sentinel-2-l2a COGs on AWS's open data, sentinel-cogs), found
  * through Element 84's Earth Search. Each MGRS tile's clearest scene of the year
  * is the yearly, and the next two clearest are the fill under its clouds and
- * edges; the year still in progress takes its latest clear scene instead, the
- * ground as it is now. The map reads and draws each footprint's TCI COG itself
- * (ui.js, s2CogLayers).
+ * edges; the year still in progress weighs age too, so it shows the ground as it
+ * is now. The map reads and draws each footprint's TCI COG itself (ui.js,
+ * s2CogLayers), with its clouds and their shadows cut out by the scene's SCL; a
+ * fourth scene lies under them uncut, the base, so ground the SCL takes for cloud
+ * in every scene (bright fresh soil and concrete can be) is never a hole.
  */
 const EARTH_SEARCH = "https://earth-search.aws.element84.com/v1/search";
 const ES_BANDS: Record<string, string> = { blue: "B02", green: "B03", red: "B04", nir08: "B8A", swir16: "B11", swir22: "B12" };
@@ -19,6 +21,10 @@ export type S2Item = {
   bands: Record<string, string>;
   /** the COGs' CRS: a UTM zone, 326zz north or 327zz south */
   epsg?: number;
+  /** the scene classification (20 m), its clouds cut out of the picture */
+  scl?: string;
+  /** the scene under every other, drawn uncut */
+  base?: boolean;
 };
 
 type EsFeature = {
@@ -29,12 +35,13 @@ type EsFeature = {
 };
 const scenes = new Map<string, Promise<S2Item[]>>();
 
-/** A scene this clear counts as clear for the year in progress, where the newest of them wins. */
-const CLEAR_NOW = 5;
+/** The year in progress: a month older weighs as a point more of cloud (percent of the tile). */
+const MONTH_NOW = 1;
 
 /**
  * For each MGRS tile under the box, its clearest scene of the year (fewest clouds, then the least of the tile left
- * empty by the swath's edge), and the next two as the fill. The year in progress ranks its clear scenes newest first.
+ * empty by the swath's edge), the next two as the fill and the fourth as the base. The year in progress adds each
+ * scene's age to that.
  */
 function sceneItems(year: number, bbox: number[]): Promise<S2Item[]> {
   const k = `${year}:${bbox.map((v) => v.toFixed(3)).join(",")}`;
@@ -48,7 +55,7 @@ function sceneItems(year: number, bbox: number[]): Promise<S2Item[]> {
         collections: ["sentinel-2-l2a"],
         bbox,
         datetime: `${year}-01-01T00:00:00Z/${year}-12-31T23:59:59Z`,
-        // the year in progress asks newest first, so the 200 kept are the latest, not the clearest of the year
+        // the year in progress asks newest first, so the 200 kept are the latest, not only the clearest
         query: { "eo:cloud_cover": { lt: 20 } },
         sortby: [now ? { field: "properties.datetime", direction: "desc" } : { field: "properties.eo:cloud_cover", direction: "asc" }],
         limit: 200,
@@ -67,18 +74,18 @@ function sceneItems(year: number, bbox: number[]): Promise<S2Item[]> {
         const cloud = (f: EsFeature) => Number(f.properties["eo:cloud_cover"] ?? 100);
         const empty = (f: EsFeature) => Number(f.properties["s2:nodata_pixel_percentage"] ?? 50);
         const rank = (f: EsFeature) => cloud(f) + 0.5 * empty(f);
-        // the year in progress: clear and mostly full first, newest of those first; the rest as any other year
-        const days = (f: EsFeature) => Date.parse(String(f.properties.datetime ?? "")) / 864e5 || 0;
-        const rankNow = (f: EsFeature) => (cloud(f) < CLEAR_NOW && empty(f) < 20 ? -1e6 - days(f) : rank(f));
+        const months = (f: EsFeature) => (Date.now() - (Date.parse(String(f.properties.datetime ?? "")) || 0)) / (30 * 864e5);
+        const rankNow = (f: EsFeature) => rank(f) + MONTH_NOW * months(f);
         const yearly: S2Item[] = [];
         const fill: S2Item[] = [];
         for (const l of byTile.values()) {
           l.sort((a, b) => (now ? rankNow(a) - rankNow(b) : rank(a) - rank(b)));
-          l.slice(0, 3).forEach((f, i) => {
+          l.slice(0, 4).forEach((f, i) => {
             const bands = Object.fromEntries(Object.entries(ES_BANDS).filter(([a]) => f.assets[a]).map(([a, b]) => [b, f.assets[a].href]));
             const epsg = Number(f.properties["proj:epsg"]) || undefined;
-            const it: S2Item = { id: i ? `${f.id}#fill` : f.id, url: f.assets.visual.href, bbox: f.bbox, bands, epsg };
-            if (i) fill.push({ ...it, fill: true });
+            const scl = f.assets.scl?.href;
+            const it: S2Item = { id: i ? `${f.id}#fill` : f.id, url: f.assets.visual.href, bbox: f.bbox, bands, epsg, scl };
+            if (i) fill.push({ ...it, fill: true, base: i === 3 });
             else yearly.push(it);
           });
         }

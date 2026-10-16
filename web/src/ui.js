@@ -882,7 +882,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // then the nearest the center of the view
   const s2Limiter = new PerOriginSemaphore({maxRequests: 16});
   const s2Asked = new Set();  // "year/z/x/y" asked of the kernel
-  const s2Stat = {tiles: 0, pending: 0, failed: 0, last: 0, years: {}};  // years: per year ("2025", "2025 fill") {tiles, pending, last}, for the tests
+  // years: per year ("2025", "2025 fill", "2025 base") {tiles, pending, last}; cut: the pixels cut out as cloud. For the tests
+  const s2Stat = {tiles: 0, pending: 0, failed: 0, last: 0, cut: 0, years: {}};
   const s2Tiff = (url, opts, year, fill) => {
     let p = s2Tiffs.get(url);
     if (!p) {
@@ -918,14 +919,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
         s2Items(year, {z, x, y}).then((items) => {
           let e = s2Src.get(year);
           if (!e) { e = {ids: new Set(), batches: []}; s2Src.set(year, e); }
-          const bt = {key: k.replace(/\//g, "-"), yearly: [], fill: [], bbox: [180, 90, -180, -90]};
+          const bt = {key: k.replace(/\//g, "-"), yearly: [], fill: [], base: [], bbox: [180, 90, -180, -90]};
           for (const it of items) {
             if (!it.bbox || e.ids.has(it.id)) continue;
             e.ids.add(it.id);
-            bt[it.fill ? "fill" : "yearly"].push({id: it.id, url: it.url, bbox: it.bbox, bands: it.bands || {}});
+            bt[it.base ? "base" : it.fill ? "fill" : "yearly"].push({id: it.id, url: it.url, bbox: it.bbox, bands: it.bands || {}, scl: it.scl});
             bt.bbox = [Math.min(bt.bbox[0], it.bbox[0]), Math.min(bt.bbox[1], it.bbox[1]), Math.max(bt.bbox[2], it.bbox[2]), Math.max(bt.bbox[3], it.bbox[3])];
           }
-          if (bt.yearly.length || bt.fill.length) { e.batches.push(bt); update(); }
+          if (bt.yearly.length || bt.fill.length || bt.base.length) { e.batches.push(bt); update(); }
         }, () => { s2Asked.delete(k); });
       }
   }
@@ -938,11 +939,59 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (s2Warm || s2Stat.pending !== 0 || !(key === want || key === want + " fill")) return;
     s2Warm = true; setTimeout(update, 250);
   }
-  async function s2TileData(image, {device, x, y, signal, pool}, key) {
+  // the scene's clouds under one tile of its image (TCI, or a band), a byte a pixel (1 cut): the SCL's cloud shadow
+  // (3), cloud (8, 9) and cirrus (10), grown by one SCL pixel for the haze at their edges. Null with no SCL to read
+  const S2_CLOUD = new Uint8Array(256);
+  for (const v of [3, 8, 9, 10]) S2_CLOUD[v] = 1;
+  async function s2Clouds(src, image, x, y, pool, year) {
+    if (!src || !src.scl) return null;
+    const g = await s2Tiff(src.scl, null, year, true).catch(() => null);
+    if (!g) return null;
+    const tp = image.transform, tw = image.tileWidth, th = image.tileHeight;
+    // the SCL level nearest the tile's pixel (its finest is 20 m, so a 10 m tile reads it at half)
+    const lv = (q) => Math.abs(Math.log(q.transform[0] / tp[0]));
+    const im = [g, ...g.overviews].reduce((a, q) => (lv(q) < lv(a) ? q : a));
+    const q = im.transform, bw = im.tileWidth, bh = im.tileHeight;
+    const X0 = tp[2] + x * tw * tp[0], Y0 = tp[5] + y * th * tp[4];
+    // the SCL window under the tile, a pixel wider on every side for the growing
+    const c0 = Math.floor((X0 - q[2]) / q[0]) - 1, r0 = Math.floor((Y0 - q[5]) / q[4]) - 1;
+    const cw = Math.ceil(tw * tp[0] / q[0]) + 3, ch = Math.ceil(th * tp[4] / q[4]) + 3;
+    const win = new Uint8Array(cw * ch), jobs = [];
+    for (let by = Math.max(0, Math.floor(r0 / bh)); by <= Math.min(Math.ceil(im.height / bh) - 1, Math.floor((r0 + ch - 1) / bh)); by++)
+      for (let bx = Math.max(0, Math.floor(c0 / bw)); bx <= Math.min(Math.ceil(im.width / bw) - 1, Math.floor((c0 + cw - 1) / bw)); bx++)
+        jobs.push(s2Block(src.scl, im, bx, by, pool).then((t) => {
+          if (!t) return;
+          const ox = bx * bw - c0, oy = by * bh - r0;
+          for (let r = Math.max(0, -oy); r < t.h && r + oy < ch; r++)
+            for (let c = Math.max(0, -ox); c < t.w && c + ox < cw; c++) win[(r + oy) * cw + c + ox] = S2_CLOUD[t.d[r * t.w + c]];
+        }));
+    await Promise.all(jobs);
+    const grown = new Uint8Array(cw * ch);
+    for (let r = 0; r < ch; r++) for (let c = 0; c < cw; c++) {
+      if (!win[r * cw + c]) continue;
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        const rr = r + dr, cc = c + dc;
+        if (rr >= 0 && rr < ch && cc >= 0 && cc < cw) grown[rr * cw + cc] = 1;
+      }
+    }
+    const out = new Uint8Array(tw * th);
+    let any = false;
+    for (let r = 0; r < th; r++) {
+      const sr = Math.floor((Y0 + (r + 0.5) * tp[4] - q[5]) / q[4]) - r0;
+      for (let c = 0; c < tw; c++) {
+        const sc = Math.floor((X0 + (c + 0.5) * tp[0] - q[2]) / q[0]) - c0;
+        if (grown[sr * cw + sc]) { out[r * tw + c] = 1; any = true; s2Stat.cut++; }
+      }
+    }
+    return any ? out : null;
+  }
+  // src: the footprint, its clouds cut out (cut) by its SCL; the base is drawn uncut
+  async function s2TileData(image, {device, x, y, signal, pool}, key, src = null, cut = false) {
     const sy = s2Stat.years[key] || (s2Stat.years[key] = {tiles: 0, pending: 0, last: 0});
     s2Stat.pending++; sy.pending++;
     try {
-      const {array} = await image.fetchTile(x, y, {boundless: false, pool, signal});
+      const [{array}, cloud] = await Promise.all([image.fetchTile(x, y, {boundless: false, pool, signal}),
+        cut ? s2Clouds(src, image, x, y, pool, Number(String(key).slice(0, 4))) : null]);
       const {width, height, data} = array, px = width * height;
       // TCI's black (0, 0, 0) is nodata: alpha 0 there, so the linear filter's blend of an edge
       // pixel with its nodata neighbor carries a falling alpha the shader can undo (a black
@@ -955,6 +1004,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
           rgba[4 * i] = r; rgba[4 * i + 1] = g; rgba[4 * i + 2] = b; rgba[4 * i + 3] = r || g || b ? 255 : 0;
         }
       }
+      // a cloud is nodata too (black at alpha 0, so the edge's blend divides back out the same way)
+      if (cloud && rgba.length === 4 * px && cloud.length === px) for (let i = 0; i < px; i++) if (cloud[i]) rgba[4 * i] = rgba[4 * i + 1] = rgba[4 * i + 2] = rgba[4 * i + 3] = 0;
       s2Stat.tiles++; sy.tiles++;
       return {texture: device.createTexture({data: rgba, format: "rgba8unorm", width, height, sampler: {magFilter: "linear", minFilter: "linear"}}), width, height};
     } catch (e) {
@@ -1081,7 +1132,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     }
     return p;
   }
-  async function s2BandTileData(image, {device, x, y, signal, pool}, key, geotiff, src, comp, year, fill) {
+  async function s2BandTileData(image, {device, x, y, signal, pool}, key, geotiff, src, comp, year, fill, cut = false) {
     const sy = s2Stat.years[key] || (s2Stat.years[key] = {tiles: 0, pending: 0, last: 0});
     s2Stat.pending++; sy.pending++;
     try {
@@ -1118,6 +1169,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
         return {d: out, w: tw, h: th};
       };
       const ub = [...new Set(bands)], got = new Map(await Promise.all(ub.map(async (b) => [b, await one(b)])));
+      const cloud = cut ? await s2Clouds(src, image, x, y, pool, year) : null;
       const p = got.get(prim);
       if (!p) throw new Error("no " + prim + " tile");
       const {w: width, h: height} = p, chans = bands.map((b) => got.get(b));
@@ -1134,6 +1186,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
               v[k] = x;
             }
             if (!ok) continue;
+            if (cloud && cloud[r * width + c]) continue;
             spec.q(v, q);
             const o = 4 * (r * width + c);
             px[o] = s2Half(q[0]); px[o + 1] = s2Half(q[1]); px[o + 2] = s2Half(q[2]); px[o + 3] = S2_HALF_ONE;
@@ -1162,8 +1215,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
         }
         for (let r = 0; r < height; r++) for (let c = 0; c < width; c++) {
           const i = r * width + c;
-          let ok = got[i] === 2;
-          if (got[i] === 1) {
+          let ok = got[i] === 2 && !(cloud && cloud[i]);
+          if (got[i] === 1 && !(cloud && cloud[i])) {
             ok = true;
             for (let dr = -1; dr <= 1 && ok; dr++) for (let dc = -1; dc <= 1; dc++) {
               const rr = r + dr, cc = c + dc;
@@ -1328,22 +1381,22 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const look = !spec ? null : spec.rgb ? {module: S2Stretch, props: {gamma, scale}} : {module: S2Index, props: {lo, hi, kind: spec.kind}};
     const [W_, S_, E_, N_] = s2View();
     const live = e.batches.filter((bt) => bt.bbox[0] < E_ && bt.bbox[2] > W_ && bt.bbox[1] < N_ && bt.bbox[3] > S_);
-    // every batch's fill under every batch's yearly footprints
-    const parts = [...live.filter((bt) => bt.fill.length).map((bt) => [bt, "fill"]), ...live.filter((bt) => bt.yearly.length).map((bt) => [bt, "yearly"])];
+    // every batch's base under its fill under every batch's yearly footprints; all but the base with their clouds cut
+    const parts = ["base", "fill", "yearly"].flatMap((pt) => live.filter((bt) => bt[pt] && bt[pt].length).map((bt) => [bt, pt]));
     return parts.map(([bt, part]) => new MosaicLayer({
       id: pre + bt.key + "-" + part, sources: bt[part], maxCacheSize: 0, minZoom: cfg.s2_min_z || 7, visible: visible && stretched, beforeId: slot(left ? map2 : map),
       // a footprint that cannot be read (the STAC lists it but the bucket lacks it, or its header
       // failed) is nothing there: a rejection here leaves MosaicLayer a tile with no content,
       // which it then cannot draw ("Cannot destructure property 'source' ... null")
-      getSource: (src, o) => s2Tiff(comp === "tci" ? src.url : src.bands[s2Prim(comp)], o, year, part === "fill").catch(() => null),
+      getSource: (src, o) => s2Tiff(comp === "tci" ? src.url : src.bands[s2Prim(comp)], o, year, part !== "yearly").catch(() => null),
       renderSource: (src, {data, signal}) => !data ? null : comp === "tci" ? new COGLayer({
-        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "fill" ? " fill" : "")), pool: s2Pool, signal, ...paint(),
+        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "yearly" ? "" : " " + part), src, part !== "base"), pool: s2Pool, signal, ...paint(),
         refinementStrategy: "best-available", maxRequests: 16,
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, {module: S2Look, props: {gamma}}]}),
         updateTriggers: {renderTile: [gamma]},
       }) : new COGLayer({
         id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16, ...paint(),
-        getTileData: (img, o) => s2BandTileData(img, o, comp + " " + year + (part === "fill" ? " fill" : ""), data, src, comp, year, part === "fill"),
+        getTileData: (img, o) => s2BandTileData(img, o, comp + " " + year + (part === "yearly" ? "" : " " + part), data, src, comp, year, part !== "yearly", part !== "base"),
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, look]}),
         updateTriggers: {renderTile: [gamma, ...(scale || []), ...lo, ...hi]},
       }),
