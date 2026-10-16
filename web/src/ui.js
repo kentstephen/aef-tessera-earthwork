@@ -139,7 +139,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     paintYear: cfg.paint_year || PY[PY.length - 1], filled: false,
     // each year's look (N, Shift+N): 0 its clearest scenes, 1 the next one down, and so on (s2.ts)
     looks: {},
-    fit: !!cfg.fit, holding: false, stuck: false, flareOn: false,
+    fit: !!cfg.fit, holding: false, stuck: false,
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
   };
@@ -345,8 +345,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
       return;
     }
     if (st.gmode === "earth" && st.yearMap) {
-      keyEl.innerHTML = `<span class="ew-yk">${DY.map((y) => `<span class="${y > st.mapYear ? "later" : ""}"><i style="background:${civOf(y)}"></i>’${String(y).slice(-2)}</span>`).join("")}</span>`;
-      keyEl.title = `Where the ground was likely dug, filled or graded, in the color of the latest year it was, ${DY[0]} to ${detYear()}`;
+      // a year clicked flashes its finds (dug that year) on the imagery and the year map, the year shown kept
+      keyEl.innerHTML = `<span class="ew-yk">${DY.map((y) => `<button data-year="${y}" class="${y > st.mapYear ? "later" : ""}" title="flash ${y}'s finds"><i style="background:${civOf(y)}"></i>’${String(y).slice(-2)}</button>`).join("")}</span>`;
+      keyEl.title = `Where the ground was likely dug, filled or graded, in the color of the latest year it was, ${DY[0]} to ${detYear()}. Click a year to flash its finds`;
+      keyEl.querySelectorAll("[data-year]").forEach((b) => { b.onclick = (e) => { e.stopPropagation(); flash(+b.dataset.year); }; });
       return;
     }
     if (st.gmode === "earth") { keyEl.innerHTML = `<span>unlikely</span><i class="at-ramp" style="background:linear-gradient(90deg,${virCss(8)})"></i><span>likely</span>`; keyEl.title = `The chance the ground itself was dug, filled or graded, ${y0} to ${y1}`; return; }
@@ -461,7 +463,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
   styleNames();
   item("Place names", "<kbd>L</kbd> steps them", namesBox);
-  // the flare (G): brighten the finds, or dim the rest (white ground stands out too). Kept in this browser
+  // the flare (a year clicked in the year map's key): brighten the finds, or dim the rest (white ground stands out too). Kept in this browser
   st.flareDim = (() => { try { return localStorage.getItem("aef-lc-flare") === "dim"; } catch (e) { return false; } })();
   const flareBox = el_("div");
   const styleFlare = segOf(flareBox, [["bright", "Brighten", "the finds brighter", ""], ["dim", "Dim the rest", "everything but the finds darker: white ground stands out too", ""]],
@@ -472,7 +474,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     styleFlare();
   }
   styleFlare();
-  item("Flare", "<kbd>G</kbd> a flash on each year step, <kbd>Shift</kbd>+<kbd>G</kbd> switches", flareBox);
+  item("Flare", "click a year in the year map's key to flash its finds, <kbd>Shift</kbd>+<kbd>G</kbd> switches", flareBox);
   // picking: the tooltip and the click's card, off to look at the map (or shoot it) clean
   const rPick = rowOf("Picking");
   // picking off also lets go of the pixel or hexagon picked (with clicks off, it could not be clicked away)
@@ -490,7 +492,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery (S keeps it on, S again back), scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; G flares the year's finds (dug that year) on the imagery and the year map (G arms a flash on every year step, G again stops it; Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key flashes its finds (dug that year) on the imagery and the year map (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -506,8 +508,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <ul>
       <li><b>Click</b> a spot: where it is, its coordinates and H3 string to copy, and its score.</li>
       <li><kbd>I</kbd> switches to the chance itself on the basemap, yellow likely and dark not, and back.</li>
-      <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in full color, or press <kbd>S</kbd> to keep it on (<kbd>S</kbd> again to go back); while it shows, <b>scroll</b> (or <kbd>[</kbd> <kbd>]</kbd>) to step its year, ${S2Y[0]} to ${S2Y[S2Y.length - 1]}.</li>
-      <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together.</li>
+      <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in full color; while it shows, <b>scroll</b> (or <kbd>[</kbd> <kbd>]</kbd>) to step its year, ${S2Y[0]} to ${S2Y[S2Y.length - 1]}.</li>
+      <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together. On the year map, <b>click</b> a year in its key to flash that year's finds on both sides.</li>
       <li><b>AEF Years</b> in the Earthwork card are the years compared; <kbd>M</kbd> switches the layer: Aggregate (AlphaEarth and TESSERA together), AEF or TESSERA.</li>
       <li>Earthwork shows from zoom ${EWZ} in. <kbd>/</kbd> searches a place.</li>
     </ul>
@@ -769,7 +771,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (st.yearMap && !st.holding) {
       const dEnds = `${String(YM[0]).slice(2)}/${String(YM[YM.length - 1]).slice(2)}`;
       const lk = lookOf(st.imgYear);
-      const img = (st.pair ? `<span>Sentinel-2 ${st.imgYear}, ${lk ? `look ${lk + 1}` : st.imgYear >= new Date().getFullYear() ? "its latest clear day" : "one clear day"}</span><span><kbd>N</kbd> new look</span><span><kbd>G</kbd> ${st.flareOn ? "flash on" : "flash"}</span>` : `<span><kbd>P</kbd> <kbd>S</kbd> or <kbd>Space</kbd> imagery</span>`)
+      const img = (st.pair ? `<span>Sentinel-2 ${st.imgYear}, ${lk ? `look ${lk + 1}` : st.imgYear >= new Date().getFullYear() ? "its latest clear day" : "one clear day"}</span><span><kbd>N</kbd> new look</span><span>click a year to flash</span>` : `<span><kbd>P</kbd> or <kbd>Space</kbd> imagery</span>`)
         + (st.mapYear > AY_LAST ? `<span>found to ${AY_LAST}</span>` : "");
       s2c.innerHTML = `<div class="ew-s2hd"><b>${st.mapYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
         + `<div class="ew-keys"><span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${dEnds}</span>${img}<span><kbd>Y</kbd> year map</span></div>`;
@@ -778,8 +780,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
       + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span><span><kbd>N</kbd> ${lookOf(yearOf()) ? `look ${lookOf(yearOf()) + 1}` : "new look"}</span>`
         : showImg
-        ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>N</kbd> ${lookOf(yearOf()) ? `look ${lookOf(yearOf()) + 1}` : "new look"}</span>${st.holding && st.yearMap ? `<span><kbd>G</kbd> ${st.flareOn ? "flash on" : "flash"}</span>` : ""}${st.stuck ? `<span><kbd>S</kbd> back</span>` : ""}`
-        : `<span><kbd>S</kbd> <kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
+        ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>N</kbd> ${lookOf(yearOf()) ? `look ${lookOf(yearOf()) + 1}` : "new look"}</span>${st.stuck ? `<span><kbd>S</kbd> back</span>` : ""}`
+        : `<span><kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
     s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
     }
     // the readout: the clicked hexagon's account, nothing until a click
@@ -1615,16 +1617,16 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // ---- the flare (G): the year map's finds of the year shown only (dug that year, as the imagery shows it), brighten
   // the imagery under them for a moment (its
   // brightness scaled by 1 + FLARE: no color laid over it, the ground itself brighter there), on the map showing Sentinel-2 (the pair's left,
-  // or the main map while space is held or S keeps it). G arms it (st.flareOn) and G again disarms it; armed, each
-  // year stepped to flashes its finds once (rises, holds a moment, fades), as does arming. Its layer stays mounted at
-  // strength 0 (not drawn), so its chunks are in before the first flash
+  // or the main map while space is held). A year clicked in the year map's key flashes that year's finds once (rises,
+  // holds a moment, fades), the year shown kept. Its layer stays mounted at strength 0 (not drawn), so its chunks are
+  // in before the first flash
   // Two ways (settings, Flare; Shift+G switches): brighten the finds (by 1 + FLARE), or dim the rest (by 1 - FLARE_DIM),
   // for white ground, which cannot brighten and only clips
   const FLARE = Math.max(0.05, Math.min(1, Number(cfg.flare) || 0.4)), FLARE_UP = 90, FLARE_HOLD = 220, FLARE_DOWN = 650;
   const FLARE_DIM = Math.max(0.05, Math.min(0.9, Number(cfg.flare_dim) || 0.4));
-  let flareK = 0, flareHeld = false, flareUntil = 0, flareRaf = 0, flareLast = 0;
-  // flareK runs 0 to 1, the strength of the way chosen
-  const flareLayer = (m) => earthwork.yearLayer({visible: flareK > 0.002 && m.getZoom() >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ,
+  let flareK = 0, flareHeld = false, flareUntil = 0, flareRaf = 0, flareLast = 0, flareYear = null;
+  // flareK runs 0 to 1, the strength of the way chosen; the year flashed last (the year shown before any)
+  const flareLayer = (m) => earthwork.yearLayer({visible: flareK > 0.002 && m.getZoom() >= EWZ, year: flareYear ?? detYear(), years: DY, model: st.model, minZoom: EWZ,
     flare: flareK * (st.flareDim ? FLARE_DIM : FLARE), flareDim: st.flareDim});
   function flareStep(now) {
     const dt = Math.min(50, now - (flareLast || now)); flareLast = now;
@@ -1639,13 +1641,13 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
   function flare(on) {
     if (on) {
-      if (!((st.pair && st.left === "s2") || st.holding)) { note("G lights the year's finds on the imagery: pair it (P), or S or space for Sentinel-2", 2500); return; }
+      if (!((st.pair && st.left === "s2") || st.holding)) { note("A year clicked flashes its finds on the imagery: pair the map with Sentinel-2 (P)", 2500); return; }
       flareHeld = true; flareUntil = performance.now() + FLARE_UP + FLARE_HOLD;
     } else flareHeld = false;
     if (!flareRaf) flareRaf = requestAnimationFrame(flareStep);
   }
-  // one flash: up, a moment lit, down
-  const flash = () => { flare(true); flare(false); };
+  // one flash of a year's finds (the last flashed, or the year shown, by default): up, a moment lit, down
+  const flash = (y) => { if (y != null) flareYear = y; flare(true); flare(false); };
   function ewLoaded() { if (!ewIn) { ewIn = true; if (map) map.triggerRepaint(); } ewProgress(); }
   // how much of the view's earthwork is in: the bar and its tag, hidden when all of it is (or zoomed out, or holding)
   let ewTagFor = "";
@@ -1762,7 +1764,6 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (onYears()) { st.mapYear = y; const s = S2Y.filter((v) => v <= y); st.imgYear = s.length ? s[s.length - 1] : S2Y[0]; styleKey(); rescoreSpot(); }
     else if (onPaint()) { st.paintYear = y; paintSeen.add(y); styleWin(); refreshScores(); } else st.imgYear = y;
     renderYear(); update();
-    if (st.flareOn) flash();
   };
   const stepImg = (d) => { const ys = yearsOn(), i = ys.indexOf(curYear()); setYear(ys[Math.max(0, Math.min(ys.length - 1, (i < 0 ? ys.length - 1 : i) + d))]); };
   // Shift held: the paint filled in (PAINT_FILL), the layers untouched, so only a redraw
@@ -1816,7 +1817,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     beginHold(pt.x, pt.y, "key");
   }
   // S: Sentinel-2 on the main map and kept there (the hold without holding: "stuck"), S again back. Space, the mouse,
-  // a lost window leave it on; the keys work as they do while holding (scroll or [ ] the year, G the flare)
+  // a lost window leave it on; the keys work as they do while holding (scroll or [ ] the year). Off for now (its key
+  // unbound): the flash is clicked in the year map's key, which works paired
   function stickS2() {
     if (!map) return;
     if (st.holding && holdBy === "stuck") { endHold("stuck"); return; }
@@ -2067,19 +2069,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
       const ys = yearsOn(), a = ys[0], b = ys[ys.length - 1];
       setYear(curYear() === b ? a : b);
     }
-    // G: the flare, while held (a tap flashes it)
     // Shift+G: the other way to flare (brighten the finds, dim the rest), shown at once
     // (a flash of the way chosen)
     else if ((k === "g" || k === "G") && e.shiftKey) { if (e.repeat) return; setFlareDim(!st.flareDim); note(st.flareDim ? "Flare: the rest dimmed (Shift+G to brighten the finds instead)" : "Flare: the finds brightened (Shift+G to dim the rest instead)", 2000); flash(); }
-    // G: a flash on each year step armed (and a flash now), G again disarmed
-    else if (k === "g" || k === "G") {
-      if (e.repeat) return;
-      if (!st.flareOn && !((st.pair && st.left === "s2") || st.holding)) { flare(true); return; }  // its note: nothing to flash on
-      st.flareOn = !st.flareOn; renderYear();
-      if (st.flareOn) flash();
-      note(st.flareOn ? "Each year stepped to flashes its finds (G to stop)" : "No flash on the year steps", 2000);
-    }
-    else if (k === "s" || k === "S") stickS2();
     // N: a new look for the imagery's year shown (each tile's next scene down, with its own fill), Shift+N back
     else if (k === "n" || k === "N") {
       if (!(st.paint || st.holding || (st.pair && st.left === "s2"))) return;
