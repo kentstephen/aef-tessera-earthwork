@@ -434,6 +434,9 @@ uniform earthworkYearTexUniforms {
     "fs:#decl": `
 precision highp sampler2D;
 uniform highp sampler2D yearTex;
+// the year drawn, and the pixel, kept for the confidence after it (EarthworkYearConf)
+int earthworkYear_latest;
+ivec2 earthworkYear_px;
 `,
     "fs:DECKGL_FILTER_COLOR": /* glsl */ `
       ivec2 ysize = textureSize(yearTex, 0);
@@ -445,6 +448,8 @@ uniform highp sampler2D yearTex;
         if (latest < 0 && k <= top && ((bits >> k) & 1) == 1) latest = k;
       }
       if (latest < 0) discard;
+      earthworkYear_latest = latest;
+      earthworkYear_px = ypx;
       float t = earthworkYearTex.n > 1.5 ? float(latest) / (earthworkYearTex.n - 1.0) : 1.0;
       t = 0.15 + 0.85 * t;
       color = vec4(t, t, t, 1.0);
@@ -453,6 +458,39 @@ uniform highp sampler2D yearTex;
   uniformTypes: { shown: "f32", n: "f32" },
   getUniforms: (props: Partial<EarthworkYearTexProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, n: props.n ?? 1 }),
 } as const satisfies ShaderModule<EarthworkYearTexProps>;
+
+/** Props for {@link EarthworkYearConf}. */
+export type EarthworkYearConfProps = {
+  /** r8unorm, the chunk's width by its height x the years: each year's confidence (confidenceChunk), a plane a year. */
+  confTex: Texture;
+  /** The chunk's height, the plane's. */
+  h: number;
+};
+
+/**
+ * After the year map's colormap: its pixel as opaque as the confidence of the year it is drawn in, from 15% at none,
+ * so a year called weakly is faint in its color and a strong one solid.
+ */
+export const EarthworkYearConf = {
+  name: "earthworkYearConf",
+  fs: `\
+uniform earthworkYearConfUniforms {
+  float h;
+} earthworkYearConf;
+`,
+  inject: {
+    "fs:#decl": `
+uniform highp sampler2D confTex;
+`,
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      int ch = int(earthworkYearConf.h + 0.5);
+      float conf = texelFetch(confTex, ivec2(earthworkYear_px.x, earthworkYear_px.y + earthworkYear_latest * ch), 0).r;
+      color.a *= mix(0.15, 1.0, conf);
+    `,
+  },
+  uniformTypes: { h: "f32" },
+  getUniforms: (props: Partial<EarthworkYearConfProps>) => ({ confTex: props.confTex, h: props.h ?? 1 }),
+} as const satisfies ShaderModule<EarthworkYearConfProps>;
 
 /**
  * Props for the {@link EarthworkFlare} shader module.

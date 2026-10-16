@@ -12,7 +12,7 @@ import * as zarr from "zarrita";
 import { type AefArray, bandTexture, CHUNK, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
 import ChunkWorker from "./chunk.worker.ts?worker";
 import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
-import { EarthworkAggregate, EarthworkAlpha, EarthworkConfAlpha, EarthworkCut, EarthworkFlare, EarthworkScore, EarthworkScoreTex, EarthworkTessera, EarthworkYearTex } from "./earthwork-score";
+import { EarthworkAggregate, EarthworkAlpha, EarthworkConfAlpha, EarthworkCut, EarthworkYearConf, EarthworkFlare, EarthworkScore, EarthworkScoreTex, EarthworkTessera, EarthworkYearTex } from "./earthwork-score";
 import { TES_BANDS } from "./tessera";
 
 export type { LayerKind, WorldModel };
@@ -23,7 +23,7 @@ const paintOf = (kind: ChunkKind): LayerKind | null => (kind.startsWith("paint-"
 /** One chunk of the paint: every year's score on the GPU (rgba8unorm, a year per channel, 1 + 254 x score, 0 where a year is missing). */
 type PaintTile = { width: number; height: number; byteLength: number; key: string; scoreTex: Texture };
 /** One chunk of the year map: the years each pixel was over the layer's cutoff, a bit a year (r8unorm). */
-type YearTile = { width: number; height: number; byteLength: number; key: string; yearTex: Texture };
+type YearTile = { width: number; height: number; byteLength: number; key: string; yearTex: Texture; confTex?: Texture };
 
 /** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags (none of TESSERA's for AlphaEarth's layer alone). */
 type TileData = PairTileData & {
@@ -87,18 +87,22 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
 
   /** The paint's scores for one chunk and layer, every year in `allIdx` (each from the year before), a year per channel. */
   function scoreChunk(kind: LayerKind, px0: number, py0: number, w: number, h: number, allIdx: number[], signal?: AbortSignal): Promise<Uint8Array> {
+    return scoreConfChunk(kind, px0, py0, w, h, allIdx, false, signal).then((r) => r.score);
+  }
+  /** The same, and with `conf` each year's confidence (confidenceChunk) for the pixels over the cutoff, a plane a year. */
+  function scoreConfChunk(kind: LayerKind, px0: number, py0: number, w: number, h: number, allIdx: number[], conf: boolean, signal?: AbortSignal): Promise<{ score: Uint8Array; conf?: Uint8Array }> {
     if (signal?.aborted) return Promise.reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
     const id = ++askId;
-    return new Promise<{ score: Uint8Array }>((resolve, reject) => {
+    return new Promise<{ score: Uint8Array; conf?: Uint8Array }>((resolve, reject) => {
       asked.set(id, { resolve, reject });
-      worker.postMessage({ type: "score", id, kind, px0, py0, w, h, allIdx });
+      worker.postMessage({ type: "score", id, kind, px0, py0, w, h, allIdx, conf });
       signal?.addEventListener("abort", () => {
         if (!asked.has(id)) return;
         asked.delete(id);
         worker.postMessage({ type: "abort", id });
         reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
       });
-    }).then((r) => r.score);
+    });
   }
 
   /** A window's chunk's confidence (confidenceChunk), 0 to 255 a pixel. */
@@ -306,9 +310,12 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * imagery under them by 1 + flare (EarthworkFlare and the layer's blend), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
    * chunks kept for the card), which are the year map's, and its chunks' scores come from the worker's, read once
    */
-  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
+  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; conf?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
     const { visible, year, minZoom, onTile, onViewportLoad } = opts;
     const flare = opts.flare, dim = opts.flareDim ? 1 : 0;
+    // the confidence (the year map's own, not the flare's): each year's, made with the scores from the same years (so
+    // it reads nothing more) and kept with the tile, so A and a step between years only redraw
+    const conf = !!opts.conf && flare == null;
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aef", ck: ChunkKind = `years-${kind}`;
     const years = opts.years.slice(0, 8), allIdx = years.map((y) => y - YEAR_ORIGIN), lastIdx = allIdx[allIdx.length - 1];
     const shown = years.filter((y) => y <= year).length - 1;
@@ -327,7 +334,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         const { device, width, height } = o;
         // the colormap's texture is made on the first device seen (the main map's: never the flare's)
         if (flare == null) onDevice(device);
-        const s = await scoreChunk(kind, px0, py0, width, height, allIdx, o.signal);
+        const { score: s, conf: cb } = await scoreConfChunk(kind, px0, py0, width, height, allIdx, flare == null, o.signal);
         const key = keyOf(0, 0, ck, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
         if (flare == null) {
           keepPaint(key, { s, w: width, h: height, years, stride });
@@ -348,14 +355,27 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           data: bits,
           sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
         });
-        return { width, height, byteLength: plane, key, yearTex };
+        const confTex = cb
+          ? device.createTexture({
+              format: "r8unorm",
+              width,
+              height: height * allIdx.length,
+              mipLevels: 1,
+              data: cb,
+              sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
+            })
+          : undefined;
+        return { width, height, byteLength: plane * (1 + (cb ? allIdx.length : 0)), key, yearTex, confTex };
       },
-      renderTile: (d: YearTile) => ({
-        renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare, dim } }] : [
-          { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
-          ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.cividis } }] : []),
-        ],
-      }),
+      renderTile: (d: YearTile) => {
+        return {
+          renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare, dim } }] : [
+            { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
+            ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.cividis } }] : []),
+            ...(conf && d.confTex ? [{ module: EarthworkYearConf, props: { confTex: d.confTex, h: d.height } }] : []),
+          ],
+        };
+      },
       visible,
       minZoom,
       // a chunk reads every year (nine AlphaEarth reads): fewer at once keeps the worker's kept chunks enough for
@@ -368,6 +388,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         if (!t) return;
         if (flare == null) loaded.delete(t.key);
         t.yearTex?.destroy();
+        t.confTex?.destroy();
       },
       onViewportLoad: () => flare == null && onViewportLoad && onViewportLoad(),
       // the flare's blend works on what is under it, so a tile drawn over its parent (refining) would flare twice
@@ -377,7 +398,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // texture, contrast and colors kept); dimming, out = dst src, scaled down. Its alpha kept
       ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
-      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim] },
+      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, conf] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
@@ -618,6 +639,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     whenConf: (f: () => void) => {
       onConf = f;
     },
+    confIn: () => confN,
   };
 }
 

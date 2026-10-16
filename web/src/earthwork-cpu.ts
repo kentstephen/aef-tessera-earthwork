@@ -149,10 +149,13 @@ export function confidenceChunk(
   aef: Float32Array,
   plane: number,
   m: WorldModel,
+  drawn?: { score: Float32Array; cut: number },
 ): Uint8Array {
   const out = new Uint8Array(plane).fill(255);
   const e = new Float64Array(NUM_BANDS);
   for (let at = 0; at < plane; at++) {
+    // only the pixels drawn (the year map's, over its layer's cutoff), when given
+    if (drawn && !(drawn.score[at] >= drawn.cut)) continue;
     if (tes ? !(tes.flags[at] & TES_OK) || aef[at] < 0 : aef[at] < 0.05) continue;
     if (!unitAef(aefFirst, plane, at, bA) || !unitAef(aefLast, plane, at, aA)) continue;
     let agree = 1;

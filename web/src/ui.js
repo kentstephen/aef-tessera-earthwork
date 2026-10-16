@@ -483,9 +483,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const swPick = sw(() => !st.noPick, (v) => { st.noPick = !v; tip.style.display = "none"; hover = null; if (st.noPick && cardData) closeCard(); update(); });
   swPick.title = "the tooltip and the card on a click (Q)";
   rPick.append(swPick, el_("span", "at-pick", "<span>Tooltip and click</span><kbd>Q</kbd>"));
-  // the confidence as alpha (A): a likely call made weakly faint in its color, a strong one solid. Read when it is
-  // turned on, for the chunks in view (AlphaEarth's earlier years, and TESSERA for the aggregate), so it is for a
-  // place parked on
+  // the confidence as alpha (A): a likely call made weakly faint in its color, a strong one solid; on the year map, each
+  // year's call its own. Read when it is turned on, for the chunks in view (AlphaEarth's earlier years, and TESSERA
+  // but for AEF's layer), so it is for a place parked on
   const rConf = rowOf("Confidence");
   const swConf = sw(() => st.conf, (v) => setConf(v));
   swConf.title = "fade the calls that are weak: only one embedding says moved, or the ground went back to what it was (A)";
@@ -493,10 +493,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
   function setConf(on) {
     st.conf = on; swConf.sty(); update();
     if (!on) return;
-    note(st.yearMap || st.paint ? "Confidence shows on the earthwork layer: Y or I for it"
-      : st.model === "tessera" ? "Confidence shows on the aggregate and AEF: M to switch"
-      : st.model === "aef" ? "Confidence on AEF: faint where the ground went back to what it was before. The aggregate (M) also fades what TESSERA does not call moved"
-      : "Confidence: faint where only one embedding calls it moved, or the ground went back to what it was before", 4000);
+    note(st.paint ? "Confidence shows on the year map (Y) and the earthwork layer (I)"
+      : st.model === "aef" ? `Confidence${st.yearMap ? ", each year its own" : ""}: faint where the ground went back to what it was before. The aggregate (M) also fades what TESSERA does not call moved`
+      : `Confidence${st.yearMap ? ", each year its own" : ""}: faint where only one embedding calls it moved, or the ground went back to what it was before`, 4000);
   }
   more.appendChild(el_("hr"));
   const bAbout = el_("button", "at-chip", "About this map <kbd>?</kbd>"); bAbout.title = "about this map (?)"; bAbout.style.margin = "4px 10px 6px";
@@ -509,7 +508,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; A the confidence on the earthwork layer (faint where only one embedding calls it moved, or the ground went back to what it was in the three years before), read when turned on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; A the confidence (faint where only one embedding calls it moved, or the ground went back to what it was in the three years before; on the year map each year's call its own), read when turned on; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -1599,7 +1598,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // painting, one mask for every year at once (each year its own change from the year before, a channel each): a
     // step between years only changes the channel
     // the year map: every year read at once, a bit a year; a step between years only changes which bits count
-    if (st.yearMap) out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
+    if (st.yearMap) out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, conf: st.conf, onTile: tileIn, onViewportLoad: ewLoaded}));
     else if (st.paint) out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ, year: st.paintYear, years: PY, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, conf: st.conf, onTile: tileIn, onViewportLoad: ewLoaded}));
     // the flare over the imagery while space is held (the pair's left has its own, layers2); paired, the year map here
@@ -2226,7 +2225,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     map.on("error", (ev) => { if (ev && ev.error && ev.error.message && !ev.tile && !/tile|404/i.test(ev.error.message)) say("map: " + ev.error.message); else if (ev && ev.error) console.warn("map", ev.sourceId || "", ev.error.message); });
     new ResizeObserver(() => { try { map.resize(); } catch (e) {} fitCard(); }).observe(mapEl);
     window.__cmMaps = () => [map];
-    window.__cmState = () => ({st: Object.assign({}, st), flare: flareK, hex: N, res, hmeta, tiles: tstat, s2: s2Stat, s2stretch: cfg.s2_stretch, card: cardData, status: model.get("status"),
+    window.__cmState = () => ({st: Object.assign({}, st), flare: flareK, confIn: earthwork.confIn(), hex: N, res, hmeta, tiles: tstat, s2: s2Stat, s2stretch: cfg.s2_stretch, card: cardData, status: model.get("status"),
       lc: hattrs ? Array.from({length: N}, (_, i) => hattrs[HB * i + 7]).reduce((c, v) => (c[v]++, c), [0, 0, 0, 0]) : null});
     window.__cmTiles = () => ({log: tlog, frames: flog});
     window.__cmEw = () => { const b = map.getBounds(); const r = earthwork.chunksIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); const l = earthwork.loadedIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ...winOf(), kindOf()); return {inHand: r.inHand, wanted: r.wanted, read: earthwork.tilesRead(), loaded: l.loaded, ewIn, bar: ewBar.classList.contains("on")}; };
