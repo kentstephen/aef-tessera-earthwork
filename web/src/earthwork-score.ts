@@ -438,14 +438,6 @@ export type EarthworkFlareProps = {
   strength: number;
   /** 1 to dim the imagery outside the pixels instead (white ground inside, which cannot brighten, stands out too). */
   dim: number;
-  /** 1 to fill the pixels with a color of their own instead (fr, fg, fb, 0 to 1), its alpha the strength. */
-  fill?: number;
-  fr?: number;
-  fg?: number;
-  fb?: number;
-  /** The index of a year whose color on the year map is lit instead (the pixels whose latest year up to the year
-   * shown is that one), -1 for the year shown's own finds. */
-  only?: number;
 };
 
 /**
@@ -462,11 +454,6 @@ uniform earthworkFlareUniforms {
   float shown;
   float strength;
   float dim;
-  float only;
-  float fill;
-  float fr;
-  float fg;
-  float fb;
 } earthworkFlare;
 `,
   inject: {
@@ -479,23 +466,12 @@ uniform highp sampler2D yearTex;
       ivec2 ypx = clamp(ivec2(geometry.uv * vec2(ysize)), ivec2(0), ysize - 1);
       int bits = int(texelFetch(yearTex, ypx, 0).r * 255.0 + 0.5);
       int top = int(floor(earthworkFlare.shown + 0.5));
-      int only = int(floor(earthworkFlare.only + 0.5));
-      // one year's color: its bit the latest set up to the year shown
-      bool on = only >= 0 ? only <= top && ((bits & ((2 << top) - 1)) >> only) == 1 : top >= 0 && ((bits >> top) & 1) == 1;
+      bool on = top >= 0 && ((bits >> top) & 1) == 1;
       bool dim = earthworkFlare.dim > 0.5;
-      if (earthworkFlare.fill > 0.5) {
-        // filled: the pixels in a color of their own over the imagery, the rest untouched
-        if (!on) discard;
-        color = vec4(earthworkFlare.fr, earthworkFlare.fg, earthworkFlare.fb, earthworkFlare.strength);
-      } else {
-        if (on == dim) discard;
-        color = vec4(vec3(dim ? 1.0 - earthworkFlare.strength : earthworkFlare.strength), 1.0);
-      }
+      if (on == dim) discard;
+      color = vec4(vec3(dim ? 1.0 - earthworkFlare.strength : earthworkFlare.strength), 1.0);
     `,
   },
-  uniformTypes: { shown: "f32", strength: "f32", dim: "f32", only: "f32", fill: "f32", fr: "f32", fg: "f32", fb: "f32" },
-  getUniforms: (props: Partial<EarthworkFlareProps>) => ({
-    yearTex: props.yearTex, shown: props.shown ?? 0, strength: props.strength ?? 0, dim: props.dim ?? 0, only: props.only ?? -1,
-    fill: props.fill ?? 0, fr: props.fr ?? 1, fg: props.fg ?? 1, fb: props.fb ?? 1,
-  }),
+  uniformTypes: { shown: "f32", strength: "f32", dim: "f32" },
+  getUniforms: (props: Partial<EarthworkFlareProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, strength: props.strength ?? 0, dim: props.dim ?? 0 }),
 } as const satisfies ShaderModule<EarthworkFlareProps>;

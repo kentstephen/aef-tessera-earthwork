@@ -572,8 +572,11 @@ body {
   color: var(--muted);
 }
 
-/* the year map's key: a swatch a year, the years after the one shown faded */
+/* the year map's key: a swatch a year, the years after the one shown faded; a year clicked lights its finds, again turns them off */
 .at .ew-yk { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; }
-.at .ew-yk > span { display: inline-flex; align-items: center; gap: 3px; }
+.at .ew-yk > button { display: inline-flex; align-items: center; gap: 3px; font: inherit; color: inherit; background: none; border: 0; border-radius: 4px; padding: 2px 3px; margin: -2px -3px; cursor: pointer; }
+.at .ew-yk > button:hover { background: var(--line); }
 .at .ew-yk i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
 .at .ew-yk .later { opacity: 0.3; }
+.at .ew-yk .later:hover { opacity: 0.7; }
+.at .ew-yk > button.on, .at .ew-yk > button.on.later { opacity: 1; background: var(--text); color: var(--on); }
