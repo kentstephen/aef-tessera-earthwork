@@ -424,3 +424,46 @@ uniform highp sampler2D yearTex;
   uniformTypes: { shown: "f32", n: "f32" },
   getUniforms: (props: Partial<EarthworkYearTexProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, n: props.n ?? 1 }),
 } as const satisfies ShaderModule<EarthworkYearTexProps>;
+
+/**
+ * Props for the {@link EarthworkFlare} shader module.
+ */
+export type EarthworkFlareProps = {
+  /** r8unorm: the years each pixel was over the layer's cutoff, as {@link EarthworkYearTexProps}. */
+  yearTex: Texture;
+  /** The index of the latest year counted (the year shown). */
+  shown: number;
+  /** How far the imagery under it is lifted toward white, 0 none to 1 all the way. */
+  strength: number;
+};
+
+/**
+ * The flare: the year map's pixels (any year up to the one shown) as a gray of the flare's strength, for a screen
+ * blend over the imagery (the layer's parameters), which lifts the ground there, its darks most, and keeps its own
+ * colors. Pixels never over the cutoff are discarded, so the rest of the imagery is untouched.
+ */
+export const EarthworkFlare = {
+  name: "earthworkFlare",
+  fs: `\
+uniform earthworkFlareUniforms {
+  float shown;
+  float strength;
+} earthworkFlare;
+`,
+  inject: {
+    "fs:#decl": `
+precision highp sampler2D;
+uniform highp sampler2D yearTex;
+`,
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      ivec2 ysize = textureSize(yearTex, 0);
+      ivec2 ypx = clamp(ivec2(geometry.uv * vec2(ysize)), ivec2(0), ysize - 1);
+      int bits = int(texelFetch(yearTex, ypx, 0).r * 255.0 + 0.5);
+      int top = int(floor(earthworkFlare.shown + 0.5));
+      if (top < 0 || (bits & ((2 << top) - 1)) == 0) discard;
+      color = vec4(vec3(earthworkFlare.strength), 1.0);
+    `,
+  },
+  uniformTypes: { shown: "f32", strength: "f32" },
+  getUniforms: (props: Partial<EarthworkFlareProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, strength: props.strength ?? 0 }),
+} as const satisfies ShaderModule<EarthworkFlareProps>;
