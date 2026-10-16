@@ -752,13 +752,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (c.km2) h += `<p class="sub">${c.km2 < 0.1 ? `${Math.round(c.km2 * 1e6).toLocaleString("en-US")} m²` : `${c.km2.toFixed(2)} km²`} hexagon.</p>`;
     return h + `</div>`;
   }
-  let ycFolded = false, s2Folded = keep("s2card"), ycOpenedFor = null;
+  let ycFolded = false, s2Open = keep("s2keys"), ycOpenedFor = null;
   // the imagery's year, its colors and keys: the card's head while held, the pair's left card
   const cbOf = (folded) => `<button class="at-cb" title="${folded ? "open the card" : "fold the card"}">${ICON.chev}</button>`;
   const imgYr = (cbH, help) => `<div class="yr img"><b>${st.imgYear}</b><span class="comp">${COMP_NAME[st.s2comp] || ""}</span>${cbH}<span class="comps">${COMPS.map(([k, l, t]) => `<button data-comp="${k}" class="${k === st.s2comp ? "on" : ""}" title="${esc(t)}">${l}</button>`).join("")}</span><span class="help">${help}</span></div>`;
   const divName = (v) => { if (!v) return null; if (typeof v !== "string") return v.primary || null; try { const o = JSON.parse(v); return o.primary || v; } catch (e) { return v; } };
   // the map's zoom, in the Sentinel-2 card's head; kept current on every zoom without redrawing the card
   const zoomTxt = () => map ? map.getZoom().toFixed(1) : "";
+  // the Sentinel-2 card's head: the year, the imagery's colors, the zoom; the keys under it only when opened (its head
+  // clicked), kept in this browser
+  const s2Head = (y, comp) => `<div class="ew-s2hd" title="${s2Open ? "fold the shortcuts" : "the shortcuts"}"><b>${y}</b><span>${COMP_SHORT[comp] || "true color"}</span><span class="ew-zw">z <i class="ew-z">${zoomTxt()}</i></span>${cbOf(!s2Open)}</div>`;
+  s2c.addEventListener("click", (e) => { if (!e.target.closest(".ew-s2hd")) return; e.stopPropagation(); s2Open = !s2Open; keep("s2keys", s2Open); renderYear(); });
   function renderYear() {
     // the imagery's card: its year, while the imagery shows (held, or the pair's left)
     const showImg = st.holding || st.paint || (st.pair && st.left === "s2");
@@ -771,16 +775,16 @@ export function render({model, el, earthwork, s2Items, credits}) {
       const lk = lookOf(st.imgYear);
       const img = (st.pair ? `<span>Sentinel-2 ${st.imgYear}, ${lk ? `look ${lk + 1}` : st.imgYear >= new Date().getFullYear() ? "its latest clear day" : "one clear day"}</span><span><kbd>N</kbd> new look</span><span>${litPatch ? `${litPatch.year} patch lit, click it to turn off` : "click a patch to light it"}</span>` : `<span><kbd>P</kbd> or <kbd>Space</kbd> imagery</span>`)
         + (st.mapYear > AY_LAST ? `<span>found to ${AY_LAST}</span>` : "");
-      s2c.innerHTML = `<div class="ew-s2hd"><b>${st.mapYear}</b><span>Sentinel-2<br>${COMP_SHORT[st.s2comp] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
+      s2c.innerHTML = s2Head(st.mapYear, st.s2comp)
         + `<div class="ew-keys"><span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${dEnds}</span>${img}<span><kbd>Y</kbd> year map</span></div>`;
-      s2c.className = "at-yc at-s2c at-glass ew-showing";
+      s2c.className = "at-yc at-s2c at-glass ew-showing" + (s2Open ? "" : " ew-folded");
     } else {
-    s2c.innerHTML = `<div class="ew-s2hd"><b>${yearOf()}</b><span>Sentinel-2<br>${COMP_SHORT[cs] || "true color"}</span><span class="ew-zw">z<br><i class="ew-z">${zoomTxt()}</i></span></div>`
+    s2c.innerHTML = s2Head(yearOf(), cs)
       + `<div class="ew-keys">${showImg && !stepping ? `<span><kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>Shift</kbd> fill</span><span><kbd>N</kbd> ${lookOf(yearOf()) ? `look ${lookOf(yearOf()) + 1}` : "new look"}</span>`
         : showImg
         ? `<span>${st.holding ? "Scroll or " : ""}<kbd>[</kbd><kbd>]</kbd> year</span><span><kbd>B</kbd> ${ends}</span><span><kbd>N</kbd> ${lookOf(yearOf()) ? `look ${lookOf(yearOf()) + 1}` : "new look"}</span>${st.stuck ? `<span><kbd>S</kbd> back</span>` : ""}`
         : `<span><kbd>Space</kbd> or <kbd>P</kbd> to see it</span>`}<span class="ew-ck"><kbd>C</kbd> ${showImg && stretching ? "stretching\u2026" : "colors"}</span></div>`;
-    s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "");
+    s2c.className = "at-yc at-s2c at-glass" + (showImg ? " ew-showing" : "") + (s2Open ? "" : " ew-folded");
     }
     // the readout: the clicked hexagon's account, nothing until a click
     const h = cardData && cardData.kind === "spot" ? hexSection(cardData) : "";

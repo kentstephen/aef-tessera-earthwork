@@ -421,7 +421,7 @@ body {
 }
 
 .ew-s2hd b {
-  font-size: 34px;
+  font-size: 22px;
   line-height: 1;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -494,6 +494,18 @@ body {
 .ew-s2hd .ew-zw {
   margin-left: auto;
   text-align: right;
+}
+
+/* folded, the card is its head alone, the arrow at its right */
+.at-s2c .ew-s2hd .at-cb {
+  width: 20px;
+  height: 20px;
+  margin: 0 -4px 0 -2px;
+}
+
+.at .at-yc.at-s2c.ew-folded {
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .ew-s2hd .ew-z {
