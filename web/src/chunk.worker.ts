@@ -10,18 +10,17 @@ import { tesseraOnChunk } from "./tessera";
  * hold up the map, the imagery or the keys; the page only makes the textures.
  */
 type Read = { type: "read"; id: number; px0: number; py0: number; w: number; h: number; firstIdx: number; lastIdx: number; aefOnly?: boolean };
-/** The paint: a layer's score for one chunk, the year before `lastIdx` to it; `allIdx` the paint's other years. */
-type Score = { type: "score"; id: number; kind: LayerKind; px0: number; py0: number; w: number; h: number; lastIdx: number; allIdx: number[] };
+/** The paint: a layer's score for one chunk, for every year in `allIdx` (each from the year before it). */
+type Score = { type: "score"; id: number; kind: LayerKind; px0: number; py0: number; w: number; h: number; allIdx: number[] };
 type Msg = { type: "init"; model: WorldModel } | Read | Score | { type: "abort"; id: number };
 
 let model: WorldModel | null = null;
 let mosaic: Promise<AefArray> | null = null;
 const running = new Map<number, AbortController>();
 
-// AlphaEarth's chunks by year, the last used last (each 64 bands x 256 x 256, 4 MB; 128 kept, about 500 MB, two years of a wide view and the next year read ahead): the paint
-// steps one year at a time, and each pair shares a year with the next (2023-2024, then 2024-2025), so a step reads one
-// year, not two
-const AEF_KEEP = 128;
+// AlphaEarth's chunks by year, the last used last (each 64 bands x 256 x 256, 4 MB; 64 kept, about 250 MB): a chunk's
+// years are read once for all the pairs that share them (2022 for 2021-2022 and 2022-2023)
+const AEF_KEEP = 64;
 // a read is shared by the tiles waiting on it, and stopped only when every one of them has let go
 type Kept = { p: Promise<zarr.Chunk<"int8">>; ac: AbortController; waiting: number; done: boolean };
 const aefKept = new Map<string, Kept>();
@@ -63,9 +62,8 @@ function aefChunk(arr: AefArray, idx: number, py0: number, px0: number, h: numbe
 
 // ---- the paint's scores: per layer, chunk and year, the layer's score from the year before (TESSERA read for the
 // aggregate and TESSERA's own, where AlphaEarth points, as for the map), as 1 + 254 x score (0 where
-// a year is missing), 64 KB a chunk where its two years are 8 MB. Kept by "lastIdx:py0:px0:h:w", the last used last.
-// Once a chunk's year is in, its other years are scored in the background (nearest year first, newest chunks first,
-// only while nothing in view is waiting), so a step to another year draws from here with nothing to download
+// a year is missing), 64 KB a chunk and year where its two years are 8 MB. Kept by "kind:lastIdx:py0:px0:h:w", the
+// last used last, so a layer switched back to draws from here
 const SCORE_KEEP = 1500;
 const scoreKept = new Map<string, Promise<Uint8Array>>();
 const scoreKey = (kind: LayerKind, lastIdx: number, m: { py0: number; px0: number; h: number; w: number }) => `${kind}:${lastIdx}:${m.py0}:${m.px0}:${m.h}:${m.w}`;
@@ -106,53 +104,25 @@ async function pairScore(kind: LayerKind, lastIdx: number, g: { py0: number; px0
   while (scoreKept.size > SCORE_KEEP) scoreKept.delete(scoreKept.keys().next().value as string);
   return p;
 }
-// the background: one job per chunk and year, taken nearest year first (the next step's for the whole view before the
-// one after it), then the newest chunk first; only while nothing in view is waiting
-type Ahead = { kind: LayerKind; g: { py0: number; px0: number; h: number; w: number }; y: number; dist: number; seq: number };
-const ahead: Ahead[] = [];
-const AHEAD_MAX = 600, AHEAD_RUN = 6;
-let fgWaiting = 0, aheadRunning = 0, aheadSeq = 0;
-const never = new AbortController().signal;
-function nextAhead(): Ahead | undefined {
-  let bi = -1;
-  for (let i = 0; i < ahead.length; i++) {
-    const j = ahead[i], b = bi < 0 ? null : ahead[bi];
-    if (!b || j.dist < b.dist || (j.dist === b.dist && j.seq > b.seq)) bi = i;
-  }
-  return bi < 0 ? undefined : ahead.splice(bi, 1)[0];
-}
-function pumpAhead() {
-  while (fgWaiting === 0 && aheadRunning < AHEAD_RUN) {
-    const job = nextAhead();
-    if (!job) return;
-    if (scoreKept.has(scoreKey(job.kind, job.y, job.g))) continue;
-    aheadRunning++;
-    pairScore(job.kind, job.y, job.g, never)
-      .catch(() => {})  // a year that cannot be read: left for a step to it
-      .finally(() => { aheadRunning--; pumpAhead(); });
-  }
-}
+// every year of a chunk at once, packed one year per channel (RGBA: up to four years), so a step between years
+// only reads another channel on the GPU
 async function score(m: Score) {
   const ac = new AbortController();
   running.set(m.id, ac);
-  fgWaiting++;
   try {
-    const sc = await pairScore(m.kind, m.lastIdx, m, ac.signal);
-    const out = sc.slice();
+    const plane = m.w * m.h, n = m.allIdx.length;
+    const each = await Promise.all(m.allIdx.map((y) => pairScore(m.kind, y, m, ac.signal)));
+    const out = new Uint8Array(4 * plane);
+    for (let c = 0; c < n && c < 4; c++) {
+      const sc = each[c];
+      for (let i = 0; i < plane; i++) out[4 * i + c] = sc[i];
+    }
     postMessage({ id: m.id, score: out }, { transfer: [out.buffer] as ArrayBuffer[] });
-    // the chunk's other years, nearest first
-    const rest = m.allIdx.filter((y) => y !== m.lastIdx && !scoreKept.has(scoreKey(m.kind, y, m)));
-    const seq = ++aheadSeq, g = { py0: m.py0, px0: m.px0, h: m.h, w: m.w };
-    for (const y of rest) ahead.push({ kind: m.kind, g, y, dist: Math.abs(y - m.lastIdx), seq });
-    // the oldest chunks' jobs go first when there are too many (a long pan)
-    if (ahead.length > AHEAD_MAX) { ahead.sort((p, q) => p.seq - q.seq); ahead.splice(0, ahead.length - AHEAD_MAX); }
   } catch (e) {
     const err = e as { name?: string; message?: string };
     postMessage({ id: m.id, error: { name: err?.name || "Error", message: err?.message || String(e) } });
   } finally {
     running.delete(m.id);
-    fgWaiting--;
-    pumpAhead();
   }
 }
 

@@ -957,7 +957,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the paint waits for the earthwork: the imagery in its own colors until the view's chunks are in (onViewportLoad),
   // then gray but for the lit ground; back to color when the view moves somewhere mostly not read yet (ewCheck)
   let ewIn = false;
-  const PAINT_FILL = {name: "paintFill", fs: "layout(std140) uniform paintFillUniforms {\n  float full;\n  float dim;\n  float alpha;\n  float under;\n} paintFill;\n", uniformTypes: {full: "f32", dim: "f32", alpha: "f32", under: "f32"}};
+  const PAINT_FILL = {name: "paintFill", fs: "layout(std140) uniform paintFillUniforms {\n  float full;\n  float dim;\n  float alpha;\n} paintFill;\n", uniformTypes: {full: "f32", dim: "f32", alpha: "f32"}};
   // outside, the gray as a print: brightness levels set from PAINT_BLACK to PAINT_WHITE (the imagery is mostly
   // dark, so a curve around the middle would crush it), then an S-curve for real blacks and bright roofs and sand.
   // Inside, the lit ground lifted: saturation and contrast up, so it stands out by more than keeping its colors
@@ -985,13 +985,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
   class PaintExtension extends MaskExtension {
     // the raster is one mesh drawn as one instance: placed by its geometry, never by the instance
     getShaders() { this.state.maskByInstance = false; return {modules: [PAINT_MOD, PAINT_FILL]}; }
-    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({paintFill: {full: st.filled || !ewIn ? 1 : 0, dim: st.grayLum, alpha: st.grayAlpha, under: ext.opts && ext.opts.under ? 1 : 0}}); }
+    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({paintFill: {full: st.filled || !ewIn ? 1 : 0, dim: st.grayLum, alpha: st.grayAlpha}}); }
   }
   PaintExtension.extensionName = "PaintExtension";
-  // the yearly mosaic's, and the fill's under it (under: nothing outside the lit ground while the gray is see-through)
-  const PAINT = new PaintExtension(), PAINT_UNDER = new PaintExtension({under: true});
-  // the mask is the earthwork layer itself (its id changes with the years)
-  const paintProps = (under = false) => ({extensions: [under ? PAINT_UNDER : PAINT], maskId: earthwork.layerId(...winOf(), kindOf()), maskByInstance: false});
+  const PAINT = new PaintExtension();
+  // the mask is the earthwork layer itself (one per layer: every year is in it)
+  const paintProps = () => ({extensions: [PAINT], maskId: earthwork.layerId(...winOf(), kindOf()), maskByInstance: false});
   // ---- the false colors (S2_COMPOSITES in the kernel): R, G, B from the raw bands (uint16
   // reflectance x 10,000). The layer walks the first 20 m band's tiles; each other band is read
   // at the level of the same pixel size and placed by its own geotransform (the yearly
@@ -1265,7 +1264,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // reaches them, so a tile loaded while holding stayed after the hold), while deck.gl checks
     // every parent's visible on each draw. Hidden years still load their tiles
     const visible = (left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === yearOf(left);
-    const paint = (part) => (left ? {} : paintProps(part === "fill"));
+    const paint = () => (left ? {} : paintProps());
     const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[compOf(left)] ? compOf(left) : "tci";
     const pre = (left ? "s2gl-" : "s2g-") + (comp === "tci" ? "" : comp + "-");
     // the false colors wait, still loading, for the stretch of their view
@@ -1285,12 +1284,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
       // which it then cannot draw ("Cannot destructure property 'source' ... null")
       getSource: (src, o) => s2Tiff(comp === "tci" ? src.url : src.bands[s2Prim(comp)], o, year, part === "fill").catch(() => null),
       renderSource: (src, {data, signal}) => !data ? null : comp === "tci" ? new COGLayer({
-        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "fill" ? " fill" : "")), pool: s2Pool, signal, ...paint(part),
+        id: pre + year + "-" + src.id, geotiff: data, getTileData: (img, o) => s2TileData(img, o, year + (part === "fill" ? " fill" : "")), pool: s2Pool, signal, ...paint(),
         refinementStrategy: "best-available", maxRequests: 16,
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, {module: S2Look, props: {gamma}}]}),
         updateTriggers: {renderTile: [gamma]},
       }) : new COGLayer({
-        id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16, ...paint(part),
+        id: pre + year + "-" + src.id, geotiff: data, pool: s2Pool, signal, refinementStrategy: "best-available", maxRequests: 16, ...paint(),
         getTileData: (img, o) => s2BandTileData(img, o, comp + " " + year + (part === "fill" ? " fill" : ""), data, src, comp, year, part === "fill"),
         renderTile: (d) => ({renderPipeline: [{module: CreateTexture, props: {textureName: d.texture}}, look]}),
         updateTriggers: {renderTile: [gamma, ...(scale || []), ...lo, ...hi]},
@@ -1301,7 +1300,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // between two years keeps just those two); holding, the plain imagery's year shown, the rest once it has
   // loaded, with the paint's years still mounted under it, so letting go is instant
   const s2Years = (left = false) => {
-    const pys = [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)];
+    // painting, the paint's year first and, once it is in, every other year too, so stepping waits for nothing
+    const pys = s2Warm ? [st.paintYear, ...S2Y.filter((v) => v !== st.paintYear)] : [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)];
     if (!left && st.paint && !st.holding) return pys;
     const y = yearOf(left), ys = s2Warm ? [y, ...S2Y.filter((v) => v !== y)] : [y];
     return !left && st.paint ? [...ys, ...pys.filter((v) => !ys.includes(v))] : ys;
@@ -1362,10 +1362,9 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // kept in the stack while hidden (holding, zoomed out) so its shapes stay built
     // painting, it is the paint's mask (not drawn; in the imagery's slot, since an interleaved overlay draws
     // the mask with the layers of its own slot)
-    // painting, one mask per year stepped to (each the year before it to the year, from scores the worker has read
-    // ahead for every year), kept mounted so a step back to one is instant; only the year shown's is the mask
-    if (st.paint) for (const y of [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)])
-      out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ && y === st.paintYear, year: y, years: S2Y, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
+    // painting, one mask for every year at once (each year its own change from the year before, a channel each): a
+    // step between years only changes the channel
+    if (st.paint) out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ, year: st.paintYear, years: S2Y, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);

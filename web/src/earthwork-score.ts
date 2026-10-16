@@ -337,16 +337,24 @@ uniform earthworkCutUniforms {
  * Props for the {@link EarthworkScoreTex} shader module.
  */
 export type EarthworkScoreTexProps = {
-  /** r8unorm: the score scored ahead (chunk.worker.ts), 1 + 254 x score, 0 where a year is missing. */
+  /** rgba8unorm: the paint's years scored ahead (chunk.worker.ts), one year per channel, 1 + 254 x score, 0 where a
+   * year is missing. */
   scoreTex: Texture;
+  /** The channel of the year shown (0 to 3). */
+  channel: number;
 };
 
 /**
- * The score read from a texture scored ahead on the CPU (the paint's years), in place of
+ * The score read from a texture scored ahead on the CPU (the paint's years, one per channel), in place of
  * EarthworkScore's embeddings: sets earthworkScore_v for EarthworkCut. Missing pixels are discarded.
  */
 export const EarthworkScoreTex = {
   name: "earthworkScoreTex",
+  fs: `\
+uniform earthworkScoreTexUniforms {
+  float channel;
+} earthworkScoreTex;
+`,
   inject: {
     "fs:#decl": `
 precision highp sampler2D;
@@ -356,11 +364,14 @@ float earthworkScore_v;
     "fs:DECKGL_FILTER_COLOR": /* glsl */ `
       ivec2 size = textureSize(scoreTex, 0);
       ivec2 px = clamp(ivec2(geometry.uv * vec2(size)), ivec2(0), size - 1);
-      float s = texelFetch(scoreTex, px, 0).r * 255.0;
+      vec4 t = texelFetch(scoreTex, px, 0);
+      int ch = int(earthworkScoreTex.channel + 0.5);
+      float s = (ch == 0 ? t.r : ch == 1 ? t.g : ch == 2 ? t.b : t.a) * 255.0;
       if (s < 0.5) discard;
       earthworkScore_v = (s - 1.0) / 254.0;
       color = vec4(earthworkScore_v, earthworkScore_v, earthworkScore_v, 1.0);
     `,
   },
-  getUniforms: (props: Partial<EarthworkScoreTexProps>) => ({ scoreTex: props.scoreTex }),
+  uniformTypes: { channel: "f32" },
+  getUniforms: (props: Partial<EarthworkScoreTexProps>) => ({ scoreTex: props.scoreTex, channel: props.channel ?? 0 }),
 } as const satisfies ShaderModule<EarthworkScoreTexProps>;
