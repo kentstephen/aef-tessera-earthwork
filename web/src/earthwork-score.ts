@@ -320,8 +320,8 @@ export type EarthworkConfAlphaProps = {
 };
 
 /**
- * After the colormap, in place of {@link EarthworkAlpha}: the score's alpha scaled by the confidence, from 15% at
- * none to all of it at full, so a likely call made weakly is faint in its color and a strong one solid. Quiet ground
+ * After the colormap, in place of {@link EarthworkAlpha}: the score's alpha scaled by the confidence, from 3% at
+ * a quarter or less to all of it from three quarters (few pixels left half see-through, where colors go muddy), so a likely call made weakly is faint in its color and a strong one solid. Quiet ground
  * is not a call, so it keeps the score's alpha.
  */
 export const EarthworkConfAlpha = {
@@ -336,7 +336,7 @@ uniform highp sampler2D confTex;
       float conf = texelFetch(confTex, cpx, 0).r;
       // only a call is doubted: quiet ground (under 0.2) keeps its own faint alpha, the fade comes in by 0.5
       float sv = clamp(earthworkScore_v, 0.0, 1.0);
-      color.a = mix(70.0 / 255.0, 235.0 / 255.0, sv) * mix(1.0, mix(0.15, 1.0, conf), smoothstep(0.2, 0.5, sv));
+      color.a = mix(70.0 / 255.0, 235.0 / 255.0, sv) * mix(1.0, mix(0.03, 1.0, smoothstep(0.25, 0.75, conf)), smoothstep(0.2, 0.5, sv));
     `,
   },
   getUniforms: (props: Partial<EarthworkConfAlphaProps>) => ({ confTex: props.confTex }),
@@ -468,8 +468,9 @@ export type EarthworkYearConfProps = {
 };
 
 /**
- * After the year map's colormap: its pixel as opaque as the confidence of the year it is drawn in, from 15% at none,
- * so a year called weakly is faint in its color and a strong one solid.
+ * After the year map's colormap: its pixel as opaque as the confidence of the year it is drawn in, from 3% at a
+ * quarter or less to solid from three quarters (few pixels left half see-through, where colors go muddy), so a year
+ * called weakly all but disappears and a strong one is solid.
  */
 export const EarthworkYearConf = {
   name: "earthworkYearConf",
@@ -485,7 +486,7 @@ uniform highp sampler2D confTex;
     "fs:DECKGL_FILTER_COLOR": /* glsl */ `
       int ch = int(earthworkYearConf.h + 0.5);
       float conf = texelFetch(confTex, ivec2(earthworkYear_px.x, earthworkYear_px.y + earthworkYear_latest * ch), 0).r;
-      color.a *= mix(0.15, 1.0, conf);
+      color.a *= mix(0.03, 1.0, smoothstep(0.25, 0.75, conf));
     `,
   },
   uniformTypes: { h: "f32" },
