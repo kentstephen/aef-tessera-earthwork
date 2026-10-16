@@ -214,7 +214,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   };
   st.model = cfg.model || "aggregate";
   const rModel = rowOf("Layer");
-  const styleModelSeg = segOf(rModel, MODELS.map((k) => [k, (MODEL_INFO[k] || [k])[0], (MODEL_INFO[k] || [k, ""])[1], ""]), (k) => k === kindOf(), (k) => setModel(k));
+  const styleModelSeg = segOf(rModel, MODELS.map((k) => [k, (MODEL_INFO[k] || [k])[0], (MODEL_INFO[k] || [k, ""])[1], ""]), (k) => k === (st.paint ? "aef" : st.model), (k) => setModel(k));
   rModel.querySelector(".seg-s").classList.remove("col");
   const modelKey = el_("kbd", "at-mkey", "M");
   modelKey.title = "M switches the layer";
@@ -272,7 +272,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the imagery under it, and a year with no digging is all gray), on AlphaEarth's layer alone (fast enough to step
   // through); otherwise the years set here and the layer chosen
   function winOf() { return st.paint ? [st.paintYear - 1, st.paintYear] : [st.y0, st.y1]; }
-  function kindOf() { return st.paint ? "aef" : st.model; }
+  // the chunks drawn: the paint's scores (AlphaEarth's own, scored ahead a year at a time), or the layer chosen
+  function kindOf() { return st.paint ? "paint" : st.model; }
   function styleWin() {
     const i0 = Math.max(0, aefYears.indexOf(st.y0)), i1 = Math.max(0, aefYears.indexOf(st.y1)), n = Math.max(1, aefYears.length - 1);
     rFrom.value = i0; rTo.value = i1;
@@ -1342,10 +1343,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // kept in the stack while hidden (holding, zoomed out) so its shapes stay built
     // painting, it is the paint's mask (not drawn; in the imagery's slot, since an interleaved overlay draws
     // the mask with the layers of its own slot)
-    // painting, one mask per year stepped to (each the year before it to the year), kept mounted so a step back to one
-    // is instant; only the year shown's is the mask
+    // painting, one mask per year stepped to (each the year before it to the year, from scores the worker has read
+    // ahead for every year), kept mounted so a step back to one is instant; only the year shown's is the mask
     if (st.paint) for (const y of [st.paintYear, ...[...paintSeen].filter((v) => v !== st.paintYear)])
-      out.push(earthwork.layer({visible: !st.holding && z >= EWZ && y === st.paintYear, first: y - 1, last: y, model: "aef", minZoom: EWZ, mask: true, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
+      out.push(earthwork.paintLayer({visible: !st.holding && z >= EWZ && y === st.paintYear, year: y, years: S2Y, minZoom: EWZ, onTile: tileIn, onViewportLoad: y === st.paintYear ? ewLoaded : undefined}));
     else out.push(earthwork.layer({visible: !st.holding && z >= EWZ, first: st.y0, last: st.y1, model: st.model, minZoom: EWZ, onTile: tileIn, onViewportLoad: ewLoaded}));
     const hv = hover != null && hover >= 0 ? outline("hover", hexes[hover], [255, 255, 255, 235], 2) : null;
     if (hv) out.push(hv);

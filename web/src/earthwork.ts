@@ -12,10 +12,15 @@ import * as zarr from "zarrita";
 import { type AefArray, bandTexture, CHUNK, openMosaic, type PairTileData, RES, X0, Y0, YEAR_ORIGIN } from "./aef";
 import ChunkWorker from "./chunk.worker.ts?worker";
 import { GATE_HI, GATE_LO, LAYERS, type LayerKind, scorePixel, type WorldModel } from "./earthwork-cpu";
-import { EarthworkAggregate, EarthworkAlpha, EarthworkCut, EarthworkScore, EarthworkTessera } from "./earthwork-score";
+import { EarthworkAggregate, EarthworkAlpha, EarthworkCut, EarthworkScore, EarthworkScoreTex, EarthworkTessera } from "./earthwork-score";
 import { TES_BANDS } from "./tessera";
 
 export type { LayerKind, WorldModel };
+/** The layers' chunks, and the paint's: AlphaEarth's own score scored ahead, a year at a time. */
+export type ChunkKind = LayerKind | "paint";
+
+/** One chunk of the paint: its year's score on the GPU (r8unorm, 1 + 254 x score, 0 where a year is missing). */
+type PaintTile = { width: number; height: number; byteLength: number; key: string; scoreTex: Texture };
 
 /** One chunk on the GPU: AlphaEarth's two years, TESSERA's two years on its pixels, and the flags (none of TESSERA's for AlphaEarth's layer alone). */
 type TileData = PairTileData & {
@@ -44,9 +49,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   type Read = { aefFirst: Int8Array; aefLast: Int8Array; tesFirst: Int8Array; tesLast: Int8Array; tesFlags: Uint8Array };
   const worker = new ChunkWorker();
   worker.postMessage({ type: "init", model });
-  const asked = new Map<number, { resolve: (r: Read) => void; reject: (e: unknown) => void }>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const asked = new Map<number, { resolve: (r: any) => void; reject: (e: unknown) => void }>();
   let askId = 0;
-  worker.onmessage = (ev: MessageEvent<Read & { id: number; error?: { name: string; message: string } }>) => {
+  worker.onmessage = (ev: MessageEvent<(Read | { score: Uint8Array }) & { id: number; error?: { name: string; message: string } }>) => {
     const { id, error, ...r } = ev.data;
     const a = asked.get(id);
     if (!a) return;
@@ -67,6 +73,22 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
       });
     });
+  }
+
+  /** The paint's score for one chunk, the year before `lastIdx` to it; the worker scores `allIdx` ahead. */
+  function scoreChunk(px0: number, py0: number, w: number, h: number, lastIdx: number, allIdx: number[], signal?: AbortSignal): Promise<Uint8Array> {
+    if (signal?.aborted) return Promise.reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+    const id = ++askId;
+    return new Promise<{ score: Uint8Array }>((resolve, reject) => {
+      asked.set(id, { resolve, reject });
+      worker.postMessage({ type: "score", id, px0, py0, w, h, lastIdx, allIdx });
+      signal?.addEventListener("abort", () => {
+        if (!asked.has(id)) return;
+        asked.delete(id);
+        worker.postMessage({ type: "abort", id });
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+      });
+    }).then((r) => r.score);
   }
 
   let gpu: { weights: Record<LayerKind, Texture>; colormap: Texture } | null = null;
@@ -102,8 +124,15 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   type Chunk = { aefFirst: Int8Array; aefLast: Int8Array; tesFirst: Int8Array; tesLast: Int8Array; tesFlags: Uint8Array; w: number; h: number };
   const chunks = new Map<string, Chunk>();
   const KEEP = 16;
-  const tag = (kind: LayerKind) => (kind === "aef" ? "-aef" : "");
-  const keyOf = (first: number, last: number, kind: LayerKind, r: number, c: number) => `${first}-${last}${tag(kind)}:${r}-${c}`;
+  const tag = (kind: ChunkKind) => (kind === "aef" ? "-aef" : kind === "paint" ? "-paint" : "");
+  const keyOf = (first: number, last: number, kind: ChunkKind, r: number, c: number) => `${first}-${last}${tag(kind)}:${r}-${c}`;
+  // the paint's scores by keyOf, the last used last (64 KB each): the tooltip's and the card's
+  const paintScores = new Map<string, { s: Uint8Array; w: number; h: number }>();
+  const keepPaint = (k: string, v: { s: Uint8Array; w: number; h: number }) => {
+    paintScores.delete(k);
+    paintScores.set(k, v);
+    while (paintScores.size > 400) paintScores.delete(paintScores.keys().next().value as string);
+  };
   const keepChunk = (k: string, ch: Chunk) => {
     chunks.delete(k);
     chunks.set(k, ch);
@@ -168,7 +197,65 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   }
 
   /** The layer's id for the window and the layer chosen: the paint's maskId while it is the mask. */
-  const layerId = (first: number, last: number, kind: LayerKind) => `earthwork-${first}-${last}${tag(kind)}`;
+  const layerId = (first: number, last: number, kind: ChunkKind) => `earthwork-${first}-${last}${tag(kind)}`;
+
+  /**
+   * The paint's mask for one year: AlphaEarth's own score from the year before, scored ahead in the worker (with the
+   * paint's other years, `years`, scored in the background), drawn from a 64 KB texture a chunk. A step to a year
+   * whose scores are in hand draws at once.
+   */
+  function paintLayer(opts: { visible: boolean; year: number; years: number[]; minZoom: number; onTile?: () => void; onViewportLoad?: () => void }) {
+    const { visible, year, minZoom, onTile, onViewportLoad } = opts;
+    const lastIdx = year - YEAR_ORIGIN, allIdx = opts.years.map((y) => y - YEAR_ORIGIN);
+    const cut = model.cut.aef;
+    return new ZarrLayer<zarr.Readable, "int8", PaintTile>({
+      id: layerId(year - 1, year, "paint"),
+      operation: "mask",
+      node: arr as AefArray,
+      metadata: attrs,
+      selection: { time: lastIdx, band: null },
+      getTileData: async (_a, o) => {
+        const ys = o.sliceSpec[2] as zarr.Slice, xs = o.sliceSpec[3] as zarr.Slice;
+        const py0 = ys.start ?? 0, px0 = xs.start ?? 0;
+        const { device, width, height } = o;
+        const s = await scoreChunk(px0, py0, width, height, lastIdx, allIdx, o.signal);
+        const key = keyOf(year - 1, year, "paint", Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
+        keepPaint(key, { s, w: width, h: height });
+        tilesRead++;
+        loaded.add(key);
+        const scoreTex = device.createTexture({
+          format: "r8unorm",
+          width,
+          height,
+          mipLevels: 1,
+          data: s,
+          sampler: { minFilter: "nearest", magFilter: "nearest", addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge" },
+        });
+        return { width, height, byteLength: s.byteLength, key, scoreTex };
+      },
+      renderTile: (d: PaintTile) => ({
+        renderPipeline: [
+          { module: EarthworkScoreTex, props: { scoreTex: d.scoreTex } },
+          { module: EarthworkCut, props: { cut } },
+        ],
+      }),
+      visible,
+      minZoom,
+      maxRequests: 12,
+      // 64 KB a tile: many kept, so panning back and forth draws from here
+      maxCacheSize: 256,
+      onTileLoad: () => onTile && onTile(),
+      onTileUnload: (tile: { content?: PaintTile | null }) => {
+        const t = tile.content;
+        if (!t) return;
+        loaded.delete(t.key);
+        t.scoreTex?.destroy();
+      },
+      onViewportLoad: () => onViewportLoad && onViewportLoad(),
+      // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
+      beforeId: beforeId(),
+    });
+  }
 
   /**
    * The layer for the window and the layer chosen. As the paint's mask (mask: true) it is not
@@ -263,8 +350,15 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * A layer's score at a point, as the shader computes it, from the chunk
    * already read; null where that chunk is not in hand or the layer has none there.
    */
-  function scoreAt(lon: number, lat: number, first: number, last: number, kind: LayerKind): number | null {
+  function scoreAt(lon: number, lat: number, first: number, last: number, kind: ChunkKind): number | null {
     const { px, py, r, c } = chunkAt(lon, lat);
+    if (kind === "paint") {
+      const p = paintScores.get(keyOf(first, last, "paint", r, c));
+      const ix = px - c * CHUNK, iy = py - r * CHUNK;
+      if (!p || ix < 0 || iy < 0 || ix >= p.w || iy >= p.h) return null;
+      const v = p.s[iy * p.w + ix];
+      return v ? (v - 1) / 254 : null;
+    }
     const k = keyOf(first, last, kind, r, c), ch = chunks.get(k);
     if (!ch) return null;
     keepChunk(k, ch);
@@ -277,9 +371,18 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * Read the chunk under a point for this window if it is not in hand (a view holds more chunks
    * than are kept); resolves once scoreAt can answer there, or with nothing where it cannot.
    */
-  function readAt(lon: number, lat: number, first: number, last: number, kind: LayerKind): Promise<void> {
+  function readAt(lon: number, lat: number, first: number, last: number, kind: ChunkKind): Promise<void> {
     const { px, py, r, c } = chunkAt(lon, lat);
     const k = keyOf(first, last, kind, r, c);
+    if (kind === "paint") {
+      if (paintScores.has(k)) return Promise.resolve();
+      const [, , H, W] = arr.shape;
+      if (px < 0 || py < 0 || px >= W || py >= H) return Promise.resolve();
+      const y0 = r * CHUNK, x0 = c * CHUNK, h = Math.min(CHUNK, H - y0), w = Math.min(CHUNK, W - x0);
+      return scoreChunk(x0, y0, w, h, last - YEAR_ORIGIN, [])
+        .then((s) => keepPaint(k, { s, w, h }))
+        .catch(() => {});
+    }
     if (chunks.has(k)) return Promise.resolve();
     let p = reading.get(k);
     if (!p) {
@@ -296,7 +399,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   }
 
   /** How many of the chunks under a box are loaded on the GPU for this window. */
-  function loadedIn(bbox: [number, number, number, number], first: number, last: number, kind: LayerKind) {
+  function loadedIn(bbox: [number, number, number, number], first: number, last: number, kind: ChunkKind) {
     const [W, S, E, N] = bbox;
     const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
     const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
@@ -306,17 +409,19 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   }
 
   /** How many of the chunks under a box are in hand for this window. */
-  function chunksIn(bbox: [number, number, number, number], first: number, last: number, kind: LayerKind) {
+  function chunksIn(bbox: [number, number, number, number], first: number, last: number, kind: ChunkKind) {
     const [W, S, E, N] = bbox;
     const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
     const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
     let inHand = 0;
-    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (chunks.has(keyOf(first, last, kind, r, c))) inHand++;
+    const held = kind === "paint" ? paintScores : chunks;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (held.has(keyOf(first, last, kind, r, c))) inHand++;
     return { inHand, wanted: (r1 - r0 + 1) * (c1 - c0 + 1) };
   }
 
   return {
     layer,
+    paintLayer,
     layerId,
     scoreAt,
     readAt,

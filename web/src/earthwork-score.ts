@@ -332,3 +332,35 @@ uniform earthworkCutUniforms {
   uniformTypes: { cut: "f32" },
   getUniforms: (props: { cut?: number }) => ({ cut: props.cut ?? 0.5 }),
 } as const satisfies ShaderModule<{ cut: number }>;
+
+/**
+ * Props for the {@link EarthworkScoreTex} shader module.
+ */
+export type EarthworkScoreTexProps = {
+  /** r8unorm: the score scored ahead (chunk.worker.ts), 1 + 254 x score, 0 where a year is missing. */
+  scoreTex: Texture;
+};
+
+/**
+ * The score read from a texture scored ahead on the CPU (the paint's years), in place of
+ * EarthworkScore's embeddings: sets earthworkScore_v for EarthworkCut. Missing pixels are discarded.
+ */
+export const EarthworkScoreTex = {
+  name: "earthworkScoreTex",
+  inject: {
+    "fs:#decl": `
+precision highp sampler2D;
+uniform highp sampler2D scoreTex;
+float earthworkScore_v;
+`,
+    "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+      ivec2 size = textureSize(scoreTex, 0);
+      ivec2 px = clamp(ivec2(geometry.uv * vec2(size)), ivec2(0), size - 1);
+      float s = texelFetch(scoreTex, px, 0).r * 255.0;
+      if (s < 0.5) discard;
+      earthworkScore_v = (s - 1.0) / 254.0;
+      color = vec4(earthworkScore_v, earthworkScore_v, earthworkScore_v, 1.0);
+    `,
+  },
+  getUniforms: (props: Partial<EarthworkScoreTexProps>) => ({ scoreTex: props.scoreTex }),
+} as const satisfies ShaderModule<EarthworkScoreTexProps>;
