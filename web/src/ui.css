@@ -202,8 +202,5 @@
 .at .maplibregl-ctrl-group{border:1px solid var(--line);box-shadow:0 6px 22px rgba(0,0,0,.35);border-radius:10px;background:var(--glass)}
 .at .maplibregl-ctrl-group button+button{border-top-color:var(--line)}
 .at .maplibregl-ctrl button .maplibregl-ctrl-icon{filter:invert(1)}
-.at .maplibregl-ctrl-attrib{background:var(--card);color:var(--muted)}
-.at .maplibregl-ctrl-attrib a{color:var(--muted)}
-.at .maplibregl-ctrl-attrib-button{filter:invert(1)}
 @media (max-width:760px){.at-top{max-width:calc(100% - 24px)}.at-search{width:calc(100vw - 48px)}.at-yc{top:auto;bottom:12px;max-height:45%;overflow:auto}.at-tools{top:108px}}
 @media (prefers-reduced-motion:reduce){.at-bar i{animation:none;left:0;width:100%}}

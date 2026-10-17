@@ -425,6 +425,8 @@ export type EarthworkYearTexProps = {
   shown: number;
   /** How many years the bits hold (up to eight). */
   n: number;
+  /** The last year's place on the colormap (the first year's is 0.15): 1 for plasma, less to stop short of its end. */
+  hi?: number;
 };
 
 /**
@@ -438,6 +440,7 @@ export const EarthworkYearTex = {
 uniform earthworkYearTexUniforms {
   float shown;
   float n;
+  float hi;
 } earthworkYearTex;
 `,
   inject: {
@@ -461,12 +464,12 @@ ivec2 earthworkYear_px;
       earthworkYear_latest = latest;
       earthworkYear_px = ypx;
       float t = earthworkYearTex.n > 1.5 ? float(latest) / (earthworkYearTex.n - 1.0) : 1.0;
-      t = 0.15 + 0.85 * t;
+      t = 0.15 + (earthworkYearTex.hi - 0.15) * t;
       color = vec4(t, t, t, 1.0);
     `,
   },
-  uniformTypes: { shown: "f32", n: "f32" },
-  getUniforms: (props: Partial<EarthworkYearTexProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, n: props.n ?? 1 }),
+  uniformTypes: { shown: "f32", n: "f32", hi: "f32" },
+  getUniforms: (props: Partial<EarthworkYearTexProps>) => ({ yearTex: props.yearTex, shown: props.shown ?? 0, n: props.n ?? 1, hi: props.hi ?? 1 }),
 } as const satisfies ShaderModule<EarthworkYearTexProps>;
 
 /** Props for {@link EarthworkYearCheck}. */

@@ -294,75 +294,6 @@ body {
   padding: 1px 4px;
 }
 
-/* ---- the credits: one line in the bottom right corner, as MapLibre's compact attribution; the
-   button at its end folds it away to just the button ---- */
-.at-credits {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
-  z-index: 5;
-  max-width: calc(100% - 80px);
-  box-sizing: border-box;
-  padding: 3px 30px 3px 11px;
-  background: rgba(14, 15, 17, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 16px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.at-credits.folded {
-  display: none;
-}
-
-.at-cr-b {
-  position: absolute;
-  right: 11px;
-  bottom: 9px;
-  z-index: 6;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: rgba(14, 15, 17, 0.6);
-  color: var(--muted);
-  font: italic 600 11px/16px Georgia, serif;
-  cursor: pointer;
-}
-
-.at-cr-b:hover {
-  color: var(--text);
-}
-
-.at-credits a {
-  color: var(--muted);
-  text-decoration: underline;
-  text-decoration-color: rgba(155, 165, 175, 0.35);
-  text-underline-offset: 2px;
-}
-
-.at-credits a:hover {
-  color: var(--text);
-}
-
-.at-credits .sep::before {
-  content: "";
-  display: inline-block;
-  width: 3px;
-  height: 3px;
-  margin: 0 7px 2px;
-  border-radius: 50%;
-  background: var(--faint);
-  vertical-align: middle;
-}
-
 /* the zoom buttons in the bottom left corner, clear of the credits on the right */
 .at .maplibregl-ctrl-bottom-left {
   bottom: 0;
@@ -375,10 +306,6 @@ body {
 @media (max-width: 760px) {
   .at {
     --col: 220px;
-  }
-
-  .at-credits {
-    font-size: 10px;
   }
 }
 
@@ -499,8 +426,38 @@ body {
 }
 
 .at .at-yc.at-s2c.ew-folded {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* folded, the search's width and squarer: the year twice as large with the arrow beside it, the colors and the
+   zoom on a line under it */
+.at-s2c.ew-folded .ew-s2hd {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "y cb" "c z";
+  gap: 6px 9px;
+  align-items: center;
+}
+
+.at-s2c.ew-folded .ew-s2hd b {
+  grid-area: y;
+  font-size: 44px;
+}
+
+.at-s2c.ew-folded .ew-s2hd > span:not(.ew-zw) {
+  grid-area: c;
+}
+
+.at-s2c.ew-folded .ew-s2hd .ew-zw {
+  grid-area: z;
+}
+
+.at-s2c.ew-folded .ew-s2hd .at-cb {
+  grid-area: cb;
+  align-self: start;
+  justify-self: end;
+  margin: 0 -5px 0 0;
 }
 
 .ew-s2hd .ew-z {

@@ -310,7 +310,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * imagery under them by 1 + flare (EarthworkFlare and the layer's blend), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
    * chunks kept for the card), which are the year map's, and its chunks' scores come from the worker's, read once
    */
-  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; check?: boolean; mask?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
+  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; check?: boolean; mask?: boolean; mono?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
     const { visible, year, minZoom, onTile, onViewportLoad } = opts;
     const flare = opts.flare, dim = opts.flareDim ? 1 : 0;
     // as a mask (the imagery in its own colors inside the year map's pixels, yearMaskId): a layer of its own, a mask
@@ -321,6 +321,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     // the cross-check (the year map's own, not the flare's): each year's, made with the scores from the same years (so
     // it reads nothing more) and kept with the tile, so A and a step between years only redraw
     const check = !!opts.check && flare == null && !mask;
+    const mono = !!opts.mono;
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aef", ck: ChunkKind = `years-${kind}`;
     const years = opts.years.slice(0, 8), allIdx = years.map((y) => y - YEAR_ORIGIN), lastIdx = allIdx[allIdx.length - 1];
     const shown = years.filter((y) => y <= year).length - 1;
@@ -376,8 +377,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       renderTile: (d: YearTile) => {
         return {
           renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare, dim } }] : [
-            { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
-            ...(g && !mask ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.plasma } }] : []),
+            // one color (mono): Oranges, pale orange the first year to deep orange the last (short of its brown end, which
+            // the dark basemap would swallow)
+            { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n, hi: mono ? 0.8 : 1 } },
+            ...(g && !mask ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: mono ? COLORMAP_INDEX.oranges : COLORMAP_INDEX.plasma } }] : []),
             ...(check && d.checkTex ? [{ module: EarthworkYearCheck, props: { checkTex: d.checkTex, h: d.height } }] : []),
           ],
         };
@@ -404,7 +407,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // texture, contrast and colors kept); dimming, out = dst src, scaled down. Its alpha kept
       ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
-      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, check, mask] },
+      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, check, mask, mono] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
@@ -593,6 +596,97 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
   }
 
   /**
+   * The year map's segment under a point: the pixels joined to it (by side or corner) whose latest year over the cutoff,
+   * up to `upTo`, is its own, across the chunks in hand. Its outline as edges [lon, lat, lon, lat] (runs along a row or
+   * a column merged), its year, its pixels and its center; `cut` when a chunk not in hand or the cap stopped it. Null off
+   * a segment.
+   */
+  function segmentAt(lon: number, lat: number, upTo: number, model_: LayerKind, max = 1_500_000) {
+    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
+    const ck: ChunkKind = `years-${kind}`, over = 1 + 254 * model.cut[kind];
+    const got = new Map<string, PaintChunk | null>();
+    // the latest year's index up to upTo at a pixel of the whole grid; -1 none, -2 its chunk not in hand
+    const latestAt = (gx: number, gy: number) => {
+      const r = Math.floor(gy / CHUNK), c = Math.floor(gx / CHUNK), k = r + ":" + c;
+      let p = got.get(k);
+      if (p === undefined) got.set(k, (p = paintScores.get(keyOf(0, 0, ck, r, c)) ?? null));
+      if (!p) return -2;
+      const ix = gx - c * CHUNK, iy = gy - r * CHUNK;
+      if (ix >= p.w || iy >= p.h) return -2;
+      const at = p.stride * (iy * p.w + ix);
+      let latest = -1;
+      p.years.forEach((y, ch) => {
+        if (y <= upTo && p.s[at + ch] >= over) latest = ch;
+      });
+      return latest < 0 ? -1 : p.years[latest];
+    };
+    const { px, py } = chunkAt(lon, lat);
+    const year = latestAt(px, py);
+    if (year < 0) return null;
+    // a pixel's key in the whole grid (4,007,520 columns < 2^22)
+    const W = 4194304, key = (gx: number, gy: number) => gy * W + gx;
+    const inSeg = new Set<number>([key(px, py)]);
+    const qx = [px], qy = [py];
+    let cut = false, sx = 0, sy = 0;
+    for (let q = 0; q < qx.length; q++) {
+      const x = qx[q], y = qy[q];
+      sx += x;
+      sy += y;
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          const nx = x + dx, ny = y + dy, k = key(nx, ny);
+          if (inSeg.has(k)) continue;
+          const v = latestAt(nx, ny);
+          if (v === -2) cut = true;
+          if (v !== year) continue;
+          if (inSeg.size >= max) {
+            cut = true;
+            continue;
+          }
+          inSeg.add(k);
+          qx.push(nx);
+          qy.push(ny);
+        }
+    }
+    // the outline: each side of a pixel with no segment pixel beyond it, a row's (or a column's) runs merged
+    const rows = new Map<number, number[]>(), cols = new Map<number, number[]>();
+    const push = (m: Map<number, number[]>, line: number, at: number) => {
+      const a = m.get(line);
+      if (a) a.push(at);
+      else m.set(line, [at]);
+    };
+    for (let q = 0; q < qx.length; q++) {
+      const x = qx[q], y = qy[q];
+      // a row line l is the top of row l; a column line l the left of column l. The side's sign keeps a top and a
+      // bottom on the same line apart where they meet only at a corner
+      if (!inSeg.has(key(x, y - 1))) push(rows, y * 2, x);
+      if (!inSeg.has(key(x, y + 1))) push(rows, (y + 1) * 2 + 1, x);
+      if (!inSeg.has(key(x - 1, y))) push(cols, x * 2, y);
+      if (!inSeg.has(key(x + 1, y))) push(cols, (x + 1) * 2 + 1, y);
+    }
+    const lonOf = (gx: number) => X0 + gx * RES, latOf = (gy: number) => Y0 - gy * RES;
+    const edges: [number, number, number, number][] = [];
+    const runs = (m: Map<number, number[]>, f: (line: number, a: number, b: number) => void) => {
+      for (const [l, a] of m) {
+        a.sort((u, v) => u - v);
+        let s = a[0], e = a[0];
+        for (let i = 1; i <= a.length; i++) {
+          if (i < a.length && a[i] === e + 1) e = a[i];
+          else {
+            f(l >> 1, s, e + 1);
+            if (i < a.length) s = e = a[i];
+          }
+        }
+      }
+    };
+    runs(rows, (l, a, b) => edges.push([lonOf(a), latOf(l), lonOf(b), latOf(l)]));
+    runs(cols, (l, a, b) => edges.push([lonOf(l), latOf(a), lonOf(l), latOf(b)]));
+    const n = qx.length;
+    return { year, n, cut, edges, lon: lonOf(sx / n + 0.5), lat: latOf(sy / n + 0.5) };
+  }
+
+  /**
    * Read the chunk under a point for this window if it is not in hand (a view holds more chunks
    * than are kept); resolves once scoreAt can answer there, or with nothing where it cannot.
    */
@@ -654,6 +748,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     layerId,
     scoreAt,
     detectedAt,
+    segmentAt,
     checkAt,
     readAt,
     chunksIn,

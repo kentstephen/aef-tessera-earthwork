@@ -5,7 +5,7 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {MapLibreOverlay as MapboxOverlay} from "@deck.gl/maplibre";
-import {BitmapLayer, PathLayer} from "@deck.gl/layers";
+import {BitmapLayer, LineLayer, PathLayer} from "@deck.gl/layers";
 import {TileLayer} from "@deck.gl/geo-layers";
 import {MaskExtension} from "@deck.gl/extensions";
 import {COGLayer, MosaicLayer} from "@developmentseed/deck.gl-geotiff";
@@ -121,7 +121,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const PY = cfg.paint_years || S2Y.slice(-4);
   // plasma from 15% (its darkest blue is lost on the dark basemap), a stop a year, as the year map's shader draws it
   const YEAR_RAMP = "5601a48606a6ae2892ce4b75e76f5af9973ffdc527f0f921".match(/.{6}/g);
-  const yearColor = (y) => "#" + YEAR_RAMP[Math.round((YEAR_RAMP.length - 1) * Math.max(0, DY.indexOf(y)) / Math.max(1, DY.length - 1))];
+  // one color (K): matplotlib's Oranges, as the shader draws it, pale orange the first year (0.15 on Oranges) to deep
+  // orange the last (0.8, short of its brown end)
+  const ORANGES = "fff5ebfee6cefdd0a2fdae6bfd8d3cf16913d94801a636037f2704".match(/.{6}/g).map((h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)));
+  const monoAt = (x) => { x = Math.max(0, Math.min(1, x)) * (ORANGES.length - 1); const i = Math.min(ORANGES.length - 2, Math.floor(x)), f = x - i; return "rgb(" + ORANGES[i].map((v, j) => Math.round(v + (ORANGES[i + 1][j] - v) * f)).join(",") + ")"; };
+  const yearColor = (y) => {
+    const t = Math.max(0, DY.indexOf(y)) / Math.max(1, DY.length - 1);
+    return st.yearMono ? monoAt(0.15 + 0.65 * t) : "#" + YEAR_RAMP[Math.round((YEAR_RAMP.length - 1) * t)];
+  };
   const VIR = (cfg.viridis || "440154fde725").match(/.{6}/g).map((h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)));
   const vir = (t) => { t = Math.max(0, Math.min(1, t)) * (VIR.length - 1); const i = Math.min(VIR.length - 2, Math.floor(t)), f = t - i; return VIR[i].map((v, j) => Math.round(v + (VIR[i + 1][j] - v) * f)); };
   const virCss = (n) => Array.from({length: n}, (_, i) => `rgb(${vir(i / (n - 1)).join(",")})`).join(",");
@@ -146,6 +153,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // on the year map, A: the year map's pixels in the imagery's own colors, the Sentinel-2 year shown
     // (imgYear: the year map's year, the two stepped together), the basemap everywhere else
     segImg: false,
+    // the year map's colors: plasma, or one color (K), pale orange the first year to deep orange the last
+    yearMono: (() => { try { return localStorage.getItem("aef-year-colors") === "mono"; } catch (e) { return false; } })(),
     base: (() => { try { return localStorage.getItem("aef-lc-base") === "light" ? "light" : "dark"; } catch (e) { return "dark"; } })(),
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
@@ -170,18 +179,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const fallback = () => { const ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0"; root.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e2) {} ta.remove(); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
   });
-  // the credits fold to a button in the corner, as MapLibre's compact attribution does: open at
-  // first, folded on the first drag of the map, the button opens and folds them
-  const creditsEl = el_("div", "at-credits", credits || "");
-  const crBtn = el_("button", "at-cr-b", "i");
-  crBtn.title = "credits"; crBtn.setAttribute("aria-label", "credits");
-  crBtn.onclick = (e) => { e.stopPropagation(); creditsEl.classList.toggle("folded"); };
   // under zoom 12 there is no earthwork: a standing note at the bottom says so, in the status line's style
   const zmsg = el_("div", "at-msg at-glass ew-zmsg", `Zoom in past z${EWZ} to see where the ground was dug`);
   // the earthwork read for the view: a bar along the top that fills as its chunks come in, and how many
   const ewBar = el_("div", "ew-load", "<i></i>");
   const ewTag = el_("div", "ew-load-tag at-glass");
-  pane.append(mapEl2, mapEl, bar, ewBar, ewTag, msg, zmsg, creditsEl, crBtn);
+  pane.append(mapEl2, mapEl, bar, ewBar, ewTag, msg, zmsg);
   root.appendChild(pane);
   el.appendChild(root);
 
@@ -544,6 +547,16 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!on) { if (st.yearMap) note("Years", 1500); return; }
     note(st.yearMap ? `Sentinel-2 ${st.imgYear}` : "Sentinel-2: on the year map (Y)", 1500);
   }
+  // the year map's colors (K): plasma, or one color
+  const rMono = rowOf("Year colors");
+  const swMono = sw(() => st.yearMono, (v) => setYearMono(v));
+  swMono.title = "the year map in one color, pale orange the first year to deep orange the last (K)";
+  rMono.append(swMono, el_("span", "at-pick", "<span>One color</span><kbd>K</kbd>"));
+  function setYearMono(on) {
+    st.yearMono = on; swMono.sty(); styleKey(); update();
+    try { localStorage.setItem("aef-year-colors", on ? "mono" : "plasma"); } catch (e) {}
+    note(on ? "Years in one color: pale orange the first, deep orange the latest" : "Years in plasma", 1500);
+  }
   more.appendChild(el_("hr"));
   const bAbout = el_("button", "at-chip", "About this map <kbd>?</kbd>"); bAbout.title = "about this map (?)"; bAbout.style.margin = "4px 10px 6px";
   more.appendChild(bAbout);
@@ -555,7 +568,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; D the basemap, dark or light (Positron); A the year map's calls in the colors of the Sentinel-2 year shown (the basemap everywhere else), or back to the years' colors; H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; D the basemap, dark or light (Positron); A the year map's calls in the colors of the Sentinel-2 year shown (the basemap everywhere else), or back to the years' colors; K the years' colors, plasma or one color (pale orange the first year, deep orange the latest); H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -780,13 +793,19 @@ export function render({model, el, earthwork, s2Items, credits}) {
         h += d.length
           ? `<p><b>${d[d.length - 1]}</b>: the latest year the ground here was likely dug, filled or graded (each year from the year before)${d.length > 1 ? `, and before it ${d.slice(0, -1).join(", ")}` : ""}.</p>`
           : `<p>No digging found here from ${DY[0]} to ${detYear()}.</p>`;
+        // the segment picked with it: its area (a pixel is 10 m at the equator, narrower east to west away from it)
+        if (c.seg) {
+          const m2 = c.seg.n * (AEF_R * 111320) ** 2 * Math.cos((c.seg.lat * Math.PI) / 180), ac = m2 / 4046.86, ha = m2 / 1e4;
+          const f = (v) => (v >= 100 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1));
+          h += `<p>Its segment, outlined: <b>${f(ac)} acres</b> (${f(ha)} ha) found in ${c.seg.year}${c.seg.cut ? ", cut short where the map has not read further" : ""}.</p>`;
+        }
       } else
       h += c.score == null && c.reading
         ? `<p>Reading AlphaEarth here\u2026</p>`
         : c.score == null
         ? `<p>No score here: ${map && map.getZoom() < EWZ ? `zoom in to ${EWZ} so AlphaEarth is read here` : "AlphaEarth has no data here in one of the years"}.</p>`
         : `<p><b>${Math.round(100 * c.score)}%</b>: the chance the ground itself was dug, filled or graded from ${c.y0} to ${c.y1}, at this 10 m pixel.</p>`;
-      h += `<p class="sub">Pair with Sentinel-2 (<kbd>P</kbd>) or hold space to see what it is.</p>`;
+      h += clickImg ? `<p class="sub">Click or <kbd>Esc</kbd> for the year map.</p>` : `<p class="sub">Pair with Sentinel-2 (<kbd>P</kbd>) or hold space to see what it is.</p>`;
       return h + `</div>`;
     }
     h += `<h3>This hexagon</h3>`;
@@ -904,7 +923,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (cardData && cardData.n != null && cardData.n !== ycOpenedFor) { ycOpenedFor = cardData.n; if (ycFolded) { ycFolded = false; keep("card", false); } }
     renderYear(); update();
   }
-  function closeCard() { cardData = null; picked = null; imgPick = null; spot = null; renderYear(); update(); }
+  function closeCard() { cardData = null; picked = null; imgPick = null; spot = null; seg = null; renderYear(); update(); }
   function rescoreSpot() {
     if (!cardData || cardData.kind !== "spot") return;
     [cardData.y0, cardData.y1] = winOf();
@@ -922,7 +941,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
       if (inside) return;
     }
     if (cell && cell === picked) { closeCard(); return; }
-    imgPick = null;
+    imgPick = null; seg = null;
     // the AlphaEarth pixel under the click (the mosaic's grid); the same pixel again clears it
     const i = Math.floor((ll.lng + 180) / AEF_R), j = Math.floor((AEF_Y0 - ll.lat) / AEF_R);
     const plon = -180 + (i + 0.5) * AEF_R, plat = AEF_Y0 - (j + 0.5) * AEF_R;
@@ -1625,10 +1644,24 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const AEF_R = 8.983111749910169e-05, AEF_Y0 = 83.68570533713473;
   let spot = null;
   function spotLayer(id, m = map) {
-    if (!spot) return null;
+    // a segment outlined is what was picked: its pixel is not marked
+    if (!spot || seg) return null;
     const x0 = -180 + Math.floor((spot.lon + 180) / AEF_R) * AEF_R, y1 = AEF_Y0 - Math.floor((AEF_Y0 - spot.lat) / AEF_R) * AEF_R;
     const ring = [[x0, y1], [x0 + AEF_R, y1], [x0 + AEF_R, y1 - AEF_R], [x0, y1 - AEF_R], [x0, y1]];
     return new PathLayer({id, data: [ring], getPath: (d) => d, getColor: [255, 200, 40, 255], widthUnits: "pixels", getWidth: 3, widthMinPixels: 3, beforeId: slot(m)});
+  }
+  // the picked segment (a click on the year map): its outline in gold
+  let seg = null;
+  // the imagery a segment's click brought up (until a click or Esc)
+  let clickImg = false;
+  function pickSeg(ll) {
+    seg = earthwork.segmentAt(ll.lng, ll.lat, detYear(), st.model);
+    renderYear(); update();
+  }
+  function segLayers(id, m = map) {
+    if (!seg) return [];
+    const o = {data: seg.edges, getSourcePosition: (d) => [d[0], d[1]], getTargetPosition: (d) => [d[2], d[3]], widthUnits: "pixels", beforeId: slot(m)};
+    return [new LineLayer({...o, id, getColor: [255, 200, 40, 255], getWidth: 2})];
   }
   // a chunk read: the year card's line and the tooltip under a still pointer
   let tileT = null;
@@ -1660,7 +1693,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the imagery in the calls: the year map as the imagery's mask, not drawn
     // (its own layer, beside the year map, mounted only while A shows it)
     if (st.yearMap) {
-      out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ && !st.segImg, year: detYear(), years: DY, model: st.model, minZoom: EWZ, check: st.check, onTile: tileIn, onViewportLoad: ewLoaded}));
+      out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ && !st.segImg, year: detYear(), years: DY, model: st.model, minZoom: EWZ, check: st.check, mono: st.yearMono, onTile: tileIn, onViewportLoad: ewLoaded}));
       // the mask stays while space is held (not drawn either way), so letting go only shows the imagery in it again
       // mounted beside the year map only while A shows the imagery in the calls
       if (st.segImg) out.push(earthwork.yearLayer({visible: z >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, mask: true}));
@@ -1677,6 +1710,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (sc) out.push(sc);
     const pk = picked ? outline("picked", picked, [255, 200, 40, 255], 3) : null;
     if (pk) out.push(pk);
+    out.push(...segLayers("seg"));
     const sp = spotLayer("spot");
     if (sp) out.push(sp);
     return out;
@@ -1696,6 +1730,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (sc) out.push(sc);
     const pk = picked ? outline("picked-l", picked, [255, 200, 40, 255], 3, map2) : null;
     if (pk) out.push(pk);
+    out.push(...segLayers("seg-l", map2));
     const sp = spotLayer("spot-l", map2);
     if (sp) out.push(sp);
     return out;
@@ -1825,7 +1860,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the two sides are the same size under one camera, so a point is the same place on both
     map2.on("mousemove", (e) => { const i = hexAt(e.lngLat); if (i !== hover) { hover = i; update(); } });
     map2.on("mouseout", () => { if (hover != null && hover >= 0) { hover = null; update(); } });
-    map2.on("click", (e) => { if (st.noPick) return; const i = hexAt(e.lngLat); pickCell(i >= 0 ? hexes[i] : null, e.lngLat, e.point, st.left === "s2"); });
+    map2.on("click", (e) => { if (st.noPick) return; if (map2.getZoom() >= EWZ) { segClick(e.lngLat); return; } const i = hexAt(e.lngLat); pickCell(i >= 0 ? hexes[i] : null, e.lngLat, e.point, st.left === "s2"); });
     new ResizeObserver(() => { try { map2.resize(); } catch (e) {} }).observe(mapEl2);
   }
   function setPair(on) {
@@ -1906,7 +1941,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   function endHold(by) {
     if (by !== "key") { clearTimeout(holdT); holdT = null; holdAt = null; }
     if (!st.holding || (by && by !== holdBy)) return;
-    st.holding = false; holdBy = null; st.stuck = false;
+    st.holding = false; holdBy = null; st.stuck = false; clickImg = false;
     mapEl.classList.remove("holding");
     if (map) map.dragPan.enable();
     wheelAcc = 0;
@@ -1944,6 +1979,36 @@ export function render({model, el, earthwork, s2Items, credits}) {
     beginHold(r.left + r.width / 2, r.top + r.height / 2, "stuck");
     note("Sentinel-2 kept on (S to go back)", 2000);
   }
+  // a click on the year map's segment: its pixel picked (the card) and the imagery of the year it was found (the latest
+  // year up to the one shown, its color), the year map stepped to it too, the segment outlined. Alone, the imagery stays
+  // up (as S did) until a click or Esc, the card kept; paired, the left side steps to it
+  const segYearAt = (ll) => {
+    if (!map || !st.yearMap || st.holding || map.getZoom() < EWZ || st.mapYear < DY[0]) return null;
+    const d = earthwork.detectedAt(ll.lng, ll.lat, detYear(), st.model);
+    return d && d.length ? d[d.length - 1] : null;
+  };
+  function imageryOf(y) {
+    st.mapYear = y; styleKey(); rescoreSpot();
+    const iy = s2Of(y), when = iy === y ? "" : ` (no Sentinel-2 for ${y})`;
+    if (st.pair) { st.imgYear = iy; renderYear(); update(); return `Sentinel-2 ${iy}, found ${y}${when}`; }
+    const r = mapEl.getBoundingClientRect();
+    beginHold(r.left + r.width / 2, r.top + r.height / 2, "stuck");
+    clickImg = true;
+    return `Sentinel-2 ${iy}, found ${y}${when}: click or Esc to go back`;
+  }
+  // a click from zoom EWZ on: the segment under it outlined (and its imagery), or, off a segment, the one outlined let go.
+  // The clicked pixel's card is off for now: a click picks the segment alone
+  function segClick(ll) {
+    const y = segYearAt(ll);
+    if (y == null) { if (seg) { seg = null; update(); } return; }
+    const msg = imageryOf(y);
+    pickSeg(ll);
+    if (!seg) return;
+    const m2 = seg.n * (AEF_R * 111320) ** 2 * Math.cos((seg.lat * Math.PI) / 180), ac = m2 / 4046.86, ha = m2 / 1e4;
+    const f = (v) => (v >= 100 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1));
+    note(`${f(ac)} acres (${f(ha)} ha)${seg.cut ? ", cut short at the edge of what is read" : ""}. ${msg}`, 3500);
+  }
+  function backFromImagery() { if (!clickImg) return false; endHold("stuck"); renderYear(); return true; }
   const onKeyUp = (e) => {
     if (e.key === " ") endHold("key");
     else if (e.key === "Shift") setFilled(false);
@@ -2169,6 +2234,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // cross-check, A before, off for now)
     // else if (k === "a" || k === "A") setCheck(!st.check);
     else if (k === "a" || k === "A") setSegImg(!st.segImg);
+    // K: the year map's colors, plasma or one color
+    else if (k === "k" || k === "K") setYearMono(!st.yearMono);
     else if (k === "d" || k === "D") { setBase(st.base === "dark" ? "light" : "dark"); note(st.base === "light" ? "Positron, the light basemap (D for dark)" : "Dark Matter, the dark basemap (D for light)", 2000); }
     // I: the paint (Sentinel-2 gray, the lit ground in its colors) or the earthwork layer over the basemap
     // Y: the year map, or back to the earthwork layer over the basemap
@@ -2221,7 +2288,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     else if (k === "h" || k === "H") setCards(!cardsHidden);
     else if (k === "o" || k === "O") bMore.onclick(e);
     else if (k === "?") { closeMore(); about.style.display = about.style.display === "flex" ? "none" : "flex"; }
-    else if (k === "Escape") { if (searched) unsearch(); else if (about.style.display === "flex") about.style.display = "none"; else if (more.style.display === "block") closeMore(); else if (cardData) closeCard(); else if (st.fit) { st.fit = false; sizes(); } }
+    else if (k === "Escape") { if (backFromImagery()) return; if (seg) { seg = null; update(); return; } if (searched) unsearch(); else if (about.style.display === "flex") about.style.display = "none"; else if (more.style.display === "block") closeMore(); else if (cardData) closeCard(); else if (st.fit) { st.fit = false; sizes(); } }
     else return;
     e.preventDefault();
   };
@@ -2261,7 +2328,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   };
   function boot() {
     const home = cfg.home || {longitude: 3.6, latitude: 6.46, zoom: 11};
-    map = new maplibregl.Map({container: mapEl, style: BASES[st.base], center: [home.longitude, home.latitude], zoom: home.zoom, attributionControl: false, hash: true, ...FLAT});
+    map = new maplibregl.Map({container: mapEl, style: BASES[st.base], center: [home.longitude, home.latitude], zoom: home.zoom, hash: true, ...FLAT});
     map.keyboard.disable();
     map.doubleClickZoom.enable();
     root._otf = {map, st, cfg: () => cfg, hmeta: () => hmeta, hexShown: () => (hexData && hcol ? hmeta.seq : 0), tiles: () => tlog, s2: () => ({...s2Stat, warm: s2Warm, sources: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.ids.size])), batches: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.batches.length]))})};  // for headless tests
@@ -2292,7 +2359,6 @@ export function render({model, el, earthwork, s2Items, credits}) {
         s2TakeStretch(!first);
       }, 800);
     });
-    map.once("dragstart", () => creditsEl.classList.add("folded"));
     // a new view: the footprints under it asked for
     // (and the batches near it mounted, the far ones let go)
     map.on("moveend", () => { if (S2GPU) { s2Discover(); update(); } });
@@ -2311,6 +2377,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     map.on("click", (e) => {
       if (suppressClick) { suppressClick = false; return; }
       if (st.noPick) return;
+      if (backFromImagery()) return;
+      if (map.getZoom() >= EWZ) { segClick(e.lngLat); return; }
       const i = hexAt(e.lngLat);
       pickCell(i >= 0 ? hexes[i] : null, e.lngLat, e.point, st.holding);
     });

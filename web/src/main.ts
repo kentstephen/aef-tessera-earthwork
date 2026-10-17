@@ -45,7 +45,7 @@ const CREDITS = [
   "Places: Overture Maps (ODbL)",
   "Search: Photon, Nominatim",
   '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
-].join('<span class="sep"></span>');
+];
 
 const base = import.meta.env.BASE_URL;
 const [earthwork, divPm] = await Promise.all([
