@@ -1860,7 +1860,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the two sides are the same size under one camera, so a point is the same place on both
     map2.on("mousemove", (e) => { const i = hexAt(e.lngLat); if (i !== hover) { hover = i; update(); } });
     map2.on("mouseout", () => { if (hover != null && hover >= 0) { hover = null; update(); } });
-    map2.on("click", (e) => { if (st.noPick) return; if (map2.getZoom() >= EWZ) { segClick(e.lngLat); return; } const i = hexAt(e.lngLat); pickCell(i >= 0 ? hexes[i] : null, e.lngLat, e.point, st.left === "s2"); });
+    map2.on("click", (e) => { if (st.noPick) return; if (unpickSeg(e.lngLat)) return; if (map2.getZoom() >= EWZ) { segClick(e.lngLat); return; } const i = hexAt(e.lngLat); pickCell(i >= 0 ? hexes[i] : null, e.lngLat, e.point, st.left === "s2"); });
     new ResizeObserver(() => { try { map2.resize(); } catch (e) {} }).observe(mapEl2);
   }
   function setPair(on) {
@@ -2007,6 +2007,13 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const m2 = seg.n * (AEF_R * 111320) ** 2 * Math.cos((seg.lat * Math.PI) / 180), ac = m2 / 4046.86, ha = m2 / 1e4;
     const f = (v) => (v >= 100 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1));
     note(`${f(ac)} acres (${f(ha)} ha)${seg.cut ? ", cut short at the edge of what is read" : ""}. ${msg}`, 3500);
+  }
+  // a click inside the segment outlined lets it go (and the imagery it brought up)
+  function unpickSeg(ll) {
+    if (!seg || !seg.has(ll.lng, ll.lat)) return false;
+    seg = null;
+    if (!backFromImagery()) { renderYear(); update(); }
+    return true;
   }
   function backFromImagery() { if (!clickImg) return false; endHold("stuck"); renderYear(); return true; }
   const onKeyUp = (e) => {
@@ -2377,6 +2384,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     map.on("click", (e) => {
       if (suppressClick) { suppressClick = false; return; }
       if (st.noPick) return;
+      if (unpickSeg(e.lngLat)) return;
       if (backFromImagery()) return;
       if (map.getZoom() >= EWZ) { segClick(e.lngLat); return; }
       const i = hexAt(e.lngLat);

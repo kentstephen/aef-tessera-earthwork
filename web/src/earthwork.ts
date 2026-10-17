@@ -597,9 +597,9 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
 
   /**
    * The year map's segment under a point: the pixels joined to it (by side or corner) whose latest year over the cutoff,
-   * up to `upTo`, is its own, across the chunks in hand. Its outline as edges [lon, lat, lon, lat] (runs along a row or
-   * a column merged), its year, its pixels and its center; `cut` when a chunk not in hand or the cap stopped it. Null off
-   * a segment.
+   * up to `upTo`, is its own, across the chunks in hand. Its outer outline (holes filled) as edges [lon, lat, lon, lat]
+   * (runs along a row or a column merged), its year, its pixels, its center and `has` (a point inside it); `cut` when
+   * a chunk not in hand or the cap stopped it. Null off a segment.
    */
   function segmentAt(lon: number, lat: number, upTo: number, model_: LayerKind, max = 1_500_000) {
     const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
@@ -649,24 +649,84 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
           qy.push(ny);
         }
     }
-    // the outline: each side of a pixel with no segment pixel beyond it, a row's (or a column's) runs merged
-    const rows = new Map<number, number[]>(), cols = new Map<number, number[]>();
+    // the segment row by row as runs [start, end) of columns, and the gaps between a row's runs
+    const xsOf = new Map<number, number[]>();
+    for (let q = 0; q < qx.length; q++) {
+      const a = xsOf.get(qy[q]);
+      if (a) a.push(qx[q]);
+      else xsOf.set(qy[q], [qx[q]]);
+    }
+    type Run = [number, number];
+    const runsOf = new Map<number, Run[]>(), gapsOf = new Map<number, { s: number; e: number; id: number }[]>();
+    const parent = [0]; // gap ids from 1; 0 is the outside
+    for (const [y, xs] of xsOf) {
+      xs.sort((u, v) => u - v);
+      const rs: Run[] = [];
+      for (const x of xs) {
+        const r = rs[rs.length - 1];
+        if (r && r[1] === x) r[1] = x + 1;
+        else rs.push([x, x + 1]);
+      }
+      runsOf.set(y, rs);
+      const gs = [];
+      for (let i = 1; i < rs.length; i++) gs.push({ s: rs[i - 1][1], e: rs[i][0], id: parent.push(parent.length) - 1 });
+      gapsOf.set(y, gs);
+    }
+    // a gap is a hole unless it reaches the outside through the gaps above and below it (by side, the segment being
+    // joined by corner too); holes are filled, so only the segment's outer edge is drawn
+    const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+    const join = (i: number, j: number) => void (parent[find(i)] = find(j));
+    for (const [y, gs] of gapsOf)
+      for (const ny of [y - 1, y + 1]) {
+        const rn = runsOf.get(ny), gn = gapsOf.get(ny) ?? [];
+        let j = 0;
+        for (const g of gs) {
+          if (!rn || g.s < rn[0][0] || g.e > rn[rn.length - 1][1]) join(g.id, 0);
+          while (j < gn.length && gn[j].e <= g.s) j++;
+          for (let k = j; k < gn.length && gn[k].s < g.e; k++) join(g.id, gn[k].id);
+        }
+      }
+    const filled = new Map<number, Run[]>();
+    for (const [y, rs] of runsOf) {
+      const gs = gapsOf.get(y)!, f: Run[] = [[rs[0][0], rs[0][1]]];
+      for (let i = 1; i < rs.length; i++) {
+        if (find(gs[i - 1].id) !== find(0)) f[f.length - 1][1] = rs[i][1];
+        else f.push([rs[i][0], rs[i][1]]);
+      }
+      filled.set(y, f);
+    }
+    // the parts of runs a not covered by runs b
+    const minus = (a: Run[], b: Run[] | undefined, f: (s: number, e: number) => void) => {
+      let j = 0;
+      for (const [s0, e] of a) {
+        let s = s0;
+        while (b && j < b.length && b[j][1] <= s) j++;
+        for (let k = j; b && k < b.length && b[k][0] < e; k++) {
+          if (b[k][0] > s) f(s, b[k][0]);
+          s = Math.max(s, b[k][1]);
+        }
+        if (s < e) f(s, e);
+      }
+    };
+    // the outline: a row's top (or bottom) where the row beyond does not cover it, and each run's two ends, a column
+    // line's runs merged. A column line l is the left of column l; the side's sign keeps a left and a right on the
+    // same line apart where they meet only at a corner
+    const cols = new Map<number, number[]>();
     const push = (m: Map<number, number[]>, line: number, at: number) => {
       const a = m.get(line);
       if (a) a.push(at);
       else m.set(line, [at]);
     };
-    for (let q = 0; q < qx.length; q++) {
-      const x = qx[q], y = qy[q];
-      // a row line l is the top of row l; a column line l the left of column l. The side's sign keeps a top and a
-      // bottom on the same line apart where they meet only at a corner
-      if (!inSeg.has(key(x, y - 1))) push(rows, y * 2, x);
-      if (!inSeg.has(key(x, y + 1))) push(rows, (y + 1) * 2 + 1, x);
-      if (!inSeg.has(key(x - 1, y))) push(cols, x * 2, y);
-      if (!inSeg.has(key(x + 1, y))) push(cols, (x + 1) * 2 + 1, y);
-    }
     const lonOf = (gx: number) => X0 + gx * RES, latOf = (gy: number) => Y0 - gy * RES;
     const edges: [number, number, number, number][] = [];
+    for (const [y, f] of filled) {
+      minus(f, filled.get(y - 1), (a, b) => edges.push([lonOf(a), latOf(y), lonOf(b), latOf(y)]));
+      minus(f, filled.get(y + 1), (a, b) => edges.push([lonOf(a), latOf(y + 1), lonOf(b), latOf(y + 1)]));
+      for (const [s, e] of f) {
+        push(cols, s * 2, y);
+        push(cols, e * 2 + 1, y);
+      }
+    }
     const runs = (m: Map<number, number[]>, f: (line: number, a: number, b: number) => void) => {
       for (const [l, a] of m) {
         a.sort((u, v) => u - v);
@@ -680,10 +740,22 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         }
       }
     };
-    runs(rows, (l, a, b) => edges.push([lonOf(a), latOf(l), lonOf(b), latOf(l)]));
     runs(cols, (l, a, b) => edges.push([lonOf(l), latOf(a), lonOf(l), latOf(b)]));
     const n = qx.length;
-    return { year, n, cut, edges, lon: lonOf(sx / n + 0.5), lat: latOf(sy / n + 0.5) };
+    // a point inside the outline (a hole's too)
+    const has = (lon_: number, lat_: number) => {
+      const p = chunkAt(lon_, lat_), f = filled.get(p.py);
+      if (!f) return false;
+      let lo = 0, hi = f.length - 1;
+      while (lo <= hi) {
+        const m = (lo + hi) >> 1;
+        if (f[m][1] <= p.px) lo = m + 1;
+        else if (f[m][0] > p.px) hi = m - 1;
+        else return true;
+      }
+      return false;
+    };
+    return { year, n, cut, edges, has, lon: lonOf(sx / n + 0.5), lat: latOf(sy / n + 0.5) };
   }
 
   /**
