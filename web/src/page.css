@@ -294,11 +294,6 @@ body {
   padding: 1px 4px;
 }
 
-.at-btn.on kbd {
-  color: var(--on);
-  border-color: rgba(0, 0, 0, 0.35);
-}
-
 /* ---- the credits: one line in the bottom right corner, as MapLibre's compact attribution; the
    button at its end folds it away to just the button ---- */
 .at-credits {

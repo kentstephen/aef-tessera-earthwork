@@ -310,12 +310,17 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * imagery under them by 1 + flare (EarthworkFlare and the layer's blend), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
    * chunks kept for the card), which are the year map's, and its chunks' scores come from the worker's, read once
    */
-  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; check?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
+  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; check?: boolean; mask?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
     const { visible, year, minZoom, onTile, onViewportLoad } = opts;
     const flare = opts.flare, dim = opts.flareDim ? 1 : 0;
+    // as a mask (the imagery in its own colors inside the year map's pixels, yearMaskId): a layer of its own, a mask
+    // from its first tile (a loaded layer switched to a mask keeps drawing its tiles as they were, and the imagery
+    // then finds no mask), its scores the worker's, as the flare's; it keeps no books
+    const mask = !!opts.mask && flare == null;
+    const books = flare == null && !mask;
     // the cross-check (the year map's own, not the flare's): each year's, made with the scores from the same years (so
     // it reads nothing more) and kept with the tile, so A and a step between years only redraw
-    const check = !!opts.check && flare == null;
+    const check = !!opts.check && flare == null && !mask;
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aef", ck: ChunkKind = `years-${kind}`;
     const years = opts.years.slice(0, 8), allIdx = years.map((y) => y - YEAR_ORIGIN), lastIdx = allIdx[allIdx.length - 1];
     const shown = years.filter((y) => y <= year).length - 1;
@@ -324,7 +329,8 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     const over = 1 + 254 * model.cut[kind], n = years.length, stride = strideOf(n);
     const g = gpu;
     return new ZarrLayer<zarr.Readable, "int8", YearTile>({
-      id: layerId(0, 0, ck) + (flare == null ? "" : "-flare"),
+      id: layerId(0, 0, ck) + (flare != null ? "-flare" : mask ? "-mask" : ""),
+      operation: mask ? "mask" : "draw",
       node: arr as AefArray,
       metadata: attrs,
       selection: { time: lastIdx, band: null },
@@ -333,10 +339,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         const py0 = ys.start ?? 0, px0 = xs.start ?? 0;
         const { device, width, height } = o;
         // the colormap's texture is made on the first device seen (the main map's: never the flare's)
-        if (flare == null) onDevice(device);
-        const { score: s, check: cb } = await scoreCheckChunk(kind, px0, py0, width, height, allIdx, flare == null, o.signal);
+        if (books) onDevice(device);
+        const { score: s, check: cb } = await scoreCheckChunk(kind, px0, py0, width, height, allIdx, books, o.signal);
         const key = keyOf(0, 0, ck, Math.floor(py0 / CHUNK), Math.floor(px0 / CHUNK));
-        if (flare == null) {
+        if (books) {
           keepPaint(key, { s, w: width, h: height, years, stride, check: cb });
           tilesRead++;
           loaded.add(key);
@@ -371,7 +377,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         return {
           renderPipeline: flare != null ? [{ module: EarthworkFlare, props: { yearTex: d.yearTex, shown, strength: flare, dim } }] : [
             { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n } },
-            ...(g ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.plasma } }] : []),
+            ...(g && !mask ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: COLORMAP_INDEX.plasma } }] : []),
             ...(check && d.checkTex ? [{ module: EarthworkYearCheck, props: { checkTex: d.checkTex, h: d.height } }] : []),
           ],
         };
@@ -382,15 +388,15 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // the pairs that share a year
       maxRequests: 6,
       maxCacheSize: 256,
-      onTileLoad: () => flare == null && onTile && onTile(),
+      onTileLoad: () => books && onTile && onTile(),
       onTileUnload: (tile: { content?: YearTile | null }) => {
         const t = tile.content;
         if (!t) return;
-        if (flare == null) loaded.delete(t.key);
+        if (books) loaded.delete(t.key);
         t.yearTex?.destroy();
         t.checkTex?.destroy();
       },
-      onViewportLoad: () => flare == null && onViewportLoad && onViewportLoad(),
+      onViewportLoad: () => books && onViewportLoad && onViewportLoad(),
       // the flare's blend works on what is under it, so a tile drawn over its parent (refining) would flare twice
       // there: no overlap
       ...(flare != null ? { refinementStrategy: "no-overlap" as const } : {}),
@@ -398,11 +404,14 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // texture, contrast and colors kept); dimming, out = dst src, scaled down. Its alpha kept
       ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
-      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, check] },
+      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, check, mask] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
   }
+
+  /** The year map's id for a layer, the imagery's maskId while the year map is its mask. */
+  const yearMaskId = (model: LayerKind) => layerId(0, 0, `years-${LAYERS.includes(model) ? model : "aef"}`) + "-mask";
 
   /**
    * The layer for the window and the layer chosen. As the paint's mask (mask: true) it is not
@@ -641,6 +650,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     layer,
     paintLayer,
     yearLayer,
+    yearMaskId,
     layerId,
     scoreAt,
     detectedAt,

@@ -99,7 +99,7 @@
 .at-tools{position:absolute;right:12px;top:12px;z-index:7;display:flex;gap:8px}
 .at-btn{height:40px;min-width:40px;padding:0 13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;white-space:nowrap}
 .at-btn:hover{border-color:rgba(255,255,255,.3)}
-.at-btn.on{background:var(--text);color:var(--on);border-color:var(--text)}
+.at-btn.on{border-color:rgba(255,255,255,.3)}
 .at-bar{position:absolute;left:0;right:0;top:0;height:3px;z-index:9;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .3s}
 .at-bar.busy{opacity:1}
 .at-bar i{position:absolute;top:0;height:3px;width:28%;background:linear-gradient(90deg,transparent,var(--text),transparent);animation:at-run 1.2s ease-in-out infinite}
