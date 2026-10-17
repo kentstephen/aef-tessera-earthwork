@@ -68,17 +68,40 @@ function sceneLists(year: number, bbox: number[]): Promise<EsFeature[][]> {
         query: { "eo:cloud_cover": { lt: 60 } },
         sortby: [now ? { field: "properties.datetime", direction: "desc" } : { field: "properties.eo:cloud_cover", direction: "asc" }],
         limit: 200,
+        // the footprints and links left out (the bbox is enough): whole, 200 scenes can be more than Earth Search
+        // answers with (2019 over Ashburn, sorted by cloud: a 502 every time, which the browser reports as CORS)
+        fields: { exclude: ["geometry", "links"] },
       });
-    // kept on disk: a year gone by for a week (Earth Search adds little to it), the year in progress for hours
-    const ck = `es|${body}`;
+    // kept on disk: a year gone by for a week (Earth Search adds little to it), the year in progress for hours. Only
+    // an answer with scenes in it: Earth Search sometimes answers a search with none (or few) of a year that has them,
+    // and kept, that left the year blank for the week. A kept answer with no scene is asked again. es2: the answers
+    // kept before this are set aside
+    const ck = `es2|${body}`;
+    const usable = (j: { features?: EsFeature[] }) => Array.isArray(j.features) && j.features.some((f) => f.assets?.visual && f.bbox);
+    // a search Earth Search fails (a 5xx, or no answer at all) asked again for half as many scenes, the clearest still first
+    const fetchOr100 = async () => {
+      const go = (b: string) => fetch(EARTH_SEARCH, { method: "POST", headers: { "Content-Type": "application/json" }, body: b });
+      const half = () => go(body.replace('"limit":200', '"limit":100'));
+      try {
+        const r = await go(body);
+        return r.ok || r.status < 500 ? r : half();
+      } catch {
+        return half();
+      }
+    };
+    const ask = async () => {
+      const r = await fetchOr100();
+      if (!r.ok) throw new Error(`Earth Search ${r.status}`);
+      const b = new Uint8Array(await r.arrayBuffer());
+      const j = JSON.parse(new TextDecoder().decode(b)) as { features: EsFeature[] };
+      if (usable(j)) cachePut(ck, b, now ? 6 * 36e5 : 7 * 864e5);
+      return j;
+    };
     p = cacheGet(ck)
-      .then(async (have) => {
-        if (have) return JSON.parse(new TextDecoder().decode(have)) as { features: EsFeature[] };
-        const r = await fetch(EARTH_SEARCH, { method: "POST", headers: { "Content-Type": "application/json" }, body });
-        if (!r.ok) throw new Error(`Earth Search ${r.status}`);
-        const b = new Uint8Array(await r.arrayBuffer());
-        cachePut(ck, b, now ? 6 * 36e5 : 7 * 864e5);
-        return JSON.parse(new TextDecoder().decode(b)) as { features: EsFeature[] };
+      .then((have) => {
+        if (!have) return ask();
+        const j = JSON.parse(new TextDecoder().decode(have)) as { features: EsFeature[] };
+        return usable(j) ? j : ask();
       })
       .then((j) => {
         const cog = (h?: string) => !h || /^https:.*\.tiff?$/i.test(h);
