@@ -1,6 +1,7 @@
 import * as zarr from "zarrita";
 
 import { RES, X0, Y0 } from "./aef";
+import { cacheGet, cachePut, DiskCachedStore, ZARR_TTL } from "./disk-cache";
 import { toUtm, zoneOf } from "./utm";
 
 /**
@@ -94,22 +95,28 @@ const isAbort = (e: unknown) => (e as { name?: string })?.name === "AbortError";
 
 class MergingStore implements zarr.AsyncReadable {
   private inner: zarr.FetchStore;
+  /** The disk's cache: zarr.json from the network (its fingerprint keys the chunks under it), the rest kept. */
+  private disk: DiskCachedStore;
   private asks = new Map<zarr.AbsolutePath, Ask[]>();
   private kept = new Map<string, Promise<Uint8Array | undefined>>();
   private keptBytes = 0;
   private sizes = new Map<string, number>();
 
   constructor(url: string) {
-    this.inner = new zarr.FetchStore(url);
+    const inner = (this.inner = new zarr.FetchStore(url));
+    this.disk = new DiskCachedStore(url, {
+      get: (key, opts) => retried(() => inner.get(key, opts), opts?.signal),
+      getRange: (key, range, opts) => retried(() => inner.getRange(key, range, opts)),
+    });
   }
 
   get(key: zarr.AbsolutePath, opts?: { signal?: AbortSignal }) {
-    return retried(() => this.inner.get(key, opts), opts?.signal);
+    return this.disk.get(key, opts);
   }
 
   getRange(key: zarr.AbsolutePath, range: zarr.RangeQuery, opts?: { signal?: AbortSignal }): Promise<Uint8Array | undefined> {
     // the shard's index: shared by every tile reading that shard, so no one tile's signal
-    if ("suffixLength" in range) return retried(() => this.inner.getRange(key, range));
+    if ("suffixLength" in range) return this.disk.getRange(key, range);
     const k = `${key}:${range.offset}:${range.length}`;
     const have = this.kept.get(k);
     if (have) {
@@ -120,7 +127,17 @@ class MergingStore implements zarr.AsyncReadable {
         return this.getRange(key, range, opts);
       });
     }
-    const p = this.ask(key, range, opts?.signal);
+    // from the disk, else asked of the network with the other misses of the moment (cacheGet answers them together,
+    // so they still merge)
+    const dk = this.disk.keyOf(key, range);
+    const p = (dk ? cacheGet(dk) : Promise.resolve(undefined)).then(
+      (have) =>
+        have ??
+        this.ask(key, range, opts?.signal).then((buf) => {
+          if (dk && buf) cachePut(dk, buf, ZARR_TTL);
+          return buf;
+        }),
+    );
     this.kept.set(k, p);
     p.then(
       (buf) => {

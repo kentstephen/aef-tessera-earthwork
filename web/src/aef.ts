@@ -3,6 +3,8 @@ import type { GetTileDataOptions } from "@developmentseed/deck.gl-zarr";
 import type { Device, Texture } from "@luma.gl/core";
 import * as zarr from "zarrita";
 
+import { DiskCachedStore } from "./disk-cache";
+
 /** The AlphaEarth Foundations GeoZarr mosaic on Source Cooperative. */
 export const ZARR_URL = "https://data.source.coop/tge-labs/aef-mosaic";
 export const VARIABLE = "embeddings";
@@ -35,7 +37,8 @@ export type PairTileData = MinimalTileData & {
 };
 
 export async function openMosaic(): Promise<{ arr: AefArray; attrs: unknown }> {
-  const store = new zarr.FetchStore(ZARR_URL);
+  // its chunks kept on disk between visits (disk-cache.ts)
+  const store = new DiskCachedStore(ZARR_URL, new zarr.FetchStore(ZARR_URL));
   const root = await zarr.open.v3(store, { kind: "group" });
   const arr = await zarr.open.v3(root.resolve(VARIABLE), { kind: "array" });
   if (!arr.is("int8")) {

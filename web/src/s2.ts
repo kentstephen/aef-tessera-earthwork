@@ -12,6 +12,9 @@
  * look (N on the map) moves each tile down its list: the next scene as the
  * yearly, with its own fill and base.
  */
+
+import { cacheGet, cachePut } from "./disk-cache";
+
 const EARTH_SEARCH = "https://earth-search.aws.element84.com/v1/search";
 const ES_BANDS: Record<string, string> = { blue: "B02", green: "B03", red: "B04", nir08: "B8A", swir16: "B11", swir22: "B12" };
 
@@ -55,20 +58,28 @@ function sceneLists(year: number, bbox: number[]): Promise<EsFeature[][]> {
   let p = scenes.get(k);
   if (!p) {
     const now = year >= new Date().getUTCFullYear();
-    p = fetch(EARTH_SEARCH, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const body = JSON.stringify({
         collections: ["sentinel-2-l2a"],
         bbox,
         datetime: `${year}-01-01T00:00:00Z/${year}-12-31T23:59:59Z`,
         // the year in progress asks newest first, so the 200 kept are the latest, not only the clearest
-        query: { "eo:cloud_cover": { lt: 20 } },
+        // up to 60% cloud: the share is the whole 110 km tile's, so a cloudy one can be clear over the place, and a
+        // cloudy region (Lagos 2025: one scene under 20%) still has scenes for a new look (N). The clearest stay first
+        query: { "eo:cloud_cover": { lt: 60 } },
         sortby: [now ? { field: "properties.datetime", direction: "desc" } : { field: "properties.eo:cloud_cover", direction: "asc" }],
         limit: 200,
-      }),
-    })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`Earth Search ${r.status}`))))
+      });
+    // kept on disk: a year gone by for a week (Earth Search adds little to it), the year in progress for hours
+    const ck = `es|${body}`;
+    p = cacheGet(ck)
+      .then(async (have) => {
+        if (have) return JSON.parse(new TextDecoder().decode(have)) as { features: EsFeature[] };
+        const r = await fetch(EARTH_SEARCH, { method: "POST", headers: { "Content-Type": "application/json" }, body });
+        if (!r.ok) throw new Error(`Earth Search ${r.status}`);
+        const b = new Uint8Array(await r.arrayBuffer());
+        cachePut(ck, b, now ? 6 * 36e5 : 7 * 864e5);
+        return JSON.parse(new TextDecoder().decode(b)) as { features: EsFeature[] };
+      })
       .then((j) => {
         const cog = (h?: string) => !h || /^https:.*\.tiff?$/i.test(h);
         const byTile = new Map<string, EsFeature[]>();
