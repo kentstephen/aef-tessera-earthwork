@@ -839,10 +839,8 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
     # ---- TESSERA: its sharded Zarr on Source Cooperative, read at 10 m only (no coarser product exists) --------
     # One group per UTM zone (both hemispheres on the northern CRS), arrays (year, band, y, x) in 4096 px shards
     # of 32 x 32 inner chunks (about 100 KB each, blosc zstd). Each shard's index is read once (its last 256 KB),
-    # then only the inner chunks under the box, neighbors merged into one request and all of them at once, each
-    # decoded off the event loop so the downloads keep coming in meanwhile (the read is held by the line, not the CPU).
-    # A view reads first only the chunks under ground AlphaEarth's own model sees move (TES_READ_AT), and the rest
-    # after its map is drawn (tes_window's `into`). Decoded chunks are kept (oldest dropped past the cap), so a pan or a zoom over the same ground reads none
+    # then only the inner chunks under the box, neighbors merged into one request and all of them at once.
+    # Decoded chunks are kept (oldest dropped past the cap), so a pan or a zoom over the same ground reads none
     # of them again. Only what the layers need: the embeddings (unit vectors, so the per-pixel scales only say
     # where a year is embedded) and the radar counts (where the radar came or went, the aggregate opens on
     # AlphaEarth's change alone).
@@ -855,8 +853,6 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
     # past this the box is too big to read at 10 m: no TESSERA (the same as TENM_MAX_KM2 in the wiring). A zoom 11 view
     # in a 1400 x 900 window is about 1,400 km2: 77 s to read, the kernel's peak 24.5 GB (measured at Wildwood)
     TES_MAX_KM2 = 1600
-    # AlphaEarth's own score from which a finer cell's TESSERA chunk is read first, as the web app's TES_READ_AT
-    TES_READ_AT = 0.3
     _tstore = source_coop(**S3_OPTS)
     _tsem = asyncio.Semaphore(64)
     _SH, _IN = 4096, 32
@@ -909,12 +905,10 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
         while _held[0] > _CHUNK_CAP and len(_chunks) > 1:
             _held[0] -= _chunks.pop(next(iter(_chunks))).nbytes
 
-    async def _tes_array(zone, name, ti, r0, c0, h, w, only=None, out=None):
-        """One array for year index ti over zone rows r0 .. r0 + h, cols c0 .. c0 + w: (128, h, w) or (h, w). Only the
-        inner chunks (row, col) in `only` when given, into `out` when given (the others left as they are)."""
+    async def _tes_array(zone, name, ti, r0, c0, h, w):
+        """One array for year index ti over zone rows r0 .. r0 + h, cols c0 .. c0 + w: (128, h, w) or (h, w)."""
         dt, nb, fill = _ARR[name]
-        if out is None:
-            out = np.full((nb, h, w) if nb else (h, w), fill, dt)
+        out = np.full((nb, h, w) if nb else (h, w), fill, dt)
         rr, cc = range(r0 // _IN, (r0 + h - 1) // _IN + 1), range(c0 // _IN, (c0 + w - 1) // _IN + 1)
 
         def place(i, j, blk):
@@ -925,8 +919,6 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
         todo = {}
         for i in rr:
             for j in cc:
-                if only is not None and (i, j) not in only:
-                    continue
                 blk = _chunks.pop((zone, name, ti, i, j), None)
                 if blk is not None:
                     _chunks[(zone, name, ti, i, j)] = blk  # to the newest end
@@ -948,98 +940,54 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
                     _keep((zone, name, ti, i, j), np.empty(0, dt))
                 else:
                     want.append((off, n, (i, j)))
-            def decode(buf, a, items):
-                bl, got = Blosc(), []
-                for off, n, (i, j) in items:
-                    blk = np.frombuffer(bl.decode(buf[off - a: off - a + n]), dt).reshape((nb, _IN, _IN) if nb else (_IN, _IN))
-                    place(i, j, blk)
-                    got.append(((i, j), blk))
-                return got
+            bl = Blosc()
 
             async def group(a, e, items):
                 buf = await _tget(path, start=a, end=e)
-                # in a thread (blosc lets go of the GIL): decoded on the loop, every other download waited on it
-                for (i, j), blk in await asyncio.to_thread(decode, buf, a, items):
+                for off, n, (i, j) in items:
+                    blk = np.frombuffer(bl.decode(buf[off - a: off - a + n]), dt).reshape((nb, _IN, _IN) if nb else (_IN, _IN))
                     _keep((zone, name, ti, i, j), blk)
+                    place(i, j, blk)
 
             await asyncio.gather(*(group(a, e, items) for a, e, items in _merge(want)))
 
         await asyncio.gather(*(shard(sr, sc, cells) for (sr, sc), cells in todo.items()))
         return out
 
-    _TES_NAMES = ("embeddings", "scales", "s1_asc_obs_count", "s1_desc_obs_count")
-
-    async def tes_window(box, years, at=None, into=None):
+    async def tes_window(box, years):
         """TESSERA under the box (W, S, E, N) for the years: a dict the frame samples (tes_sampler), with a status
-        line; None where it is not read (a box past TES_MAX_KM2, or a year it does not have).
-        at: H3 cells (uint64); only the inner chunks they fall in are read, the rest left unread (not embedded, as
-        far as the layers can tell) and the window marked partial. into: a partial window of the same box, whose
-        unread chunks are read now into its own arrays; it is returned whole."""
+        line; None where it is not read (a box past TES_MAX_KM2, or a year it does not have)."""
         t0 = time.time()
         W_, S_, E_, N_ = box
         km2 = (E_ - W_) * 111.32 * np.cos(np.radians((S_ + N_) / 2)) * (N_ - S_) * 110.57
         if km2 > TES_MAX_KM2 or any(y not in TES_YEARS for y in years):
             return None
-        if into is not None:
-            zone, r0, c0, h, w = into["zone"], into["r0"], into["c0"], into["h"], into["w"]
-            x0g, y0g = await _zone_origin(zone)
-        else:
-            zone = int((((W_ + E_) / 2) + 180) // 6) + 1
-            if zone not in _tf:
-                _tf[zone] = Transformer.from_crs("EPSG:4326", f"EPSG:{32600 + zone}", always_xy=True)
-            x0g, y0g = await _zone_origin(zone)
-            lons = np.concatenate([np.linspace(W_, E_, 9), np.full(9, E_), np.linspace(E_, W_, 9), np.full(9, W_)])
-            lats = np.concatenate([np.full(9, N_), np.linspace(N_, S_, 9), np.full(9, S_), np.linspace(S_, N_, 9)])
-            ux, uy = _tf[zone].transform(lons, lats)
-            uy = np.asarray(uy)  # the group's CRS is the northern one: south of the equator, northings run negative
-            c0, c1 = int(np.floor((np.min(ux) - x0g) / 10)), int(np.ceil((np.max(ux) - x0g) / 10))
-            r0, r1 = int(np.floor((y0g - np.max(uy)) / 10)), int(np.ceil((y0g - np.min(uy)) / 10))
-            c0, r0 = max(c0, 0), max(r0, 0)
-            h, w = r1 - r0, c1 - c0
-            if h <= 0 or w <= 0:
-                return None
-        every = {(i, j) for i in range(r0 // _IN, (r0 + h - 1) // _IN + 1) for j in range(c0 // _IN, (c0 + w - 1) // _IN + 1)}
-        if into is not None:
-            only = every - into["have"]
-        elif at is not None:
-            # the chunks under the cells' centers, as tes_sampler finds each cell's pixel
-            xy = cells_to_coordinates(pa.array(np.asarray(at, np.uint64)))
-            cx, cy = _tf[zone].transform(np.asarray(pa.array(xy.column("lng"))), np.asarray(pa.array(xy.column("lat"))))
-            r = np.floor((y0g - np.asarray(cy)) / 10).astype(np.int64)
-            c = np.floor((np.asarray(cx) - x0g) / 10).astype(np.int64)
-            k = (r >= r0) & (r < r0 + h) & (c >= c0) & (c < c0 + w)
-            only = set(zip(*(np.unique(np.stack([r[k] // _IN, c[k] // _IN]), axis=1).tolist())))
-        else:
-            only = None
+        zone = int((((W_ + E_) / 2) + 180) // 6) + 1
+        if zone not in _tf:
+            _tf[zone] = Transformer.from_crs("EPSG:4326", f"EPSG:{32600 + zone}", always_xy=True)
+        x0g, y0g = await _zone_origin(zone)
+        lons = np.concatenate([np.linspace(W_, E_, 9), np.full(9, E_), np.linspace(E_, W_, 9), np.full(9, W_)])
+        lats = np.concatenate([np.full(9, N_), np.linspace(N_, S_, 9), np.full(9, S_), np.linspace(S_, N_, 9)])
+        ux, uy = _tf[zone].transform(lons, lats)
+        uy = np.asarray(uy)  # the group's CRS is the northern one: south of the equator, northings run negative
+        c0, c1 = int(np.floor((np.min(ux) - x0g) / 10)), int(np.ceil((np.max(ux) - x0g) / 10))
+        r0, r1 = int(np.floor((y0g - np.max(uy)) / 10)), int(np.ceil((y0g - np.min(uy)) / 10))
+        c0, r0 = max(c0, 0), max(r0, 0)
+        h, w = r1 - r0, c1 - c0
+        if h <= 0 or w <= 0:
+            return None
         jobs = []
         for y in years:
             ti = y - 2017
-            for n in _TES_NAMES:
-                arr = None if into is None else into["emb"][y] if n == "embeddings" else into["raw"][(y, n)]
-                jobs.append(_tes_array(zone, n, ti, r0, c0, h, w, only=only, out=arr))
+            jobs += [_tes_array(zone, n, ti, r0, c0, h, w) for n in ("embeddings", "scales", "s1_asc_obs_count", "s1_desc_obs_count")]
         got = await asyncio.gather(*jobs)
-        out = into if into is not None else {"zone": zone, "x0": x0g + c0 * 10, "y0": y0g - r0 * 10, "r0": r0, "c0": c0,
-                                             "h": h, "w": w, "emb": {}, "raw": {}}
-        ok, radar = {}, {}
-        for k_, y in enumerate(years):
-            e, sc, asc, desc = got[4 * k_: 4 * k_ + 4]
+        out = {"zone": zone, "x0": x0g + c0 * 10, "y0": y0g - r0 * 10, "h": h, "w": w, "emb": {}, "ok": {}, "radar": {}}
+        for k, y in enumerate(years):
+            e, sc, asc, desc = got[4 * k: 4 * k + 4]
             out["emb"][y] = e
-            out["raw"].update({(y, "scales"): sc, (y, "s1_asc_obs_count"): asc, (y, "s1_desc_obs_count"): desc})
-            ok[y] = np.isfinite(sc) & (sc > 0)
-            radar[y] = (asc.astype(np.int32) + desc) > 0
-        # the masks made whole, then swapped in: a frame built meanwhile saw the old ones, where every chunk still
-        # being read was not embedded
-        out["ok"], out["radar"] = ok, radar
-        dt_ = time.time() - t0
-        if into is not None:
-            out["have"], out["partial"] = every, False
-            out["status"] = f"TESSERA {h * w / 1e6:.2f} Mpx, {into['first']} then the other {len(only):,} of {len(every):,} chunks {dt_:.1f} s"
-        else:
-            out["have"] = every if only is None else only
-            out["partial"] = only is not None and only != every
-            out["first"] = f"{len(out['have']):,} where AlphaEarth moved {dt_:.1f} s"
-            out["status"] = (f"TESSERA {h * w / 1e6:.2f} Mpx, {out['first']}, the other {len(every - out['have']):,} of {len(every):,} chunks next"
-                             if out["partial"] else f"TESSERA {h * w / 1e6:.2f} Mpx {dt_:.1f} s")
+            out["ok"][y] = np.isfinite(sc) & (sc > 0)
+            out["radar"][y] = (asc.astype(np.int32) + desc) > 0
+        out["status"] = f"TESSERA {h * w / 1e6:.2f} Mpx {time.time() - t0:.1f} s"
         return out
 
     def tes_sampler(tw, y0, y1):
@@ -1059,7 +1007,7 @@ def _(S3_OPTS, Transformer, asyncio, json, np, pa, source_coop, time):
                     "flip": tw["radar"][y0][r, c] != tw["radar"][y1][r, c], "n": n}
         return at
 
-    return TES_READ_AT, tes_sampler, tes_window
+    return tes_sampler, tes_window
 
 
 
@@ -1737,9 +1685,11 @@ def _(STAND, change_resolution, np, os, pa):
                 out["aggregate"][s] = np.where(oka & okt, both, np.nan)
         return out
 
-    def _on_base(aef_by_year, y0, y1):
-        """Both years on the first year's cells (sorted, see _compact), NaN where the last has none:
-        (base, Vl, S0, Sl)."""
+    def build_frame(aef_by_year, y0, y1, res, tes_at=None):
+        """tes_at(cells) -> TESSERA at those finer cells (see score_layers), or None."""
+        if aef_by_year.get(y0) is None or aef_by_year.get(y1) is None:
+            return None
+        # both years on the first year's cells (sorted, see _compact), NaN where the last has none
         base = aef_by_year[y0]["cell"]
         nfine = len(base)
         t = aef_by_year[y1]
@@ -1756,22 +1706,6 @@ def _(STAND, change_resolution, np, os, pa):
                 Vl[m_] = t["V"][pos[m_]]
                 if Sl is not None:
                     Sl[m_] = S_[pos[m_]]
-        return base, Vl, S0, Sl
-
-    def aef_moved(aef_by_year, y0, y1, at):
-        """The finer cells AlphaEarth's own model scores `at` or more from y0 to y1: where TESSERA is read first."""
-        if aef_by_year.get(y0) is None or aef_by_year.get(y1) is None:
-            return np.empty(0, np.uint64)
-        base, Vl = _on_base(aef_by_year, y0, y1)[:2]
-        sc = score_layers(aef_by_year[y0]["V"], Vl)["aef"]
-        return base[np.nan_to_num(sc, nan=0.0) >= at]
-
-    def build_frame(aef_by_year, y0, y1, res, tes_at=None):
-        """tes_at(cells) -> TESSERA at those finer cells (see score_layers), or None."""
-        if aef_by_year.get(y0) is None or aef_by_year.get(y1) is None:
-            return None
-        base, Vl, S0, Sl = _on_base(aef_by_year, y0, y1)
-        nfine = len(base)
         par = pa.array(change_resolution(base, res)).to_numpy(zero_copy_only=False).astype(np.uint64)
         cellid = np.unique(par)
         n = len(cellid)
@@ -1808,7 +1742,7 @@ def _(STAND, change_resolution, np, os, pa):
                      + (f", {100 * stood.mean():.0f}% of them standing both years (gated)" if stood is not None and nfine else ""),
         }
 
-    return CUTS, LAYERS, aef_moved, build_frame
+    return CUTS, LAYERS, build_frame
 
 
 @app.cell
@@ -4045,9 +3979,7 @@ def _(
     HOLD,
     HOME,
     SETTLE,
-    TES_READ_AT,
     aef_fold,
-    aef_moved,
     asyncio,
     build_frame,
     cmap,
@@ -4162,7 +4094,7 @@ def _(
         return tenm, max(res, TENM_MIN_RES) if tenm else res
 
     def _tbytes(t):
-        return sum(a.nbytes for k in ("emb", "raw", "ok", "radar") for a in t.get(k, {}).values()) if t and "emb" in t else 0
+        return sum(a.nbytes for k in ("emb", "ok", "radar") for a in t.get(k, {}).values()) if t and "emb" in t else 0
 
     def _trim(bkey=None):
         # the kept folds: AlphaEarth's by bytes (a year in a 2x box at zoom
@@ -4195,17 +4127,10 @@ def _(
         rbox = tuple(round(v, 3) for v in box)
         key = (y0, y1, res, rbox)
         t0 = time.time()
-        # TESSERA's rest for another box or window gives way: its window stays partial, and comes back whole
-        # when that view is served again
-        rest = HOLD.get("tes_rest")
-        if rest is not None and rest[0] != (y0, y1, rbox) and not rest[1].done():
-            rest[1].cancel()
         # Earthwork compares the window's first and last year: only those two are read
         years = [y0, y1]
         HOLD["hex_status"] = f"reading AlphaEarth {y0} and {y1}…"
         _say(HOLD["hex_status"])
-        # only whole frames are kept (a partial one waits on _tes_rest)
-        partial = False
         if key in HOLD["memo"]:
             fr, stats = HOLD["memo"][key]
         else:
@@ -4221,20 +4146,19 @@ def _(
                 while HOLD["tes"] and sum(_tbytes(t) for t in HOLD["tes"].values()) + _new > _TES_KEEP_BYTES:
                     HOLD["tes"].pop(next(iter(HOLD["tes"])))
 
-            got = await asyncio.gather(*(aef_fold(box, fres, y, read_res=rres, mosaic=tenm) for y in need))
-            for y, r in zip(need, got):
-                HOLD["aef"][(y, bkey)] = r
-            tw = HOLD["tes"].get(tkey)
-            if want_tes:
-                # TESSERA first only under the ground AlphaEarth's own model sees move, so the map comes sooner;
-                # the rest is read after it is drawn (_tes_rest), in case TESSERA sees ground move that AlphaEarth does not
+            async def _tes():
                 try:
-                    moved = await cpu(aef_moved, {y: HOLD["aef"][(y, bkey)][0] for y in years}, y0, y1, TES_READ_AT)
-                    tw = await tes_window(box, (y0, y1), at=moved)
+                    return await tes_window(box, (y0, y1))
                 except asyncio.CancelledError:
                     raise
                 except Exception as e:
-                    tw = {"error": f"TESSERA failed: {type(e).__name__}: {str(e)[:80]}"}
+                    return {"error": f"TESSERA failed: {type(e).__name__}: {str(e)[:80]}"}
+
+            got, tw = await asyncio.gather(
+                asyncio.gather(*(aef_fold(box, fres, y, read_res=rres, mosaic=tenm) for y in need)),
+                _tes() if want_tes else asyncio.sleep(0, HOLD["tes"].get(tkey)))
+            for y, r in zip(need, got):
+                HOLD["aef"][(y, bkey)] = r
             if tenm:
                 HOLD["tes"][tkey] = tw
                 # held by size, not count: a zoom 11 window is several times a zoom 13 one
@@ -4273,72 +4197,14 @@ def _(
                 f"read res {rres}, hexagons res {res}, peak of res {fres} | AEF read+fold {', '.join(_rd)} "
                 f"| {tes_s} (all {t1 - t0:.1f} s) | frame {time.time() - t1:.1f} s"
             )
-            # a frame with part of TESSERA is not kept: the one with all of it takes its place (_tes_rest)
-            partial = tes_ok and tw.get("partial")
-            if not partial:
-                HOLD["memo"][key] = (fr, stats)
-                while len(HOLD["memo"]) > 4:
-                    HOLD["memo"].pop(next(iter(HOLD["memo"])))
+            HOLD["memo"][key] = (fr, stats)
+            while len(HOLD["memo"]) > 4:
+                HOLD["memo"].pop(next(iter(HOLD["memo"])))
         HOLD["frame"], HOLD["box"], HOLD["res"] = fr, box, res
         _paint()
         HOLD["hex_status"] = HOLD["hex_ready"] = f"hexagons: {stats} | {fr['score']} | {time.time() - t0:.1f} s"
         if HOLD.get("card_pick"):
             _card_send(HOLD["card_pick"])
-        if partial:
-            _tes_rest(box, y0, y1, res, key, stats)
-
-    def _tes_rest(box, y0, y1, res, key, stats):
-        """The rest of TESSERA under the box, after the map is drawn with the part under the ground AlphaEarth sees
-        move: every chunk skipped, then the map again with all of it, while the view is still this one."""
-        rbox = tuple(round(v, 3) for v in box)
-        tkey, bkey = (y0, y1, rbox), (res, rbox)
-        cur = HOLD.get("tes_rest")
-        if cur is not None and not cur[1].done():
-            if cur[0] == tkey:
-                return
-            cur[1].cancel()
-
-        def same(tw):
-            return (HOLD["tes"].get(tkey) is tw and HOLD["box"] == box and HOLD["res"] == res
-                    and (HOLD["y0"], HOLD["y1"]) == (y0, y1))
-
-        async def _run():
-            tw = HOLD["tes"].get(tkey)
-            if tw is None or "error" in tw or not tw.get("partial"):
-                return
-            t0 = time.time()
-            try:
-                await tes_window(box, (y0, y1), into=tw)
-            except asyncio.CancelledError:
-                raise
-            except Exception as e:
-                HOLD["hex_status"] = HOLD["hex_ready"] = HOLD["hex_status"] + f" | TESSERA's rest failed: {type(e).__name__}: {str(e)[:80]}"
-                _say(HOLD["hex_status"])
-                return
-            aef_by_year = {y: HOLD["aef"][(y, bkey)][0] for y in (y0, y1) if (y, bkey) in HOLD["aef"]}
-            if not same(tw) or len(aef_by_year) < 2:
-                return
-            t1 = time.time()
-            async with HOLD["build_lock"]:
-                fr = await cpu(build_frame, aef_by_year, y0, y1, res, tes_sampler(tw, y0, y1))
-            if fr is None or not same(tw):
-                return
-            fr["timing"] = {"reads": 1e3 * (t1 - t0), "frame": 1e3 * (time.time() - t1),
-                            "aef": [HOLD["aef"][(y, bkey)][1] for y in (y0, y1)], "t_frame": time.time()}
-            HOLD["fseq"] = HOLD.get("fseq", 0) + 1
-            fr["seq"] = HOLD["fseq"]
-            st = re.sub(r"\| TESSERA [^|]*\(all", f"| {tw['status']} (all", stats)
-            HOLD["memo"][key] = (fr, st)
-            while len(HOLD["memo"]) > 4:
-                HOLD["memo"].pop(next(iter(HOLD["memo"])))
-            HOLD["frame"] = fr
-            _paint()
-            HOLD["hex_status"] = HOLD["hex_ready"] = f"hexagons: {st} | {fr['score']} | the rest {time.time() - t0:.1f} s"
-            _say(HOLD["hex_status"])
-            if HOLD.get("card_pick"):
-                _card_send(HOLD["card_pick"])
-
-        HOLD["tes_rest"] = (tkey, _spawn(_run()))
 
     # READ AHEAD: from _AHEAD_ZOOM, still short of the
     # hexagons, AlphaEarth's two years for the box zoom HEX_ZOOM would read
