@@ -60,8 +60,8 @@ const cfg = {
   ew_zoom: 12,
   // the world recipe's three layers
   ew_models: ["aggregate", "aef", "tessera"],
-  // AlphaEarth's own to start: the paint's years load quickly; M for the aggregate and TESSERA (both read TESSERA, slower)
-  model: "aef",
+  // the aggregate (AlphaEarth and TESSERA joined) to start; M for AlphaEarth alone (quicker, no TESSERA reads) and TESSERA
+  model: "aggregate",
   aef_from: 2023,
   aef_to: 2025,
   aef_years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],

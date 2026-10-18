@@ -532,3 +532,97 @@ body {
 .at .ew-yk .later { opacity: 0.3; }
 .at .ew-yk .later:hover { opacity: 0.7; }
 .at .ew-yk > button.on, .at .ew-yk > button.on.later { opacity: 1; background: var(--text); color: var(--on); }
+
+/* the patches card (R): under the imagery's card, the search's width, its list scrolling inside it */
+.at .at-yc.ew-patches {
+  display: block;
+  position: relative;
+  right: auto;
+  top: auto;
+  width: 212px;
+  padding: 8px 6px 6px 12px;
+  border-radius: 10px;
+}
+
+.ew-patches .at-hd {
+  cursor: pointer;
+  margin: 0 0 4px;
+}
+
+.ew-patches .at-hd .n {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ew-patches.ew-folded .at-hd {
+  margin: 0;
+}
+
+.ew-pl {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 290px);
+  overflow-y: auto;
+  margin-right: -2px;
+}
+
+.ew-pl button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  padding: 3px 6px 3px 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+}
+
+.ew-pl button:hover {
+  background: var(--sel);
+}
+
+.ew-pl button.on {
+  box-shadow: inset 0 0 0 1.5px rgb(255, 200, 40);
+}
+
+.ew-pl .sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.ew-pl b {
+  font-weight: 600;
+  min-width: 30px;
+  text-align: right;
+}
+
+.ew-pl .u,
+.ew-pl .y {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.ew-pl .bars {
+  margin-left: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 14px;
+}
+
+.ew-pl .bars i {
+  width: 5px;
+  border-radius: 1px 1px 0 0;
+}
+
+.ew-pk {
+  font-size: 10.5px;
+  line-height: 1.3;
+  color: var(--muted);
+  margin: 5px 4px 0 2px;
+}

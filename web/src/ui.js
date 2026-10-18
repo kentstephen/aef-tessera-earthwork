@@ -121,13 +121,17 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const PY = cfg.paint_years || S2Y.slice(-4);
   // plasma from 15% (its darkest blue is lost on the dark basemap), a stop a year, as the year map's shader draws it
   const YEAR_RAMP = "5601a48606a6ae2892ce4b75e76f5af9973ffdc527f0f921".match(/.{6}/g);
+  // cividis from 15% (its darkest navy is lost on the dark basemap), a stop a year, as the shader draws it
+  const CIV = "243c6e48526c6568707f7e789d9576bdae6cdec958fee838".match(/.{6}/g);
   // one color (K): matplotlib's Oranges, as the shader draws it, pale orange the first year (0.15 on Oranges) to deep
   // orange the last (0.8, short of its brown end)
   const ORANGES = "fff5ebfee6cefdd0a2fdae6bfd8d3cf16913d94801a636037f2704".match(/.{6}/g).map((h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)));
   const monoAt = (x) => { x = Math.max(0, Math.min(1, x)) * (ORANGES.length - 1); const i = Math.min(ORANGES.length - 2, Math.floor(x)), f = x - i; return "rgb(" + ORANGES[i].map((v, j) => Math.round(v + (ORANGES[i + 1][j] - v) * f)).join(",") + ")"; };
   const yearColor = (y) => {
     const t = Math.max(0, DY.indexOf(y)) / Math.max(1, DY.length - 1);
-    return st.yearMono ? monoAt(0.15 + 0.65 * t) : "#" + YEAR_RAMP[Math.round((YEAR_RAMP.length - 1) * t)];
+    if (st.yearRamp === "mono") return monoAt(0.15 + 0.65 * t);
+    const r = st.yearRamp === "cividis" ? CIV : YEAR_RAMP;
+    return "#" + r[Math.round((r.length - 1) * t)];
   };
   const VIR = (cfg.viridis || "440154fde725").match(/.{6}/g).map((h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)));
   const vir = (t) => { t = Math.max(0, Math.min(1, t)) * (VIR.length - 1); const i = Math.min(VIR.length - 2, Math.floor(t)), f = t - i; return VIR[i].map((v, j) => Math.round(v + (VIR[i + 1][j] - v) * f)); };
@@ -136,7 +140,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const EWZ = cfg.ew_zoom || 12;
   const HEXZ = cfg.hex_zoom || 9, HOLD_MS = cfg.hold_ms || 200, SLOP = cfg.hold_slop || 5;
   const st = {
-    gmode: "earth", want: "earth", noPick: false, hideKinds: new Set(), focus: "all", y0: cfg.aef_from || 2022, y1: cfg.aef_to || 2025,
+    gmode: "earth", want: "earth", noPick: false, noTip: false, noPatches: false, joined: false, allLines: false, hideKinds: new Set(), focus: "all", y0: cfg.aef_from || 2022, y1: cfg.aef_to || 2025,
     imgYear: cfg.s2_year || S2Y.filter((y) => y <= AY_LAST).pop() || S2Y[S2Y.length - 1], labels: "cities", s2scale: Number(cfg.s2_scale) || 1, s2comp: cfg.s2_comp || "tci",
     // the paint (I): Sentinel-2 is the map, gray but where the layer is lit, which keeps its colors; and its own
     // imagery colors (C while painting), apart from the plain imagery's (space, the pair's left)
@@ -153,8 +157,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // on the year map, A: the year map's pixels in the imagery's own colors, the Sentinel-2 year shown
     // (imgYear: the year map's year, the two stepped together), the basemap everywhere else
     segImg: false,
-    // the year map's colors: plasma, or one color (K), pale orange the first year to deep orange the last
-    yearMono: (() => { try { return localStorage.getItem("aef-year-colors") === "mono"; } catch (e) { return false; } })(),
+    // the year map's colors (K): plasma, cividis, or one color (pale orange the first year to deep orange the last)
+    yearRamp: (() => { try { const v = localStorage.getItem("aef-year-colors"); return ["plasma", "cividis", "mono"].includes(v) ? v : "plasma"; } catch (e) { return "plasma"; } })(),
     base: (() => { try { return localStorage.getItem("aef-lc-base") === "light" ? "light" : "dark"; } catch (e) { return "dark"; } })(),
     // the pair (P) and its left side (Sentinel-2)
     pair: false, left: "s2",
@@ -199,6 +203,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const panel = el_("div", "at-panel at-glass");
   // every panel folds; the fold is remembered in this browser
   const keep = (k, v) => { try { if (v === undefined) return localStorage.getItem("aef-lc-" + k) === "1"; localStorage.setItem("aef-lc-" + k, v ? "1" : "0"); } catch (e) {} return false; };
+  // the patches card's state (R), here so the calls made while the page is built find it
+  let patchBox = null, patchKey = "", patchT = null, patchList = null, patchOn = null, ewSeq = 0, pcFolded = keep("patchesfold");
+  const PATCH_MAX = cfg.patch_max || 40;
+  st.noPatches = keep("nopatches");
   const panelHd = el_("div", "at-hd", `<span class="t">Earthwork</span>`);
   const panelCb = el_("button", "at-cb", ICON.chev);
   const panelRamp = el_("i", "at-ramp ew-hramp");
@@ -325,6 +333,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   rFrom.addEventListener("change", winRelease); rTo.addEventListener("change", winRelease);
   try { new ResizeObserver(styleWin).observe(win); } catch (e) {}
   function styleKey() {
+    patchesSoon();
     const y0 = hmeta.y0 || st.y0, y1 = hmeta.y1 || st.y1;
     const out_ = map && map.getZoom() < EWZ;
     // the title is what is drawn, open or folded
@@ -383,7 +392,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
   function styleRows() { styleFill(); styleWin(); styleKey(); }
   // the pair's imagery card (renderYear) waits in the top left column, shown only in the pair
   const s2c = el_("div", "at-yc at-s2c holding at-glass");
-  top.append(search, s2c);
+  // the patches card (R): the year map's finds joined across years, the largest first, under the imagery's card
+  const pc = el_("div", "at-yc ew-patches at-glass");
+  // the search is left out for now (its box and the / key)
+  // top.append(search, s2c, pc);
+  top.append(s2c, pc);
   pane.appendChild(top);
   // the pair's right column: the Earthwork panel and the hexagon card move in (setPair)
   const rcol = el_("div", "at-rcol");
@@ -524,6 +537,30 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const swPick = sw(() => !st.noPick, (v) => { st.noPick = !v; tip.style.display = "none"; hover = null; if (st.noPick && cardData) closeCard(); update(); });
   swPick.title = "the tooltip and the card on a click (Q)";
   rPick.append(swPick, el_("span", "at-pick", "<span>Tooltip and click</span><kbd>Q</kbd>"));
+  // the tooltip alone off (T), clicks still picking: for a recording
+  const rTip = rowOf("Tooltip");
+  function setNoTip(off) { st.noTip = off; swTip.sty(); tip.style.display = "none"; }
+  const swTip = sw(() => !st.noTip, (v) => setNoTip(!v));
+  swTip.title = "the tooltip under the pointer (T)";
+  rTip.append(swTip, el_("span", "at-pick", "<span>Under the pointer</span><kbd>T</kbd>"));
+  // a click on the year map: the segment of one year, or (U) every touching find of any year as one area, its imagery
+  // from the earliest year
+  const rJoin = rowOf("Segments");
+  function setJoined(on) { st.joined = on; swJoin.sty(); }
+  const swJoin = sw(() => st.joined, (v) => setJoined(v));
+  swJoin.title = "a click outlines every touching find, whatever its year, as one area, its imagery from the earliest year found (U)";
+  rJoin.append(swJoin, el_("span", "at-pick", "<span>Across years</span><kbd>U</kbd>"));
+  // over the imagery (the pair's left, space held): the outlines of everything found up to its year (V)
+  const rAll = rowOf("Outlines");
+  function setAllLines(on) { st.allLines = on; swAll.sty(); update(); }
+  const swAll = sw(() => st.allLines, (v) => setAllLines(v));
+  swAll.title = "over the imagery, the outlines of everything found up to its year, joined across years: they appear and grow as the years step (V)";
+  rAll.append(swAll, el_("span", "at-pick", "<span>On the imagery</span><kbd>V</kbd>"));
+  // the patches card on the year map (R)
+  const rPat = rowOf("Patches");
+  const swPat = sw(() => !st.noPatches, (v) => setPatches(v));
+  swPat.title = "the year map's finds joined across years into patches, the largest listed first (R)";
+  rPat.append(swPat, el_("span", "at-pick", "<span>Largest listed</span><kbd>R</kbd>"));
   // the cross-check (A): the calls colored by it, white weak to blue strong; on the year map, each year's call its own. Read when it is turned on, for the chunks in view (AlphaEarth's earlier years, and TESSERA
   // but for AEF's layer), so it is for a place parked on
   // off for now (its row and key): A switches the year map's colors and the imagery in the calls instead
@@ -547,15 +584,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!on) { if (st.yearMap) note("Years", 1500); return; }
     note(st.yearMap ? `Sentinel-2 ${st.imgYear}` : "Sentinel-2: on the year map (Y)", 1500);
   }
-  // the year map's colors (K): plasma, or one color
+  // the year map's colors (K steps them): plasma, cividis, or one color
+  const RAMPS = [["plasma", "Plasma", "purple the first year to yellow the latest"], ["cividis", "Cividis", "navy the first year to yellow the latest"], ["mono", "Oranges", "pale orange the first year to deep orange the latest"]];
   const rMono = rowOf("Year colors");
-  const swMono = sw(() => st.yearMono, (v) => setYearMono(v));
-  swMono.title = "the year map in one color, pale orange the first year to deep orange the last (K)";
-  rMono.append(swMono, el_("span", "at-pick", "<span>One color</span><kbd>K</kbd>"));
-  function setYearMono(on) {
-    st.yearMono = on; swMono.sty(); styleKey(); update();
-    try { localStorage.setItem("aef-year-colors", on ? "mono" : "plasma"); } catch (e) {}
-    note(on ? "Years in one color: pale orange the first, deep orange the latest" : "Years in plasma", 1500);
+  const styleRamp = segOf(rMono, RAMPS.map(([k, t, tip]) => [k, t, tip, ""]), (k) => k === st.yearRamp, (k) => setYearRamp(k));
+  rMono.querySelector(".seg-s").classList.remove("col");
+  rMono.appendChild(el_("kbd", "at-mkey", "K"));
+  styleRamp();
+  function setYearRamp(k) {
+    st.yearRamp = k; styleRamp(); styleKey(); update();
+    try { localStorage.setItem("aef-year-colors", k); } catch (e) {}
+    const [, t, tip] = RAMPS.find(([v]) => v === k);
+    note(`Years in ${t.toLowerCase()}: ${tip}`, 1500);
   }
   more.appendChild(el_("hr"));
   const bAbout = el_("button", "at-chip", "About this map <kbd>?</kbd>"); bAbout.title = "about this map (?)"; bAbout.style.margin = "4px 10px 6px";
@@ -568,7 +608,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
     <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; D the basemap, dark or light (Positron); A the year map's calls in the colors of the Sentinel-2 year shown (the basemap everywhere else), or back to the years' colors; K the years' colors, plasma or one color (pale orange the first year, deep orange the latest); H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); / search (a place, or paste an H3 string); Esc close.</small></p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; S the imagery kept on without holding, S again back; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; T the tooltip alone; U a click's segment joined across years (its imagery from the earliest year found); V everything found outlined on the imagery, up to its year; R the patches card (the year map's finds joined across years, the largest first; a row, or down and up, flies to the patch, outlines it and brings up the imagery from its first year, ] to step on, click or Esc to go back); D the basemap, dark or light (Positron); A the year map's calls in the colors of the Sentinel-2 year shown (the basemap everywhere else), or back to the years' colors; K the years' colors, plasma, cividis or one color (pale orange the first year, deep orange the latest); H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -587,7 +627,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
       <li><b>Hold</b> <kbd>Space</kbd> to see the Sentinel-2 imagery in full color; while it shows, <b>scroll</b> (or <kbd>[</kbd> <kbd>]</kbd>) to step its year, ${S2Y[0]} to ${S2Y[S2Y.length - 1]}.</li>
       <li><b>Pair</b> the map with <kbd>P</kbd>: Sentinel-2 on the left, earthwork on the right, moving together. On the year map, <b>click</b> a year in its key to light that year's finds on both sides, and again to turn them off.</li>
       <li><b>AEF Years</b> in the Earthwork card are the years compared; <kbd>M</kbd> switches the layer: Aggregate (AlphaEarth and TESSERA together), AEF or TESSERA.</li>
-      <li>Earthwork shows from zoom ${EWZ} in. <kbd>/</kbd> searches a place.</li>
+      <li>Earthwork shows from zoom ${EWZ} in.</li>
     </ul>
     <p><small><kbd>?</kbd> has everything else. The code: <a href="https://github.com/kentstephen/aef-earthwork-web" target="_blank" rel="noopener">aef-earthwork-web</a> on GitHub, from the notebook in <a href="https://github.com/kentstephen/aef-earthwork" target="_blank" rel="noopener">aef-earthwork</a>.</small></p>
     <div><button class="at-chip">Start</button></div></div>`;
@@ -1655,17 +1695,33 @@ export function render({model, el, earthwork, s2Items, credits}) {
   // the imagery a segment's click brought up (until a click or Esc)
   let clickImg = false;
   function pickSeg(ll) {
-    seg = earthwork.segmentAt(ll.lng, ll.lat, detYear(), st.model);
+    seg = earthwork.segmentAt(ll.lng, ll.lat, detYear(), st.model, st.joined);
     renderYear(); update();
   }
   function segLayers(id, m = map) {
     if (!seg) return [];
     const o = {data: seg.edges, getSourcePosition: (d) => [d[0], d[1]], getTargetPosition: (d) => [d[2], d[3]], widthUnits: "pixels", beforeId: slot(m)};
-    return [new LineLayer({...o, id, getColor: [255, 200, 40, 255], getWidth: 2})];
+    // over the imagery at half opacity, so the ground at its edge shows through
+    const onS2 = m === map2 ? st.left === "s2" : st.holding;
+    return [new LineLayer({...o, id, getColor: [255, 200, 40, onS2 ? 128 : 255], getWidth: 2, updateTriggers: {getColor: onS2}})];
+  }
+  // V: over the imagery, the outlines of everything the year map found up to the imagery's year, joined across years,
+  // so stepping the years shows them appear and grow. Traced again for a year, a move or a chunk read
+  let allSeq = 0, allKey = "", allEdges = [];
+  function allLayers(id, m = map) {
+    if (!st.allLines || !map || map.getZoom() < EWZ) return [];
+    const b = map.getBounds(), y = Math.min(st.imgYear, AY_LAST);
+    const k = [y, st.model, allSeq].join("|");
+    if (k !== allKey) {
+      allKey = k;
+      allEdges = y < DY[0] ? [] : earthwork.outlinesIn([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], y, st.model) || [];
+    }
+    return [new LineLayer({id, data: allEdges, getSourcePosition: (d) => [d[0], d[1]], getTargetPosition: (d) => [d[2], d[3]], widthUnits: "pixels", beforeId: slot(m),
+      getColor: [255, 200, 40, 128], getWidth: 2})];
   }
   // a chunk read: the year card's line and the tooltip under a still pointer
   let tileT = null;
-  function tileIn() { ewProgress(); clearTimeout(tileT); tileT = setTimeout(() => { if (cardData && cardData.kind === "spot" && cardData.score == null) { rescoreSpot(); } renderYear(); if (lastPt && !st.holding) showHexTip(lastPt); }, 200); }
+  function tileIn() { ewProgress(); ewSeq++; patchesSoon(400); if (seg && seg.cut && patchOn && patchAt) { seg = earthwork.segmentAt(patchAt[0], patchAt[1], AY_LAST, st.model, true); update(); } clearTimeout(tileT); tileT = setTimeout(() => { if (st.allLines) { allSeq++; update(); } if (cardData && cardData.kind === "spot" && cardData.score == null) { rescoreSpot(); } renderYear(); if (lastPt && !st.holding) showHexTip(lastPt); }, 200); }
   function layers() {
     const out = [];
     const z = map ? map.getZoom() : 0;
@@ -1693,7 +1749,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // the imagery in the calls: the year map as the imagery's mask, not drawn
     // (its own layer, beside the year map, mounted only while A shows it)
     if (st.yearMap) {
-      out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ && !st.segImg, year: detYear(), years: DY, model: st.model, minZoom: EWZ, check: st.check, mono: st.yearMono, onTile: tileIn, onViewportLoad: ewLoaded}));
+      out.push(earthwork.yearLayer({visible: !st.holding && z >= EWZ && !st.segImg, year: detYear(), years: DY, model: st.model, minZoom: EWZ, check: st.check, ramp: st.yearRamp, onTile: tileIn, onViewportLoad: ewLoaded}));
       // the mask stays while space is held (not drawn either way), so letting go only shows the imagery in it again
       // mounted beside the year map only while A shows the imagery in the calls
       if (st.segImg) out.push(earthwork.yearLayer({visible: z >= EWZ, year: detYear(), years: DY, model: st.model, minZoom: EWZ, mask: true}));
@@ -1710,9 +1766,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (sc) out.push(sc);
     const pk = picked ? outline("picked", picked, [255, 200, 40, 255], 3) : null;
     if (pk) out.push(pk);
+    if (st.holding) out.push(...allLayers("all"));
     out.push(...segLayers("seg"));
-    const sp = spotLayer("spot");
-    if (sp) out.push(sp);
+    // the clicked pixel's marker, off for now
+    // const sp = spotLayer("spot");
+    // if (sp) out.push(sp);
     return out;
   }
   // the pair's left side: the imagery years, mounted as on the map so a year step is instant,
@@ -1730,9 +1788,11 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (sc) out.push(sc);
     const pk = picked ? outline("picked-l", picked, [255, 200, 40, 255], 3, map2) : null;
     if (pk) out.push(pk);
+    if (st.left === "s2") out.push(...allLayers("all-l", map2));
     out.push(...segLayers("seg-l", map2));
-    const sp = spotLayer("spot-l", map2);
-    if (sp) out.push(sp);
+    // the clicked pixel's marker, off for now
+    // const sp = spotLayer("spot-l", map2);
+    // if (sp) out.push(sp);
     return out;
   }
   // ---- the flare (G): the year map's finds of the year shown only (dug that year, as the imagery shows it), brighten
@@ -1806,6 +1866,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
   function update() {
     ewCheck(); ewProgress();
+    if (patchOn && !seg) { patchOn = null; renderPatches(); }
     const zout = !!map && map.getZoom() < EWZ && !st.holding;
     zmsg.style.display = zout ? "block" : "none";
     root.classList.toggle("ew-zout", zout);
@@ -1968,8 +2029,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     beginHold(pt.x, pt.y, "key");
   }
   // S: Sentinel-2 on the main map and kept there (the hold without holding: "stuck"), S again back. Space, the mouse,
-  // a lost window leave it on; the keys work as they do while holding (scroll or [ ] the year). Off for now (its key
-  // unbound): the finds are lit by a year clicked in the year map's key, which works paired
+  // a lost window leave it on; the keys work as they do while holding (scroll or [ ] the year)
   function stickS2() {
     if (!map) return;
     if (st.holding && holdBy === "stuck") { endHold("stuck"); return; }
@@ -1987,26 +2047,100 @@ export function render({model, el, earthwork, s2Items, credits}) {
     const d = earthwork.detectedAt(ll.lng, ll.lat, detYear(), st.model);
     return d && d.length ? d[d.length - 1] : null;
   };
+  // R: the patches card. Everything the year map found, any year to AlphaEarth's last, joined across years (touching by
+  // side or corner) into patches, the largest listed first. Its area is the widest view since the map last moved off
+  // it: zoomed out over a place and then in, the list stays the wider one's. A row's bars are the ground first found each
+  // year; a click, or down and up, flies to the patch, outlines it and brings up the imagery from its first year
+  const onPatches = () => !st.noPatches && st.yearMap && st.gmode === "earth" && map && map.getZoom() >= EWZ;
+  function setPatches(on) { st.noPatches = !on; keep("nopatches", !on); patchKey = ""; patchesSoon(0); }
+  function patchesSoon(ms = 250) { clearTimeout(patchT); patchT = setTimeout(findPatches, ms); }
+  function findPatches() {
+    if (!onPatches()) { patchBox = null; renderPatches(); return; }
+    // a patch picked: the list held as it is, so stepping through it is not reordered under the keys by chunks coming in
+    if (patchOn && patchList) { renderPatches(); return; }
+    const b = map.getBounds(), v = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()];
+    // the view inside the area: the area kept; touching it: the two joined while they stay a few views' size; else the view
+    const inside = patchBox && v[0] >= patchBox[0] && v[1] >= patchBox[1] && v[2] <= patchBox[2] && v[3] <= patchBox[3];
+    const touch = patchBox && v[0] < patchBox[2] && v[2] > patchBox[0] && v[1] < patchBox[3] && v[3] > patchBox[1];
+    if (!inside) {
+      const u = touch ? [Math.min(v[0], patchBox[0]), Math.min(v[1], patchBox[1]), Math.max(v[2], patchBox[2]), Math.max(v[3], patchBox[3])] : null;
+      const px = (q) => ((q[2] - q[0]) / AEF_R) * ((q[3] - q[1]) / AEF_R);
+      patchBox = u && px(u) <= 40e6 ? u : v;
+    }
+    const k = [patchBox.join(","), st.model, ewSeq].join("|");
+    if (k !== patchKey) {
+      patchKey = k;
+      patchList = earthwork.patchesIn(patchBox, AY_LAST, st.model, PATCH_MAX);
+    }
+    renderPatches();
+  }
+  pc.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (e.target.closest(".at-hd")) { pcFolded = !pcFolded; keep("patchesfold", pcFolded); renderPatches(); return; }
+    const r = e.target.closest("[data-i]");
+    if (r && patchList) goPatch(patchList.patches[+r.dataset.i]);
+  });
+  const acres = (ha) => { const ac = ha * 2.47105; return ac >= 100 ? Math.round(ac).toLocaleString("en-US") : ac >= 10 ? ac.toFixed(0) : ac.toFixed(1); };
+  function renderPatches() {
+    const on = onPatches() && patchList;
+    pc.style.display = on ? "" : "none";
+    if (!on) return;
+    const {patches, total, yearList} = patchList;
+    const head = `<div class="at-hd"><span class="t">Patches</span><span class="n">${total ? `${patches.length < total ? `${patches.length} largest of ` : ""}${total.toLocaleString("en-US")}` : "none found yet"}</span>${cbOf(pcFolded)}</div>`;
+    pc.className = "at-yc ew-patches at-glass" + (pcFolded ? " ew-folded" : "");
+    if (pcFolded) { pc.innerHTML = head; return; }
+    const rows = patches.map((p, i) => {
+      const top = Math.max(...p.years);
+      const bars = yearList.map((y, j) => `<i style="height:${p.years[j] ? Math.max(12, Math.round((100 * p.years[j]) / top)) : 0}%;background:${yearColor(y)}"></i>`).join("");
+      const tip = `${acres(p.ha)} acres (${p.ha.toFixed(1)} ha). First found: ` + yearList.flatMap((y, j) => (p.years[j] ? [`${y} ${acres(p.ha * p.years[j] / p.n)} ac`] : [])).join(", ");
+      const id = p.at.join(",");
+      return `<button data-i="${i}" class="${id === patchOn ? "on" : ""}" title="${tip}"><i class="sw" style="background:${yearColor(p.main)}"></i><b>${acres(p.ha)}</b><span class="u">ac</span><span class="y">${p.main}</span><span class="bars">${bars}</span></button>`;
+    }).join("");
+    if (!patches.length) { pc.innerHTML = head; return; }
+    pc.innerHTML = head + `<div class="ew-pl">${rows}</div><div class="ew-pk"><span>acres, the year most of it was first found, and the ground first found each year ${yearList[0] || ""} to ${yearList[yearList.length - 1] || ""}</span></div>`;
+  }
+  // a patch: flown to, outlined, and the imagery brought up at its first year (the ground before; ] steps on through the
+  // years, the year map with it) until a click or Esc; stepping on keeps the imagery up. Its row clicked again lets it go
+  let patchAt = null;
+  function goPatch(p, toggle = true) {
+    if (!p) return;
+    const id = p.at.join(",");
+    if (toggle && id === patchOn && seg) { patchOn = null; seg = null; if (!backFromImagery()) { renderYear(); update(); } renderPatches(); return; }
+    patchOn = id; patchAt = p.at;
+    const [W, S, E, N] = p.box;
+    // at zoom 14 whatever its size, centered on its box: Sentinel-2's 10 m pixels blur in closer
+    map.flyTo({center: [(W + E) / 2, (S + N) / 2], zoom: 14, bearing: map.getBearing(), duration: 700});
+    seg = earthwork.segmentAt(p.at[0], p.at[1], AY_LAST, st.model, true);
+    const y0 = S2Y[0];
+    if (clickImg && st.holding) { st.mapYear = y0; st.imgYear = y0; styleKey(); rescoreSpot(); renderYear(); }
+    else imageryOf(y0);
+    renderPatches(); update();
+    const r = pc.querySelector(".ew-pl button.on");
+    if (r) r.scrollIntoView({block: "nearest"});
+  }
+  // down and up: the next patch in the list, or the one before (the first from none)
+  function stepPatch(d) {
+    if (!onPatches() || !patchList || !patchList.patches.length) return false;
+    const ps = patchList.patches, i = ps.findIndex((p) => p.at.join(",") === patchOn);
+    goPatch(ps[i < 0 ? (d > 0 ? 0 : ps.length - 1) : Math.max(0, Math.min(ps.length - 1, i + d))], false);
+    return true;
+  }
   function imageryOf(y) {
     st.mapYear = y; styleKey(); rescoreSpot();
-    const iy = s2Of(y), when = iy === y ? "" : ` (no Sentinel-2 for ${y})`;
-    if (st.pair) { st.imgYear = iy; renderYear(); update(); return `Sentinel-2 ${iy}, found ${y}${when}`; }
+    if (st.pair) { st.imgYear = s2Of(y); renderYear(); update(); return; }
     const r = mapEl.getBoundingClientRect();
     beginHold(r.left + r.width / 2, r.top + r.height / 2, "stuck");
     clickImg = true;
-    return `Sentinel-2 ${iy}, found ${y}${when}: click or Esc to go back`;
   }
   // a click from zoom EWZ on: the segment under it outlined (and its imagery), or, off a segment, the one outlined let go.
   // The clicked pixel's card is off for now: a click picks the segment alone
   function segClick(ll) {
     const y = segYearAt(ll);
     if (y == null) { if (seg) { seg = null; update(); } return; }
-    const msg = imageryOf(y);
+    // joined (U): the whole area found, its imagery from the earliest year any of it was found
+    if (st.joined) { pickSeg(ll); if (seg) imageryOf(seg.first); return; }
+    imageryOf(y);
     pickSeg(ll);
-    if (!seg) return;
-    const m2 = seg.n * (AEF_R * 111320) ** 2 * Math.cos((seg.lat * Math.PI) / 180), ac = m2 / 4046.86, ha = m2 / 1e4;
-    const f = (v) => (v >= 100 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1));
-    note(`${f(ac)} acres (${f(ha)} ha)${seg.cut ? ", cut short at the edge of what is read" : ""}. ${msg}`, 3500);
   }
   // a click inside the segment outlined lets it go (and the imagery it brought up)
   function unpickSeg(ll) {
@@ -2015,7 +2149,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!backFromImagery()) { renderYear(); update(); }
     return true;
   }
-  function backFromImagery() { if (!clickImg) return false; endHold("stuck"); renderYear(); return true; }
+  // a click (anywhere) or Esc while a segment's imagery is up: the segment let go too, back to the year map
+  function backFromImagery() { if (!clickImg) return false; seg = null; endHold("stuck"); renderYear(); return true; }
   const onKeyUp = (e) => {
     if (e.key === " ") endHold("key");
     else if (e.key === "Shift") setFilled(false);
@@ -2030,7 +2165,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }, {capture: true, passive: false});
   root.addEventListener("pointermove", (e) => { lastPt = {x: e.clientX, y: e.clientY}; }, true);
   function showHexTip(pt) {
-    if (st.noPick || !map || map.getZoom() < EWZ) { tip.style.display = "none"; return; }
+    if (st.noPick || st.noTip || !map || map.getZoom() < EWZ) { tip.style.display = "none"; return; }
     const r = mapEl.getBoundingClientRect();
     if (pt.x < r.left || pt.x > r.right || pt.y < r.top || pt.y > r.bottom) { tip.style.display = "none"; return; }
     // only over the map itself, never over a card
@@ -2234,6 +2369,12 @@ export function render({model, el, earthwork, s2Items, credits}) {
     else if (/^[eE]$/.test(k)) { st.want = "earth"; const m = drawnMode(); if (m !== st.gmode) { st.gmode = m; recolorHex(); renderYear(); update(); } styleRows(); }
     // Q: the tooltip and picking off and back on
     else if (k === "q" || k === "Q") { st.noPick = !st.noPick; swPick.sty(); tip.style.display = "none"; hover = null; if (st.noPick && cardData) closeCard(); update(); note(st.noPick ? "No tooltip or picking (Q to turn them back on)" : "Tooltip and picking on", 2500); }
+    else if (k === "s" || k === "S") stickS2();
+    else if (k === "v" || k === "V") { setAllLines(!st.allLines); note(st.allLines ? "Everything found outlined on the imagery, up to its year (V to turn off)" : "Outlines on the imagery off", 2000); }
+    else if (k === "u" || k === "U") { setJoined(!st.joined); note(st.joined ? "Segments joined across years (U for one year's)" : "Segments of one year (U to join them across years)", 2000); }
+    else if ((k === "ArrowDown" || k === "ArrowUp") && !e.altKey && !e.metaKey && !e.ctrlKey) { if (stepPatch(k === "ArrowDown" ? 1 : -1)) e.preventDefault(); }
+    else if (k === "r" || k === "R") { setPatches(st.noPatches); swPat.sty(); note(st.noPatches ? "Patches card off (R to list them again)" : "Patches: the year map's finds joined across years, the largest first (R to hide)", 2000); }
+    else if (k === "t" || k === "T") { setNoTip(!st.noTip); note(st.noTip ? "No tooltip (T to turn it back on)" : "Tooltip on", 2000); }
     // the kinds key's Built (W)
     else if (k === "w" || k === "W") { if (st.gmode !== "kinds") return; st.focus = "built"; recolorHex(); styleKey(); update(); }
     else if (k === "p" || k === "P") setPair(!st.pair);
@@ -2241,8 +2382,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // cross-check, A before, off for now)
     // else if (k === "a" || k === "A") setCheck(!st.check);
     else if (k === "a" || k === "A") setSegImg(!st.segImg);
-    // K: the year map's colors, plasma or one color
-    else if (k === "k" || k === "K") setYearMono(!st.yearMono);
+    // K: the year map's colors, plasma, cividis or one color
+    else if (k === "k" || k === "K") setYearRamp(RAMPS[(RAMPS.findIndex(([v]) => v === st.yearRamp) + 1) % RAMPS.length][0]);
     else if (k === "d" || k === "D") { setBase(st.base === "dark" ? "light" : "dark"); note(st.base === "light" ? "Positron, the light basemap (D for dark)" : "Dark Matter, the dark basemap (D for light)", 2000); }
     // I: the paint (Sentinel-2 gray, the lit ground in its colors) or the earthwork layer over the basemap
     // Y: the year map, or back to the earthwork layer over the basemap
@@ -2290,7 +2431,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     else if ((k === "m" || k === "M") && MODELS.length > 1) setModel(MODELS[(MODELS.indexOf(st.model) + 1) % MODELS.length]);
     // full screen (the browser's own; Esc or F again leaves it), filling the window inside it
     else if (k === "f" || k === "F") toggleFull();
-    else if (k === "/") gc.focus();
+    // else if (k === "/") gc.focus();
     // H: every card folded, or all open again
     else if (k === "h" || k === "H") setCards(!cardsHidden);
     else if (k === "o" || k === "O") bMore.onclick(e);
@@ -2338,7 +2479,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     map = new maplibregl.Map({container: mapEl, style: BASES[st.base], center: [home.longitude, home.latitude], zoom: home.zoom, hash: true, ...FLAT});
     map.keyboard.disable();
     map.doubleClickZoom.enable();
-    root._otf = {map, st, cfg: () => cfg, hmeta: () => hmeta, hexShown: () => (hexData && hcol ? hmeta.seq : 0), tiles: () => tlog, s2: () => ({...s2Stat, warm: s2Warm, sources: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.ids.size])), batches: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.batches.length]))})};  // for headless tests
+    root._otf = {map, st, cfg: () => cfg, hmeta: () => hmeta, hexShown: () => (hexData && hcol ? hmeta.seq : 0), tiles: () => tlog, patches: () => patchList, seg: () => seg, ew: earthwork, s2: () => ({...s2Stat, warm: s2Warm, sources: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.ids.size])), batches: Object.fromEntries([...s2Src].map(([y, e]) => [y, e.batches.length]))})};  // for headless tests
     // the + and - zoom buttons, off for now (scroll, a double click or the trackpad zoom)
     // map.addControl(new maplibregl.NavigationControl({showCompass: false}), "bottom-left");
     ov = new MapboxOverlay({interleaved: true, layers: [], onError: (e) => say("deck: " + (e && e.message ? e.message : e))});
@@ -2351,6 +2492,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
       if (st.paint) send("s2comp");
     });
     map.on("moveend", sendView);
+    map.on("moveend", () => { if (st.allLines) { allSeq++; update(); } });
+    map.on("moveend", () => patchesSoon());
     // the paint's false colors are stretched for the view: moved a view's width away or zoomed two
     // levels, the stretch is taken again (once the camera rests), so another place is not drawn in the
     // last one's stretch
@@ -2384,8 +2527,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     map.on("click", (e) => {
       if (suppressClick) { suppressClick = false; return; }
       if (st.noPick) return;
-      if (unpickSeg(e.lngLat)) return;
       if (backFromImagery()) return;
+      if (unpickSeg(e.lngLat)) return;
       if (map.getZoom() >= EWZ) { segClick(e.lngLat); return; }
       const i = hexAt(e.lngLat);
       pickCell(i >= 0 ? hexes[i] : null, e.lngLat, e.point, st.holding);

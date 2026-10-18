@@ -310,7 +310,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
    * imagery under them by 1 + flare (EarthworkFlare and the layer's blend), for a map of its own (the pair's left). It keeps no books (the chunks loaded, the
    * chunks kept for the card), which are the year map's, and its chunks' scores come from the worker's, read once
    */
-  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; check?: boolean; mask?: boolean; mono?: boolean; onTile?: () => void; onViewportLoad?: () => void }) {
+  function yearLayer(opts: { visible: boolean; year: number; years: number[]; model: LayerKind; minZoom: number; flare?: number; flareDim?: boolean; check?: boolean; mask?: boolean; ramp?: "plasma" | "cividis" | "mono"; onTile?: () => void; onViewportLoad?: () => void }) {
     const { visible, year, minZoom, onTile, onViewportLoad } = opts;
     const flare = opts.flare, dim = opts.flareDim ? 1 : 0;
     // as a mask (the imagery in its own colors inside the year map's pixels, yearMaskId): a layer of its own, a mask
@@ -321,7 +321,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     // the cross-check (the year map's own, not the flare's): each year's, made with the scores from the same years (so
     // it reads nothing more) and kept with the tile, so A and a step between years only redraw
     const check = !!opts.check && flare == null && !mask;
-    const mono = !!opts.mono;
+    const ramp = opts.ramp ?? "plasma", mono = ramp === "mono";
     const kind: LayerKind = LAYERS.includes(opts.model) ? opts.model : "aef", ck: ChunkKind = `years-${kind}`;
     const years = opts.years.slice(0, 8), allIdx = years.map((y) => y - YEAR_ORIGIN), lastIdx = allIdx[allIdx.length - 1];
     const shown = years.filter((y) => y <= year).length - 1;
@@ -380,7 +380,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
             // one color (mono): Oranges, pale orange the first year to deep orange the last (short of its brown end, which
             // the dark basemap would swallow)
             { module: EarthworkYearTex, props: { yearTex: d.yearTex, shown, n, hi: mono ? 0.8 : 1 } },
-            ...(g && !mask ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: mono ? COLORMAP_INDEX.oranges : COLORMAP_INDEX.plasma } }] : []),
+            ...(g && !mask ? [{ module: Colormap, props: { colormapTexture: g.colormap, colormapIndex: mono ? COLORMAP_INDEX.oranges : COLORMAP_INDEX[ramp] } }] : []),
             ...(check && d.checkTex ? [{ module: EarthworkYearCheck, props: { checkTex: d.checkTex, h: d.height } }] : []),
           ],
         };
@@ -407,7 +407,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       // texture, contrast and colors kept); dimming, out = dst src, scaled down. Its alpha kept
       ...(flare != null ? { parameters: { blend: true, blendColorOperation: "add", blendColorSrcFactor: dim ? "zero" : "dst", blendColorDstFactor: dim ? "src" : "one", blendAlphaOperation: "add", blendAlphaSrcFactor: "zero", blendAlphaDstFactor: "one" } } : {}),
       // the year shown is only which bits count: a step redraws, it reads nothing
-      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, check, mask, mono] },
+      updateTriggers: { renderTile: [shown, !!g, flare ?? -1, dim, check, mask, ramp] },
       // @ts-expect-error beforeId is read by the MapLibre overlay, not typed on the layer
       beforeId: beforeId(),
     });
@@ -595,70 +595,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     return any ? out : null;
   }
 
-  /**
-   * The year map's segment under a point: the pixels joined to it (by side or corner) whose latest year over the cutoff,
-   * up to `upTo`, is its own, across the chunks in hand. Its outer outline (holes filled) as edges [lon, lat, lon, lat]
-   * (runs along a row or a column merged), its year, its pixels, its center and `has` (a point inside it); `cut` when
-   * a chunk not in hand or the cap stopped it. Null off a segment.
-   */
-  function segmentAt(lon: number, lat: number, upTo: number, model_: LayerKind, max = 1_500_000) {
-    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
-    const ck: ChunkKind = `years-${kind}`, over = 1 + 254 * model.cut[kind];
-    const got = new Map<string, PaintChunk | null>();
-    // the latest year's index up to upTo at a pixel of the whole grid; -1 none, -2 its chunk not in hand
-    const latestAt = (gx: number, gy: number) => {
-      const r = Math.floor(gy / CHUNK), c = Math.floor(gx / CHUNK), k = r + ":" + c;
-      let p = got.get(k);
-      if (p === undefined) got.set(k, (p = paintScores.get(keyOf(0, 0, ck, r, c)) ?? null));
-      if (!p) return -2;
-      const ix = gx - c * CHUNK, iy = gy - r * CHUNK;
-      if (ix >= p.w || iy >= p.h) return -2;
-      const at = p.stride * (iy * p.w + ix);
-      let latest = -1;
-      p.years.forEach((y, ch) => {
-        if (y <= upTo && p.s[at + ch] >= over) latest = ch;
-      });
-      return latest < 0 ? -1 : p.years[latest];
-    };
-    const { px, py } = chunkAt(lon, lat);
-    const year = latestAt(px, py);
-    if (year < 0) return null;
-    // a pixel's key in the whole grid (4,007,520 columns < 2^22)
-    const W = 4194304, key = (gx: number, gy: number) => gy * W + gx;
-    const inSeg = new Set<number>([key(px, py)]);
-    const qx = [px], qy = [py];
-    let cut = false, sx = 0, sy = 0;
-    for (let q = 0; q < qx.length; q++) {
-      const x = qx[q], y = qy[q];
-      sx += x;
-      sy += y;
-      for (let dy = -1; dy <= 1; dy++)
-        for (let dx = -1; dx <= 1; dx++) {
-          if (!dx && !dy) continue;
-          const nx = x + dx, ny = y + dy, k = key(nx, ny);
-          if (inSeg.has(k)) continue;
-          const v = latestAt(nx, ny);
-          if (v === -2) cut = true;
-          if (v !== year) continue;
-          if (inSeg.size >= max) {
-            cut = true;
-            continue;
-          }
-          inSeg.add(k);
-          qx.push(nx);
-          qy.push(ny);
-        }
-    }
-    // the segment row by row as runs [start, end) of columns, and the gaps between a row's runs
-    const xsOf = new Map<number, number[]>();
-    for (let q = 0; q < qx.length; q++) {
-      const a = xsOf.get(qy[q]);
-      if (a) a.push(qx[q]);
-      else xsOf.set(qy[q], [qx[q]]);
-    }
-    type Run = [number, number];
-    const runsOf = new Map<number, Run[]>(), gapsOf = new Map<number, { s: number; e: number; id: number }[]>();
-    const parent = [0]; // gap ids from 1; 0 is the outside
+  type Run = [number, number];
+  /** A row's columns (unsorted) as runs [start, end), row by row. */
+  function runsFrom(xsOf: Map<number, number[]>) {
+    const runsOf = new Map<number, Run[]>();
     for (const [y, xs] of xsOf) {
       xs.sort((u, v) => u - v);
       const rs: Run[] = [];
@@ -668,12 +608,24 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         else rs.push([x, x + 1]);
       }
       runsOf.set(y, rs);
+    }
+    return runsOf;
+  }
+
+  /**
+   * The outer outline of pixels given row by row as runs [start, end) of the whole grid's columns, holes filled: edges
+   * [lon, lat, lon, lat] (runs along a row or a column merged), and the rows' runs with their holes filled.
+   */
+  function traceOutline(runsOf: Map<number, Run[]>) {
+    const gapsOf = new Map<number, { s: number; e: number; id: number }[]>();
+    const parent = [0]; // gap ids from 1; 0 is the outside
+    for (const [y, rs] of runsOf) {
       const gs = [];
       for (let i = 1; i < rs.length; i++) gs.push({ s: rs[i - 1][1], e: rs[i][0], id: parent.push(parent.length) - 1 });
       gapsOf.set(y, gs);
     }
     // a gap is a hole unless it reaches the outside through the gaps above and below it (by side, the segment being
-    // joined by corner too); holes are filled, so only the segment's outer edge is drawn
+    // joined by corner too); holes are filled, so only the outer edge is drawn
     const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
     const join = (i: number, j: number) => void (parent[find(i)] = find(j));
     for (const [y, gs] of gapsOf)
@@ -741,6 +693,241 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       }
     };
     runs(cols, (l, a, b) => edges.push([lonOf(l), latOf(a), lonOf(l), latOf(b)]));
+    return { edges, filled };
+  }
+
+  /**
+   * The outlines of everything the year map found (any year up to `upTo`) in the chunks over a box, joined across years
+   * and holes filled, as edges [lon, lat, lon, lat]; chunks not in hand count as nothing found. Null over more than
+   * `maxPx` pixels.
+   */
+  function outlinesIn(bbox: [number, number, number, number], upTo: number, model_: LayerKind, maxPx = 12_000_000) {
+    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
+    const ck: ChunkKind = `years-${kind}`, over = 1 + 254 * model.cut[kind];
+    const [W, S, E, N] = bbox;
+    const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
+    const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
+    if ((r1 - r0 + 1) * (c1 - c0 + 1) * CHUNK * CHUNK > maxPx) return null;
+    const runsOf = new Map<number, Run[]>();
+    for (let r = r0; r <= r1; r++)
+      for (let c = c0; c <= c1; c++) {
+        const p = paintScores.get(keyOf(0, 0, ck, r, c));
+        if (!p) continue;
+        const chs = p.years.flatMap((y, ch) => (y <= upTo ? [ch] : []));
+        if (!chs.length) continue;
+        for (let iy = 0; iy < p.h; iy++) {
+          const gy = r * CHUNK + iy;
+          let rs = runsOf.get(gy);
+          for (let ix = 0; ix < p.w; ix++) {
+            const at = p.stride * (iy * p.w + ix);
+            let hit = false;
+            for (const ch of chs) if (p.s[at + ch] >= over) { hit = true; break; }
+            if (!hit) continue;
+            const gx = c * CHUNK + ix;
+            if (!rs) runsOf.set(gy, (rs = []));
+            const last = rs[rs.length - 1];
+            if (last && last[1] === gx) last[1] = gx + 1;
+            else rs.push([gx, gx + 1]);
+          }
+        }
+      }
+    // a row's runs come chunk by chunk from the west, in order, a run going on across a chunk's edge
+    return traceOutline(runsOf).edges;
+  }
+
+  /**
+   * Found ground this many pixels apart or less still joins into one patch (a building and its graded lot with a road or
+   * a curb between them): 1, ten meters, one pixel not found between them.
+   */
+  const PATCH_GAP = 1;
+
+  /**
+   * The patches the year map found over a box: every pixel found in any year up to `upTo` joined to its neighbors (by
+   * side or corner, or across a gap of PATCH_GAP pixels) whatever its year, one patch, as the joined segment is. The `limit` largest, largest first, and how
+   * many there were. Each: its pixels `n`, hectares, center, box [W, S, E, N], a pixel in it (`at`), `years` (pixels
+   * first found each year, by `yearList`), `first` its earliest year, `main` the year most of it was first found, `last` the latest year any of it was.
+   * Chunks not in hand count as nothing found.
+   */
+  function patchesIn(bbox: [number, number, number, number], upTo: number, model_: LayerKind, limit = 40) {
+    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
+    const ck: ChunkKind = `years-${kind}`, over = 1 + 254 * model.cut[kind];
+    const [W, S, E, N] = bbox;
+    const c0 = Math.floor((W - X0) / RES / CHUNK), c1 = Math.floor((E - X0) / RES / CHUNK);
+    const r0 = Math.floor((Y0 - N) / RES / CHUNK), r1 = Math.floor((Y0 - S) / RES / CHUNK);
+    // the runs found, row by row from the north, each row from the west: row, start, end, its pixels' first years in fy
+    const ry: number[] = [], rs: number[] = [], re: number[] = [], rf: number[] = [];
+    let fy = new Uint8Array(1 << 20), nf = 0;
+    const parent: number[] = [];
+    const find = (i: number): number => {
+      while (parent[i] !== i) i = parent[i] = parent[parent[i]];
+      return i;
+    };
+    const yearSet = new Set<number>();
+    // each row's runs [start, end) in the run arrays, for the rows above PATCH_GAP + 1 back
+    const rowRuns = new Map<number, [number, number]>();
+    const join = (i: number, j: number) => {
+      const x = find(i), y = find(j);
+      if (x !== y) parent[x] = y;
+    };
+    for (let r = r0; r <= r1; r++) {
+      const ps: (PaintChunk | null)[] = [];
+      const chs: number[][] = [];
+      for (let c = c0; c <= c1; c++) {
+        const p = paintScores.get(keyOf(0, 0, ck, r, c)) ?? null;
+        ps.push(p);
+        chs.push(p ? p.years.flatMap((y, ch) => (y <= upTo ? [ch] : [])) : []);
+        if (p) for (const y of p.years) if (y <= upTo) yearSet.add(y);
+      }
+      for (let iy = 0; iy < CHUNK; iy++) {
+        const gy = r * CHUNK + iy, cur0 = ry.length;
+        let open = -1; // the run going on, -1 none
+        for (let j = 0; j < ps.length; j++) {
+          const p = ps[j], ch = chs[j];
+          if (!p || iy >= p.h || !ch.length) { open = -1; continue; }
+          const gx0 = (c0 + j) * CHUNK;
+          for (let ix = 0; ix < p.w; ix++) {
+            const at = p.stride * (iy * p.w + ix);
+            let first = -1;
+            for (const k of ch) if (p.s[at + k] >= over) { first = p.years[k]; break; }
+            if (first < 0) { open = -1; continue; }
+            if (nf === fy.length) { const g = new Uint8Array(fy.length * 2); g.set(fy); fy = g; }
+            fy[nf++] = first - 2000;
+            const gx = gx0 + ix;
+            if (open >= 0 && re[open] === gx) re[open] = gx + 1;
+            else {
+              open = ry.length;
+              ry.push(gy); rs.push(gx); re.push(gx + 1); rf.push(nf - 1); parent.push(open);
+              // the run before it in this row, across a gap of PATCH_GAP pixels or less
+              if (open > cur0 && gx - re[open - 1] <= PATCH_GAP) join(open, open - 1);
+            }
+          }
+          if (p.w < CHUNK) open = -1;
+        }
+        // join this row's runs to the runs of the rows above within PATCH_GAP + 1 pixels (by side or corner, or across
+        // the gap)
+        for (let d = 1; d <= PATCH_GAP + 1; d++) {
+          const up = rowRuns.get(gy - d);
+          if (!up) continue;
+          const [p0, p1] = up;
+          let a = p0;
+          for (let b = cur0; b < ry.length; b++) {
+            while (a < p1 && re[a] < rs[b] - PATCH_GAP) a++;
+            for (let k = a; k < p1 && rs[k] <= re[b] + PATCH_GAP; k++) join(b, k);
+          }
+        }
+        if (ry.length > cur0) rowRuns.set(gy, [cur0, ry.length]);
+        rowRuns.delete(gy - PATCH_GAP - 2);
+      }
+    }
+    const yearList = [...yearSet].sort((u, v) => u - v), yi = new Map(yearList.map((y, i) => [y - 2000, i]));
+    type P = { n: number; sx: number; sy: number; x0: number; x1: number; y0: number; y1: number; ax: number; ay: number; years: number[] };
+    const by = new Map<number, P>();
+    for (let i = 0; i < ry.length; i++) {
+      const root = find(i);
+      let q = by.get(root);
+      if (!q) by.set(root, (q = { n: 0, sx: 0, sy: 0, x0: rs[i], x1: re[i], y0: ry[i], y1: ry[i], ax: rs[i], ay: ry[i], years: yearList.map(() => 0) }));
+      const len = re[i] - rs[i];
+      q.n += len;
+      q.sx += len * (rs[i] + re[i] - 1) / 2;
+      q.sy += len * ry[i];
+      q.x0 = Math.min(q.x0, rs[i]);
+      q.x1 = Math.max(q.x1, re[i]);
+      q.y0 = Math.min(q.y0, ry[i]);
+      q.y1 = Math.max(q.y1, ry[i] + 1);
+      for (let k = rf[i]; k < rf[i] + len; k++) q.years[yi.get(fy[k])!]++;
+    }
+    const lonOf = (gx: number) => X0 + gx * RES, latOf = (gy: number) => Y0 - gy * RES;
+    const all = [...by.values()].sort((u, v) => v.n - u.n);
+    const patches = all.slice(0, limit).map((q) => {
+      const lat = latOf(q.sy / q.n + 0.5), m = Math.max(...q.years);
+      return {
+        n: q.n,
+        ha: (q.n * (RES * 111320) ** 2 * Math.cos((lat * Math.PI) / 180)) / 1e4,
+        lon: lonOf(q.sx / q.n + 0.5),
+        lat,
+        box: [lonOf(q.x0), latOf(q.y1), lonOf(q.x1), latOf(q.y0)] as [number, number, number, number],
+        at: [lonOf(q.ax + 0.5), latOf(q.ay + 0.5)] as [number, number],
+        years: q.years,
+        first: yearList[q.years.findIndex((v) => v > 0)],
+        main: yearList[q.years.indexOf(m)],
+        last: yearList[q.years.length - 1 - [...q.years].reverse().findIndex((v) => v > 0)],
+      };
+    });
+    return { patches, total: all.length, yearList };
+  }
+
+  /**
+   * The year map's segment under a point: the pixels joined to it (by side or corner) whose latest year over the cutoff,
+   * up to `upTo`, is its own, across the chunks in hand. Its outer outline (holes filled) as edges [lon, lat, lon, lat]
+   * (runs along a row or a column merged), its year, its pixels, its center and `has` (a point inside it); `cut` when
+   * a chunk not in hand or the cap stopped it. Null off a segment. `joined`: every pixel found in any year up to `upTo`
+   * joined to it, whatever its year, as one, across a gap of PATCH_GAP pixels as a patch is; `first` the earliest year any of its pixels was found.
+   */
+  function segmentAt(lon: number, lat: number, upTo: number, model_: LayerKind, joined = false, max = 1_500_000) {
+    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef";
+    const ck: ChunkKind = `years-${kind}`, over = 1 + 254 * model.cut[kind];
+    const got = new Map<string, PaintChunk | null>();
+    // the latest year's index up to upTo at a pixel of the whole grid; -1 none, -2 its chunk not in hand
+    const latestAt = (gx: number, gy: number) => {
+      const r = Math.floor(gy / CHUNK), c = Math.floor(gx / CHUNK), k = r + ":" + c;
+      let p = got.get(k);
+      if (p === undefined) got.set(k, (p = paintScores.get(keyOf(0, 0, ck, r, c)) ?? null));
+      if (!p) return -2;
+      const ix = gx - c * CHUNK, iy = gy - r * CHUNK;
+      if (ix >= p.w || iy >= p.h) return -2;
+      const at = p.stride * (iy * p.w + ix);
+      let latest = -1;
+      p.years.forEach((y, ch) => {
+        if (y <= upTo && p.s[at + ch] >= over) latest = ch;
+      });
+      return latest < 0 ? -1 : p.years[latest];
+    };
+    // the earliest year found up to upTo at a pixel found (its chunk in hand)
+    const firstAt = (gx: number, gy: number) => {
+      const r = Math.floor(gy / CHUNK), c = Math.floor(gx / CHUNK), p = got.get(r + ":" + c)!;
+      const at = p.stride * ((gy - r * CHUNK) * p.w + gx - c * CHUNK);
+      return p.years.find((y, ch) => y <= upTo && p.s[at + ch] >= over)!;
+    };
+    const { px, py } = chunkAt(lon, lat);
+    const year = latestAt(px, py);
+    if (year < 0) return null;
+    // a pixel's key in the whole grid (4,007,520 columns < 2^22)
+    const W = 4194304, key = (gx: number, gy: number) => gy * W + gx;
+    const inSeg = new Set<number>([key(px, py)]);
+    const qx = [px], qy = [py];
+    let cut = false, sx = 0, sy = 0, first = year;
+    const reach = joined ? PATCH_GAP + 1 : 1;
+    for (let q = 0; q < qx.length; q++) {
+      const x = qx[q], y = qy[q];
+      sx += x;
+      sy += y;
+      if (joined) first = Math.min(first, firstAt(x, y));
+      for (let dy = -reach; dy <= reach; dy++)
+        for (let dx = -reach; dx <= reach; dx++) {
+          if (!dx && !dy) continue;
+          const nx = x + dx, ny = y + dy, k = key(nx, ny);
+          if (inSeg.has(k)) continue;
+          const v = latestAt(nx, ny);
+          if (v === -2) cut = true;
+          if (joined ? v < 0 : v !== year) continue;
+          if (inSeg.size >= max) {
+            cut = true;
+            continue;
+          }
+          inSeg.add(k);
+          qx.push(nx);
+          qy.push(ny);
+        }
+    }
+    // the segment's pixels row by row
+    const xsOf = new Map<number, number[]>();
+    for (let q = 0; q < qx.length; q++) {
+      const a = xsOf.get(qy[q]);
+      if (a) a.push(qx[q]);
+      else xsOf.set(qy[q], [qx[q]]);
+    }
+    const { edges, filled } = traceOutline(runsFrom(xsOf));
+    const lonOf = (gx: number) => X0 + gx * RES, latOf = (gy: number) => Y0 - gy * RES;
     const n = qx.length;
     // a point inside the outline (a hole's too)
     const has = (lon_: number, lat_: number) => {
@@ -755,7 +942,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       }
       return false;
     };
-    return { year, n, cut, edges, has, lon: lonOf(sx / n + 0.5), lat: latOf(sy / n + 0.5) };
+    return { year, first, n, cut, edges, has, lon: lonOf(sx / n + 0.5), lat: latOf(sy / n + 0.5) };
   }
 
   /**
@@ -821,6 +1008,8 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     scoreAt,
     detectedAt,
     segmentAt,
+    outlinesIn,
+    patchesIn,
     checkAt,
     readAt,
     chunksIn,
