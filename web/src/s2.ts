@@ -1,7 +1,7 @@
 /**
  * Sentinel-2 footprints for the map, found in the page: single scenes from the
  * official bucket (sentinel-2-l2a COGs on AWS's open data, sentinel-cogs), found
- * through Element 84's Earth Search. Each MGRS tile's clearest scene of the year
+ * through Element 84's Earth Search. Each MGRS tile's clearest leaf-on scene of the year
  * is the yearly, and the next two clearest are the fill under its clouds and
  * edges; the year still in progress weighs age too, so it shows the ground as it
  * is now. The map reads and draws each footprint's TCI COG itself (ui.js,
@@ -48,8 +48,28 @@ const scenes = new Map<string, Promise<EsFeature[][]>>();
 const MONTH_NOW = 1;
 
 /**
+ * The leaf-on season, as days of the year (mid May to mid September north of the tropics, mid November to mid March
+ * south of them): a year gone by ranks every scene in it ahead of every scene outside it, so the years compare in the
+ * same season and the change between them is the ground's, not the leaves'. A year with none in season falls back to the
+ * rest. Inside the tropics the season is left out.
+ */
+const SEASON_NORTH: [number, number] = [135, 258];
+const SEASON_SOUTH: [number, number] = [319, 75];
+const SEASON_PENALTY = 1000;
+function outOfSeason(datetime: string, lat: number): boolean {
+  if (Math.abs(lat) < 23.5) return false;
+  const t = Date.parse(datetime);
+  if (!t) return true;
+  const doy = Math.floor((t - Date.UTC(new Date(t).getUTCFullYear(), 0, 1)) / 864e5) + 1;
+  const [a, b] = lat >= 0 ? SEASON_NORTH : SEASON_SOUTH;
+  // the south's season runs past the new year
+  return a <= b ? doy < a || doy > b : doy < a && doy > b;
+}
+
+/**
  * For each MGRS tile under the box, its scenes of the year ranked: fewest clouds, then the least of the tile left
- * empty by the swath's edge; the year in progress adds each scene's age to that. Scenes the browser cannot read are
+ * empty by the swath's edge; a year gone by puts the leaf-on season's first (outOfSeason), the year in progress adds
+ * each scene's age to that. Scenes the browser cannot read are
  * left out: a few in 2017 to 2020 point at the old JPEG2000 files (s3://sentinel-s2-l2a, no COG), and one of those
  * as the base left every cloud cut over it a hole.
  */
@@ -69,8 +89,13 @@ function sceneLists(year: number, bbox: number[]): Promise<EsFeature[][]> {
         sortby: [now ? { field: "properties.datetime", direction: "desc" } : { field: "properties.eo:cloud_cover", direction: "asc" }],
         limit: 200,
         // the footprints and links left out (the bbox is enough): whole, 200 scenes can be more than Earth Search
-        // answers with (2019 over Ashburn, sorted by cloud: a 502 every time, which the browser reports as CORS)
-        fields: { exclude: ["geometry", "links"] },
+        // answers with (2019 over Ashburn, sorted by cloud: a 502 every time, which the browser reports as CORS). The
+        // properties the ranking and the reads use named, or an exclude alone answers with the datetime only
+        fields: {
+          include: ["id", "bbox", "assets", "properties.datetime", "properties.eo:cloud_cover", "properties.s2:nodata_pixel_percentage",
+            "properties.grid:code", "properties.s2:mgrs_tile", "properties.proj:epsg"],
+          exclude: ["geometry", "links"],
+        },
       });
     // kept on disk: a year gone by for a week (Earth Search adds little to it), the year in progress for hours. Only
     // an answer with scenes in it: Earth Search sometimes answers a search with none (or few) of a year that has them,
@@ -118,8 +143,11 @@ function sceneLists(year: number, bbox: number[]): Promise<EsFeature[][]> {
         const rank = (f: EsFeature) => cloud(f) + 0.5 * empty(f);
         const months = (f: EsFeature) => (Date.now() - (Date.parse(String(f.properties.datetime ?? "")) || 0)) / (30 * 864e5);
         const rankNow = (f: EsFeature) => rank(f) + MONTH_NOW * months(f);
+        // a year gone by: the leaf-on season's scenes first, whatever their clouds
+        const lat = (bbox[1] + bbox[3]) / 2;
+        const rankPast = (f: EsFeature) => rank(f) + (outOfSeason(String(f.properties.datetime ?? ""), lat) ? SEASON_PENALTY : 0);
         const lists = [...byTile.values()];
-        for (const l of lists) l.sort((a, b) => (now ? rankNow(a) - rankNow(b) : rank(a) - rank(b)));
+        for (const l of lists) l.sort((a, b) => (now ? rankNow(a) - rankNow(b) : rankPast(a) - rankPast(b)));
         return lists;
       });
     p.catch(() => scenes.delete(k));

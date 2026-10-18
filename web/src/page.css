@@ -180,11 +180,12 @@ body {
   --col: var(--rcol, 264px);
   position: absolute;
   right: 12px;
-  top: 54px;
+  top: 12px;
   z-index: 6;
   width: var(--col);
   max-width: calc(50vw - 24px);
-  max-height: calc(100% - 96px);
+  /* clear of the credits at the bottom right */
+  max-height: calc(100% - 56px);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -533,13 +534,19 @@ body {
 .at .ew-yk .later:hover { opacity: 0.7; }
 .at .ew-yk > button.on, .at .ew-yk > button.on.later { opacity: 1; background: var(--text); color: var(--on); }
 
-/* the patches card (R): under the imagery's card, the search's width, its list scrolling inside it */
+/* the patches card (R): in the right column under the years' legend, its width; the list scrolls inside it and gives
+   way to the cards under it */
 .at .at-yc.ew-patches {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
   position: relative;
   right: auto;
   top: auto;
-  width: 212px;
+  width: 100%;
+  /* the cards' own max-width (24 px short of the column) left it narrower than the legend over it */
+  max-width: none;
   padding: 8px 6px 6px 12px;
   border-radius: 10px;
 }
@@ -562,6 +569,8 @@ body {
 .ew-pl {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  flex: 0 1 auto;
   max-height: calc(100vh - 290px);
   overflow-y: auto;
   margin-right: -2px;
@@ -625,4 +634,30 @@ body {
   line-height: 1.3;
   color: var(--muted);
   margin: 5px 4px 0 2px;
+}
+
+/* the year map's legend, at the top of the right column where the buttons were: the first year, a step a year, the last */
+.ew-yleg {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ew-yleg i {
+  display: flex;
+  flex: 1;
+  height: 10px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ew-yleg b {
+  flex: 1;
 }

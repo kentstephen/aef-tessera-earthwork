@@ -8,6 +8,7 @@ import {MapLibreOverlay as MapboxOverlay} from "@deck.gl/maplibre";
 import {BitmapLayer, LineLayer, PathLayer} from "@deck.gl/layers";
 import {TileLayer} from "@deck.gl/geo-layers";
 import {MaskExtension} from "@deck.gl/extensions";
+import {COORDINATE_SYSTEM, LayerExtension} from "@deck.gl/core";
 import {COGLayer, MosaicLayer} from "@developmentseed/deck.gl-geotiff";
 import {CreateTexture} from "@developmentseed/deck.gl-raster/gpu-modules";
 import {DecoderPool, GeoTIFF, PerOriginSemaphore} from "@developmentseed/geotiff";
@@ -207,6 +208,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
   let patchBox = null, patchKey = "", patchT = null, patchList = null, patchOn = null, ewSeq = 0, pcFolded = keep("patchesfold");
   const PATCH_MAX = cfg.patch_max || 40;
   st.noPatches = keep("nopatches");
+  // the spotlight: V lights every listed patch over the imagery, the rest dimmed; a patch picked is lit alone. J: the rest
+  // dark or gray. spotK: how far the dimming is in (0 none, 1 full), faded in and out
+  st.spotAll = false; st.spotGray = keep("spotgray");
+  let spotK = 0, spotRaf = 0;
   const panelHd = el_("div", "at-hd", `<span class="t">Earthwork</span>`);
   const panelCb = el_("button", "at-cb", ICON.chev);
   const panelRamp = el_("i", "at-ramp ew-hramp");
@@ -333,7 +338,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
   rFrom.addEventListener("change", winRelease); rTo.addEventListener("change", winRelease);
   try { new ResizeObserver(styleWin).observe(win); } catch (e) {}
   function styleKey() {
-    patchesSoon();
+    patchesSoon(); renderLegend();
     const y0 = hmeta.y0 || st.y0, y1 = hmeta.y1 || st.y1;
     const out_ = map && map.getZoom() < EWZ;
     // the title is what is drawn, open or folded
@@ -396,7 +401,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const pc = el_("div", "at-yc ew-patches at-glass");
   // the search is left out for now (its box and the / key)
   // top.append(search, s2c, pc);
-  top.append(s2c, pc);
+  // the patches card is in the right column, under the years' legend (ewCol below)
+  top.append(s2c);
   pane.appendChild(top);
   // the pair's right column: the Earthwork panel and the hexagon card move in (setPair)
   const rcol = el_("div", "at-rcol");
@@ -419,6 +425,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
   let cardsHidden = keep("readout");
   function setCards(hidden) { cardsHidden = hidden; keep("readout", hidden); root.classList.toggle("ew-read-hidden", hidden); bHide.classList.toggle("on", hidden); }
   pane.appendChild(tools);
+  // the buttons hidden for now (their keys still work: P, O, H, F); in their place, the year map's colors, a step a year,
+  // its first and last year at the ends
+  tools.style.display = "none";
+  const yleg = el_("div", "ew-yleg at-glass");
+  // in the right column, its first card (ewCol below)
+  function renderLegend() {
+    const on = st.yearMap && st.gmode === "earth";
+    yleg.style.display = on ? "" : "none";
+    if (!on) return;
+    yleg.innerHTML = `<span>${DY[0]}</span><i>${DY.map((y) => `<b style="background:${yearColor(y)}"></b>`).join("")}</i><span>${DY[DY.length - 1]}</span>`;
+    yleg.title = `Where the ground was likely dug, filled or graded, in the color of the latest year it was, ${DY[0]} to ${DY[DY.length - 1]}`;
+  }
   const yc = el_("div", "at-yc at-glass");
   // the old floating hexagon card: kept hidden (the hexagon drops down in the top right card)
   const fc = el_("div", "at-yc at-fc at-glass");
@@ -426,7 +444,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
   pane.appendChild(fc);
   pane.appendChild(rcol);
   const ewCol = el_("div", "ew-col-r");
-  ewCol.append(panel, yc);
+  // the years' legend, the patches under it, then Earthwork's settings and the readout
+  ewCol.append(yleg, pc, panel, yc);
   pane.appendChild(ewCol);
   // the right column is the button row's width, so its cards line up under the buttons, edge to edge
   const fitCol = () => { if (tools.offsetWidth) root.style.setProperty("--rcol", tools.offsetWidth + "px"); };
@@ -556,6 +575,18 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const swAll = sw(() => st.allLines, (v) => setAllLines(v));
   swAll.title = "over the imagery, the outlines of everything found up to its year, joined across years: they appear and grow as the years step (V)";
   rAll.append(swAll, el_("span", "at-pick", "<span>On the imagery</span><kbd>V</kbd>"));
+  // its key is the spotlight's now: the row hidden for now
+  rAll.style.display = "none";
+  // the spotlight (V): every listed patch lit over the imagery, the rest dark or gray (J)
+  const rSpot = rowOf("Spotlight");
+  const swSpot = sw(() => st.spotAll, (v) => setSpotAll(v));
+  swSpot.title = "every listed patch lit over the imagery, the rest dimmed (V)";
+  rSpot.append(swSpot, el_("span", "at-pick", "<span>Patches lit</span><kbd>V</kbd>"));
+  const rAround = rowOf("Around them");
+  const styleSpotGray = segOf(rAround, [["dark", "Dark", "the imagery around the patches darkened", ""], ["gray", "Gray", "the imagery around the patches in gray", ""]], (k) => (k === "gray") === st.spotGray, (k) => setSpotGray(k === "gray"));
+  rAround.querySelector(".seg-s").classList.remove("col");
+  rAround.appendChild(el_("kbd", "at-mkey", "J"));
+  styleSpotGray();
   // the patches card on the year map (R)
   const rPat = rowOf("Patches");
   const swPat = sw(() => !st.noPatches, (v) => setPatches(v));
@@ -607,8 +638,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     <h2>Earthwork</h2>
     <p><b>Earthwork</b> is the chance the ground itself was dug, filled or graded between the first and last year read: a model on AlphaEarth and TESSERA taught where repeat lidar flew the same ground twice, in the US and abroad. The map shows Sentinel-2 in gray, in its own colors where the chance is over the layer's cutoff (I shows the chance itself on the basemap instead). Pair (P) with Sentinel-2 to see the ground as it is.</p>
     <p>Earthwork is scored on your GPU for every 10 m pixel, from zoom ${EWZ}. <b>Click</b> a spot for its account.</p>
-    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
-    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; S the imagery kept on without holding, S again back; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; T the tooltip alone; U a click's segment joined across years (its imagery from the earliest year found); V everything found outlined on the imagery, up to its year; R the patches card (the year map's finds joined across years, the largest first; a row, or down and up, flies to the patch, outlines it and brings up the imagery from its first year, ] to step on, click or Esc to go back); D the basemap, dark or light (Positron); A the year map's calls in the colors of the Sentinel-2 year shown (the basemap everywhere else), or back to the years' colors; K the years' colors, plasma, cividis or one color (pale orange the first year, deep orange the latest); H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); Esc close.</small></p>
+    <p><b>Hold space</b> to see the Sentinel-2 yearly imagery (each year's clearest Sentinel-2 day in the leaf-on season, and this year's latest clear day) in full color; scroll while holding to step through the years. The gray map has its own year, ${PY[PY.length - 1]} to start (the ground as it is now; step back to see it dug): [ and ] step it, B jumps between ${S2Y[0]} and ${S2Y[S2Y.length - 1]}, and holding Shift fills it in with the imagery's own colors.</p>
+    <p><small>Keys: Y the year map (where the ground was likely dug, in the color of the latest year it was; [ and ] its year, B its first or its latest); I the gray map or the earthwork layer; [ and ] the gray map's year, B its first year or its latest, hold Shift to fill it in; hold space for the imagery, scroll or [ and ] for its year, B its first year or its latest; S the imagery kept on without holding, S again back; N a new look for the imagery's year (each tile's next clearest scene), Shift+N back; paired, a year clicked in the year map's key lights its finds (dug that year) on the imagery and the year map, clicked again turns them off (Shift+G switches between brightening them and dimming the rest); C the imagery's colors (the gray map's and the plain imagery's apart); P pairs the map with Sentinel-2; M switches the layer (Aggregate, AEF, TESSERA); Q the tooltip and picking off and on; T the tooltip alone; U a click's segment joined across years (its imagery from the earliest year found); V every listed patch lit over the imagery, the rest dimmed; J the rest dark or gray; R the patches card (the year map's finds joined across years, the largest first; a row, or down and up, flies to the patch, dims the rest and plays the imagery before it was dug, the year it was, and now; click or Esc to go back); D the basemap, dark or light (Positron); A the year map's calls in the colors of the Sentinel-2 year shown (the basemap everywhere else), or back to the years' colors; K the years' colors, plasma, cividis or one color (pale orange the first year, deep orange the latest); H hides and shows the readout; the arrows fold the cards; O settings; ? this page; Shift + left and right turn the map; F full screen; ; and ' its brightness; L place names (all, cities, major, none); Esc close.</small></p>
     <p><small>AlphaEarth Foundations by Google and Google DeepMind (CC BY 4.0). ESA WorldCover 10 m 2021 v200, contains modified Copernicus Sentinel data processed by the ESA WorldCover consortium (CC BY 4.0). Impact Observatory, Microsoft and Esri 10 m annual land use and land cover v02, via Microsoft Planetary Computer (CC BY 4.0). Overture Maps transportation and land use, &copy;&nbsp;OpenStreetMap contributors (ODbL), from Overture's PMTiles. Sentinel-2 L2A, contains modified Copernicus Sentinel data, from the sentinel-cogs bucket on the Registry of Open Data on AWS, found through Element 84's Earth Search. Place names from Overture Maps divisions, &copy;&nbsp;OpenStreetMap contributors, Overture Maps Foundation (ODbL), with geoBoundaries, Esri Community Maps contributors and LINZ (CC BY 4.0): the PMTiles and, via Source Cooperative, fused/overture. Search by Photon (Komoot) and Nominatim over OpenStreetMap (ODbL). Basemap by Carto.</small></p>
     <div style="margin-top:12px"><button class="at-chip">Close</button></div></div>`;
   pane.appendChild(about);
@@ -1303,6 +1334,32 @@ export function render({model, el, earthwork, s2Items, credits}) {
   const PAINT = new PaintExtension();
   // the mask is the earthwork layer itself (one per layer: every year is in it)
   const paintProps = () => ({extensions: [PAINT], maskId: earthwork.layerId(...winOf(), kindOf()), maskByInstance: false});
+  // the spotlight: the imagery outside the patches (the mask) darkened or grayed by spotK, inside as it is
+  const SPOT_FILL = {name: "spotFill", fs: "layout(std140) uniform spotFillUniforms {\n  float k;\n  float gray;\n} spotFill;\n", uniformTypes: {k: "f32", gray: "f32"}};
+  const SPOT_MOD = {...MASK_MOD, inject: {...maskInject, "fs:#main-end": `
+  if (mask.enabled && spotFill.k > 0.0 && !mask_isInBounds(mask_texCoords)) {
+    float l = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    vec3 o = mix(fragColor.rgb * 0.3, vec3(l) * 0.8, spotFill.gray);
+    fragColor.rgb = mix(fragColor.rgb, o, spotFill.k);
+  }
+`}};
+  class SpotExtension extends MaskExtension {
+    getShaders() { this.state.maskByInstance = false; return {modules: [SPOT_MOD, SPOT_FILL]}; }
+    draw(params, ext) { super.draw(params, ext); this.setShaderModuleProps({spotFill: {k: spotK, gray: st.spotGray ? 1 : 0}}); }
+  }
+  SpotExtension.extensionName = "SpotExtension";
+  const SPOT = new SpotExtension();
+  // the spotlight's mask: a bitmap of the patches' pixels, its clear pixels dropped so only the patches count
+  class DiscardClear extends LayerExtension {
+    getShaders() { return {inject: {"fs:DECKGL_FILTER_COLOR": "if (color.a < 0.5) discard;"}}; }
+  }
+  DiscardClear.extensionName = "DiscardClear";
+  const DISCARD_CLEAR = new DiscardClear();
+  // a BitmapLayer gives deck no bounds (its positions are not kept), so its mask was never drawn: its own bounds here
+  class SpotMaskLayer extends BitmapLayer {
+    getBounds() { const [w, s_, e, n] = this.props.bounds; return [[w, s_], [e, n]]; }
+  }
+  SpotMaskLayer.layerName = "SpotMaskLayer";
   // the imagery in the calls: the year map is the mask, the imagery outside it dropped (the basemap shows there)
   const SEG_MASK = new MaskExtension();
   const segPaint = () => !!map && st.yearMap && st.segImg && !st.holding && map.getZoom() >= EWZ;
@@ -1594,7 +1651,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     cfg.s2_stretch = {comp, box, ...(got || Object.fromEntries(bands.map((bd) => [bd, 3000])))};
     renderYear(); update();
   }
-  const s2CogLayers = (year, left = false, seg = false) => {
+  const s2CogLayers = (year, left = false, seg = false, spot = false) => {
     s2PoolGet();
     const e = s2Src.get(year);
     if (!e || !map) return [];
@@ -1604,14 +1661,14 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // every parent's visible on each draw. Hidden years still load their tiles
     // seg: the imagery in the calls, a set of its own kept mounted beside the plain one, so space held and let go
     // only switches which set shows (nothing made again)
-    const visible = (seg ? segPaint() : left ? st.pair && st.left === "s2" : st.holding || st.paint) && year === yearOf(left);
+    const visible = (seg ? segPaint() : spot ? true : left ? st.pair && st.left === "s2" : (st.holding || st.paint) && !spotOn()) && year === yearOf(left);
     // the paint's mask only while painting: the year map and the earthwork layer are no mask (deck.gl: "Could not find a
     // mask layer"), so over them the imagery is drawn as it is
-    const paint = () => (seg ? segProps() : left || !st.paint ? {} : paintProps());
+    const paint = () => (seg ? segProps() : spot ? {extensions: [SPOT], maskId: "spot-mask", maskByInstance: false} : left || !st.paint ? {} : paintProps());
     const gamma = Number(st.s2scale) || 1, comp = S2_FALSE[compOf(left)] ? compOf(left) : "tci";
     // the imagery in the calls: layers of their own, made with the mask from their first tile (a tile layer made
     // without it and given it later keeps its tiles' old drawing, with no mask to read, and draws nothing)
-    const pre = (left ? "s2gl-" : "s2g-") + (seg ? "seg-" : "") + (comp === "tci" ? "" : comp + "-");
+    const pre = (left ? "s2gl-" : "s2g-") + (seg ? "seg-" : spot ? "spot-" : "") + (comp === "tci" ? "" : comp + "-");
     // the false colors wait, still loading, for the stretch of their view
     const sx = cfg.s2_stretch, stretched = comp === "tci" || (sx && sx.comp === comp);
     const spec = S2_FALSE[comp];
@@ -1699,7 +1756,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     renderYear(); update();
   }
   function segLayers(id, m = map) {
-    if (!seg) return [];
+    // a patch picked from the list is lit by the spotlight, not outlined
+    if (!seg || patchOn) return [];
     const o = {data: seg.edges, getSourcePosition: (d) => [d[0], d[1]], getTargetPosition: (d) => [d[2], d[3]], widthUnits: "pixels", beforeId: slot(m)};
     // over the imagery at half opacity, so the ground at its edge shows through
     const onS2 = m === map2 ? st.left === "s2" : st.holding;
@@ -1734,7 +1792,13 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // year's imagery and scored every chunk a second time (its mask), and the year map loaded far slower
     const segSet = S2GPU && st.yearMap && z >= EWZ && st.segImg;
     if (segSet) { s2Discover(); for (const y of s2Years()) out.push(...s2CogLayers(y, false, true)); }
-    if (st.paint ? z >= (cfg.s2_min_z || 7) : segSet || (!st.pair && (st.holding || z >= 9))) {
+    // the spotlight: the imagery's own set, made with its mask (the plain set hidden while it shows), and the mask
+    if (S2GPU && spotOn()) {
+      const m = spotMaskLayer();
+      if (m) { out.push(m); s2Discover(); for (const y of s2Years()) out.push(...s2CogLayers(y, false, false, true)); }
+    }
+    // the plain set left out while the spotlight draws the imagery (kept, hidden, it read every tile a second time)
+    if (st.paint ? z >= (cfg.s2_min_z || 7) : !spotOn() && (segSet || (!st.pair && (st.holding || z >= 9)))) {
       if (S2GPU) { s2Discover(); for (const y of s2Years()) out.push(...s2CogLayers(y)); }
       else for (const y of S2Y) if (st.s2comp === "tci" || y === st.imgYear) out.push(s2Layer(y));
     }
@@ -2101,27 +2165,139 @@ export function render({model, el, earthwork, s2Items, credits}) {
   }
   // a patch: flown to, outlined, and the imagery brought up at its first year (the ground before; ] steps on through the
   // years, the year map with it) until a click or Esc; stepping on keeps the imagery up. Its row clicked again lets it go
-  let patchAt = null;
+  // a patch: flown to at zoom 14.2, the imagery up for the flight, nothing dimmed. Landed,
+  // the rest dims around it (no outline) and three frames play: before (the first imagery year), the year most of it was
+  // dug, now (the last), FRAME_MS apart, holding on the last. Its row clicked again lets it go
+  const FLY_MS = cfg.fly_ms || 700, FRAME_MS = cfg.frame_ms || 2000;
+  let patchAt = null, flyTok = 0;
+  // the frames stop (a new patch, Esc, a click back): every wait checks the token
+  function stopPlay() { flyTok++; }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // a year's imagery in the spotlight drawn whole (every tile of its layers in)
+  function spotYearLoaded(y) {
+    const d = ov && ov._deck;
+    if (!d) return true;
+    const re = new RegExp(`^s2g-spot-(?:[a-z0-9]+-)?${y}-`);
+    const ls = d.layerManager.getLayers().filter((l) => re.test(l.id) && !l.parent);
+    return ls.length > 0 && ls.every((l) => l.isLoaded);
+  }
+  // the imagery's year (the year map's with it), brought up if it is not up
+  function showYear(y) {
+    if (clickImg && st.holding) { st.mapYear = y; st.imgYear = s2Of(y); styleKey(); rescoreSpot(); renderYear(); update(); }
+    else imageryOf(y);
+  }
   function goPatch(p, toggle = true) {
     if (!p) return;
     const id = p.at.join(",");
-    if (toggle && id === patchOn && seg) { patchOn = null; seg = null; if (!backFromImagery()) { renderYear(); update(); } renderPatches(); return; }
-    patchOn = id; patchAt = p.at;
-    const [W, S, E, N] = p.box;
-    // at zoom 14 whatever its size, centered on its box: Sentinel-2's 10 m pixels blur in closer
-    map.flyTo({center: [(W + E) / 2, (S + N) / 2], zoom: 14, bearing: map.getBearing(), duration: 700});
+    if (toggle && id === patchOn && seg) { stopPlay(); flyTok++; patchOn = null; seg = null; if (!backFromImagery()) { renderYear(); update(); } renderPatches(); return; }
+    patchOn = id; patchAt = p.at; patchLast = id;
+    const tok = ++flyTok;
     seg = earthwork.segmentAt(p.at[0], p.at[1], AY_LAST, st.model, true);
-    const y0 = S2Y[0];
-    if (clickImg && st.holding) { st.mapYear = y0; st.imgYear = y0; styleKey(); rescoreSpot(); renderYear(); }
-    else imageryOf(y0);
+    fillPatch(id);
+    if (!(clickImg && st.holding)) imageryOf(st.mapYear);
+    spotFade(0, 250);
+    const [W, S, E, N] = p.box;
+    // at zoom 14.2 whatever its size, centered on its box: Sentinel-2's 10 m pixels blur in closer
+    map.flyTo({center: [(W + E) / 2, (S + N) / 2], zoom: 14.2, bearing: map.getBearing(), duration: FLY_MS});
+    const land = () => {
+      if (tok !== flyTok) return;
+      if (map.isMoving()) { map.once("moveend", land); return; }
+      const frames = [...new Set([S2Y[0], p.main, S2Y[S2Y.length - 1]])];
+      const live = () => tok === flyTok && patchOn === id;
+      showYear(frames[0]);
+      spotFade(1, 700);
+      // each frame held FRAME_MS from when its imagery is in (waiting up to 8 s for it), the last held
+      (async () => {
+        for (let i = 0; i < frames.length; i++) {
+          if (i) showYear(frames[i]);
+          const t0 = Date.now();
+          while (!spotYearLoaded(frames[i]) && Date.now() - t0 < 8000) { await sleep(100); if (!live()) return; }
+          if (i === frames.length - 1) return;
+          await sleep(FRAME_MS);
+          if (!live()) return;
+        }
+      })();
+    };
+    map.once("moveend", land);
     renderPatches(); update();
     const r = pc.querySelector(".ew-pl button.on");
     if (r) r.scrollIntoView({block: "nearest"});
   }
-  // down and up: the next patch in the list, or the one before (the first from none)
+  // the spotlight is drawn while the imagery is up on the main map and there is something to light: the patch picked,
+  // or every listed patch (V)
+  function spotOn() {
+    return !!(map && st.holding && !st.pair && ((patchOn && seg && seg.runs) || (st.spotAll && patchList && patchList.patches.length)));
+  }
+  // the dimming faded to `to` over `ms` (smoothstep), then `done`
+  function spotFade(to, ms, done) {
+    cancelAnimationFrame(spotRaf);
+    const from = spotK, t0 = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - t0) / ms);
+      spotK = from + (to - from) * t * t * (3 - 2 * t);
+      if (map) map.triggerRepaint();
+      if (t < 1) spotRaf = requestAnimationFrame(step); else if (done) done();
+    };
+    spotRaf = requestAnimationFrame(step);
+  }
+  // the mask: the patch picked (its holes filled), or every listed patch, as one bitmap over their box at the year
+  // map's pixel (coarser past 2048 across), made again only when what it covers changes
+  let spotMask = null;
+  function spotMaskLayer() {
+    const one = patchOn && seg && seg.runs;
+    const key = one ? `p${patchOn}|${seg.n}` : `a${patchKey}`;
+    if (!spotMask || spotMask.key !== key) {
+      const lists = one ? [seg.runs] : patchList.patches.map((q) => q.runs);
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const r of lists) for (let i = 0; i < r.length; i += 3) { y0 = Math.min(y0, r[i]); y1 = Math.max(y1, r[i] + 1); x0 = Math.min(x0, r[i + 1]); x1 = Math.max(x1, r[i + 2]); }
+      if (!(x1 > x0)) return null;
+      const f = Math.max(1, Math.ceil(Math.max(x1 - x0, y1 - y0) / 2048)), w = Math.ceil((x1 - x0) / f), h = Math.ceil((y1 - y0) / f);
+      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+      const img = new ImageData(w, h), d = img.data;
+      for (const r of lists) for (let i = 0; i < r.length; i += 3) {
+        const row = Math.floor((r[i] - y0) / f);
+        for (let c = Math.floor((r[i + 1] - x0) / f); c < Math.ceil((r[i + 2] - x0) / f); c++) d.fill(255, 4 * (row * w + c), 4 * (row * w + c) + 4);
+      }
+      cv.getContext("2d").putImageData(img, 0, 0);
+      spotMask = {key, image: cv, bounds: [-180 + x0 * AEF_R, AEF_Y0 - y1 * AEF_R, -180 + x1 * AEF_R, AEF_Y0 - y0 * AEF_R]};
+    }
+    return new SpotMaskLayer({id: "spot-mask", image: spotMask.image, bounds: spotMask.bounds, operation: "mask", extensions: [DISCARD_CLEAR],
+      _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT, beforeId: slot(map)});
+  }
+  // V: every listed patch lit over the imagery (brought up if it is not), the rest dimmed; V again lets the dimming go
+  function setSpotAll(on) {
+    if (on) {
+      if (!onPatches() || !patchList || !patchList.patches.length) { note("No patches to light here (zoom in to " + EWZ + " on the year map)", 2500); return; }
+      st.spotAll = true; swSpot.sty();
+      if (!st.holding) imageryOf(st.mapYear);
+      update(); spotFade(1, 700);
+    } else spotFade(0, 400, () => { st.spotAll = false; swSpot.sty(); update(); });
+  }
+  function setSpotGray(on) { st.spotGray = on; keep("spotgray", on); styleSpotGray(); if (map) map.triggerRepaint(); }
+  // a patch cut short where the year map's chunks are not in hand (past the area the list was made from, or the map
+  // hidden under the imagery so it loads nothing): those chunks read and the patch traced again, a few rounds while it
+  // keeps running on into chunks not read
+  async function fillPatch(id) {
+    for (let round = 0; round < 4; round++) {
+      if (patchOn !== id || !seg || !seg.cut || !seg.edges.length) return;
+      let W = Infinity, S = Infinity, E = -Infinity, N = -Infinity;
+      for (const [a, b, c, d] of seg.edges) { W = Math.min(W, a, c); E = Math.max(E, a, c); S = Math.min(S, b, d); N = Math.max(N, b, d); }
+      const n = await earthwork.readYearsIn([W, S, E, N], st.model);
+      if (patchOn !== id) return;
+      seg = earthwork.segmentAt(patchAt[0], patchAt[1], AY_LAST, st.model, true);
+      // its row's acres to match (its bars stay as the list counted them)
+      const p = patchList && patchList.patches.find((q) => q.at.join(",") === id);
+      if (p && seg && seg.n !== p.n) { p.ha *= seg.n / p.n; p.n = seg.n; renderPatches(); }
+      update();
+      if (!n) return;
+    }
+  }
+  // down and up: the next patch in the list, or the one before, on from the last one picked (let go by Esc or a click,
+  // the next Down is the one after it); the first from none
+  let patchLast = null;
   function stepPatch(d) {
     if (!onPatches() || !patchList || !patchList.patches.length) return false;
-    const ps = patchList.patches, i = ps.findIndex((p) => p.at.join(",") === patchOn);
+    const ps = patchList.patches, i = ps.findIndex((p) => p.at.join(",") === (patchOn || patchLast));
     goPatch(ps[i < 0 ? (d > 0 ? 0 : ps.length - 1) : Math.max(0, Math.min(ps.length - 1, i + d))], false);
     return true;
   }
@@ -2150,7 +2326,7 @@ export function render({model, el, earthwork, s2Items, credits}) {
     return true;
   }
   // a click (anywhere) or Esc while a segment's imagery is up: the segment let go too, back to the year map
-  function backFromImagery() { if (!clickImg) return false; seg = null; endHold("stuck"); renderYear(); return true; }
+  function backFromImagery() { if (!clickImg) return false; stopPlay(); flyTok++; seg = null; endHold("stuck"); renderYear(); return true; }
   const onKeyUp = (e) => {
     if (e.key === " ") endHold("key");
     else if (e.key === "Shift") setFilled(false);
@@ -2354,6 +2530,8 @@ export function render({model, el, earthwork, s2Items, credits}) {
     if (!st.fit && !path.includes(root)) return;
     const tgt = path[0] || e.target;
     if (tgt && /^(INPUT|SELECT|TEXTAREA)$/.test(tgt.tagName)) return;
+    // the browser's own shortcuts (Cmd or Ctrl with a key: Cmd+Shift+R reloads) are left to it
+    if (e.metaKey || e.ctrlKey) return;
     const k = e.key, lo = st.y0, hi = st.y1;
     // the first visit's card: Esc or Enter closes it, the other keys wait for it
     if (welcome.style.display === "flex") { if (k === "Escape" || k === "Enter") { e.preventDefault(); closeWelcome(); } return; }
@@ -2370,7 +2548,10 @@ export function render({model, el, earthwork, s2Items, credits}) {
     // Q: the tooltip and picking off and back on
     else if (k === "q" || k === "Q") { st.noPick = !st.noPick; swPick.sty(); tip.style.display = "none"; hover = null; if (st.noPick && cardData) closeCard(); update(); note(st.noPick ? "No tooltip or picking (Q to turn them back on)" : "Tooltip and picking on", 2500); }
     else if (k === "s" || k === "S") stickS2();
-    else if (k === "v" || k === "V") { setAllLines(!st.allLines); note(st.allLines ? "Everything found outlined on the imagery, up to its year (V to turn off)" : "Outlines on the imagery off", 2000); }
+    // V: the patches lit over the imagery (the old V, everything found outlined on the imagery, unbound for now)
+    // else if (k === "v" || k === "V") { setAllLines(!st.allLines); note(st.allLines ? "Everything found outlined on the imagery, up to its year (V to turn off)" : "Outlines on the imagery off", 2000); }
+    else if (k === "v" || k === "V") setSpotAll(!st.spotAll);
+    else if (k === "j" || k === "J") { setSpotGray(!st.spotGray); note(st.spotGray ? "Around the patches: gray (J for dark)" : "Around the patches: dark (J for gray)", 1500); }
     else if (k === "u" || k === "U") { setJoined(!st.joined); note(st.joined ? "Segments joined across years (U for one year's)" : "Segments of one year (U to join them across years)", 2000); }
     else if ((k === "ArrowDown" || k === "ArrowUp") && !e.altKey && !e.metaKey && !e.ctrlKey) { if (stepPatch(k === "ArrowDown" ? 1 : -1)) e.preventDefault(); }
     else if (k === "r" || k === "R") { setPatches(st.noPatches); swPat.sty(); note(st.noPatches ? "Patches card off (R to list them again)" : "Patches: the year map's finds joined across years, the largest first (R to hide)", 2000); }

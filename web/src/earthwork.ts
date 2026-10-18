@@ -820,12 +820,12 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       }
     }
     const yearList = [...yearSet].sort((u, v) => u - v), yi = new Map(yearList.map((y, i) => [y - 2000, i]));
-    type P = { n: number; sx: number; sy: number; x0: number; x1: number; y0: number; y1: number; ax: number; ay: number; years: number[] };
+    type P = { root: number; n: number; sx: number; sy: number; x0: number; x1: number; y0: number; y1: number; ax: number; ay: number; years: number[] };
     const by = new Map<number, P>();
     for (let i = 0; i < ry.length; i++) {
       const root = find(i);
       let q = by.get(root);
-      if (!q) by.set(root, (q = { n: 0, sx: 0, sy: 0, x0: rs[i], x1: re[i], y0: ry[i], y1: ry[i], ax: rs[i], ay: ry[i], years: yearList.map(() => 0) }));
+      if (!q) by.set(root, (q = { root, n: 0, sx: 0, sy: 0, x0: rs[i], x1: re[i], y0: ry[i], y1: ry[i], ax: rs[i], ay: ry[i], years: yearList.map(() => 0) }));
       const len = re[i] - rs[i];
       q.n += len;
       q.sx += len * (rs[i] + re[i] - 1) / 2;
@@ -838,7 +838,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     }
     const lonOf = (gx: number) => X0 + gx * RES, latOf = (gy: number) => Y0 - gy * RES;
     const all = [...by.values()].sort((u, v) => v.n - u.n);
-    const patches = all.slice(0, limit).map((q) => {
+    // the listed patches' pixels, as runs [row, start, end, ...] of the whole grid, for a mask of them
+    const top = all.slice(0, limit), runsOf = new Map<number, number[]>(top.map((q) => [q.root, []]));
+    for (let i = 0; i < ry.length; i++) runsOf.get(find(i))?.push(ry[i], rs[i], re[i]);
+    const patches = top.map((q) => {
       const lat = latOf(q.sy / q.n + 0.5), m = Math.max(...q.years);
       return {
         n: q.n,
@@ -851,6 +854,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
         first: yearList[q.years.findIndex((v) => v > 0)],
         main: yearList[q.years.indexOf(m)],
         last: yearList[q.years.length - 1 - [...q.years].reverse().findIndex((v) => v > 0)],
+        runs: runsOf.get(q.root)!,
       };
     });
     return { patches, total: all.length, yearList };
@@ -942,7 +946,10 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       }
       return false;
     };
-    return { year, first, n, cut, edges, has, lon: lonOf(sx / n + 0.5), lat: latOf(sy / n + 0.5) };
+    // its rows' runs, holes filled, as [row, start, end, ...] of the whole grid (a mask of it)
+    const runs: number[] = [];
+    for (const [y, rs] of filled) for (const [a, b] of rs) runs.push(y, a, b);
+    return { year, first, n, cut, edges, has, runs, lon: lonOf(sx / n + 0.5), lat: latOf(sy / n + 0.5) };
   }
 
   /**
@@ -976,6 +983,25 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
       reading.set(k, p);
     }
     return p;
+  }
+
+  /**
+   * The year map's chunks under a box and one chunk around it, read where they are not in hand (up to `max`), as a
+   * point read does: for a patch running past what the map has loaded (off the screen, or the map hidden under the
+   * imagery). Resolves to how many were read.
+   */
+  function readYearsIn(bbox: [number, number, number, number], model_: LayerKind, max = 36): Promise<number> {
+    const kind: LayerKind = LAYERS.includes(model_) ? model_ : "aef", ck: ChunkKind = `years-${kind}`;
+    const [W, S, E, N] = bbox;
+    const c0 = Math.floor((W - X0) / RES / CHUNK) - 1, c1 = Math.floor((E - X0) / RES / CHUNK) + 1;
+    const r0 = Math.floor((Y0 - N) / RES / CHUNK) - 1, r1 = Math.floor((Y0 - S) / RES / CHUNK) + 1;
+    const jobs: Promise<void>[] = [];
+    for (let r = r0; r <= r1; r++)
+      for (let c = c0; c <= c1; c++) {
+        if (paintScores.has(keyOf(0, 0, ck, r, c)) || jobs.length >= max) continue;
+        jobs.push(readAt(X0 + (c + 0.5) * CHUNK * RES, Y0 - (r + 0.5) * CHUNK * RES, 0, 0, ck));
+      }
+    return Promise.all(jobs).then(() => jobs.length);
   }
 
   /** How many of the chunks under a box are loaded on the GPU for this window. */
@@ -1012,6 +1038,7 @@ export async function createEarthwork(modelUrl: string, beforeId: () => string) 
     patchesIn,
     checkAt,
     readAt,
+    readYearsIn,
     chunksIn,
     loadedIn,
     model,
